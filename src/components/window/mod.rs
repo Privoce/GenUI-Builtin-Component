@@ -1,17 +1,16 @@
 mod event;
-mod register;
-pub mod types;
+pub mod register;
 
 pub use event::*;
 use makepad_widgets::*;
 use nav_control::NavControl;
 
-pub use register::register;
+
 
 use super::{
     image::GImageWidgetExt,
     label::GLabelWidgetExt,
-    tool_btn::{types::GOsType, GToolButtonWidgetExt},
+    tool_btn::{GOsType, GToolButtonWidgetExt},
     view::{GView, GViewWidgetExt},
 };
 

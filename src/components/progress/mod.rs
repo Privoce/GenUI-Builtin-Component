@@ -1,11 +1,11 @@
 pub mod event;
-mod register;
+pub mod register;
 
 use core::panic;
 
 use event::*;
 use makepad_widgets::*;
-pub use register::register;
+
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, event_option, play_animation, ref_area,

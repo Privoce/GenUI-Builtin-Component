@@ -1,9 +1,9 @@
 mod event;
-mod register;
+pub mod register;
 pub mod types;
 
 pub use event::*;
-pub use register::register;
+
 use types::LinkType;
 
 use crate::shader::draw_link::DrawGLink;

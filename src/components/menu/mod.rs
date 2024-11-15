@@ -1,6 +1,6 @@
 pub mod event;
 pub mod menu_item;
-mod register;
+pub mod register;
 pub mod sub_menu;
 
 use super::view::GView;
@@ -10,7 +10,7 @@ use crate::{
 use event::{GMenuChangedParam, GMenuEvent};
 use makepad_widgets::*;
 use menu_item::GMenuItemWidgetRefExt;
-pub use register::register;
+
 use sub_menu::GSubMenuWidgetRefExt;
 
 live_design! {

@@ -1,10 +1,11 @@
 mod event;
-pub mod item;
-mod register;
+mod item;
+pub mod register;
 
+pub use item::*;
 pub use event::*;
 use item::GTabbarItemWidgetRefExt;
-pub use register::register;
+
 
 use makepad_widgets::*;
 

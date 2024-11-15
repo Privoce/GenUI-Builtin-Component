@@ -1,36 +1,68 @@
 use makepad_widgets::*;
 
-pub mod breadcrumb;
-pub mod button;
-pub mod checkbox;
-pub mod collapse;
-pub mod divider;
-pub mod drop_down;
-pub mod file_upload;
-pub mod icon;
-pub mod image;
-pub mod input;
-pub mod label;
-pub mod link;
-pub mod loading;
-pub mod menu;
-pub mod notification;
-pub mod popup;
-pub mod progress;
-pub mod radio;
-pub mod router;
-pub mod select;
-pub mod shader;
-pub mod svg;
-pub mod tab;
-pub mod tabbar;
-pub mod table;
-pub mod tag;
-pub mod toggle;
-pub mod tool_btn;
-pub mod view;
-pub mod window;
-pub mod colors;
+mod breadcrumb;
+mod button;
+mod checkbox;
+mod collapse;
+mod colors;
+mod divider;
+mod drop_down;
+mod file_upload;
+mod icon;
+mod image;
+mod input;
+mod label;
+mod link;
+mod loading;
+mod menu;
+mod notification;
+mod popup;
+mod progress;
+mod radio;
+pub mod register;
+mod router;
+mod select;
+mod shader;
+mod svg;
+mod tab;
+mod tabbar;
+mod table;
+mod tag;
+mod toggle;
+mod tool_btn;
+mod view;
+mod window;
+
+pub use breadcrumb::*;
+pub use button::*;
+pub use checkbox::*;
+pub use collapse::*;
+pub use colors::*;
+pub use divider::*;
+pub use drop_down::*;
+pub use file_upload::*;
+pub use icon::*;
+pub use image::*;
+pub use input::*;
+pub use label::*;
+pub use link::*;
+pub use loading::*;
+pub use menu::*;
+pub use popup::*;
+pub use progress::*;
+pub use radio::*;
+pub use router::*;
+pub use select::*;
+pub use shader::*;
+pub use svg::*;
+pub use tab::*;
+pub use tabbar::*;
+pub use table::*;
+pub use tag::*;
+pub use toggle::*;
+pub use tool_btn::*;
+pub use view::*;
+pub use window::*;
 
 live_design! {
     // imports -----------------------------------------------------
@@ -846,7 +878,7 @@ live_design! {
         }
     }
     GCollapse = <GCollapseBase>{
-        
+
         header: <GHLayout>{
             background_visible: true,
             height: Fit,

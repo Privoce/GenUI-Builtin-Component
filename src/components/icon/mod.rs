@@ -1,9 +1,9 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
 use makepad_widgets::*;
-pub use register::register;
+
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_finger_down,

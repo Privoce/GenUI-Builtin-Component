@@ -1,9 +1,9 @@
 pub mod event;
-mod register;
-pub mod types;
+pub mod register;
+mod types;
 
 use event::*;
-pub use register::register;
+
 use types::*;
 
 use makepad_widgets::*;

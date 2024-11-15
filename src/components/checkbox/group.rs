@@ -184,6 +184,7 @@ impl GCheckBoxGroup {
     }
 }
 
+#[allow(dead_code)]
 impl GCheckBoxGroupRef {
     ref_event_option! {
         changed => GCheckBoxGroupEventParam

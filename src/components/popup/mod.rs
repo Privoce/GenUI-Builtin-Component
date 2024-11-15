@@ -1,7 +1,7 @@
-mod register;
+pub mod register;
 
 use makepad_widgets::*;
-pub use register::register;
+
 
 use crate::{
     shader::{

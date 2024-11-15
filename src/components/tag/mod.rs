@@ -1,8 +1,8 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
-pub use register::register;
+
 
 use crate::shader::draw_icon_pixel::DrawGIconPixel;
 use crate::shader::draw_svg::DrawGSvg;

@@ -1,7 +1,9 @@
-pub mod body;
-pub mod button;
-pub mod header;
-pub mod pane;
+mod body;
+mod button;
+mod header;
+mod pane;
+
+pub mod register;
 
 use header::GTabHeader;
 use makepad_widgets::*;

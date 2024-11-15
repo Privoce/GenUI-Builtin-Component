@@ -1,17 +1,23 @@
 pub mod event;
-pub mod group;
-mod register;
+mod group;
+pub mod register;
 
 use event::*;
+pub use group::*;
 use makepad_widgets::*;
-pub use register::register;
 use shader::draw_text::TextWrap;
 
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area, ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn, shader::{
+    active_event, animatie_fn, default_handle_animation, default_hit_hover_in,
+    default_hit_hover_out, event_option, play_animation, ref_area, ref_area_ext, ref_event_option,
+    ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn,
+    shader::{
         draw_check_box::DrawGCheckBox, draw_radio::GChooseType, draw_text::DrawGText,
         draw_view::DrawGView,
-    }, themes::Themes, utils::{get_font_family, set_cursor, BoolToF32, ThemeColor}, widget_area
+    },
+    themes::Themes,
+    utils::{get_font_family, set_cursor, BoolToF32, ThemeColor},
+    widget_area,
 };
 
 live_design! {

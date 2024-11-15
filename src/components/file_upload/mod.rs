@@ -1,7 +1,7 @@
 mod event;
-mod register;
+pub mod register;
 pub use event::*;
-pub use register::register;
+
 
 use std::{path::PathBuf, str::FromStr};
 

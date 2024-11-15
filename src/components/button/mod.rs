@@ -1,8 +1,8 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
-pub use register::register;
+
 
 use crate::utils::{set_cursor, BoolToF32, ThemeColor};
 use crate::{

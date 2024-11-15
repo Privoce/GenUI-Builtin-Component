@@ -1,12 +1,12 @@
 mod event;
-mod register;
-pub mod types;
+pub mod register;
+mod types;
 
 pub use event::*;
-pub use register::register;
+
 
 use makepad_widgets::*;
-use types::{GOsType, GToolButtonType};
+pub use types::{GOsType, GToolButtonType};
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area, ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::{

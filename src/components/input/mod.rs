@@ -1,8 +1,8 @@
-mod register;
-pub mod types;
+pub mod register;
+mod types;
 
 use makepad_widgets::*;
-pub use register::register;
+
 use shader::draw_text::TextWrap;
 use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};

@@ -1,9 +1,9 @@
 pub mod event;
-mod register;
+pub mod register;
 
 use event::*;
 use makepad_widgets::*;
-pub use register::register;
+
 
 use crate::{
     event_bool, ref_area, ref_event_bool, ref_redraw, set_event_bool, set_scope_path, shader::draw_shader::DrawGShader, utils::BoolToF32, widget_area

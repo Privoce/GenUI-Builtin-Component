@@ -1,12 +1,10 @@
 mod event;
-// mod copy;
-pub mod item;
-mod register;
+mod item;
+pub mod register;
 
 pub use event::*;
-pub use register::register;
+pub use item::*;
 
-use item::GBreadCrumbItemWidgetRefExt;
 use makepad_widgets::*;
 
 use crate::{

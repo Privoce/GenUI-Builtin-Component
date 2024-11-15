@@ -1,5 +1,5 @@
-mod register;
-pub use register::register;
+pub mod register;
+
 
 use makepad_widgets::*;
 

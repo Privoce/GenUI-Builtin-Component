@@ -1,9 +1,9 @@
 pub mod event;
-pub mod group;
-mod register;
+mod group;
+pub mod register;
 
 use event::{GRadioClickedParam, GRadioEvent, GRadioHoverParam};
-pub use register::register;
+pub use group::*;
 
 use makepad_widgets::*;
 use shader::draw_text::TextWrap;

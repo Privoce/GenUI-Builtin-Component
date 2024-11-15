@@ -1,9 +1,9 @@
 pub mod event;
-mod register;
+pub mod register;
 
 use event::{GToggleClickedParam, GToggleEvent, GToggleHoverParam};
 use makepad_widgets::*;
-pub use register::register;
+
 
 use crate::{
     animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_toggle::{DrawGToggle, GToggleType}, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor}, widget_area

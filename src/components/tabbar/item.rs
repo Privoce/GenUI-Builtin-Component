@@ -401,6 +401,7 @@ impl GTabbarItem {
     }
 }
 
+#[allow(dead_code)]
 impl GTabbarItemRef {
     ref_area!();
     ref_redraw!();
@@ -436,6 +437,7 @@ impl GTabbarItemRef {
     }
 }
 
+#[allow(dead_code)]
 impl GTabbarItemSet {
     set_event! {
         clicked => GTabbarItemClickedParam,

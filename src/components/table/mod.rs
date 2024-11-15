@@ -2,14 +2,14 @@ pub mod body;
 pub mod cell;
 pub mod column;
 pub mod header;
-mod register;
+pub mod register;
 pub mod row;
 pub mod virt;
 
 use body::GTableBody;
 use header::GTableHeader;
 use makepad_widgets::*;
-pub use register::register;
+
 use virt::GVTableBody;
 
 use crate::{

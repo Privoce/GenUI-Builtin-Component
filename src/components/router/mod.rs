@@ -1,7 +1,7 @@
 pub mod event;
 pub mod page;
-mod register;
-pub mod types;
+pub mod register;
+mod types;
 
 use crate::{
     components::view::GViewWidgetExt,
@@ -11,7 +11,7 @@ use crate::{
 use event::GRouterEvent;
 use makepad_widgets::*;
 use page::GPageWidgetRefExt;
-pub use register::register;
+
 use types::{PageType, RouterStack, RouterStackItem};
 
 use super::{

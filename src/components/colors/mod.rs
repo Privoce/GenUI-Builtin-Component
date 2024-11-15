@@ -1,7 +1,5 @@
 use makepad_widgets::*;
-mod register;
-
-pub use register::register;
+pub mod register;
 
 use crate::{shader::draw_view::DrawGView, themes::Themes};
 
@@ -82,7 +80,6 @@ impl LiveHook for GColor {
         }
 
         if self.colors.is_visible() {
-            
             self.colors.children.clear();
             for (index, color) in self.theme.to_vec().into_iter().enumerate() {
                 self.colors

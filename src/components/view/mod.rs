@@ -1,8 +1,8 @@
 pub mod event;
-mod register;
+pub mod register;
 
 use event::*;
-pub use register::register;
+
 
 use std::{cell::RefCell, collections::HashMap};
 

@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::components::menu::sub_menu::GSubMenuWidgetRefExt;
+use crate::sub_menu::GSubMenuWidgetRefExt;
 
 /// The `PopupMode` enum represents the different modes for a popup
 #[derive(Live, LiveHook, PartialEq, Eq, Clone, Copy, Debug)]
@@ -31,7 +31,7 @@ pub enum TriggerMode {
     Press = shader_enum(3),
 }
 
-impl TriggerMode{
+impl TriggerMode {
     pub fn is_click(&self) -> bool {
         matches!(self, TriggerMode::Click)
     }
@@ -53,7 +53,6 @@ pub enum CloseMode {
     #[pick]
     /// Only Outer Can Close Popup, always use when you have no close button in the popup
     Out = shader_enum(2),
-    
 }
 
 impl Default for CloseMode {
@@ -61,8 +60,6 @@ impl Default for CloseMode {
         CloseMode::Out
     }
 }
-
-
 
 /// The `ComponentMode` enum represents the different modes for a component
 #[derive(Live, LiveHook, PartialEq, Eq, Clone, Copy)]

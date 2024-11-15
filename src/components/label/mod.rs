@@ -1,8 +1,8 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
-pub use register::register;
+
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event::UnifiedEvent, event_option, play_animation, ref_animate_state, ref_area, ref_event_option, ref_play_animation, ref_redraw, ref_render, set_scope_path, set_text_and_visible_fn, shader::draw_text::DrawGText, themes::Themes, utils::{get_font_family, set_cursor, ThemeColor, ToBool}
@@ -148,7 +148,7 @@ pub struct GLabel {
     pub area: Area,
     #[live(false)]
     pub event_key: bool,
-    #[live(true)]
+    #[live(false)]
     pub grab_key_focus: bool,
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,

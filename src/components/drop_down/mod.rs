@@ -1,10 +1,10 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
 // use event::*;
 use makepad_widgets::*;
-pub use register::register;
+
 use std::rc::Rc;
 
 use crate::{

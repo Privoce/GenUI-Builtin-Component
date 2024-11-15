@@ -1,8 +1,8 @@
 mod event;
-mod register;
+pub mod register;
 
 pub use event::*;
-pub use register::register;
+
 
 use image_cache::{ImageCacheImpl, ImageFit};
 use makepad_widgets::*;

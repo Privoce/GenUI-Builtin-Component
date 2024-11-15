@@ -1,14 +1,14 @@
 pub mod event;
-pub mod item;
+mod item;
 pub mod options;
-mod register;
-pub mod types;
+pub mod register;
+mod types;
 
 use std::{cell::RefCell, rc::Rc};
-
+pub use item::*;
 use event::*;
 use options::GSelectOptions;
-pub use register::register;
+
 
 use makepad_widgets::*;
 use types::SelectOption;
