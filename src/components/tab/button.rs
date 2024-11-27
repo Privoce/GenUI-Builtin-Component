@@ -1,9 +1,9 @@
 use makepad_widgets::*;
 
 use crate::{
-    shader::{draw_view::DrawGView, draw_icon_pixel::DrawGIconPixel, draw_tab::DrawTabBtn},
-    themes::{get_color, hex_to_vec4, Themes},
-    utils::{get_font_family, set_cursor, AbsExt, DefaultTextStyle},
+    shader::{draw_icon_pixel::DrawGIconPixel, draw_tab::DrawTabBtn, draw_view::DrawGView},
+    themes::Themes,
+    utils::{get_color, get_font_family, hex_to_vec4, set_cursor, AbsExt, DefaultTextStyle},
 };
 
 live_design! {

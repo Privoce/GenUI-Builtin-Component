@@ -2,7 +2,7 @@ use makepad_widgets::*;
 
 use crate::{
     shader::draw_view::DrawGView,
-    themes::{hex_to_vec4, Themes},
+    themes::Themes, utils::hex_to_vec4,
 };
 
 use super::button::{GTabButtonEvent, GTabButtonRef, GTabButtonWidgetRefExt};
