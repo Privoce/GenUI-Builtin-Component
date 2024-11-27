@@ -1,11 +1,10 @@
 mod colors;
 pub mod style;
+pub mod register;
 
-use std::fmt::Display;
-
-use crate::utils::hex_to_vec4;
 pub use colors::*;
 use makepad_widgets::*;
+use std::fmt::Display;
 
 #[derive(Copy, Clone, Debug, Live, LiveHook)]
 #[live_ignore]
