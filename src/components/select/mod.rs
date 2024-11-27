@@ -21,7 +21,9 @@ use crate::{
 };
 
 live_design! {
-    GSelectBase = {{GSelect}}{
+    link gen_base;
+
+    pub GSelectBase = {{GSelect}}{
         height: 36.0,
         width: 180.0,
         border_width: 1.0,

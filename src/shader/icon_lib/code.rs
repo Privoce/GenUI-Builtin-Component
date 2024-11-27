@@ -3,7 +3,7 @@ use makepad_widgets::*;
 use super::{types::code::Code, ApplyIconType, DrawGIcon};
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGIconCode = {{DrawGIconCode}}{
         fn pixel(self) -> vec4{
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);

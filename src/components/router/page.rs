@@ -8,7 +8,9 @@ use crate::{
 use super::{event::GRouterEvent, GRouter};
 
 live_design! {
-    GPageBase = {{GPage}}{}
+    link gen_base;
+    
+    pub GPageBase = {{GPage}}{}
 }
 
 #[derive(Live, Widget)]

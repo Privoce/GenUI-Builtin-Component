@@ -10,7 +10,9 @@ use super::{
 };
 
 live_design! {
-    GRadioGroupBase = {{GRadioGroup}} {
+    link gen_base;
+    
+    pub GRadioGroupBase = {{GRadioGroup}} {
         border_radius: 0.0,
         border_width: 0.0,
         spread_radius: 0.0,

@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
 
     DrawGIconPixel = {{DrawGIconPixel}}{
         

@@ -14,9 +14,9 @@ use menu_item::GMenuItemWidgetRefExt;
 use sub_menu::GSubMenuWidgetRefExt;
 
 live_design! {
-    GMenuBase = {{GMenu}}{
+    link gen_base;
 
-    }
+    pub GMenuBase = {{GMenu}}{}
 }
 
 #[derive(Live, Widget)]

@@ -30,9 +30,11 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25
-    GIconBase = {{GIcon}}{
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+    
+    pub GIconBase = {{GIcon}}{
         draw_icon: {
             instance hover: 0.0,
             instance focus: 0.0,

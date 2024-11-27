@@ -12,9 +12,11 @@ use crate::{
 use makepad_widgets::*;
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25;
-    GTabbarItemBase = {{GTabbarItem}}{
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+    
+    pub GTabbarItemBase = {{GTabbarItem}}{
         height: 36.0,
         width: Fill,
         flow: Down,

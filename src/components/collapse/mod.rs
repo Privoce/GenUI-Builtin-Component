@@ -16,9 +16,11 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25;
-    GCollapseBase = {{GCollapse}}{
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+
+    pub GCollapseBase = {{GCollapse}}{
         height: Fit,
         width: Fill,
         flow: Down,

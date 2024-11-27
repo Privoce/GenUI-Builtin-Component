@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGView = {{DrawGView}}{              
         varying rect_size2: vec2,
         varying rect_size3: vec2,

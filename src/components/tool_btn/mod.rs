@@ -16,9 +16,11 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25;
-    GToolButtonBase = {{GToolButton}} {
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+    
+    pub GToolButtonBase = {{GToolButton}} {
         height: 32.0,
         width: 46.0,
         color: #768390,

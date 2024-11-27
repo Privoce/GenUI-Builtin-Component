@@ -3,7 +3,9 @@ use makepad_widgets::*;
 use crate::{components::view::GView, widget_area};
 
 live_design! {
-    GTableCellBase = {{GTableCell}}{
+    link gen_base;
+    
+    pub GTableCellBase = {{GTableCell}}{
         background_visible: true,
         border_radius: 0.0,
         border_width: 0.0,

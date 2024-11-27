@@ -3,7 +3,9 @@ use makepad_widgets::*;
 use crate::components::view::GView;
 
 live_design! {
-    GTabBodyBase = {{GTabBody}}{
+    link gen_base;
+
+    pub GTabBodyBase = {{GTabBody}}{
         background_visible: true,
         border_width: 0.0,
         border_radius: 0.0,

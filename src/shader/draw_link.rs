@@ -3,7 +3,7 @@ use makepad_widgets::*;
 use super::draw_view::DrawGView;
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGLink = {{DrawGLink}}{
         fn get_underline_color(self) -> vec4 {
             return mix(

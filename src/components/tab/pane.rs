@@ -5,7 +5,9 @@ use crate::{components::view::DrawState, shader::draw_tab_pane::DrawTabPane};
 use super::body::{GTabBodyRef, GTabBodyWidgetRefExt};
 
 live_design! {
-    GTabPaneBase = {{GTabPane}}{}
+    link gen_base;
+
+    pub GTabPaneBase = {{GTabPane}}{}
 }
 
 #[derive(Live, Widget)]

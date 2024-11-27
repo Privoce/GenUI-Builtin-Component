@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGLoading = {{DrawGLoading}}{
         fn loading_circle(self, color: vec4) -> vec4 {
             let pi = 3.141592653589793;

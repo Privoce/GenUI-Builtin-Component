@@ -12,7 +12,9 @@ use pane::GTabPane;
 use crate::{shader::draw_view::DrawGView, themes::Themes};
 
 live_design! {
-    GTabBase = {{GTab}}{}
+    link gen_base;
+
+    pub GTabBase = {{GTab}}{}
 }
 
 #[derive(Live, Widget)]

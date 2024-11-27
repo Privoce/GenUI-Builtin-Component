@@ -6,7 +6,7 @@ use super::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGIconBase = {{DrawGIconBase}}{
         fn pixel(self) -> vec4{
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);

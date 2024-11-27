@@ -19,7 +19,9 @@ use super::{
 };
 
 live_design! {
-    GDropDownBase = {{GDropDown}} {}
+    link gen_base;
+    
+    pub GDropDownBase = {{GDropDown}} {}
 }
 
 #[derive(Live, Widget)]

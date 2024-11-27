@@ -11,7 +11,8 @@ use super::{
 };
 
 live_design! {
-    GCheckBoxGroupBase = {{GCheckBoxGroup}} {
+    link gen_base;
+    pub GCheckBoxGroupBase = {{GCheckBoxGroup}} {
         border_radius: 0.0,
         border_width: 0.0,
         spread_radius: 0.0,

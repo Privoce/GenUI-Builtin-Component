@@ -9,9 +9,9 @@ use crate::{
 use super::{item::GSelectItem, GSelectItemEvent, GSelectOptionsChangedParam, GSelectOptionsEvent};
 
 live_design! {
-    GSelectOptionsBase = {{GSelectOptions}}{
+    link gen_base;
 
-    }
+    pub GSelectOptionsBase = {{GSelectOptions}}{ }
 }
 
 #[derive(Live, LiveRegister)]

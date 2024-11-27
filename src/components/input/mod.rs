@@ -12,8 +12,10 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GInputBase = {{GInput}}{
+    link gen_base;
+    use link::shaders::*;
+
+    pub GInputBase = {{GInput}}{
         background_color: vec4(1.0, 1.0, 1.0, 1.0),
         hover_color: vec4(0.9, 0.9, 0.9, 1.0),
         focus_color: vec4(0.9, 0.9, 0.9, 1.0),

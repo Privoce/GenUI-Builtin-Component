@@ -8,9 +8,10 @@ use crate::{
 use super::button::{GTabButtonEvent, GTabButtonRef, GTabButtonWidgetRefExt};
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    link gen_base;
+    use link::shaders::*;
 
-    GTabHeaderBase = {{GTabHeader}}{
+    pub GTabHeaderBase = {{GTabHeader}}{
         draw_header: {
             fn pixel(self) -> vec4 {
                 let sdf = Sdf2d::viewport(self.pos * self.rect_size)

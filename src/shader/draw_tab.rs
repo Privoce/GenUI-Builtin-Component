@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawTabBtn = {{DrawTabBtn}}{
         instance inset: vec4(0.0, 0.0, 0.0, 0.0)
         instance hover: 0.0,

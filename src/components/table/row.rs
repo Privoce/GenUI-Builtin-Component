@@ -5,8 +5,9 @@ use crate::{components::view::DrawState, shader::draw_view::DrawGView};
 use super::cell::{GTableCellRef, GTableCellWidgetRefExt};
 
 live_design! {
-    GTableRowBase = {{GTableRow}}{
-    }
+    link gen_base;
+    
+    pub GTableRowBase = {{GTableRow}}{}
 }
 
 #[derive(Live, Widget)]

@@ -17,7 +17,7 @@ use makepad_widgets::*;
 use types::IconType;
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGIcon = {{DrawGIcon}}{
         // draw bezier curve (2) http://wx.karlew.com/canvas/bezier/
         fn bezier2(self, start: vec2, control: vec2, end: vec2, t: float) -> vec2 {

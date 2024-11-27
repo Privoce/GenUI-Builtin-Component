@@ -10,7 +10,9 @@ use crate::{
 };
 
 live_design! {
-    GTableHeaderBase = {{GTableHeader}}{
+    link gen_base;
+
+    pub GTableHeaderBase = {{GTableHeader}}{
         padding: 0.0,
         margin: 0.0,
         flow: Down,

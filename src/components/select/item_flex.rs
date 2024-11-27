@@ -14,7 +14,7 @@ use crate::{
 use super::{GSelectItemClickedParam, GSelectItemEvent};
 
 live_design! {
-    GLOBAL_DURATION = 0.25;
+    use link::gen_theme::GLOBAL_DURATION;
     GSelectItemBase = {{GSelectItem}}{
         height: 36.0,
         width: 180.0,

@@ -5,7 +5,9 @@ use crate::shader::draw_view::DrawGView;
 use super::cell::GTableCell;
 
 live_design! {
-    GTableColumnBase = {{GTableColumn}}{
+    link gen_base;
+
+    pub GTableColumnBase = {{GTableColumn}}{
         flow: Down,
     }
 }

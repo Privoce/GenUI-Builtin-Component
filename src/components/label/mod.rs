@@ -10,9 +10,11 @@ use crate::{
 use makepad_widgets::*;
 use shader::draw_text::TextWrap;
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25;
-    GLabelBase = {{GLabel}}{
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+
+    pub GLabelBase = {{GLabel}}{
         animator: {
             hover = {
                 default: off,

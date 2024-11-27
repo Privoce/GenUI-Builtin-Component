@@ -10,7 +10,9 @@ use crate::{
 };
 
 live_design! {
-    GShaderBase = {{GShader}} {
+    link gen_base;
+
+    pub GShaderBase = {{GShader}} {
         width: Fill,
         height: Fill,
     }

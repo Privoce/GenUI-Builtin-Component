@@ -7,9 +7,10 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    link gen_base;
+    use link::shaders::*;
 
-    GTabButtonBase = {{GTabButton}}{
+    pub GTabButtonBase = {{GTabButton}}{
         spacing: 6.0,
         text_walk: {
             height: Fit,

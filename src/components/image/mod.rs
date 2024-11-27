@@ -12,8 +12,10 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GImageBase = {{GImage}} {
+    link gen_base;
+    use link::shaders::*;
+    
+    pub GImageBase = {{GImage}} {
         draw_image: {
             texture image: texture2d
 

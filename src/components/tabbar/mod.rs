@@ -12,7 +12,9 @@ use crate::{default_handle_animation, event_option, ref_event_option, set_event}
 use super::view::GView;
 
 live_design! {
-    GTabbarBase = {{GTabbar}}{}
+    link gen_base;
+
+    pub GTabbarBase = {{GTabbar}}{}
 }
 
 #[derive(Live, Widget)]

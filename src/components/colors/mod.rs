@@ -9,7 +9,8 @@ use super::{
 };
 
 live_design! {
-    GColorBase = {{GColor}}{}
+    link gen_base;
+    pub GColorBase = {{GColor}}{}
 }
 
 #[derive(Live, Widget)]

@@ -16,7 +16,9 @@ use crate::{
 use super::svg::GSvg;
 
 live_design! {
-    GUploadBase =  {{GUpload}}{
+    link gen_base;
+
+    pub GUploadBase = {{GUpload}}{
         draw_upload: {
             fn pixel(self) ->vec4{
                 return vec4(0.0);

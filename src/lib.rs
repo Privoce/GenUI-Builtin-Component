@@ -9,10 +9,7 @@ pub mod utils;
 
 pub use components::*;
 
-
 pub fn live_design(cx: &mut Cx, theme: Option<LiveId>) {
-    let theme = theme.unwrap_or(live_id!(crate::themes::style));
-    cx.link(live_id!(theme), theme);
     // style --------------------------------------------------
     crate::themes::register::register(cx);
     // components ---------------------------------------------
@@ -21,4 +18,8 @@ pub fn live_design(cx: &mut Cx, theme: Option<LiveId>) {
     crate::shader::register::register(cx);
     // export all the components
     crate::components::live_design(cx);
+    // link the theme
+    if let Some(theme) = theme {
+        cx.link(live_id!(gen_theme), theme);
+    }
 }

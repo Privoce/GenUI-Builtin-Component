@@ -18,10 +18,11 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
 
-    GViewBase = {{GView}}{
+    pub GViewBase = {{GView}}{
         spread_radius: 0.0,
         clip_x: false,
         clip_y: false,

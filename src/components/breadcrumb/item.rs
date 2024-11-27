@@ -11,8 +11,8 @@ use crate::{
 use super::event::*;
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25,
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
     GBreadCrumbItemBase = {{GBreadCrumbItem}}{
         spacing: 4.0,
         flow: Right,

@@ -3,7 +3,7 @@ use makepad_widgets::*;
 use super::{draw_view::DrawGView, manual::Position};
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
 
     DrawGPopup = {{DrawGPopup}}{}
 }

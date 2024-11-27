@@ -1,8 +1,9 @@
 use makepad_widgets::*;
 
 live_design!{
-    import makepad_draw::shader::std::*;
-    DrawGButton = {{DrawGButton}}{
+    // use makepad_draw::shader::std::*;
+    use link::shaders::*;
+    pub DrawGButton = {{DrawGButton}}{
         instance inset: vec4(0.0, 0.0, 0.0, 0.0)
         instance hover: 0.0,
         instance pressed: 0.0,

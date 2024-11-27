@@ -18,8 +18,9 @@ use super::{
 };
 
 live_design! {
-    GLOBAL_DURATION = 0.25;
-    GBreadCrumbBase = {{GBreadCrumb}}{
+    link gen_base;
+    use link::gen_theme::GLOBAL_DURATION;
+    pub GBreadCrumbBase = {{GBreadCrumb}}{
         animation_key: true,
     }
 }

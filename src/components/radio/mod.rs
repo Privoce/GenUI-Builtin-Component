@@ -23,10 +23,11 @@ use crate::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
 
-    GRadioBase = {{GRadio}}{
+    pub GRadioBase = {{GRadio}}{
         height: Fit,
         width: Fit,
         font_size: 10.0,

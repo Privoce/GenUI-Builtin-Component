@@ -11,10 +11,10 @@ use super::view::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    import crate::components::view::GViewBase;
-
-    GDividerBase = {{GDivider}}{
+    link gen_base;
+    use link::shaders::*;
+    
+    pub GDividerBase = {{GDivider}}{
         height: 2.0,
         width: Fill,
         align: {x: 0.5, y: 0.5},

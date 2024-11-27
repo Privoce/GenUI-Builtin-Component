@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGDivider = {{DrawGDivider}}{
         fn get_stroke_color(self) -> vec4 {
             return mix(

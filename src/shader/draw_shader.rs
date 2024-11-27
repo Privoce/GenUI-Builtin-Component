@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawGShader = {{DrawGShader}}{
         fn draw(self) -> vec4{
             return vec4(1.0);

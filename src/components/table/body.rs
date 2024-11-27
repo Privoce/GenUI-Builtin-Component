@@ -9,7 +9,9 @@ use crate::{
 };
 
 live_design! {
-    GTableBodyBase = {{GTableBody}}{
+    link gen_base;
+
+    pub GTableBodyBase = {{GTableBody}}{
         // background_visible: true,
         // border_width: 0.0,
         // border_radius: 0.0,

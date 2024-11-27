@@ -3,7 +3,7 @@ use makepad_widgets::*;
 use super::draw_radio::GChooseType;
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
 
     DrawGCheckBox = {{DrawGCheckBox}} {
 

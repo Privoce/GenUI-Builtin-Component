@@ -14,7 +14,9 @@ use crate::{
 };
 
 live_design! {
-    GLoadingBase = {{GLoading}}{}
+    link gen_base;
+
+    pub GLoadingBase = {{GLoading}}{}
 }
 
 #[derive(Live, Widget)]

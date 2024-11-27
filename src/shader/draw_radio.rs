@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design! {
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
 
     DrawGRadio = {{DrawGRadio}} {
         fn get_background_color(self) -> vec4 {

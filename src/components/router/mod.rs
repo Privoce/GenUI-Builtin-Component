@@ -20,7 +20,9 @@ use super::{
 };
 
 live_design! {
-    GRouterBase = {{GRouter}}{}
+    link gen_base;
+    
+    pub GRouterBase = {{GRouter}}{}
 }
 
 #[derive(Live, Widget)]

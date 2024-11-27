@@ -3,7 +3,7 @@ use makepad_widgets::*;
 use super::draw_view::DrawGView;
 
 live_design!{
-    import makepad_draw::shader::std::*;
+    use link::shaders::*;
     DrawTabPane = {{DrawTabPane}}{
         instance inset: vec4(0.0, 0.0, 0.0, 0.0)
         instance hover: 0.0,

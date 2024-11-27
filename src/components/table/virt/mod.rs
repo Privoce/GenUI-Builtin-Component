@@ -5,7 +5,9 @@ use crate::shader::draw_view::DrawGView;
 use super::row::GTableRowRef;
 
 live_design! {
-    GVTableBodyBase = {{GVTableBody}}{
+    link gen_base;
+
+    pub GVTableBodyBase = {{GVTableBody}}{
         padding: 0.0,
         margin: 0.0,
         flow: Down,

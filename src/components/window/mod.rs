@@ -15,8 +15,10 @@ use super::{
 };
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GWindowBase = {{GWindow}}{
+    link gen_base;
+    use link::shaders::*;
+    
+    pub GWindowBase = {{GWindow}}{
         border_radius: 0.0,
         background_visible: true,
         background_color: #22272F,

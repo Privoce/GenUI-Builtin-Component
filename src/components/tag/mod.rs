@@ -18,9 +18,11 @@ use crate::{shader::draw_view::DrawGView, themes::Themes};
 use makepad_widgets::*;
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GLOBAL_DURATION = 0.25;
-    GTagBase = {{GTag}}{
+    link gen_base;
+    use link::shaders::*;
+    use link::gen_theme::GLOBAL_DURATION;
+    
+    pub GTagBase = {{GTag}}{
         clip_x: false,
         clip_y: false,
         shadow_offset: vec2(0.0, 2.0),

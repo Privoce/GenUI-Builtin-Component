@@ -9,8 +9,10 @@ use crate::{
 use super::{GSelectItemClickedParam, GSelectItemEvent};
 
 live_design! {
-    import makepad_draw::shader::std::*;
-    GSelectItemBase = {{GSelectItem}} {
+    link gen_base;
+    use link::shaders::*;
+    
+    pub GSelectItemBase = {{GSelectItem}} {
         width: Fill,
         height: 36.0,
         align: {x: 0.0, y: 0.5},

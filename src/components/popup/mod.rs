@@ -15,11 +15,13 @@ use crate::{
 use super::view::GView;
 
 live_design! {
-    GPopupContainerBase = {{GPopupContainer}} {
+    link gen_base;
+
+    pub GPopupContainerBase = {{GPopupContainer}} {
         animation_key: false,
         background_visible: false,
     }
-    GPopupBase = {{GPopup}} {}
+    pub GPopupBase = {{GPopup}} {}
 }
 #[derive(Live, LiveRegister)]
 pub struct GPopupContainer {

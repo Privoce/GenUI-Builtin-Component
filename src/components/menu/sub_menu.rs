@@ -14,7 +14,9 @@ use super::{
 };
 
 live_design! {
-    GSubMenuBase = {{GSubMenu}} {
+    link gen_base;
+    
+    pub GSubMenuBase = {{GSubMenu}} {
         border_radius: 0.0,
         border_width: 0.0,
         spread_radius: 0.0,
