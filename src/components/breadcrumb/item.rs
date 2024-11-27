@@ -11,9 +11,10 @@ use crate::{
 use super::event::*;
 
 live_design! {
+    link gen_base;
     use link::shaders::*;
     use link::gen_theme::*;
-    GBreadCrumbItemBase = {{GBreadCrumbItem}}{
+    pub GBreadCrumbItemBase = {{GBreadCrumbItem}}{
         height: 24.0,
         width: Fit,
         font_size: (FONT_SIZE),
