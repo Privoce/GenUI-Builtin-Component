@@ -2,7 +2,10 @@ use std::{path::PathBuf, str::FromStr};
 
 use makepad_widgets::{DVec2, LiveDependency, LiveId, Rect, Vec2, Vec4};
 
-use crate::themes::{get_color, hex_to_vec4, Themes};
+use crate::themes::{
+    ThemeColorValue, ThemeDark, ThemeError, ThemeInfo, ThemePrimary, ThemeSuccess, ThemeWarning,
+    Themes,
+};
 
 // -------------------------------------------------------------------------------------------------
 /// This trait is used to get the color of the theme
@@ -21,48 +24,118 @@ impl ThemeColor for Option<Vec4> {
     }
 }
 
+pub fn hex_to_vec4(hex: &str) -> Vec4 {
+    // 去掉开头的 '#' 符号
+    let hex = hex.trim_start_matches('#');
+
+    // 解析 RGB 值
+    let (r, g, b, a) = if hex.len() == 6 {
+        let r = u8::from_str_radix(&hex[0..2], 16).unwrap();
+        let g = u8::from_str_radix(&hex[2..4], 16).unwrap();
+        let b = u8::from_str_radix(&hex[4..6], 16).unwrap();
+        (r, g, b, 255)
+    } else if hex.len() == 8 {
+        let r = u8::from_str_radix(&hex[0..2], 16).unwrap();
+        let g = u8::from_str_radix(&hex[2..4], 16).unwrap();
+        let b = u8::from_str_radix(&hex[4..6], 16).unwrap();
+        let a = u8::from_str_radix(&hex[6..8], 16).unwrap();
+        (r, g, b, a)
+    } else {
+        panic!("invalid hex color: {}", hex);
+    };
+
+    Vec4 {
+        x: r as f32 / 255.0,
+        y: g as f32 / 255.0,
+        z: b as f32 / 255.0,
+        w: a as f32 / 255.0,
+    }
+}
+
+/// v: color value, range: `[25, 50, 100 ,200, 300, 400, 500, 600, 700, 800, 900]`
+pub fn get_color(theme: Themes, color: Option<&Vec4>, v: u32) -> Vec4 {
+    return if let Some(target) = color {
+        target.clone()
+    } else {
+        match theme {
+            Themes::Dark => ThemeDark::v(v),
+            Themes::Primary => ThemePrimary::v(v),
+            Themes::Error => ThemeError::v(v),
+            Themes::Warning => ThemeWarning::v(v),
+            Themes::Success => ThemeSuccess::v(v),
+            Themes::Info => ThemeInfo::v(v),
+        }
+    };
+}
+
 #[macro_export]
-macro_rules! color_v_trait {
-    ($T:ty) => {
-        impl ThemeColorValue for $T {
-            fn v(target: u32) -> Vec4 {
-                hex_to_vec4(match target {
-                    25 => Self::_25,
-                    50 => Self::_50,
-                    100 => Self::_100,
-                    200 => Self::_200,
-                    300 => Self::_300,
-                    400 => Self::_400,
-                    500 => Self::_500,
-                    600 => Self::_600,
-                    700 => Self::_700,
-                    800 => Self::_800,
-                    900 => Self::_900,
-                    _ => panic!("invalid target"),
-                })
+macro_rules! theme_color {
+    (
+        $(
+            $T:ident {
+                $(
+                    $K:ident : $V:expr,
+                )*
+            }
+        ),*
+    ) => {
+        $(
+            #[derive(Debug, Clone)]
+            pub struct $T(Vec4);
+
+            impl $T {
+                $(
+                    pub const $K: &'static str = $V;
+                )*
             }
 
-            fn get(&self) -> Vec4 {
-                self.0
-            }
-
-            fn hex(target: u32) -> &'static str {
-                match target {
-                    25 => Self::_25,
-                    50 => Self::_50,
-                    100 => Self::_100,
-                    200 => Self::_200,
-                    300 => Self::_300,
-                    400 => Self::_400,
-                    500 => Self::_500,
-                    600 => Self::_600,
-                    700 => Self::_700,
-                    800 => Self::_800,
-                    900 => Self::_900,
-                    _ => panic!("invalid target"),
+            impl Default for $T {
+                fn default() -> Self {
+                    Self(crate::utils::hex_to_vec4(Self::_500))
                 }
             }
-        }
+
+
+            impl crate::themes::ThemeColorValue for $T {
+                fn v(target: u32) -> Vec4 {
+                    crate::utils::hex_to_vec4(match target {
+                        25 => Self::_25,
+                        50 => Self::_50,
+                        100 => Self::_100,
+                        200 => Self::_200,
+                        300 => Self::_300,
+                        400 => Self::_400,
+                        500 => Self::_500,
+                        600 => Self::_600,
+                        700 => Self::_700,
+                        800 => Self::_800,
+                        900 => Self::_900,
+                        _ => panic!("invalid target"),
+                    })
+                }
+
+                fn get(&self) -> Vec4 {
+                    self.0
+                }
+
+                fn hex(target: u32) -> &'static str {
+                    match target {
+                        25 => Self::_25,
+                        50 => Self::_50,
+                        100 => Self::_100,
+                        200 => Self::_200,
+                        300 => Self::_300,
+                        400 => Self::_400,
+                        500 => Self::_500,
+                        600 => Self::_600,
+                        700 => Self::_700,
+                        800 => Self::_800,
+                        900 => Self::_900,
+                        _ => panic!("invalid target"),
+                    }
+                }
+            }
+        )*
     };
 }
 // -------------------------------------------------------------------------------------------------

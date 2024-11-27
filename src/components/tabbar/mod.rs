@@ -4,8 +4,6 @@ pub mod register;
 
 pub use item::*;
 pub use event::*;
-use item::GTabbarItemWidgetRefExt;
-
 
 use makepad_widgets::*;
 
