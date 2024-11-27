@@ -10,7 +10,13 @@ use super::{
 
 live_design! {
     link gen_base;
-    pub GColorBase = {{GColor}}{}
+    pub GColorBase = {{GColor}}{
+        height: Fit,
+        width: 440.0,
+        flow: Down,
+        clip_x: true,
+        clip_y: true,
+    }
 }
 
 #[derive(Live, Widget)]
@@ -115,7 +121,7 @@ impl GColor {
         // ------------------ hover color -----------------------------------------------
         let hover_color = self.theme.get(500);
         // ------------------ pressed color ---------------------------------------------
-        let pressed_color = self.theme.get(500);
+        let focus_color = self.theme.get(500);
         // ------------------ border color ----------------------------------------------
         let border_color = self.theme.get(500);
         self.draw_color.apply_over(
@@ -126,7 +132,7 @@ impl GColor {
                 border_color: (border_color),
                 // border_width: (self.border_width),
                 // border_radius: (self.border_radius),
-                pressed_color: (pressed_color),
+                focus_color: (focus_color),
                 hover_color: (hover_color),
                 shadow_color: (shadow_color),
                 spread_radius: 0.0,

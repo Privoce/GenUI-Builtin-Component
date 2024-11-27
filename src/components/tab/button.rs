@@ -9,8 +9,19 @@ use crate::{
 live_design! {
     link gen_base;
     use link::shaders::*;
+    use link::gen_theme::*;
 
     pub GTabButtonBase = {{GTabButton}}{
+        height: Fit,
+        width: Fit,
+        text: " ",
+        border_width: 0.0,
+        padding: <GLOBAL_PADDING_SMALL>{}
+        // font_size: (FONT_SIZE),
+        align: <ALIGN_CENTER_WALK>{},
+        plain: true,
+        closeable: true,
+        margin: 0.0,
         spacing: 6.0,
         text_walk: {
             height: Fit,

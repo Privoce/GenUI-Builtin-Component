@@ -17,8 +17,12 @@ use super::svg::GSvg;
 
 live_design! {
     link gen_base;
+    use link::gen_theme::ALIGN_CENTER_WALK;
 
     pub GUploadBase = {{GUpload}}{
+        height: 100.0,
+        width: Fill,
+        align: <ALIGN_CENTER_WALK>{},
         draw_upload: {
             fn pixel(self) ->vec4{
                 return vec4(0.0);

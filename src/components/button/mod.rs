@@ -14,9 +14,14 @@ use makepad_widgets::*;
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
 
     pub GButtonBase = {{GButton}}{
+        height: Fit,
+        width: Fit,
+        theme: Primary,
+        padding: <GLOBAL_PADDING>{}
+        align: <ALIGN_CENTER_WALK>{},
         clip_x: false,
         clip_y: false,
         cursor: Hand,

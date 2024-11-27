@@ -10,12 +10,12 @@ pub mod utils;
 pub use components::*;
 
 pub fn live_design(cx: &mut Cx, theme: Option<LiveId>) {
+    // shader -------------------------------------------------
+    crate::shader::register::register(cx);
     // style --------------------------------------------------
     crate::themes::register::register(cx);
     // components ---------------------------------------------
     crate::components::register::register(cx);
-    // shader -------------------------------------------------
-    crate::shader::register::register(cx);
     // export all the components
     crate::components::live_design(cx);
     // link the theme

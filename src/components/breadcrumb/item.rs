@@ -12,8 +12,12 @@ use super::event::*;
 
 live_design! {
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
     GBreadCrumbItemBase = {{GBreadCrumbItem}}{
+        height: 24.0,
+        width: Fit,
+        font_size: (FONT_SIZE),
+        align: { x: 0.0, y: 0.5},
         spacing: 4.0,
         flow: Right,
         padding: 0,

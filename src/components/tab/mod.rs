@@ -14,7 +14,14 @@ use crate::{shader::draw_view::DrawGView, themes::Themes};
 live_design! {
     link gen_base;
 
-    pub GTabBase = {{GTab}}{}
+    pub GTabBase = {{GTab}}{
+        height: 300.0,
+        width: Fill,
+        margin: 0.0,
+        padding: 0.0,
+        spacing: 0.0,
+        flow: Down,
+    }
 }
 
 #[derive(Live, Widget)]

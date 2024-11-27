@@ -18,9 +18,10 @@ use crate::{
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
     
     pub GToolButtonBase = {{GToolButton}} {
+        align: <ALIGN_CENTER_WALK>{},
         height: 32.0,
         width: 46.0,
         color: #768390,

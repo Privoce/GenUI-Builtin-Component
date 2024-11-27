@@ -10,8 +10,12 @@ use super::button::{GTabButtonEvent, GTabButtonRef, GTabButtonWidgetRefExt};
 live_design! {
     link gen_base;
     use link::shaders::*;
+    use link::gen_theme::ALIGN_CENTER_WALK;
 
     pub GTabHeaderBase = {{GTabHeader}}{
+        height: Fit,
+        width: Fill,
+        align: <ALIGN_CENTER_WALK>{},
         draw_header: {
             fn pixel(self) -> vec4 {
                 let sdf = Sdf2d::viewport(self.pos * self.rect_size)

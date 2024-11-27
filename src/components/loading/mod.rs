@@ -16,7 +16,10 @@ use crate::{
 live_design! {
     link gen_base;
 
-    pub GLoadingBase = {{GLoading}}{}
+    pub GLoadingBase = {{GLoading}}{
+        height: 48.0,
+        width: 48.0,
+    }
 }
 
 #[derive(Live, Widget)]

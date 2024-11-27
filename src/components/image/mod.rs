@@ -16,6 +16,8 @@ live_design! {
     use link::shaders::*;
     
     pub GImageBase = {{GImage}} {
+        width: 32.0,
+        height: 32.0,
         draw_image: {
             texture image: texture2d
 

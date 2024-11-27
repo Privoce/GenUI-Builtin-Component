@@ -12,9 +12,15 @@ use shader::draw_text::TextWrap;
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
 
     pub GLabelBase = {{GLabel}}{
+        width: Fit,
+        height: Fit,
+        color: (COLOR_WHITE),
+        font_family: (FONT_FAMILY),
+        line_spacing: 1.5,
+        font_size: (FONT_SIZE),
         animator: {
             hover = {
                 default: off,

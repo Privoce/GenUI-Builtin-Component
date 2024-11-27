@@ -6,6 +6,8 @@ live_design! {
     link gen_base;
 
     pub GTabBodyBase = {{GTabBody}}{
+        height: Fill,
+        width: Fill,
         background_visible: true,
         border_width: 0.0,
         border_radius: 0.0,

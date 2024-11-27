@@ -14,7 +14,20 @@ use super::view::GView;
 live_design! {
     link gen_base;
 
-    pub GTabbarBase = {{GTabbar}}{}
+    pub GTabbarBase = {{GTabbar}}{
+        height: 42.0,
+        width: Fill,
+        align: {
+            x: 0.5,
+            y: 0.5,
+        },
+        spacing: 0.0,
+        padding: {
+            left: 8.0,
+            right: 8.0
+        },
+        border_radius: 0.0,
+    }
 }
 
 #[derive(Live, Widget)]

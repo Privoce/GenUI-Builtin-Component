@@ -14,8 +14,11 @@ use crate::{
 live_design! {
     link gen_base;
     use link::shaders::*;
+    use link::gen_theme::*;
 
     pub GInputBase = {{GInput}}{
+        font_family: (FONT_FAMILY),
+        font_size: (FONT_SIZE),
         background_color: vec4(1.0, 1.0, 1.0, 1.0),
         hover_color: vec4(0.9, 0.9, 0.9, 1.0),
         focus_color: vec4(0.9, 0.9, 0.9, 1.0),

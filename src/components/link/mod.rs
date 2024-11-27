@@ -23,11 +23,15 @@ use makepad_widgets::*;
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
 
     pub GLinkBase = {{GLink}}{
         height: Fit,
         width: Fit,
+        padding: 0,
+        font_size: (FONT_SIZE),
+        font_family: (FONT_FAMILY),
+        align: <ALIGN_CENTER_WALK>{},
         text_walk: {
             height: Fit,
             width: Fit,

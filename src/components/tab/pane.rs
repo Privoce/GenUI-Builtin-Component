@@ -7,7 +7,13 @@ use super::body::{GTabBodyRef, GTabBodyWidgetRefExt};
 live_design! {
     link gen_base;
 
-    pub GTabPaneBase = {{GTabPane}}{}
+    pub GTabPaneBase = {{GTabPane}}{
+        height: Fill,
+        width: Fill,
+        margin: 0.0,
+        padding: 6.0,
+        spacing: 0.0,
+    }
 }
 
 #[derive(Live, Widget)]

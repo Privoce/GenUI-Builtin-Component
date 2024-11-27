@@ -18,6 +18,8 @@ live_design! {
     link gen_base;
 
     pub GPopupContainerBase = {{GPopupContainer}} {
+        height: Fill,
+        width: Fill,
         animation_key: false,
         background_visible: false,
     }

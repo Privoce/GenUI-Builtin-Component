@@ -35,6 +35,8 @@ live_design! {
     use link::gen_theme::GLOBAL_DURATION;
     
     pub GIconBase = {{GIcon}}{
+        width: 24.0,
+        height: 24.0,
         draw_icon: {
             instance hover: 0.0,
             instance focus: 0.0,

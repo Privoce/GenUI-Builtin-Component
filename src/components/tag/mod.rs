@@ -20,9 +20,15 @@ use makepad_widgets::*;
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
     
     pub GTagBase = {{GTag}}{
+        spacing: 4.6,
+        theme: Primary,
+        text: "",
+        padding: <GLOBAL_PADDING_SMALL>{},
+        font_size: (FONT_SIZE_SMALL),
+        align: <ALIGN_CENTER_WALK>{},
         clip_x: false,
         clip_y: false,
         shadow_offset: vec2(0.0, 2.0),

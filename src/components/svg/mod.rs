@@ -16,6 +16,8 @@ live_design! {
     use link::gen_theme::GLOBAL_DURATION;
 
     pub GSvgBase = {{GSvg}}{
+        width: 24.0,
+        height: 24.0,
         animator: {
             hover = {
                 default: off,

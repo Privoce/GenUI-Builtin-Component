@@ -22,6 +22,9 @@ live_design! {
     use link::gen_theme::GLOBAL_DURATION;
     
     pub GProgressBase = {{GProgress}}{
+        height: 16.0,
+        width: 300.0,
+        border_radius: 4.0,
         animator: {
             hover = {
                 default: off,

@@ -23,6 +23,8 @@ live_design! {
     use link::gen_theme::GLOBAL_DURATION;
 
     pub GViewBase = {{GView}}{
+        height: Fill,
+        width: Fill,
         spread_radius: 0.0,
         clip_x: false,
         clip_y: false,

@@ -19,9 +19,14 @@ use super::{
 
 live_design! {
     link gen_base;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::ALIGN_LEFT_WALK;
     pub GBreadCrumbBase = {{GBreadCrumb}}{
         animation_key: true,
+        height: 24.0,
+        width: Fill,
+        padding: 6.0,
+        spacing: 8.0,
+        align: <ALIGN_LEFT_WALK>{},
     }
 }
 
