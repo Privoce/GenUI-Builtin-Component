@@ -11,12 +11,9 @@ use crate::shader::draw_text::DrawGText;
 use crate::themes::Themes;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::utils::open_browser;
-use crate::utils::{get_font_family, set_cursor, BoolToF32, ThemeColor};
+use crate::utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool};
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
-    default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area,
-    ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn,
-    widget_area,
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn, widget_area
 };
 use makepad_widgets::*;
 
@@ -536,6 +533,96 @@ impl GLink {
 }
 
 impl GLinkRef {
+    prop_setter!{
+        GLink{
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
+            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color);}},
+            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color);}},
+            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color);}},
+            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color);}},
+            set_underline_visible(visible: bool) {|c_ref| {c_ref.underline_visible = visible}},
+            set_underline_color(color: Vec4) {|c_ref| {c_ref.underline_color.replace(color);}},
+            set_underline_hover_color(color: Vec4) {|c_ref| {c_ref.underline_hover_color.replace(color);}},
+            set_underline_focus_color(color: Vec4) {|c_ref| {c_ref.underline_focus_color.replace(color);}},
+            set_underline_width(width: f32) {|c_ref| {c_ref.underline_width = width;}},
+            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius;}},
+            set_round(round: bool) {|c_ref| {c_ref.round = round;}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible;}},
+            set_text(text: ArcStringMut) {|c_ref| {c_ref.text = text;}},
+            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size;}},
+            set_color(color: Vec4) {|c_ref| {c_ref.color.replace(color);}},
+            set_text_hover_color(color: Vec4) {|c_ref| {c_ref.text_hover_color.replace(color);}},
+            set_text_focus_color(color: Vec4) {|c_ref| {c_ref.text_focus_color.replace(color);}},
+            set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family;}},
+            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor);}},
+            set_href(href: String) {|c_ref| {c_ref.href.replace(href);}},
+            set_link_type(link_type: LinkType) {|c_ref| {c_ref.link_type = link_type;}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
+            set_text_walk(walk: Walk) {|c_ref| {c_ref.text_walk = walk;}},
+            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus;}},
+            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key;}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key;}},
+            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos);}},
+            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
+            set_height(height: Size) {|c_ref| {c_ref.walk.height = height;}},
+            set_width(width: Size) {|c_ref| {c_ref.walk.width = width;}},
+            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll;}},
+            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x;}},
+            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y;}},
+            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding;}},
+            set_align(align: Align) {|c_ref| {c_ref.layout.align = align;}},
+            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow;}},
+            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing;}},
+            set_text_height(height: Size) {|c_ref| {c_ref.text_walk.height = height;}},
+            set_text_width(width: Size) {|c_ref| {c_ref.text_walk.width = width;}},
+            set_text_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.text_walk.abs_pos.replace(abs_pos);}},
+            set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin;}}
+        }
+    }
+    prop_getter! {
+        GLink{
+            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_background_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_link.background_color}},
+            get_hover_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.hover_color}},
+            get_focus_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.focus_color}},
+            get_border_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.border_color}},
+            get_underline_visible(bool) {|| true}, {|c_ref| {c_ref.draw_link.underline_visible.to_bool()}},
+            get_underline_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.underline_color}},
+            get_underline_hover_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.underline_hover_color}},
+            get_underline_focus_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_link.underline_focus_color}},
+            get_underline_width(f32) {|| 1.0}, {|c_ref| {c_ref.draw_link.underline_width}},
+            get_border_radius(f32) {|| 4.0}, {|c_ref| {c_ref.draw_link.border_radius}},
+            get_round(bool) {|| false}, {|c_ref| {c_ref.round}},
+            get_background_visible(bool) {|| false}, {|c_ref| {c_ref.background_visible}},
+            get_font_size(f64) {|| 10.0}, {|c_ref| {c_ref.font_size}},
+            get_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_text.color}},
+            get_text_hover_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_text.stroke_hover_color}},
+            get_text_focus_color(Vec4) {||  Vec4::default()}, {|c_ref| {c_ref.draw_text.stroke_focus_color}},
+            // get_font_family(LiveDependency) {|| LiveDependency::default()}, {|c_ref| {c_ref.font_family}},
+            get_cursor(MouseCursor) {|| MouseCursor::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_href(Option<String>) {|| None}, {|c_ref| {c_ref.href.clone()}},
+            get_link_type(LinkType) {|| LinkType::default()}, {|c_ref| {c_ref.link_type}},
+            get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
+            get_text_height(Size) {|| Size::default()}, {|c_ref| {c_ref.text_walk.height}},
+            get_text_width(Size) {|| Size::default()}, {|c_ref| {c_ref.text_walk.width}},
+            get_text_abs_pos(Option<DVec2>) {|| None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_text_margin(Margin) {|| Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
+            get_grab_key_focus(bool) {||false}, {|c_ref| {c_ref.grab_key_focus}},
+            get_animation_key(bool) {||true}, {|c_ref| {c_ref.animation_key}},
+            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
+        }
+    }
     ref_area!();
     ref_redraw!();
     ref_render!();

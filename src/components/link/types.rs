@@ -18,3 +18,9 @@ impl Display for LinkType {
         }
     }
 }
+
+impl Default for LinkType {
+    fn default() -> Self {
+        LinkType::NewTab
+    }
+}

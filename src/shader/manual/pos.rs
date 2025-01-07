@@ -1,12 +1,18 @@
 use makepad_widgets::*;
 
-#[derive(Live, LiveHook)]
+#[derive(Live, LiveHook, Clone)]
 #[live_ignore]
 #[repr(u32)]
 pub enum Direction {
     #[pick]
     Horizontal = shader_enum(1),
     Vertical = shader_enum(2),
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Direction::Horizontal
+    }
 }
 
 impl Direction {
