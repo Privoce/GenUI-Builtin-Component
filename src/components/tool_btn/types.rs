@@ -14,6 +14,12 @@ pub enum GOsType {
     Other,
 }
 
+impl Default for GOsType {
+    fn default() -> Self {
+        GOsType::Linux
+    }
+}
+
 impl From<GOsType> for OsType {
     fn from(value: GOsType) -> Self {
         match value {

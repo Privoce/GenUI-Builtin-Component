@@ -3,10 +3,12 @@ pub mod register;
 
 pub use event::*;
 
-
 use crate::utils::{set_cursor, BoolToF32, ThemeColor};
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area, ref_event_option, ref_play_animation, ref_redraw, ref_render, set_event, set_scope_path, widget_area
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
+    default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option,
+    play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_play_animation,
+    ref_redraw, ref_render, set_event, set_scope_path, widget_area,
 };
 use crate::{shader::draw_view::DrawGView, themes::Themes};
 use makepad_widgets::*;
@@ -227,7 +229,7 @@ impl Widget for GButton {
 }
 
 impl LiveHook for GButton {
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
@@ -355,6 +357,70 @@ impl GButton {
 }
 
 impl GButtonRef {
+    prop_setter! {
+        GButton{
+            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme;}},
+            set_background_color(color: Vec4){|c_ref| {c_ref.background_color.replace(color);}},
+            set_background_visible(visible: bool){|c_ref| {c_ref.background_visible = visible;}},
+            set_hover_color(color: Vec4){|c_ref| {c_ref.hover_color.replace(color);}},
+            set_focus_color(color: Vec4){|c_ref| {c_ref.focus_color.replace(color);}},
+            set_shadow_color(color: Vec4){|c_ref| {c_ref.shadow_color.replace(color);}},
+            set_spread_radius(radius: f32){|c_ref| {c_ref.spread_radius = radius;}},
+            set_blur_radius(radius: f32){|c_ref| {c_ref.blur_radius = radius;}},
+            set_shadow_offset(offset: Vec2){|c_ref| {c_ref.shadow_offset = offset;}},
+            set_border_color(color: Vec4){|c_ref| {c_ref.border_color.replace(color);}},
+            set_border_width(width: f32){|c_ref| {c_ref.border_width = width;}},
+            set_border_radius(radius: f32){|c_ref| {c_ref.border_radius = radius;}},
+            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor);}},
+            set_visible(visible: bool){|c_ref| {c_ref.visible = visible;}},
+            set_grab_key_focus(grab: bool){|c_ref| {c_ref.grab_key_focus = grab;}},
+            set_animation_key(key: bool){|c_ref| {c_ref.animation_key = key;}},
+            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos);}},
+            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin;}},
+            set_height(height: Size){|c_ref| {c_ref.walk.height = height;}},
+            set_width(width: Size){|c_ref| {c_ref.walk.width = width;}},
+            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll;}},
+            set_clip_x(clip: bool){|c_ref| {c_ref.layout.clip_x = clip;}},
+            set_clip_y(clip: bool){|c_ref| {c_ref.layout.clip_y = clip;}},
+            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding;}},
+            set_align(align: Align){|c_ref| {c_ref.layout.align = align;}},
+            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow;}},
+            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing;}},
+            set_event_key(key: bool){|c_ref| {c_ref.event_key = key;}}
+        }
+    }
+    prop_getter! {
+        GButton{
+            get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_background_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_button.background_color}},
+            get_background_visible(bool) {||true}, {|c_ref| {c_ref.background_visible}},
+            get_hover_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_button.hover_color}},
+            get_focus_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_button.focus_color}},
+            get_shadow_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_button.shadow_color}},
+            get_spread_radius(f32) {||0.0}, {|c_ref| {c_ref.draw_button.spread_radius}},
+            get_blur_radius(f32) {||4.8}, {|c_ref| {c_ref.draw_button.blur_radius}},
+            get_shadow_offset(Vec2) {||Vec2::default()}, {|c_ref| {c_ref.draw_button.shadow_offset}},
+            get_border_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_button.border_color}},
+            get_border_width(f32) {||0.0}, {|c_ref| {c_ref.draw_button.border_width}},
+            get_border_radius(f32) {||2.0}, {|c_ref| {c_ref.draw_button.border_radius}},
+            get_cursor(MouseCursor) {||MouseCursor::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
+            get_grab_key_focus(bool) {||true}, {|c_ref| {c_ref.grab_key_focus}},
+            get_animation_key(bool) {||true}, {|c_ref| {c_ref.animation_key}},
+            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
+            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
+        }
+    }
     ref_event_option! {
         hover_in => GButtonHoverParam,
         hover_out => GButtonHoverParam,
@@ -372,7 +438,7 @@ impl GButtonRef {
         animate_focus_on,
         animate_focus_off
     }
-    ref_play_animation!{
+    ref_play_animation! {
         play_hover_on: id!(hover.on),
         play_hover_off: id!(hover.off),
         play_focus_on: id!(hover.focus),

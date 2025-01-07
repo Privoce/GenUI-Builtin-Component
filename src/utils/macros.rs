@@ -505,3 +505,73 @@ macro_rules! check_event_scope {
         }
     };
 }
+
+#[macro_export]
+macro_rules! setter {
+    ($T: ty) => {
+        fn setter<F>(&self, cx: &mut Cx, f: F) -> ()
+        where
+            F: FnOnce(&mut std::cell::RefMut<'_, $T>),
+        {
+            if let Some(mut c_ref) = self.borrow_mut() {
+                f(&mut c_ref);
+                c_ref.render(cx);
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! prop_setter {
+    ($T:ty {$(
+        $fn_name: ident ($arg: ident: $arg_ty: ty) {$code: expr }
+    ),*}) => {
+        crate::setter!($T);
+        $(
+            pub fn $fn_name(&mut self, cx: &mut Cx, $arg: $arg_ty) -> () {
+                self.setter(cx, $code);
+            }
+        )*
+    };
+}
+
+#[macro_export]
+macro_rules! prop_setter_where {
+    ($(
+        $fn_name: ident ($arg: ident: $arg_ty: ty) {$code: expr }
+    ),*) => {
+        $(
+            pub fn $fn_name<T>(&mut self, cx: &mut Cx, $arg: T) -> ()
+            where
+                T: Into<$arg_ty>
+            {
+                self.setter(cx, $code);
+            }
+        )*
+    };
+
+}
+
+#[macro_export]
+macro_rules! prop_getter {
+    ($T:ty {$(
+        $fn_name: ident ($return_ty: ty) {$default: expr} , {$code: expr}
+    ),*}) => {
+        pub fn getter<T, F, D>(&self,default:D, f: F) -> T
+        where
+            F: Fn(&std::cell::Ref<'_, $T>) -> T,
+            D: Fn() -> T
+        {
+            if let Some(c_ref) = self.borrow() {
+                f(&c_ref)
+            } else {
+                default()
+            }
+        }
+        $(
+            pub fn $fn_name(&self) -> $return_ty{
+                self.getter($default, $code)
+            }
+        )*
+    };
+}

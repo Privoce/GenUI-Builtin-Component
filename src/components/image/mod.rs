@@ -8,7 +8,7 @@ use image_cache::{ImageCacheImpl, ImageFit};
 use makepad_widgets::*;
 
 use crate::{
-    active_event, event_option, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_view::DrawGView, utils::set_cursor, widget_area
+    active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_view::DrawGView, utils::set_cursor, widget_area
 };
 
 live_design! {
@@ -364,6 +364,56 @@ impl GImage {
 }
 
 impl GImageRef {
+    prop_setter!{
+        GImage{
+            set_visible(visible: bool) {|c_ref|{c_ref.visible = visible;}},
+            set_grab_key_focus(grab_key_focus: bool) {|c_ref|{c_ref.grab_key_focus = grab_key_focus;}},
+            set_opacity(opacity: f32) {|c_ref|{c_ref.opacity = opacity;}},
+            set_cursor(cursor: MouseCursor) {|c_ref|{c_ref.cursor.replace(cursor);}},
+            set_scale(scale: f64) {|c_ref|{c_ref.scale = scale;}},
+            set_fit(fit: ImageFit) {|c_ref|{c_ref.fit = fit;}},
+            set_min_width(min_width: i64) {|c_ref|{c_ref.min_width = min_width;}},
+            set_min_height(min_height: i64) {|c_ref|{c_ref.min_height = min_height;}},
+            set_rotation(rotation: f32) {|c_ref|{c_ref.rotation = rotation;}},
+            set_abs_pos(abs_pos: DVec2) {|c_ref|{c_ref.walk.abs_pos.replace(abs_pos);}},
+            set_margin(margin: Margin) {|c_ref|{c_ref.walk.margin = margin;}},
+            set_height(height: Size) {|c_ref|{c_ref.walk.height = height;}},
+            set_width(width: Size) {|c_ref|{c_ref.walk.width = width;}},
+            set_scroll(scroll: DVec2) {|c_ref|{c_ref.layout.scroll = scroll;}},
+            set_clip_x(clip_x: bool) {|c_ref|{c_ref.layout.clip_x = clip_x;}},
+            set_clip_y(clip_y: bool) {|c_ref|{c_ref.layout.clip_y = clip_y;}},
+            set_padding(padding: Padding) {|c_ref|{c_ref.layout.padding = padding;}},
+            set_align(align: Align) {|c_ref|{c_ref.layout.align = align;}},
+            set_flow(flow: Flow) {|c_ref|{c_ref.layout.flow = flow;}},
+            set_spacing(spacing: f64) {|c_ref|{c_ref.layout.spacing = spacing;}},
+            set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key;}}
+        }
+    }
+    prop_getter!{
+        GImage{
+            get_visible(bool) {|| true}, {|c_ref| c_ref.visible},
+            get_grab_key_focus(bool) {|| true}, {|c_ref| c_ref.grab_key_focus},
+            get_opacity(f32) {|| 1.0}, {|c_ref| c_ref.opacity},
+            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| c_ref.cursor.unwrap_or_default()},
+            get_scale(f64) {|| 1.0}, {|c_ref| c_ref.scale},
+            get_fit(ImageFit) {|| Default::default()}, {|c_ref| c_ref.fit},
+            get_min_width(i64) {|| 16}, {|c_ref| c_ref.min_width},
+            get_min_height(i64) {|| 16}, {|c_ref| c_ref.min_height},
+            get_rotation(f32) {|| 0.0}, {|c_ref| c_ref.rotation},
+            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
+            get_event_key(bool) {||true}, {|c_ref| c_ref.event_key}
+        }
+    }
     ref_redraw!();
     ref_area!();
     ref_render!();

@@ -3,9 +3,16 @@ pub mod register;
 
 pub use event::*;
 
-
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event::UnifiedEvent, event_option, play_animation, ref_animate_state, ref_area, ref_event_option, ref_play_animation, ref_redraw, ref_render, set_scope_path, set_text_and_visible_fn, shader::draw_text::DrawGText, themes::Themes, utils::{get_font_family, set_cursor, ThemeColor, ToBool}
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
+    default_hit_hover_in, default_hit_hover_out,
+    event::UnifiedEvent,
+    event_option, play_animation, prop_getter, prop_setter, ref_animate_state, ref_area,
+    ref_event_option, ref_play_animation, ref_redraw, ref_render, set_scope_path,
+    set_text_and_visible_fn,
+    shader::draw_text::DrawGText,
+    themes::Themes,
+    utils::{get_font_family, set_cursor, ThemeColor, ToBool},
 };
 use makepad_widgets::*;
 use shader::draw_text::TextWrap;
@@ -218,19 +225,18 @@ impl Widget for GLabel {
 }
 
 impl LiveHook for GLabel {
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
         self.render(cx);
     }
-    
 }
 
 impl GLabel {
     set_scope_path!();
     play_animation!();
-    active_event!{
+    active_event! {
         active_hover_in: GLabelEvent::HoverIn |e: FingerHoverEvent| => GLabelHoverParam{ e },
         active_hover_out: GLabelEvent::HoverOut |e: FingerHoverEvent| => GLabelHoverParam{ e },
         active_focus: GLabelEvent::Focus |e: FingerDownEvent| => GLabelFocusParam{ e },
@@ -325,6 +331,53 @@ impl GLabel {
 }
 
 impl GLabelRef {
+    prop_setter! {
+        GLabel{
+            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme;}},
+            set_color(color: String){|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color));}},
+            set_stroke_hover_color(color: String){|c_ref| {c_ref.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color));}},
+            set_stroke_focus_color(color: String){|c_ref| {c_ref.stroke_focus_color.replace(crate::utils::hex_to_vec4(&color));}},
+            set_font_size(size: f64){|c_ref| {c_ref.font_size = size;}},
+            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor);}},
+            set_line_spacing(spacing: f64){|c_ref| {c_ref.line_spacing = spacing;}},
+            set_height_factor(factor: f64){|c_ref| {c_ref.height_factor = factor;}},
+            set_wrap(wrap: TextWrap){|c_ref| {c_ref.wrap = wrap;}},
+            set_font_family(font_family: LiveDependency){|c_ref| {c_ref.font_family = font_family;}},
+            set_visible(visible: bool){|c_ref| {c_ref.visible = visible;}},
+            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos);}},
+            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin;}},
+            set_height(height: Size){|c_ref| {c_ref.walk.height = height;}},
+            set_width(width: Size){|c_ref| {c_ref.walk.width = width;}},
+            set_padding(padding: Padding){|c_ref| {c_ref.padding = padding;}},
+            set_align(align: Align){|c_ref| {c_ref.align = align;}},
+            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key;}},
+            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key;}},
+            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus;}}
+        }
+    }
+    prop_getter! {
+        GLabel{
+            get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_stroke_hover_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.stroke_hover_color}},
+            get_stroke_focus_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.stroke_focus_color}},
+            get_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.color}},
+            get_font_size(f64) {|| Default::default()}, {|c_ref| {c_ref.font_size}},
+            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_line_spacing(f64) {|| Default::default()}, {|c_ref| {c_ref.draw_text.text_style.line_spacing}},
+            get_height_factor(f64) {|| Default::default()}, {|c_ref| {c_ref.height_factor}},
+            get_wrap(TextWrap) {|| TextWrap::Ellipsis}, {|c_ref| {c_ref.wrap.clone()}},
+            get_visible(bool) {|| Default::default()}, {|c_ref| {c_ref.visible}},
+            get_abs_pos(DVec2) {|| Default::default()}, {|c_ref| {c_ref.walk.abs_pos.unwrap_or_default()}},
+            get_margin(Margin) {|| Default::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {|| Default::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {|| Default::default()}, {|c_ref| {c_ref.walk.width}},
+            get_padding(Padding) {|| Default::default()}, {|c_ref| {c_ref.padding}},
+            get_align(Align) {|| Default::default()}, {|c_ref| {c_ref.align}},
+            get_animation_key(bool){|| Default::default()},  {|c_ref| {c_ref.animation_key}},
+            get_event_key(bool) {|| Default::default()}, {|c_ref| {c_ref.event_key}},
+            get_grab_key_focus(bool) {|| Default::default()}, {|c_ref| {c_ref.grab_key_focus}}
+        }
+    }
     animatie_fn! {
         clear_animation,
         animate_hover_on,
@@ -336,7 +389,7 @@ impl GLabelRef {
     ref_animate_state!();
     ref_redraw!();
     ref_render!();
-    ref_play_animation!{
+    ref_play_animation! {
         play_hover_on: id!(hover.on),
         play_hover_off: id!(hover.off),
         play_focus_on: id!(hover.focus),
