@@ -129,3 +129,9 @@ pub enum GChooseType {
     /// ⛔ (横线)
     Cross = shader_enum(3),
 }
+
+impl Default for GChooseType {
+    fn default() -> Self {
+        GChooseType::Round
+    }
+}
