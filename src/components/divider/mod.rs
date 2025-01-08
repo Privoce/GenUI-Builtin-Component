@@ -1,9 +1,11 @@
 pub mod register;
 
-
 use makepad_widgets::*;
 
-use crate::{animatie_fn, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw_mut, ref_render, shader::manual::Direction, themes::Themes, utils::{BoolToF32, ToBool}};
+use crate::{
+    animatie_fn, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw_mut, ref_render,
+    shader::manual::Direction, themes::Themes, utils::ToBool,
+};
 
 use super::view::{
     event::{GViewClickedParam, GViewFocusLostParam, GViewFocusParam, GViewHoverParam},
@@ -13,7 +15,7 @@ use super::view::{
 live_design! {
     link gen_base;
     use link::shaders::*;
-    
+
     pub GDividerBase = {{GDivider}}{
         height: 2.0,
         width: Fill,
@@ -74,7 +76,7 @@ pub struct GDivider {
     #[live(1.4)]
     pub stroke_width: f32,
     #[live(Direction::Horizontal)]
-    pub direction: Direction
+    pub direction: Direction,
 }
 
 impl Widget for GDivider {
@@ -93,23 +95,17 @@ impl Widget for GDivider {
 impl LiveHook for GDivider {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
-        self.add_render(cx);
+    }
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+        if !self.visible {
+            return;
+        }
+
+        self.render(cx);
     }
 }
 
 impl GDivider {
-    fn add_render(&mut self, cx: &mut Cx) {
-        let stroke_width = self.stroke_width;
-        let direction = self.direction.to_f32();
-        // now set stroke width to draw_view
-        self.draw_view.apply_over(
-            cx,
-            live! {
-                stroke_width: (stroke_width),
-                direction: (direction)
-            },
-        );
-    }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) {
         self.deref_widget.animate_hover_on(cx);
     }
@@ -130,7 +126,6 @@ impl GDivider {
     }
     pub fn render(&mut self, cx: &mut Cx) {
         self.deref_widget.render(cx);
-        self.add_render(cx);
     }
     pub fn area(&self) -> Area {
         self.deref_widget.area()
@@ -153,20 +148,20 @@ impl GDivider {
 }
 
 impl GDividerRef {
-    prop_setter!{
+    prop_setter! {
         GDivider{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
-            set_background_color(color: Vec4) {|c_ref| {c_ref.draw_view.background_color = color;}},
-            set_shadow_color(color: Vec4) {|c_ref| {c_ref.draw_view.shadow_color = color;}},
-            set_hover_color(color: Vec4) {|c_ref| {c_ref.draw_view.hover_color = color;}},
-            set_focus_color(color: Vec4) {|c_ref| {c_ref.draw_view.focus_color = color;}},
-            set_border_color(color: Vec4) {|c_ref| {c_ref.draw_view.border_color = color;}},
-            set_border_width(width: f64) {|c_ref| {c_ref.draw_view.border_width = width as f32;}},
-            set_border_radius(radius: f64) {|c_ref| {c_ref.draw_view.border_radius = radius as f32;}},
-            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.draw_view.shadow_offset = offset;}},
-            set_spread_radius(radius: f64) {|c_ref| {c_ref.draw_view.spread_radius = radius as f32;}},
-            set_blur_radius(radius: f64) {|c_ref| {c_ref.draw_view.blur_radius = radius as f32;}},
-            set_background_visible(visible: bool) {|c_ref| {c_ref.draw_view.background_visible = visible.to_f32();}},
+            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color);}},
+            set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color);}},
+            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color);}},
+            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color);}},
+            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color);}},
+            set_border_width(width: f64) {|c_ref| {c_ref.border_width = width as f32;}},
+            set_border_radius(radius: f64) {|c_ref| {c_ref.border_radius = radius as f32;}},
+            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset;}},
+            set_spread_radius(radius: f64) {|c_ref| {c_ref.spread_radius = radius as f32;}},
+            set_blur_radius(radius: f64) {|c_ref| {c_ref.blur_radius = radius as f32;}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible;}},
             set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
             set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor);}},
             set_grab_key_focus(grab: bool) {|c_ref| {c_ref.grab_key_focus = grab;}},
@@ -190,7 +185,7 @@ impl GDividerRef {
             set_direction(direction: Direction) {|c_ref| {c_ref.direction = direction;}}
         }
     }
-    prop_getter!{
+    prop_getter! {
         GDivider{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.background_color}},
@@ -198,11 +193,11 @@ impl GDividerRef {
             get_hover_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.hover_color}},
             get_focus_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.focus_color}},
             get_border_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.border_color}},
-            get_border_width(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.border_width as f64}},
-            get_border_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.border_radius as f64}},
-            get_shadow_offset(Vec2) {|| Vec2::default()}, {|c_ref| {c_ref.draw_view.shadow_offset}},
-            get_spread_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.spread_radius as f64}},
-            get_blur_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.blur_radius as f64}},
+            get_border_width(f64) {|| 0.0}, {|c_ref| {c_ref.border_width as f64}},
+            get_border_radius(f64) {|| 0.0}, {|c_ref| {c_ref.border_radius as f64}},
+            get_shadow_offset(Vec2) {|| Vec2::default()}, {|c_ref| {c_ref.shadow_offset}},
+            get_spread_radius(f64) {|| 0.0}, {|c_ref| {c_ref.spread_radius as f64}},
+            get_blur_radius(f64) {|| 0.0}, {|c_ref| {c_ref.blur_radius as f64}},
             get_background_visible(bool) {|| true}, {|c_ref| {c_ref.draw_view.background_visible.to_bool()}},
             get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
             get_cursor(MouseCursor) {|| MouseCursor::Default}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},

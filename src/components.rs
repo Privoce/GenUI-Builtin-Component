@@ -220,8 +220,8 @@ live_design! {
     }
     pub GRadio = <GRadioBase>{}
     pub GRadioGroup = <GRadioGroupBase>{}
-    pub GCheckBox = <GCheckBoxBase>{}
-    pub GCheckBoxGroup = <GCheckBoxGroupBase>{}
+    pub GCheckbox = <GCheckboxBase>{}
+    pub GCheckboxGroup = <GCheckboxGroupBase>{}
     pub GToggle = <GToggleBase>{}
     pub GSvg = <GSvgBase>{}
     pub GIcon = <GIconBase>{}

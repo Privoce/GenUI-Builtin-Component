@@ -8,7 +8,7 @@ use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 
 use crate::{
-    animatie_fn, event_bool, event_option, ref_event_bool, ref_event_option, set_event, set_event_bool, shader::{draw_view::DrawGView, draw_text::DrawGText}, themes::Themes, utils::{get_font_family, BoolToF32, ThemeColor}, widget_area
+    animatie_fn, event_bool, event_option, prop_getter, prop_setter, ref_event_bool, ref_event_option, set_event, set_event_bool, shader::{draw_text::DrawGText, draw_view::DrawGView}, themes::Themes, utils::{get_font_family, BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -189,10 +189,10 @@ pub struct GInput {
     pub text_align: Align,
     #[live(9.0)]
     pub font_size: f64,
-    #[live(1.0)]
-    pub brightness: f32,
-    #[live(0.5)]
-    pub curve: f32,
+    // #[live(1.0)]
+    // pub brightness: f32,
+    // #[live(0.5)]
+    // pub curve: f32,
     // #[live(1.2)]
     // pub top_drop: f64,
     #[live(1.3)]
@@ -250,15 +250,16 @@ impl Widget for GInput {
 
         self.draw_selection.append_to_draw_call(cx);
 
+        let inner_walk = self.inner_walk();
         // Draw text
         if self.text.is_empty() {
-            // self.draw_text.empty = 1.0;
+            self.draw_text.empty = 1.0;
             self.draw_text
-                .draw_walk(cx, Walk::fill(), self.text_align, &self.placeholder);
+                .draw_walk(cx, inner_walk, self.text_align, &self.placeholder);
         } else {
-            // self.draw_text.empty = 0.0;
+            self.draw_text.empty = 0.0;
             self.draw_text
-                .draw_walk(cx, Walk::fill(), self.text_align, &self.text);
+                .draw_walk(cx, inner_walk, self.text_align, &self.text);
         }
 
         let padded_rect = cx.turtle().padded_rect();
@@ -266,7 +267,7 @@ impl Widget for GInput {
         // Draw selection
         let rects = self.draw_text.selected_rects(
             cx,
-            Walk::fill(),
+            inner_walk,
             self.text_align,
             padded_rect.size.x,
             &self.text,
@@ -495,31 +496,24 @@ impl Widget for GInput {
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyZ,
-                modifiers:
-                    KeyModifiers {
-                        logo: true,
-                        shift: false,
-                        ..
-                    },
+                modifiers,
                 ..
-            }) if !self.read_only => {
+            }) if modifiers.is_primary() && !modifiers.shift && !self.read_only => {
                 self.undo();
                 self.draw_input.redraw(cx);
                 cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyZ,
-                modifiers:
-                    KeyModifiers {
-                        logo: true,
-                        shift: true,
-                        ..
-                    },
+                modifiers,
                 ..
-            }) if !self.read_only => {
+            }) if modifiers.is_primary() && modifiers.shift && !self.read_only => {
                 self.redo();
                 self.draw_input.redraw(cx);
                 cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+            }
+            Hit::KeyDown(ke) => {
+                cx.widget_action(uid, &scope.path, TextInputAction::KeyDownUnhandled(ke));
             }
             Hit::TextInput(TextInputEvent {
                 input,
@@ -636,10 +630,22 @@ impl Widget for GInput {
 }
 
 impl LiveHook for GInput {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_new_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
+        self.render(cx);
+    }
+    // fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+    //     if !self.visible {
+    //         return;
+    //     }
+    //     self.draw_input.after_apply(cx, apply, index, nodes);
+    // }
+}
+
+impl GInput {
+    pub fn render(&mut self, cx: &mut Cx) {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 25);
         // ------------------ hover color -----------------------------------------------
@@ -650,9 +656,9 @@ impl LiveHook for GInput {
         let cursor_color = self.cursor_color.get(self.theme, 800);
         let cursor_hover_color = self.cursor_hover_color.get(self.theme, 800);
         let cursor_focus_color = self.cursor_focus_color.get(self.theme, 800);
-        let select_color = self.select_color.get(self.theme, 400);
-        let select_hover_color = self.select_hover_color.get(self.theme, 300);
-        let select_focus_color = self.select_focus_color.get(self.theme, 500);
+        let select_color = self.select_color.get(self.theme, 50);
+        let select_hover_color = self.select_hover_color.get(self.theme, 100);
+        let select_focus_color = self.select_focus_color.get(self.theme, 200);
         let placeholder_color = self.placeholder_color.use_or("#98A2B3");
         // ------------------ focus color ---------------------------------------------
         let focus_color = self.focus_color.get(self.theme, 25);
@@ -722,14 +728,14 @@ impl LiveHook for GInput {
                 border_radius: 0.0
             },
         );
-        // self.draw_text.redraw(cx);
-        // self.draw_input.redraw(cx);
-        // self.draw_cursor.redraw(cx);
-        // self.draw_selection.redraw(cx);
     }
-}
-
-impl GInput {
+    fn inner_walk(&self) -> Walk {
+        if self.walk.width.is_fit() {
+            Walk::fit()
+        } else {
+            Walk::fill_fit()
+        }
+    }
     widget_area! {
         area, draw_input,
         area_selection, draw_selection
@@ -869,12 +875,12 @@ impl GInput {
         cx.set_key_focus(self.draw_input.area());
     }
 
-    pub fn set_cursor(&mut self, cursor: Cursor) {
+    pub fn set_input_cursor(&mut self, cursor: Cursor) {
         self.cursor = cursor;
     }
 
     pub fn select_all(&mut self) {
-        self.set_cursor(Cursor {
+        self.set_input_cursor(Cursor {
             head: IndexAffinity {
                 index: self.text.len(),
                 affinity: Affinity::After,
@@ -1059,6 +1065,108 @@ impl GInput {
 }
 
 impl GInputRef {
+    prop_setter!{
+        GInput{
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
+            set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color);}},
+            set_spread_radius(radius: f32) {|c_ref| {c_ref.spread_radius = radius;}},
+            set_blur_radius(radius: f32) {|c_ref| {c_ref.blur_radius = radius;}},
+            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset;}},
+            set_placeholder_color(color: Vec4) {|c_ref| {c_ref.placeholder_color.replace(color);}},
+            set_color(color: Vec4) {|c_ref| {c_ref.color.replace(color);}},
+            set_cursor_color(color: Vec4) {|c_ref| {c_ref.cursor_color.replace(color);}},
+            set_select_color(color: Vec4) {|c_ref| {c_ref.select_color.replace(color);}},
+            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color);}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible;}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
+            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color);}},
+            set_text_hover_color(color: Vec4) {|c_ref| {c_ref.text_hover_color.replace(color);}},
+            set_text_focus_color(color: Vec4) {|c_ref| {c_ref.text_focus_color.replace(color);}},
+            set_cursor_hover_color(color: Vec4) {|c_ref| {c_ref.cursor_hover_color.replace(color);}},
+            set_cursor_focus_color(color: Vec4) {|c_ref| {c_ref.cursor_focus_color.replace(color);}},
+            set_select_hover_color(color: Vec4) {|c_ref| {c_ref.select_hover_color.replace(color);}},
+            set_select_focus_color(color: Vec4) {|c_ref| {c_ref.select_focus_color.replace(color);}},
+            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color);}},
+            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color);}},
+            set_border_width(width: f32) {|c_ref| {c_ref.border_width = width;}},
+            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius;}},
+            // set_text_align(align: Align) {|c_ref| {c_ref.text_align = align;}},
+            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size;}},
+            set_height_factor(factor: f64) {|c_ref| {c_ref.height_factor = factor;}},
+            set_wrap(wrap: TextWrap) {|c_ref| {c_ref.wrap = wrap;}},
+            // set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family;}},
+            set_cursor_border_radius(radius: f32) {|c_ref| {c_ref.cursor_border_radius = radius as f64;}},
+            set_cursor_width(width: f64) {|c_ref| {c_ref.cursor_width = width;}},
+            set_read_only(read_only: bool) {|c_ref| {c_ref.read_only = read_only;}},
+            set_numeric_only(numeric_only: bool) {|c_ref| {c_ref.numeric_only = numeric_only;}},
+            set_placeholder(placeholder: String) {|c_ref| {c_ref.placeholder = placeholder;}},
+            set_text(text: String) {|c_ref| {c_ref.text = text;}},
+            set_cursor(cursor: Cursor) {|c_ref| {c_ref.cursor = cursor;}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key;}},
+            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos);}},
+            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
+            set_height(height: Size) {|c_ref| {c_ref.walk.height = height;}},
+            set_width(width: Size) {|c_ref| {c_ref.walk.width = width;}},
+            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll;}},
+            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x;}},
+            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y;}},
+            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding;}},
+            set_align(align: Align) {|c_ref| {c_ref.layout.align = align;}},
+            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow;}},
+            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing;}}
+        }
+    }
+    prop_getter! {
+        GInput{
+            get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_shadow_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_input.shadow_color}},
+            get_spread_radius(f32) {||1.0}, {|c_ref| {c_ref.draw_input.spread_radius}},
+            get_blur_radius(f32) {||4.8}, {|c_ref| {c_ref.draw_input.blur_radius}},
+            get_shadow_offset(Vec2) {||Vec2::default()}, {|c_ref| {c_ref.draw_input.shadow_offset}},
+            get_placeholder_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.placeholder_color.unwrap_or_default()}},
+            get_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_text.color}},
+            get_cursor_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_cursor.background_color}},
+            get_select_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_selection.background_color}},
+            get_background_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_input.background_color}},
+            get_background_visible(bool) {||true}, {|c_ref| {c_ref.draw_input.background_visible.to_bool()}},
+            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
+            get_hover_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_input.hover_color}},
+            get_text_hover_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_text.stroke_hover_color}},
+            get_text_focus_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_text.stroke_focus_color}},
+            get_cursor_hover_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_cursor.hover_color}},
+            get_cursor_focus_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_cursor.focus_color}},
+            get_select_hover_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_selection.hover_color}},
+            get_select_focus_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_selection.focus_color}},
+            get_focus_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_input.focus_color}},
+            get_border_color(Vec4) {||Vec4::default()}, {|c_ref| {c_ref.draw_input.border_color}},
+            get_border_width(f32) {||1.0}, {|c_ref| {c_ref.draw_input.border_width}},
+            get_border_radius(f32) {||2.0}, {|c_ref| {c_ref.draw_input.border_radius}},
+            // get_text_align(Align) {||Align::default()}, {|c_ref| {c_ref.draw_text.text_style}},
+            get_font_size(f64) {||9.0}, {|c_ref| {c_ref.draw_text.text_style.font_size}},
+            get_height_factor(f64) {||1.3}, {|c_ref| {c_ref.draw_text.text_style.height_factor}},
+            get_wrap(TextWrap) {||TextWrap::Word}, {|c_ref| {c_ref.draw_text.wrap.clone()}},
+            // get_font_family(LiveDependency) {||LiveDependency::default()}, {|c_ref| {c_ref.draw_text.text_style.font}},
+            get_cursor_border_radius(f32) {||1.0}, {|c_ref| {c_ref.draw_cursor.border_radius}},
+            get_cursor_width(f64) {||2.0}, {|c_ref| {c_ref.cursor_width}},
+            get_read_only(bool) {||false}, {|c_ref| {c_ref.read_only}},
+            get_numeric_only(bool) {||false}, {|c_ref| {c_ref.numeric_only}},
+            get_placeholder(String) {||String::default()}, {|c_ref| {c_ref.placeholder.to_string()}},
+            get_text(String) {||String::default()}, {|c_ref| {c_ref.text.to_string()}},
+            get_cursor(Cursor) {||Cursor::default()}, {|c_ref| {c_ref.cursor}},
+            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}},
+            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}}
+        }
+    }
     ref_event_bool! {
         key_focus,
         key_focus_lost,
@@ -1088,9 +1196,9 @@ impl GInputRef {
         None
     }
 
-    pub fn set_cursor(&self, head: usize, tail: usize) {
+    pub fn set_input_cursor(&self, head: usize, tail: usize) {
         if let Some(mut inner) = self.borrow_mut() {
-            inner.set_cursor(Cursor {
+            inner.set_input_cursor(Cursor {
                 head: IndexAffinity {
                     index: head,
                     affinity: Affinity::After,

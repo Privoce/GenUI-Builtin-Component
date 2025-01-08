@@ -16,7 +16,7 @@
   - [x] VLayout 🆗
   - [x] HLayout 🆗
 - [x] Radio 🆗
-- [x] CheckBox 🆗
+- [x] Checkbox 🆗
 - [x] Icon 🆗
 - [x] Svg 🆗
 - [x] Image 🆗
@@ -45,8 +45,8 @@
 - [x] ToolButton
 - [x] RadioGroup
 - [ ] Virtual RadioGroup
-- [ ] CheckBoxGroup
-- [ ] Virtual CheckBoxGroup
+- [ ] CheckboxGroup
+- [ ] Virtual CheckboxGroup
 - [x] Select
 - [x] Drawer
 - [x] Router

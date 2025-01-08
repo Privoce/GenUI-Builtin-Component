@@ -9,8 +9,8 @@ use std::fmt::Display;
 #[derive(Copy, Clone, Debug, Live, LiveHook)]
 #[live_ignore]
 pub enum Themes {
-    Dark,
     #[pick]
+    Dark,
     Primary,
     Error,
     Warning,
@@ -20,7 +20,7 @@ pub enum Themes {
 
 impl Default for Themes {
     fn default() -> Self {
-        Themes::Primary
+        Themes::Dark
     }
 }
 
