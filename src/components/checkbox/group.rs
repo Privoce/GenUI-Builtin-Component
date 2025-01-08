@@ -6,13 +6,13 @@ use crate::{
 };
 
 use super::{
-    event::{GCheckBoxGroupEvent, GCheckBoxGroupEventParam},
-    GCheckBoxRef, GCheckBoxWidgetRefExt,
+    event::{GCheckboxGroupEvent, GCheckboxGroupEventParam},
+    GCheckboxRef, GCheckboxWidgetRefExt,
 };
 
 live_design! {
     link gen_base;
-    pub GCheckBoxGroupBase = {{GCheckBoxGroup}} {
+    pub GCheckboxGroupBase = {{GCheckboxGroup}} {
         border_radius: 0.0,
         border_width: 0.0,
         spread_radius: 0.0,
@@ -25,7 +25,7 @@ live_design! {
 }
 
 #[derive(Live, Widget)]
-pub struct GCheckBoxGroup {
+pub struct GCheckboxGroup {
     #[deref]
     pub deref_widget: GView,
     // selected indexs of checkbox, if selected.len() == 0, means no checkbox is selected
@@ -33,7 +33,7 @@ pub struct GCheckBoxGroup {
     pub selected: Vec<i32>,
 }
 
-impl Widget for GCheckBoxGroup {
+impl Widget for GCheckboxGroup {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         self.deref_widget.draw_walk(cx, scope, walk)
     }
@@ -52,7 +52,7 @@ impl Widget for GCheckBoxGroup {
         };
         let mut flag = false;
         for (_, (_id, child)) in self.children.iter().enumerate() {
-            let _ = child.as_gcheck_box().borrow().map(|checkbox| {
+            let _ = child.as_gcheckbox().borrow().map(|checkbox| {
                 if let Some(_) = checkbox.clicked(&actions) {
                     // here we just make sure the clicked is exist
                     flag = true;
@@ -70,7 +70,7 @@ impl Widget for GCheckBoxGroup {
                 cx.widget_action(
                     self.widget_uid(),
                     path,
-                    GCheckBoxGroupEvent::Changed(GCheckBoxGroupEventParam {
+                    GCheckboxGroupEvent::Changed(GCheckboxGroupEventParam {
                         selected: self.selected.iter().map(|x| *x as usize).collect(),
                         values,
                         e,
@@ -84,7 +84,7 @@ impl Widget for GCheckBoxGroup {
     }
 }
 
-impl LiveHook for GCheckBoxGroup {
+impl LiveHook for GCheckboxGroup {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
         if self.selected.len() == 0 {
@@ -95,19 +95,19 @@ impl LiveHook for GCheckBoxGroup {
     }
 }
 
-impl GCheckBoxGroup {
+impl GCheckboxGroup {
     pub fn set_selected(&mut self, cx: &mut Cx, selected: Vec<i32>) -> () {
         // loop all gcheckbox child and let selected == false except self.selected is true
         self.children
             .iter_mut()
             .enumerate()
             .for_each(|(index, (_id, child))| {
-                if let Some(mut child) = child.as_gcheck_box().borrow_mut() {
+                if let Some(mut child) = child.as_gcheckbox().borrow_mut() {
                     let selected = &selected[index];
 
                     child.toggle(cx, *selected == index as i32);
                 } else {
-                    panic!("GCheckBoxGroup only allows GCheckBox as child!");
+                    panic!("GCheckboxGroup only allows GCheckbox as child!");
                 }
             });
 
@@ -117,12 +117,12 @@ impl GCheckBoxGroup {
         self.selected = self.children.iter().enumerate().fold(
             Vec::new(),
             |mut selected, (index, (_, child))| {
-                if let Some(child) = child.as_gcheck_box().borrow() {
+                if let Some(child) = child.as_gcheckbox().borrow() {
                     if child.selected {
                         selected.push(index as i32);
                     }
                 } else {
-                    panic!("GCheckBoxGroup only allows GCheckBox as child!");
+                    panic!("GCheckboxGroup only allows GCheckbox as child!");
                 }
                 selected
             },
@@ -131,10 +131,10 @@ impl GCheckBoxGroup {
     pub fn area(&self) -> Area {
         self.area
     }
-    pub fn get(&self, index: usize) -> Option<(LiveId, GCheckBoxRef)> {
+    pub fn get(&self, index: usize) -> Option<(LiveId, GCheckboxRef)> {
         self.children
             .get(index)
-            .map(|(id, child)| (id.clone(), child.as_gcheck_box()))
+            .map(|(id, child)| (id.clone(), child.as_gcheckbox()))
     }
     pub fn redraw(&mut self, cx: &mut Cx) {
         self.deref_widget.redraw(cx);
@@ -150,7 +150,7 @@ impl GCheckBoxGroup {
             cx.widget_action(
                 self.widget_uid(),
                 path,
-                GCheckBoxGroupEvent::Changed(GCheckBoxGroupEventParam {
+                GCheckboxGroupEvent::Changed(GCheckboxGroupEventParam {
                     selected: self.selected.iter().map(|x| *x as usize).collect(),
                     values,
                     e,
@@ -181,19 +181,19 @@ impl GCheckBoxGroup {
             .collect()
     }
     event_option! {
-        changed: GCheckBoxGroupEvent::Changed => GCheckBoxGroupEventParam
+        changed: GCheckboxGroupEvent::Changed => GCheckboxGroupEventParam
     }
 }
 
 #[allow(dead_code)]
-impl GCheckBoxGroupRef {
+impl GCheckboxGroupRef {
     ref_event_option! {
-        changed => GCheckBoxGroupEventParam
+        changed => GCheckboxGroupEventParam
     }
     ref_area!();
     ref_redraw_mut!();
     ref_render!();
-    pub fn get(&self, index: usize) -> Option<(LiveId, GCheckBoxRef)> {
+    pub fn get(&self, index: usize) -> Option<(LiveId, GCheckboxRef)> {
         self.borrow().map(|c_ref| c_ref.get(index)).flatten()
     }
     pub fn change(&self, cx: &mut Cx, index: Vec<usize>) {
@@ -204,8 +204,8 @@ impl GCheckBoxGroupRef {
     }
 }
 
-impl GCheckBoxGroupSet {
+impl GCheckboxGroupSet {
     set_event! {
-        changed => GCheckBoxGroupEventParam
+        changed => GCheckboxGroupEventParam
     }
 }

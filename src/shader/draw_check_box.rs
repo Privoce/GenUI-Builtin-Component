@@ -5,7 +5,7 @@ use super::draw_radio::GChooseType;
 live_design! {
     use link::shaders::*;
 
-    DrawGCheckBox = {{DrawGCheckBox}} {
+    DrawGCheckbox = {{DrawGCheckbox}} {
 
         fn get_background_color(self) -> vec4 {
             return mix(
@@ -78,7 +78,7 @@ live_design! {
 
 #[derive(Live, LiveRegister, LiveHook)]
 #[repr(C)]
-pub struct DrawGCheckBox {
+pub struct DrawGCheckbox {
     #[deref]
     pub draw_super: DrawQuad,
     // ---- event state
@@ -115,7 +115,7 @@ pub struct DrawGCheckBox {
     pub check_type: GChooseType,
 }
 
-impl DrawGCheckBox {
+impl DrawGCheckbox {
     pub fn apply_type(&mut self, check_type: GChooseType) {
         self.check_type = check_type;
     }

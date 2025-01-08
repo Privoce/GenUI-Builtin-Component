@@ -550,6 +550,11 @@ impl GRadio {
 }
 
 impl GRadioRef {
+    pub fn set_selected(&mut self, cx: &mut Cx, selected: bool) {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.toggle(cx, selected);
+        }
+    }
     prop_setter! {
         GRadio{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
@@ -585,7 +590,6 @@ impl GRadioRef {
             set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset;}},
             set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor);}},
             set_value(value: Option<String>) {|c_ref| {c_ref.value = value;}},
-            set_selected(selected: bool) {|c_ref| {c_ref.selected = selected;}},
             set_radio_type(radio_type: GChooseType) {|c_ref| {c_ref.radio_type = radio_type;}},
             set_abs_pos(pos: Option<DVec2>) {|c_ref| {c_ref.walk.abs_pos = pos;}},
             set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
@@ -690,6 +694,7 @@ impl GRadioRef {
     /// ## Get the selected state of the radio.
     /// If the radio is selected, it will return true.
     /// Otherwise, it will return false.(include can not find the radio)
+    #[deprecated(since = "0.1.0", note = "Please use `get_selected()` instead")]
     pub fn is_selected(&self) -> bool {
         if let Some(c_ref) = self.borrow() {
             c_ref.is_selected()

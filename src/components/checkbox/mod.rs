@@ -12,8 +12,7 @@ use crate::{
     default_hit_hover_out, event_option, play_animation, ref_area, ref_area_ext, ref_event_option,
     ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn,
     shader::{
-        draw_check_box::DrawGCheckBox, draw_radio::GChooseType, draw_text::DrawGText,
-        draw_view::DrawGView,
+        draw_check_box::DrawGCheckbox, draw_radio::GChooseType, draw_text::DrawGText, draw_view::DrawGView
     },
     themes::Themes,
     utils::{get_font_family, set_cursor, BoolToF32, ThemeColor},
@@ -25,7 +24,7 @@ live_design! {
     use link::shaders::*;
     use link::gen_theme::GLOBAL_DURATION;
 
-    pub GCheckBoxBase = {{GCheckBox}}{
+    pub GCheckboxBase = {{GCheckbox}}{
         height: Fit,
         width: Fit,
         font_size: 10.0,
@@ -78,7 +77,7 @@ live_design! {
 }
 
 #[derive(Widget, Live)]
-pub struct GCheckBox {
+pub struct GCheckbox {
     #[live]
     pub theme: Themes,
     // text ----------------------
@@ -160,7 +159,7 @@ pub struct GCheckBox {
     // deref -------------------
     #[redraw]
     #[live]
-    pub draw_checkbox: DrawGCheckBox,
+    pub draw_checkbox: DrawGCheckbox,
     #[redraw]
     #[live]
     pub draw_text: DrawGText,
@@ -187,7 +186,7 @@ pub struct GCheckBox {
     pub scope_path: Option<HeapLiveIdPath>,
 }
 
-impl Widget for GCheckBox {
+impl Widget for GCheckbox {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
@@ -247,7 +246,7 @@ impl Widget for GCheckBox {
     set_text_and_visible_fn!();
 }
 
-impl LiveHook for GCheckBox {
+impl LiveHook for GCheckbox {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if !self.visible {
             return;
@@ -256,7 +255,7 @@ impl LiveHook for GCheckBox {
     }
 }
 
-impl GCheckBox {
+impl GCheckbox {
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -265,13 +264,13 @@ impl GCheckBox {
         area_text, draw_text
     }
     event_option! {
-        clicked: GCheckBoxEvent::Clicked => GCheckBoxClickedParam,
-        hover_in: GCheckBoxEvent::HoverIn => GCheckBoxHoverParam,
-        hover_out: GCheckBoxEvent::HoverOut => GCheckBoxHoverParam
+        clicked: GCheckboxEvent::Clicked => GCheckboxClickedParam,
+        hover_in: GCheckboxEvent::HoverIn => GCheckboxHoverParam,
+        hover_out: GCheckboxEvent::HoverOut => GCheckboxHoverParam
     }
     active_event! {
-        active_hover_in: GCheckBoxEvent::HoverIn |e: Option<FingerHoverEvent>| => GCheckBoxHoverParam {e},
-        active_hover_out: GCheckBoxEvent::HoverOut |e: Option<FingerHoverEvent>| => GCheckBoxHoverParam {e}
+        active_hover_in: GCheckboxEvent::HoverIn |e: Option<FingerHoverEvent>| => GCheckboxHoverParam {e},
+        active_hover_out: GCheckboxEvent::HoverOut |e: Option<FingerHoverEvent>| => GCheckboxHoverParam {e}
     }
     fn check_event_scope(&self) -> Option<&HeapLiveIdPath> {
         self.event_key.then(|| self.scope_path.as_ref()).flatten()
@@ -281,7 +280,7 @@ impl GCheckBox {
             cx.widget_action(
                 self.widget_uid(),
                 path,
-                GCheckBoxEvent::Clicked(GCheckBoxClickedParam {
+                GCheckboxEvent::Clicked(GCheckboxClickedParam {
                     value: self.value.clone(),
                     selected: self.selected,
                     e,
@@ -545,7 +544,7 @@ impl GCheckBox {
     }
 }
 
-impl GCheckBoxRef {
+impl GCheckboxRef {
     ref_area!();
     ref_area_ext! {
         area_checkbox,
@@ -554,9 +553,9 @@ impl GCheckBoxRef {
     ref_redraw!();
     ref_render!();
     ref_event_option! {
-        clicked => GCheckBoxClickedParam,
-        hover_in => GCheckBoxHoverParam,
-        hover_out => GCheckBoxHoverParam
+        clicked => GCheckboxClickedParam,
+        hover_in => GCheckboxHoverParam,
+        hover_out => GCheckboxHoverParam
     }
     animatie_fn! {
         animate_hover_on,
@@ -586,10 +585,10 @@ impl GCheckBoxRef {
     }
 }
 
-impl GCheckBoxSet {
+impl GCheckboxSet {
     set_event! {
-        clicked => GCheckBoxClickedParam,
-        hover_in => GCheckBoxHoverParam,
-        hover_out => GCheckBoxHoverParam
+        clicked => GCheckboxClickedParam,
+        hover_in => GCheckboxHoverParam,
+        hover_out => GCheckboxHoverParam
     }
 }
