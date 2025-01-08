@@ -249,7 +249,7 @@ impl Widget for GCheckbox {
 }
 
 impl LiveHook for GCheckbox {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
@@ -548,7 +548,8 @@ impl GCheckbox {
 
 impl GCheckboxRef {
     pub fn set_selected(&mut self, cx: &mut Cx, selected: bool) -> () {
-        self.borrow_mut().map(|mut c_ref| c_ref.toggle(cx, selected));
+        self.borrow_mut()
+            .map(|mut c_ref| c_ref.toggle(cx, selected));
     }
     prop_setter! {
         GCheckbox{

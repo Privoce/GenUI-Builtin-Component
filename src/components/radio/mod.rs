@@ -253,7 +253,7 @@ impl Widget for GRadio {
 }
 
 impl LiveHook for GRadio {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
         if !self.visible {
             return;
         }
