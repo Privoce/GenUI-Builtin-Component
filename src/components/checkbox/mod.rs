@@ -547,9 +547,14 @@ impl GCheckbox {
 }
 
 impl GCheckboxRef {
-    pub fn set_selected(&mut self, cx: &mut Cx, selected: bool) -> () {
+    pub fn set_selected(&self, cx: &mut Cx, selected: bool) -> () {
         self.borrow_mut()
             .map(|mut c_ref| c_ref.toggle(cx, selected));
+    }
+    pub fn set_text(&self, cx: &mut Cx, text: String) -> () {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.set_text_and_redraw(cx, &text);
+        }
     }
     prop_setter! {
         GCheckbox{

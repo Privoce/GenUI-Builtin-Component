@@ -555,6 +555,11 @@ impl GRadioRef {
             c_ref.toggle(cx, selected);
         }
     }
+    pub fn set_text(&mut self, cx: &mut Cx, text: String) -> () {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.set_text_and_redraw(cx, &text);
+        }
+    }
     prop_setter! {
         GRadio{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},

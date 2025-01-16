@@ -45,7 +45,7 @@
 - [x] ToolButton
 - [x] RadioGroup
 - [ ] Virtual RadioGroup
-- [ ] CheckboxGroup
+- [x] CheckboxGroup
 - [ ] Virtual CheckboxGroup
 - [x] Select
 - [x] Drawer

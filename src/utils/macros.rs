@@ -528,7 +528,7 @@ macro_rules! prop_setter {
     ),*}) => {
         crate::setter!($T);
         $(
-            pub fn $fn_name(&mut self, cx: &mut Cx, $arg: $arg_ty) -> () {
+            pub fn $fn_name(&self, cx: &mut Cx, $arg: $arg_ty) -> () {
                 self.setter(cx, $code);
             }
         )*

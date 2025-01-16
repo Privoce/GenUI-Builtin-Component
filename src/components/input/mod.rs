@@ -1,6 +1,7 @@
 pub mod register;
 mod types;
-
+pub mod event;
+use event::*;
 use makepad_widgets::*;
 
 use shader::draw_text::TextWrap;
@@ -335,12 +336,12 @@ impl Widget for GInput {
                 self.animator_play(cx, id!(focus.on));
                 self.force_new_edit_group();
                 // TODO: Select all if necessary
-                cx.widget_action(uid, &scope.path, TextInputAction::KeyFocus);
+                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocus);
             }
             Hit::KeyFocusLost(_) => {
                 self.animator_play(cx, id!(focus.off));
                 cx.hide_text_ime();
-                cx.widget_action(uid, &scope.path, TextInputAction::KeyFocusLost);
+                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocusLost);
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::ArrowLeft,
@@ -420,7 +421,11 @@ impl Widget for GInput {
                 ..
             }) => {
                 cx.hide_text_ime();
-                cx.widget_action(uid, &scope.path, TextInputAction::Return(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::ReturnKey),
+                    modifiers: Some(KeyModifiers{ shift: false, ..Default::default() })
+                }));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::ReturnKey,
@@ -435,13 +440,17 @@ impl Widget for GInput {
                     replace_with: "\n".to_string(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::ReturnKey),
+                    modifiers: Some(KeyModifiers{ shift: true, ..Default::default() })
+                }));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Escape,
                 ..
             }) => {
-                cx.widget_action(uid, &scope.path, TextInputAction::Escape);
+                cx.widget_action(uid, &scope.path, GInputEvent::Escaped);
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Backspace,
@@ -460,7 +469,11 @@ impl Widget for GInput {
                     replace_with: String::new(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::Backspace),
+                    modifiers: None
+                }));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Delete,
@@ -479,7 +492,11 @@ impl Widget for GInput {
                     replace_with: String::new(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::Delete),
+                    modifiers: None
+                }));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyA,
@@ -501,7 +518,11 @@ impl Widget for GInput {
             }) if modifiers.is_primary() && !modifiers.shift && !self.read_only => {
                 self.undo();
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::KeyZ),
+                    modifiers: Some(modifiers)
+                }));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyZ,
@@ -510,10 +531,14 @@ impl Widget for GInput {
             }) if modifiers.is_primary() && modifiers.shift && !self.read_only => {
                 self.redo();
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                    text: self.text.clone(),
+                    ty: InputEventType::KeyDown(KeyCode::KeyZ),
+                    modifiers: Some(modifiers)
+                }));
             }
             Hit::KeyDown(ke) => {
-                cx.widget_action(uid, &scope.path, TextInputAction::KeyDownUnhandled(ke));
+                cx.widget_action(uid, &scope.path, GInputEvent::KeyDownUnhandled(ke));
             }
             Hit::TextInput(TextInputEvent {
                 input,
@@ -545,7 +570,11 @@ impl Widget for GInput {
                         replace_with: input,
                     });
                     self.draw_input.redraw(cx);
-                    cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                    cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                        text: self.text.clone(),
+                        ty: InputEventType::Input,
+                        modifiers: None
+                    }));
                 }
             }
             Hit::TextCopy(event) => {
@@ -564,7 +593,11 @@ impl Widget for GInput {
                         replace_with: String::new(),
                     });
                     self.draw_input.redraw(cx);
-                    cx.widget_action(uid, &scope.path, TextInputAction::Change(self.text.clone()));
+                    cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
+                        text: self.text.clone(),
+                        ty: InputEventType::Cut,
+                        modifiers: None
+                    }));
                 }
             }
             Hit::FingerHoverIn(_) => {
@@ -741,13 +774,12 @@ impl GInput {
         area_selection, draw_selection
     }
     event_option! {
-        change: TextInputAction::Change => String,
-        r#return: TextInputAction::Return => String
+        change: GInputEvent::Changed => String
     }
     event_bool! {
-        key_focus: TextInputAction::KeyFocus,
-        key_focus_lost: TextInputAction::KeyFocusLost,
-        escape: TextInputAction::Escape
+        key_focus: GInputEvent::KeyFocus,
+        key_focus_lost: GInputEvent::KeyFocusLost,
+        escape: GInputEvent::Escaped
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.draw_input.apply_over(
@@ -1173,8 +1205,7 @@ impl GInputRef {
         escape
     }
     ref_event_option! {
-        change => String,
-        r#return => String
+        change => String
     }
     animatie_fn! {
         animate_hover_on,
@@ -1182,19 +1213,19 @@ impl GInputRef {
         animate_focus_on,
         animate_focus_off
     }
-    pub fn changed(&self, actions: &Actions) -> Option<String> {
-        if let TextInputAction::Change(val) = actions.find_widget_action_cast(self.widget_uid()) {
+    pub fn changed(&self, actions: &Actions) -> Option<GInputChangedParam> {
+        if let GInputEvent::Changed(val) = actions.find_widget_action_cast(self.widget_uid()) {
             return Some(val);
         }
         None
     }
 
-    pub fn returned(&self, actions: &Actions) -> Option<String> {
-        if let TextInputAction::Return(val) = actions.find_widget_action_cast(self.widget_uid()) {
-            return Some(val);
-        }
-        None
-    }
+    // pub fn returned(&self, actions: &Actions) -> Option<String> {
+    //     if let GInputEvent::Return(val) = actions.find_widget_action_cast(self.widget_uid()) {
+    //         return Some(val);
+    //     }
+    //     None
+    // }
 
     pub fn set_input_cursor(&self, head: usize, tail: usize) {
         if let Some(mut inner) = self.borrow_mut() {
@@ -1225,8 +1256,7 @@ impl GInputSet {
         escape
     }
     set_event! {
-        change => String,
-        r#return => String
+        change => String
     }
 }
 

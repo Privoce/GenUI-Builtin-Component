@@ -231,6 +231,7 @@ impl LiveHook for GLabel {
         }
         self.render(cx);
     }
+    fn after_new_from_doc(&mut self, _cx: &mut Cx) {}
 }
 
 impl GLabel {
@@ -331,6 +332,11 @@ impl GLabel {
 }
 
 impl GLabelRef {
+    pub fn set_text(&self, cx: &mut Cx, text: String) {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.set_text_and_redraw(cx, &text);
+        }
+    }
     prop_setter! {
         GLabel{
             set_theme(theme: Themes){|c_ref| {c_ref.theme = theme;}},
@@ -375,7 +381,8 @@ impl GLabelRef {
             get_align(Align) {|| Default::default()}, {|c_ref| {c_ref.align}},
             get_animation_key(bool){|| Default::default()},  {|c_ref| {c_ref.animation_key}},
             get_event_key(bool) {|| Default::default()}, {|c_ref| {c_ref.event_key}},
-            get_grab_key_focus(bool) {|| Default::default()}, {|c_ref| {c_ref.grab_key_focus}}
+            get_grab_key_focus(bool) {|| Default::default()}, {|c_ref| {c_ref.grab_key_focus}},
+            get_text(String) {|| Default::default()}, {|c_ref| {c_ref.text.as_ref().to_string()}}
         }
     }
     animatie_fn! {
