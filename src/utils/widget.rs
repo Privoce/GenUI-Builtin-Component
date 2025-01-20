@@ -1,22 +1,24 @@
 use makepad_widgets::{
-    font_atlas::CxFontsAtlasRc, Cx, Cx2d, DVec2, Font, LiveDependency, MouseCursor, Rect
+    font_atlas::CxFontsAtlasRc, Cx, Cx2d, DVec2, Font, LiveDependency, MouseCursor, Rect,
 };
 
-pub fn get_font_family(font_family: &LiveDependency, cx: &mut Cx2d) -> Font {
+pub fn get_font_family(font_family: &LiveDependency, cx: &mut Cx2d, font: &mut Font) -> () {
     let font_family = font_family.clone();
 
-    let atlas = cx.get_global::<CxFontsAtlasRc>().clone();
-    let font_id = Some(
-        atlas
-            .0
-            .borrow_mut()
-            .get_font_by_path(cx, font_family.as_str()),
-    );
-    let font = Font {
-        font_id,
-        path: font_family,
-    };
-    font
+    if font_family.as_str() != font.path.as_str() {
+        let atlas = cx.get_global::<CxFontsAtlasRc>().clone();
+        let font_id = Some(
+            atlas
+                .0
+                .borrow_mut()
+                .get_or_load_font(cx, font_family.as_str()),
+        );
+
+        *font = Font {
+            font_id,
+            path: font_family,
+        };
+    }
 }
 
 pub fn set_cursor(cx: &mut Cx, cursor: Option<&MouseCursor>) -> () {

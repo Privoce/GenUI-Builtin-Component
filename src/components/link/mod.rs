@@ -242,11 +242,8 @@ impl Widget for GLink {
             return DrawStep::done();
         }
         let _ = self.set_scope_path(&scope.path);
-        let font = get_font_family(&self.font_family, cx);
-        self.draw_text.text_style.font = font;
-
+        let _ = get_font_family(&self.font_family, cx, &mut  self.draw_text.text_style.font);
         let _ = self.draw_link.begin(cx, walk, self.layout);
-
         let _ = self
             .draw_text
             .draw_walk(cx, self.text_walk, Align::default(), self.text.as_ref());

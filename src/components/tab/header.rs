@@ -103,7 +103,7 @@ impl Widget for GTabHeader {
                 WidgetRef::new_from_ptr(cx, self.item).as_gtab_button()
             });
 
-            target.set_text(data);
+            target.set_text(cx, data);
 
             target.draw_all(cx, &mut Scope::empty());
         }

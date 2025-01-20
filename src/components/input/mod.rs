@@ -1,7 +1,7 @@
+mod event;
 pub mod register;
 mod types;
-pub mod event;
-use event::*;
+pub use event::*;
 use makepad_widgets::*;
 
 use shader::draw_text::TextWrap;
@@ -9,7 +9,12 @@ use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 
 use crate::{
-    animatie_fn, event_bool, event_option, prop_getter, prop_setter, ref_event_bool, ref_event_option, set_event, set_event_bool, shader::{draw_text::DrawGText, draw_view::DrawGView}, themes::Themes, utils::{get_font_family, BoolToF32, ThemeColor, ToBool}, widget_area
+    animatie_fn, event_bool, event_option, prop_getter, prop_setter, ref_event_bool,
+    ref_event_option, set_event, set_event_bool,
+    shader::{draw_text::DrawGText, draw_view::DrawGView},
+    themes::Themes,
+    utils::{get_font_family, BoolToF32, ThemeColor, ToBool},
+    widget_area,
 };
 
 live_design! {
@@ -246,7 +251,7 @@ impl Widget for GInput {
             return DrawStep::done();
         }
         // self.draw_text.wrap = self.wrap.clone();
-        self.draw_text.text_style.font = get_font_family(&self.font_family, cx);
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         self.draw_input.begin(cx, walk, self.layout);
 
         self.draw_selection.append_to_draw_call(cx);
@@ -421,11 +426,18 @@ impl Widget for GInput {
                 ..
             }) => {
                 cx.hide_text_ime();
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::ReturnKey),
-                    modifiers: Some(KeyModifiers{ shift: false, ..Default::default() })
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::ReturnKey),
+                        modifiers: Some(KeyModifiers {
+                            shift: false,
+                            ..Default::default()
+                        }),
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::ReturnKey,
@@ -440,11 +452,18 @@ impl Widget for GInput {
                     replace_with: "\n".to_string(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::ReturnKey),
-                    modifiers: Some(KeyModifiers{ shift: true, ..Default::default() })
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::ReturnKey),
+                        modifiers: Some(KeyModifiers {
+                            shift: true,
+                            ..Default::default()
+                        }),
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Escape,
@@ -469,11 +488,15 @@ impl Widget for GInput {
                     replace_with: String::new(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::Backspace),
-                    modifiers: None
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::Backspace),
+                        modifiers: None,
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Delete,
@@ -492,11 +515,15 @@ impl Widget for GInput {
                     replace_with: String::new(),
                 });
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::Delete),
-                    modifiers: None
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::Delete),
+                        modifiers: None,
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyA,
@@ -518,11 +545,15 @@ impl Widget for GInput {
             }) if modifiers.is_primary() && !modifiers.shift && !self.read_only => {
                 self.undo();
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::KeyZ),
-                    modifiers: Some(modifiers)
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::KeyZ),
+                        modifiers: Some(modifiers),
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::KeyZ,
@@ -531,11 +562,15 @@ impl Widget for GInput {
             }) if modifiers.is_primary() && modifiers.shift && !self.read_only => {
                 self.redo();
                 self.draw_input.redraw(cx);
-                cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                    text: self.text.clone(),
-                    ty: InputEventType::KeyDown(KeyCode::KeyZ),
-                    modifiers: Some(modifiers)
-                }));
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Changed(GInputChangedParam {
+                        text: self.text.clone(),
+                        ty: InputEventType::KeyDown(KeyCode::KeyZ),
+                        modifiers: Some(modifiers),
+                    }),
+                );
             }
             Hit::KeyDown(ke) => {
                 cx.widget_action(uid, &scope.path, GInputEvent::KeyDownUnhandled(ke));
@@ -570,11 +605,15 @@ impl Widget for GInput {
                         replace_with: input,
                     });
                     self.draw_input.redraw(cx);
-                    cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                        text: self.text.clone(),
-                        ty: InputEventType::Input,
-                        modifiers: None
-                    }));
+                    cx.widget_action(
+                        uid,
+                        &scope.path,
+                        GInputEvent::Changed(GInputChangedParam {
+                            text: self.text.clone(),
+                            ty: InputEventType::Input,
+                            modifiers: None,
+                        }),
+                    );
                 }
             }
             Hit::TextCopy(event) => {
@@ -593,11 +632,15 @@ impl Widget for GInput {
                         replace_with: String::new(),
                     });
                     self.draw_input.redraw(cx);
-                    cx.widget_action(uid, &scope.path, GInputEvent::Changed(GInputChangedParam{
-                        text: self.text.clone(),
-                        ty: InputEventType::Cut,
-                        modifiers: None
-                    }));
+                    cx.widget_action(
+                        uid,
+                        &scope.path,
+                        GInputEvent::Changed(GInputChangedParam {
+                            text: self.text.clone(),
+                            ty: InputEventType::Cut,
+                            modifiers: None,
+                        }),
+                    );
                 }
             }
             Hit::FingerHoverIn(_) => {
@@ -647,7 +690,7 @@ impl Widget for GInput {
         self.text.to_string()
     }
 
-    fn set_text(&mut self, text: &str) {
+    fn set_text(&mut self, cx: &mut Cx, text: &str) {
         if self.text == text {
             return;
         }
@@ -655,6 +698,7 @@ impl Widget for GInput {
         self.cursor.head.index = self.cursor.head.index.min(text.len());
         self.cursor.tail.index = self.cursor.tail.index.min(text.len());
         self.history.clear();
+        self.redraw(cx);
     }
 
     fn is_visible(&self) -> bool {
@@ -774,12 +818,12 @@ impl GInput {
         area_selection, draw_selection
     }
     event_option! {
-        change: GInputEvent::Changed => String
+        changed: GInputEvent::Changed => GInputChangedParam
     }
     event_bool! {
         key_focus: GInputEvent::KeyFocus,
         key_focus_lost: GInputEvent::KeyFocusLost,
-        escape: GInputEvent::Escaped
+        escaped: GInputEvent::Escaped
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.draw_input.apply_over(
@@ -1097,7 +1141,7 @@ impl GInput {
 }
 
 impl GInputRef {
-    prop_setter!{
+    prop_setter! {
         GInput{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
             set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color);}},
@@ -1202,10 +1246,10 @@ impl GInputRef {
     ref_event_bool! {
         key_focus,
         key_focus_lost,
-        escape
+        escaped
     }
     ref_event_option! {
-        change => String
+        changed => GInputChangedParam
     }
     animatie_fn! {
         animate_hover_on,
@@ -1213,12 +1257,12 @@ impl GInputRef {
         animate_focus_on,
         animate_focus_off
     }
-    pub fn changed(&self, actions: &Actions) -> Option<GInputChangedParam> {
-        if let GInputEvent::Changed(val) = actions.find_widget_action_cast(self.widget_uid()) {
-            return Some(val);
-        }
-        None
-    }
+    // pub fn changed(&self, actions: &Actions) -> Option<GInputChangedParam> {
+    //     if let GInputEvent::Changed(val) = actions.find_widget_action_cast(self.widget_uid()) {
+    //         return Some(val);
+    //     }
+    //     None
+    // }
 
     // pub fn returned(&self, actions: &Actions) -> Option<String> {
     //     if let GInputEvent::Return(val) = actions.find_widget_action_cast(self.widget_uid()) {
@@ -1253,10 +1297,10 @@ impl GInputSet {
     set_event_bool! {
         key_focus,
         key_focus_lost,
-        escape
+        escaped
     }
     set_event! {
-        change => String
+        changed => GInputChangedParam
     }
 }
 

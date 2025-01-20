@@ -187,7 +187,7 @@ impl GBreadCrumb {
 
             self.children.get_mut(index).map(|(_, child)| {
                 child.as_gbread_crumb_item().borrow_mut().map(|mut item| {
-                    item.set_text(&path);
+                    item.set_text(cx, &path);
                 });
             });
         }

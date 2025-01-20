@@ -26,9 +26,10 @@ use crate::{
 live_design! {
     link gen_base;
     use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    use link::gen_theme::*;
 
     pub GRadioBase = {{GRadio}}{
+        font_family: (FONT_FAMILY),
         height: Fit,
         width: Fit,
         font_size: 10.0,
@@ -209,8 +210,7 @@ impl Widget for GRadio {
         self.draw_radio.draw_walk(cx, radio_walk);
 
         if self.text_visible {
-            let font = get_font_family(&self.font_family, cx);
-            self.draw_text.text_style.font = font;
+            let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
             let text_walk = Walk {
                 width: Size::Fit,
                 height: Size::Fit,
@@ -253,7 +253,7 @@ impl Widget for GRadio {
 }
 
 impl LiveHook for GRadio {
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
@@ -557,7 +557,7 @@ impl GRadioRef {
     }
     pub fn set_text(&mut self, cx: &mut Cx, text: String) -> () {
         if let Some(mut c_ref) = self.borrow_mut() {
-            c_ref.set_text_and_redraw(cx, &text);
+            c_ref.set_text(cx, &text);
         }
     }
     prop_setter! {

@@ -151,10 +151,10 @@ impl Widget for GWindow {
                         OsType::Macos => {
                             if self.hide_caption_on_fullscreen {
                                 if ev.new_geom.is_fullscreen && !ev.old_geom.is_fullscreen {
-                                    self.view(id!(caption_bar)).set_visible(false);
+                                    self.view(id!(caption_bar)).set_visible(cx, false);
                                     self.redraw(cx);
                                 } else if !ev.new_geom.is_fullscreen && ev.old_geom.is_fullscreen {
-                                    self.view(id!(caption_bar)).set_visible(true);
+                                    self.view(id!(caption_bar)).set_visible(cx, true);
                                     self.redraw(cx);
                                 };
                             }

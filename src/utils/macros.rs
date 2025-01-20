@@ -5,10 +5,7 @@ macro_rules! set_text_and_visible_fn {
         fn text(&self) -> String {
             self.text.as_ref().to_string()
         }
-        fn set_text(&mut self, v: &str) {
-            self.text.as_mut_empty().push_str(v);
-        }
-        fn set_text_and_redraw(&mut self, cx: &mut Cx, v: &str) {
+        fn set_text(&mut self, cx: &mut Cx, v: &str) {
             self.text.as_mut_empty().push_str(v);
             self.redraw(cx)
         }

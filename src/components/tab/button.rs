@@ -138,9 +138,7 @@ pub enum GTabButtonEvent {
 impl Widget for GTabButton {
     fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, walk: Walk) -> DrawStep {
         self.draw_tab_btn.begin(cx, walk, self.layout);
-        let font = get_font_family(&self.font_family, cx);
-
-        self.draw_text.text_style.font = font.clone();
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         self.draw_text.draw_walk(
             cx,
             self.text_walk.with_add_padding(Padding {
@@ -169,7 +167,11 @@ impl Widget for GTabButton {
                     ..Default::default()
                 },
             );
-            self.draw_msg_count.text_style.font = font;
+            let _ = get_font_family(
+                &self.font_family,
+                cx,
+                &mut self.draw_msg_count.text_style.font,
+            );
             self.draw_msg_count.draw_walk(
                 cx,
                 self.msg_count_walk,
@@ -225,10 +227,7 @@ impl Widget for GTabButton {
     fn text(&self) -> String {
         self.text.as_ref().to_string()
     }
-    fn set_text(&mut self, v: &str) {
-        self.text.as_mut_empty().push_str(v);
-    }
-    fn set_text_and_redraw(&mut self, cx: &mut Cx, v: &str) {
+    fn set_text(&mut self, cx: &mut Cx, v: &str) {
         self.text.as_mut_empty().push_str(v);
         self.redraw(cx)
     }
@@ -308,17 +307,33 @@ impl GTabButton {
         );
         let text_style = DefaultTextStyle::default();
         // ----------------- background color -------------------------------------------
-        let bg_color = get_color(self.theme, self.background_color.as_ref(), plain_color(500, 600));
+        let bg_color = get_color(
+            self.theme,
+            self.background_color.as_ref(),
+            plain_color(500, 600),
+        );
         let msg_bg_color = select_color(
-            get_color(self.theme, self.background_color.as_ref(), plain_color(600, 100)),
+            get_color(
+                self.theme,
+                self.background_color.as_ref(),
+                plain_color(600, 100),
+            ),
             "#ECEFF3",
         );
         // ------------------ hover color -----------------------------------------------
         let hover_color = get_color(self.theme, self.hover_color.as_ref(), plain_color(400, 600));
         // ------------------ pressed color ---------------------------------------------
-        let pressed_color = get_color(self.theme, self.pressed_color.as_ref(), plain_color(600, 600));
+        let pressed_color = get_color(
+            self.theme,
+            self.pressed_color.as_ref(),
+            plain_color(600, 600),
+        );
         // ------------------ border color ----------------------------------------------
-        let border_color = get_color(self.theme, self.border_color.as_ref(), plain_color(800, 600));
+        let border_color = get_color(
+            self.theme,
+            self.border_color.as_ref(),
+            plain_color(800, 600),
+        );
         let icon_color = select_color(
             get_color(self.theme, self.icon_color.as_ref(), plain_color(100, 600)),
             "#667085",

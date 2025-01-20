@@ -177,10 +177,9 @@ impl Widget for GLabel {
         let padding = self.padding;
         let walk = walk.with_add_padding(padding);
         cx.begin_turtle(walk, Layout::default());
-        let font = get_font_family(&self.font_family, cx);
-        self.draw_text.text_style.font = font;
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         let _ = self.text.as_ref().is_empty().then(|| {
-            let _ = self.set_text(" ");
+            let _ = self.set_text(cx, " ");
         });
         self.draw_text
             .draw_walk(cx, walk, self.align, self.text.as_ref());
@@ -334,7 +333,7 @@ impl GLabel {
 impl GLabelRef {
     pub fn set_text(&self, cx: &mut Cx, text: String) {
         if let Some(mut c_ref) = self.borrow_mut() {
-            c_ref.set_text_and_redraw(cx, &text);
+            c_ref.set_text(cx, &text);
         }
     }
     prop_setter! {

@@ -4,17 +4,16 @@ pub mod options;
 pub mod register;
 mod types;
 
-use std::{cell::RefCell, rc::Rc};
-pub use item::*;
 use event::*;
+pub use item::*;
 use options::GSelectOptions;
-
+use std::{cell::RefCell, rc::Rc};
 
 use makepad_widgets::*;
 use types::SelectOption;
 
 use crate::{
-    shader::{draw_view::DrawGView, draw_text::DrawGText},
+    shader::{draw_text::DrawGText, draw_view::DrawGView},
     themes::Themes,
     utils::{get_font_family, set_cursor, BoolToF32, ThemeColor},
     widget_area,
@@ -161,8 +160,7 @@ impl Widget for GSelect {
         let _ = self.draw_select.begin(cx, walk, self.layout);
 
         if (self.options.len() >= self.selected) && self.options.len() != 0 {
-            let font = get_font_family(&self.font_family, cx);
-            self.draw_text.text_style.font = font;
+            let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
             let text = self.options[self.selected].text.to_string();
             self.draw_text
                 .draw_walk(cx, Walk::fit(), Align { x: 0.0, y: 0.5 }, &text);
@@ -183,7 +181,7 @@ impl Widget for GSelect {
             for (index, option) in self.options.iter().enumerate() {
                 options_menu.draw_option(cx, LiveId(index as u64), &option.text, &option.value);
             }
-            
+
             let _ = options_menu.end_container(cx);
             let area = self.area().rect(cx);
             let container_size = options_menu.area().rect(cx).size;

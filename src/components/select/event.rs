@@ -30,7 +30,7 @@ pub struct GSelectOptionsChangedParam {
 }
 
 // -------------------------------------------------------------------------
-// TODO
+#[allow(unused)]
 #[derive(Debug, Clone, DefaultNone)]
 pub enum GSelectEvent {
     Changed(GSelectOptionsChangedParam),

@@ -220,8 +220,7 @@ impl GSelectItem {
     pub fn draw_item(&mut self, cx: &mut Cx2d, text: &str, value: &str, theme: Themes) {
         self.theme = theme;
         let _ = self.draw_item.begin(cx, self.walk, self.layout);
-        let font = get_font_family(&self.font_family, cx);
-        self.draw_text.text_style.font = font;
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         let _ = self
             .draw_text
             .draw_walk(cx, Walk::fit(), Align::default(), text);

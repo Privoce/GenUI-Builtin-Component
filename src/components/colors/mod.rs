@@ -80,10 +80,10 @@ impl LiveHook for GColor {
             self.header.theme = self.theme;
             self.header
                 .glabel(id!(theme_name))
-                .set_text_and_redraw(cx, &self.theme.to_string());
+                .set_text(cx, self.theme.to_string());
             self.header
                 .glabel(id!(theme_main))
-                .set_text_and_redraw(cx, &self.theme.hex(500));
+                .set_text(cx, self.theme.hex(500).to_string());
         }
 
         if self.colors.is_visible() {

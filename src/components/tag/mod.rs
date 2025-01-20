@@ -26,6 +26,7 @@ live_design! {
         spacing: 4.6,
         theme: Primary,
         text: "",
+        font_family: (FONT_FAMILY),
         padding: <GLOBAL_PADDING_SMALL>{},
         font_size: (FONT_SIZE_SMALL),
         align: <ALIGN_CENTER_WALK>{},
@@ -204,9 +205,7 @@ impl Widget for GTag {
             return DrawStep::done();
         }
         self.set_scope_path(&scope.path);
-        let font = get_font_family(&self.font_family, cx);
-        self.draw_text.text_style.font = font;
-
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         self.icon_walk.height = Size::Fixed(self.font_size);
         self.icon_walk.width = Size::Fixed(self.font_size);
         // self.text_walk.margin.top = self.font_size / 4.0;
