@@ -1,10 +1,10 @@
-# GEN Components (v0.1.0)
+# GEN Components (v0.2.0)
 
-- version: `v0.1.0`
-- update date: 2024-10-24
+- version: `v0.2.0`
+- update date: 2025-01-20
 - author: [Will-YiFei Sheng](syf20020816@outlook.com)
 - makepad_widget version: `v0.6.0`
-- makepad branch: `rik`
+- makepad branch: `gen_ui`
 
 ## Basic Builtin Component
 
@@ -123,15 +123,17 @@
 - [x] default_hit_hover_in!
 - [x] default_hit_hover_out!
 - [x] default_handle_animation!
+- [x] getter
+- [x] setter
 
 ## Example Project
 - [x] AWS Personal Cloud Drive GUI (亚马逊个人云盘GUI界面, 仅实现上传，查看，验证功能)
-- [ ] GenUI Builtin Component Lib (GenUI内置组件库学习页面)
+- [x] GenUI Builtin Component Lib (GenUI内置组件库学习页面)
 - [ ] Fake Phone (仿手机系统)
 
 ## Plan
 
 - [x] 09-28 AWS Personal Cloud Drive GUI
-- [ ] 10-24 finish v0.1.0
-- [ ] 11-18 GenUI Framework 集成v0.1.0
-- [ ] 11-31 finish v0.2.0
+- [x] 10-24 finish v0.1.0
+- [x] 12-18 GenUI Framework 集成v0.1.0
+- [x] 12-31 finish v0.2.0
