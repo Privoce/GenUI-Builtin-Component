@@ -259,17 +259,14 @@ impl Widget for GLink {
 }
 
 impl LiveHook for GLink {
-    // fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-    //     if !self.visible {
-    //         return;
-    //     }
-    //     self.render(cx);
-    // }
+
     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GLink render error: {:?}", e);
+        }
     }
 }
 

@@ -707,19 +707,14 @@ impl Widget for GInput {
 }
 
 impl LiveHook for GInput {
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
-                if !self.visible {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+        if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GInput render error: {:?}", e);
+        }
     }
-
-    // fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-    //     if !self.visible {
-    //         return;
-    //     }
-    //     self.draw_input.after_apply(cx, apply, index, nodes);
-    // }
 }
 
 impl GInput {

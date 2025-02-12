@@ -4,7 +4,6 @@ pub mod register;
 use event::*;
 use makepad_widgets::*;
 
-
 use crate::{
     event_bool, ref_area, ref_event_bool, ref_redraw, ref_render, set_event_bool, set_scope_path,
     shader::draw_loading::{DrawGLoading, GLoadingType},
@@ -91,7 +90,9 @@ impl LiveHook for GLoading {
             return;
         }
 
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GLoading render error: {:?}", e);
+        }
     }
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         // starts the animation cycle on startup
@@ -145,7 +146,7 @@ impl GLoading {
         self.draw_loading.opened = 0.0;
         self.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) ->Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ------------------ hover color -----------------------------------------------
         let loading_color = self.stroke_color.get(self.theme, 600);
         // ------------------ apply to draw_loading_wrap ----------------------------------------

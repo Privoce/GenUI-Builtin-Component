@@ -130,7 +130,9 @@ impl LiveHook for GImage {
             return;
         }
 
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GImage render error: {:?}", e);
+        }
     }
 }
 

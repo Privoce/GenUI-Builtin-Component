@@ -15,7 +15,7 @@ live_design! {
     link gen_base;
     use link::shaders::*;
     use link::gen_theme::GLOBAL_DURATION;
-    
+
     pub GTabbarItemBase = {{GTabbarItem}}{
         height: 36.0,
         width: Fill,
@@ -196,7 +196,9 @@ impl LiveHook for GTabbarItem {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GTabbarItem render error: {:?}", e);
+        }
     }
 }
 
@@ -395,7 +397,9 @@ impl GTabbarItem {
     }
     pub fn toggle(&mut self, cx: &mut Cx, selected: bool) -> () {
         self.selected = selected;
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GTabbarItem render error: {:?}", e);
+        }
     }
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.icon_slot.redraw(cx);
