@@ -255,16 +255,16 @@ impl LiveHook for GSelect {
         let menu = self.select_options.unwrap();
         map.get_or_insert(cx, menu, |cx| GSelectOptions::new_from_ptr(cx, Some(menu)));
         // ----------------- background color -------------------------------------------
-        let bg_color = self.background_color.use_or("#ffffff");
+        let bg_color = self.background_color.use_or("#ffffff").unwrap();
         // ------------------ hover color -----------------------------------------------
-        let hover_color = self.hover_color.use_or("#ffffff");
+        let hover_color = self.hover_color.use_or("#ffffff").unwrap();
         // ------------------ focus color ---------------------------------------------
-        let focus_color = self.focus_color.use_or("#ffffff");
+        let focus_color = self.focus_color.use_or("#ffffff").unwrap();
         // ------------------ border color ----------------------------------------------
         let border_color = self.border_color.get(self.theme, 600);
         let shadow_color = self.shadow_color.get(self.theme, 700);
         let background_visible = self.background_visible.to_f32();
-        let color = self.color.use_or("#ADBAC7");
+        let color = self.color.use_or("#ADBAC7").unwrap();
         self.draw_select.apply_over(
             cx,
             live! {

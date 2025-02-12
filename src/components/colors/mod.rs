@@ -75,7 +75,9 @@ impl LiveHook for GColor {
         if !self.is_visible() {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GColor render error: {:?}", e);
+        }
         if self.header.is_visible() {
             self.header.theme = self.theme;
             self.header
@@ -114,7 +116,7 @@ impl GColor {
             self.colors.redraw(cx);
         }
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) ->Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.theme.get(500);
         let shadow_color = self.theme.get(500);
@@ -138,5 +140,6 @@ impl GColor {
                 spread_radius: 0.0,
             },
         );
+        Ok(())
     }
 }

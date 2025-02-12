@@ -283,7 +283,7 @@ impl GTabButton {
     pub fn area_close(&self) -> Area {
         self.draw_close.area()
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) ->Result<(), Box<dyn std::error::Error>> {
         let plain_color = |origin: u32, or: u32| -> u32 {
             if self.plain {
                 or
@@ -292,9 +292,9 @@ impl GTabButton {
             }
         };
 
-        let select_color = |c1: Vec4, c2: &str| -> Vec4 {
+        let select_color = |c1: Vec4, c2: &str| -> Result<Vec4, Box<dyn std::error::Error>> {
             if self.selected {
-                c1
+                Ok(c1)
             } else {
                 hex_to_vec4(c2)
             }
@@ -304,7 +304,7 @@ impl GTabButton {
         let font_color = select_color(
             get_color(self.theme, self.color.as_ref(), plain_color(100, 600)),
             "#667085",
-        );
+        )?;
         let text_style = DefaultTextStyle::default();
         // ----------------- background color -------------------------------------------
         let bg_color = get_color(
@@ -319,7 +319,7 @@ impl GTabButton {
                 plain_color(600, 100),
             ),
             "#ECEFF3",
-        );
+        )?;
         // ------------------ hover color -----------------------------------------------
         let hover_color = get_color(self.theme, self.hover_color.as_ref(), plain_color(400, 600));
         // ------------------ pressed color ---------------------------------------------
@@ -337,7 +337,7 @@ impl GTabButton {
         let icon_color = select_color(
             get_color(self.theme, self.icon_color.as_ref(), plain_color(100, 600)),
             "#667085",
-        );
+        )?;
 
         if self.show_msg_count {
             self.draw_msg_wrap.apply_over(
@@ -408,6 +408,7 @@ impl GTabButton {
             self.draw_close.redraw(cx);
         }
         self.draw_text.redraw(cx);
+        Ok(())
     }
 }
 

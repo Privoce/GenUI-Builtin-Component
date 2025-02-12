@@ -207,7 +207,7 @@ impl GToggle {
     pub fn redraw(&self, cx: &mut Cx) {
         self.draw_toggle.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 500);
         // ------------------ hover color -----------------------------------------------
@@ -242,6 +242,7 @@ impl GToggle {
             },
         );
         self.draw_toggle.apply_type(self.toggle_type.clone());
+        Ok(())
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.clear_animation(cx);

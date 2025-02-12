@@ -149,7 +149,7 @@ impl Widget for GTabHeader {
 
 impl LiveHook for GTabHeader {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        let bg_color = hex_to_vec4("#EAECF0");
+        let bg_color = hex_to_vec4("#EAECF0").unwrap();
         self.draw_header.apply_over(
             cx,
             live! {

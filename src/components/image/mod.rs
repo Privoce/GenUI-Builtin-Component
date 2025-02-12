@@ -16,7 +16,9 @@ use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
     active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
-    ref_render, set_event, set_scope_path, shader::{draw_image::DrawGImage, source::Src}, utils::set_cursor,
+    ref_render, set_event, set_scope_path,
+    shader::{draw_image::DrawGImage, source::Src},
+    utils::set_cursor,
     widget_area,
 };
 
@@ -27,96 +29,6 @@ live_design! {
     pub GImageBase = {{GImage}} {
         width: 32.0,
         height: 32.0,
-        // draw_image: {
-        //     texture image: texture2d
-
-        //     fn rotation_vertex_expansion(rotation: float, w: float, h: float) -> vec2 {
-        //         let horizontal_expansion = (abs(cos(rotation)) * w + abs(sin(rotation)) * h) / w - 1.0;
-        //         let vertical_expansion = (abs(sin(rotation)) * w + abs(cos(rotation)) * h) / h - 1.0;
-
-        //         return vec2(horizontal_expansion, vertical_expansion);
-        //     }
-
-        //     fn rotate_2d_from_center(coord: vec2, a: float, size: vec2) -> vec2 {
-        //         let cos_a = cos(-a);
-        //         let sin_a = sin(-a);
-
-        //         let centered_coord = coord - vec2(0.5, 0.5);
-
-        //         // Denormalize the coordinates to use original proportions (between height and width)
-        //         let denorm_coord = vec2(centered_coord.x, centered_coord.y * size.y / size.x);
-        //         let demorm_rotated = vec2(denorm_coord.x * cos_a - denorm_coord.y * sin_a, denorm_coord.x * sin_a + denorm_coord.y * cos_a);
-
-        //         // Restore the coordinates to use the texture coordinates proportions (between 0 and 1 in both axis)
-        //         let rotated = vec2(demorm_rotated.x, demorm_rotated.y * size.x / size.y);
-
-        //         return rotated + vec2(0.5, 0.5);
-        //     }
-
-        //     fn get_color(self) -> vec4 {
-        //         let rot_padding = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y) / 2.0;
-
-        //         // Current position is a traslated one, so let's get the original position
-        //         let current_pos = self.pos.xy - rot_padding;
-        //         let original_pos = rotate_2d_from_center(current_pos, self.rotation, self.rect_size);
-
-        //         // Scale the current position by the scale factor
-        //         let scaled_pos = original_pos / self.scale;
-
-        //         // Take pixel color from the original image
-        //         let color = sample2d(self.image, scaled_pos).xyzw;
-
-        //         let faded_color = color * vec4(1.0, 1.0, 1.0, self.opacity);
-        //         return faded_color;
-        //     }
-
-        //     fn pixel(self) -> vec4 {
-        //         let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
-
-        //         // Debug
-        //         // let line_width = 0.01;
-        //         // if self.pos.x < line_width || self.pos.x > (self.scale + rot_expansion.x - line_width) || self.pos.y < line_width || self.pos.y > (self.scale + rot_expansion.y - line_width) {
-        //         //     return #c86;
-        //         // }
-
-        //         let sdf = Sdf2d::viewport(self.pos * self.rect_size);
-
-        //         let translation_offset = vec2(self.rect_size.x * rot_expansion.x / 2.0, self.rect_size.y * self.scale * rot_expansion.y / 2.0);
-        //         sdf.translate(translation_offset.x, translation_offset.y);
-
-        //         let center = self.rect_size * 0.5;
-        //         sdf.rotate(self.rotation, center.x, center.y);
-
-        //         let scaled_size = self.rect_size * self.scale;
-        //         sdf.box(0.0, 0.0, scaled_size.x, scaled_size.y, 1);
-
-        //         sdf.fill_premul(Pal::premul(self.get_color()));
-        //         return sdf.result
-        //     }
-
-        //     fn vertex(self) -> vec4 {
-        //         let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
-        //         let adjusted_pos = vec2(
-        //             self.rect_pos.x - self.rect_size.x * rot_expansion.x / 2.0,
-        //             self.rect_pos.y - self.rect_size.y * rot_expansion.y / 2.0
-        //         );
-
-        //         let expanded_size = vec2(self.rect_size.x * (self.scale + rot_expansion.x), self.rect_size.y * (self.scale + rot_expansion.y));
-        //         let clipped: vec2 = clamp(
-        //             self.geom_pos * expanded_size + adjusted_pos,
-        //             self.draw_clip.xy,
-        //             self.draw_clip.zw
-        //         );
-
-        //         self.pos = (clipped - adjusted_pos) / self.rect_size;
-        //         return self.camera_projection * (self.camera_view * (
-        //             self.view_transform * vec4(clipped.x, clipped.y, self.draw_depth + self.draw_zbias, 1.)
-        //         ));
-        //     }
-
-        //     shape: Solid,
-        //     fill: Image
-        // }
     }
 }
 
@@ -185,8 +97,6 @@ pub struct GImage {
     #[redraw]
     #[live]
     pub draw_image: DrawGImage,
-    // #[live]
-    // pub src: LiveDependency,
     #[live]
     pub src: Src,
     #[rust(Texture::new(cx))]
@@ -208,10 +118,17 @@ impl ImageCacheImpl for GImage {
 }
 
 impl LiveHook for GImage {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    // fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    //     if !self.visible {
+    //         return;
+    //     }
+
+    //     self.render(cx);
+    // }
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
-        }        
+        }
 
         self.render(cx);
     }
@@ -318,7 +235,7 @@ impl GImage {
     pub fn redraw(&self, cx: &mut Cx) {
         self.draw_image.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         self.draw_image.apply_over(
             cx,
             live! {
@@ -328,18 +245,19 @@ impl GImage {
         );
 
         self.lazy_create_image_cache(cx);
-        match self.src.clone(){
-            Src::None => {},
+        match self.src.clone() {
+            Src::None => {}
             Src::Live(live_dependency) => {
-                if !live_dependency.as_str().is_empty(){
+                if !live_dependency.as_str().is_empty() {
                     let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
                 }
-            },
+            }
             _ => {
                 let src = self.src.to_string();
                 let _ = self.load(cx, &src);
             }
-        } 
+        }
+        Ok(())
     }
     pub fn draw_walk_rotated_image(&mut self, cx: &mut Cx2d, walk: Walk) -> () {
         if let Some(image_texture) = &self.texture {
@@ -439,7 +357,7 @@ impl GImage {
                 from_bytes(self, cx, buf)
             }
             SrcType::Base64 { data, ty } => match ty {
-                imghdr::Type::Png => self.load_png_from_data(cx, &data,0).map_err(|e| e.into()),
+                imghdr::Type::Png => self.load_png_from_data(cx, &data, 0).map_err(|e| e.into()),
                 imghdr::Type::Jpeg => self.load_jpg_from_data(cx, &data, 0).map_err(|e| e.into()),
                 _ => Err(ImageError::UnsupportedFormat.into()),
             },
@@ -447,7 +365,6 @@ impl GImage {
         self.redraw(cx);
         Ok(())
     }
-    
 }
 
 pub enum SrcType {
@@ -488,7 +405,6 @@ impl FromStr for SrcType {
                 .map_err(|_| ImageError::UnsupportedFormat)
         }
     }
-    
 }
 
 impl GImageRef {
@@ -548,26 +464,26 @@ impl GImageRef {
     }
     prop_setter! {
         GImage{
-            set_visible(visible: bool) {|c_ref|{c_ref.visible = visible;}},
-            set_grab_key_focus(grab_key_focus: bool) {|c_ref|{c_ref.grab_key_focus = grab_key_focus;}},
-            set_opacity(opacity: f32) {|c_ref|{c_ref.opacity = opacity;}},
-            set_cursor(cursor: MouseCursor) {|c_ref|{c_ref.cursor.replace(cursor);}},
-            set_scale(scale: f64) {|c_ref|{c_ref.scale = scale;}},
-            set_fit(fit: ImageFit) {|c_ref|{c_ref.fit = fit;}},
-            set_min_width(min_width: i64) {|c_ref|{c_ref.min_width = min_width;}},
-            set_min_height(min_height: i64) {|c_ref|{c_ref.min_height = min_height;}},
-            set_abs_pos(abs_pos: DVec2) {|c_ref|{c_ref.walk.abs_pos.replace(abs_pos);}},
-            set_margin(margin: Margin) {|c_ref|{c_ref.walk.margin = margin;}},
-            set_height(height: Size) {|c_ref|{c_ref.walk.height = height;}},
-            set_width(width: Size) {|c_ref|{c_ref.walk.width = width;}},
-            set_scroll(scroll: DVec2) {|c_ref|{c_ref.layout.scroll = scroll;}},
-            set_clip_x(clip_x: bool) {|c_ref|{c_ref.layout.clip_x = clip_x;}},
-            set_clip_y(clip_y: bool) {|c_ref|{c_ref.layout.clip_y = clip_y;}},
-            set_padding(padding: Padding) {|c_ref|{c_ref.layout.padding = padding;}},
-            set_align(align: Align) {|c_ref|{c_ref.layout.align = align;}},
-            set_flow(flow: Flow) {|c_ref|{c_ref.layout.flow = flow;}},
-            set_spacing(spacing: f64) {|c_ref|{c_ref.layout.spacing = spacing;}},
-            set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key;}}
+            set_visible(visible: bool) {|c_ref|{c_ref.visible = visible; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c_ref|{c_ref.grab_key_focus = grab_key_focus; Ok(())}},
+            set_opacity(opacity: f32) {|c_ref|{c_ref.opacity = opacity; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c_ref|{c_ref.cursor.replace(cursor); Ok(())}},
+            set_scale(scale: f64) {|c_ref|{c_ref.scale = scale; Ok(())}},
+            set_fit(fit: ImageFit) {|c_ref|{c_ref.fit = fit; Ok(())}},
+            set_min_width(min_width: i64) {|c_ref|{c_ref.min_width = min_width; Ok(())}},
+            set_min_height(min_height: i64) {|c_ref|{c_ref.min_height = min_height; Ok(())}},
+            set_abs_pos(abs_pos: DVec2) {|c_ref|{c_ref.walk.abs_pos.replace(abs_pos); Ok(())}},
+            set_margin(margin: Margin) {|c_ref|{c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c_ref|{c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c_ref|{c_ref.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c_ref|{c_ref.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c_ref|{c_ref.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c_ref|{c_ref.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c_ref|{c_ref.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c_ref|{c_ref.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c_ref|{c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c_ref|{c_ref.layout.spacing = spacing; Ok(())}},
+            set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key; Ok(())}}
         }
     }
     prop_getter! {

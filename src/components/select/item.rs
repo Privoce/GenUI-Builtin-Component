@@ -166,16 +166,16 @@ pub struct GSelectItem {
 impl LiveHook for GSelectItem {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         // ----------------- background color -------------------------------------------
-        let bg_color = self.background_color.use_or("#FFFFFF00");
+        let bg_color = self.background_color.use_or("#FFFFFF00").unwrap();
         // ------------------ hover color -----------------------------------------------
-        let hover_color = self.hover_color.use_or("#F9FAFB");
+        let hover_color = self.hover_color.use_or("#F9FAFB").unwrap();
         // ------------------ focus color ---------------------------------------------
-        let focus_color = self.focus_color.use_or("#F9FAFB");
+        let focus_color = self.focus_color.use_or("#F9FAFB").unwrap();
         // ------------------ border color ----------------------------------------------
         let border_color = self.border_color.get(self.theme, 600);
         let shadow_color = self.shadow_color.get(self.theme, 700);
         let background_visible = self.background_visible.to_f32();
-        let color = self.color.use_or("#101828");
+        let color = self.color.use_or("#101828").unwrap();
         let stroke_color = self.stroke_color.get(self.theme, 600);
         // let stroke_hover_color = self.stroke_hover_color.get(self.theme, 600);
         self.draw_item.apply_over(

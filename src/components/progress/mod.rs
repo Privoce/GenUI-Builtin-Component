@@ -252,7 +252,7 @@ impl GProgress {
             },
         );
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 100);
         // ------------------ hover color -----------------------------------------------
@@ -284,6 +284,7 @@ impl GProgress {
             },
         );
         self.draw_progress.apply_type(self.progress_type.clone());
+        Ok(())
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.clear_animation(cx);

@@ -145,7 +145,7 @@ impl GLoading {
         self.draw_loading.opened = 0.0;
         self.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) ->Result<(), Box<dyn std::error::Error>> {
         // ------------------ hover color -----------------------------------------------
         let loading_color = self.stroke_color.get(self.theme, 600);
         // ------------------ apply to draw_loading_wrap ----------------------------------------
@@ -157,6 +157,7 @@ impl GLoading {
             },
         );
         self.draw_loading.apply_type(self.loading_type.clone());
+        Ok(())
     }
     pub fn redraw(&self, cx: &mut Cx) {
         self.draw_loading.redraw(cx);

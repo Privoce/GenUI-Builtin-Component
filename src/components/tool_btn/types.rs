@@ -66,10 +66,10 @@ impl GOsType {
                 | GToolButtonType::Close => vec4(0.0, 0.0, 0.0, 0.0),
             },
             GOsType::Mac | GOsType::Linux => match btn_type {
-                GToolButtonType::Min => hex_to_vec4("#FDC12F"),
-                GToolButtonType::Max => hex_to_vec4("#21CE36"),
-                GToolButtonType::FullScreen => hex_to_vec4("#D6D0D9"),
-                GToolButtonType::Close => hex_to_vec4("#F1615B"),
+                GToolButtonType::Min => hex_to_vec4("#FDC12F").unwrap(),
+                GToolButtonType::Max => hex_to_vec4("#21CE36").unwrap(),
+                GToolButtonType::FullScreen => hex_to_vec4("#D6D0D9").unwrap(),
+                GToolButtonType::Close => hex_to_vec4("#F1615B").unwrap(),
             },
         }
     }
@@ -79,15 +79,15 @@ impl GOsType {
         match self {
             GOsType::Windows | GOsType::Other => match btn_type {
                 GToolButtonType::Min | GToolButtonType::Max | GToolButtonType::FullScreen => {
-                    hex_to_vec4("#3F444A")
+                    hex_to_vec4("#3F444A").unwrap()
                 }
-                GToolButtonType::Close => hex_to_vec4("#E81123"),
+                GToolButtonType::Close => hex_to_vec4("#E81123").unwrap(),
             },
             GOsType::Mac | GOsType::Linux => match btn_type {
-                GToolButtonType::Min => hex_to_vec4("#fdbc21"),
-                GToolButtonType::Max => hex_to_vec4("#17d82e"),
-                GToolButtonType::FullScreen => hex_to_vec4("#cbc5ce"),
-                GToolButtonType::Close => hex_to_vec4("#ec4f48"),
+                GToolButtonType::Min => hex_to_vec4("#fdbc21").unwrap(),
+                GToolButtonType::Max => hex_to_vec4("#17d82e").unwrap(),
+                GToolButtonType::FullScreen => hex_to_vec4("#cbc5ce").unwrap(),
+                GToolButtonType::Close => hex_to_vec4("#ec4f48").unwrap(),
             },
         }
     }
@@ -95,15 +95,15 @@ impl GOsType {
         match self {
             GOsType::Windows | GOsType::Other => match btn_type {
                 GToolButtonType::Min | GToolButtonType::Max | GToolButtonType::FullScreen => {
-                    hex_to_vec4("#5B5F64")
+                    hex_to_vec4("#5B5F64").unwrap()
                 }
-                GToolButtonType::Close => hex_to_vec4("#981A27"),
+                GToolButtonType::Close => hex_to_vec4("#981A27").unwrap(),
             },
             GOsType::Mac | GOsType::Linux => match btn_type {
-                GToolButtonType::Min => hex_to_vec4("#fdbc21"),
-                GToolButtonType::Max => hex_to_vec4("#17d82e"),
-                GToolButtonType::FullScreen => hex_to_vec4("#cbc5ce"),
-                GToolButtonType::Close => hex_to_vec4("#ec4f48"),
+                GToolButtonType::Min => hex_to_vec4("#fdbc21").unwrap(),
+                GToolButtonType::Max => hex_to_vec4("#17d82e").unwrap(),
+                GToolButtonType::FullScreen => hex_to_vec4("#cbc5ce").unwrap(),
+                GToolButtonType::Close => hex_to_vec4("#ec4f48").unwrap(),
             },
         }
     }
@@ -119,10 +119,10 @@ impl GOsType {
                 | GToolButtonType::Close => (vec4(0.0, 0.0, 0.0, 0.0), 0.0),
             },
             GOsType::Mac | GOsType::Linux => match btn_type {
-                GToolButtonType::Min => (hex_to_vec4("#fdbc21"), 0.0),
-                GToolButtonType::Max => (hex_to_vec4("#17d82e"), 0.0),
-                GToolButtonType::FullScreen => (hex_to_vec4("#cbc5ce"), 0.0),
-                GToolButtonType::Close => (hex_to_vec4("#ec4f48"), 0.0),
+                GToolButtonType::Min => (hex_to_vec4("#fdbc21").unwrap(), 0.0),
+                GToolButtonType::Max => (hex_to_vec4("#17d82e").unwrap(), 0.0),
+                GToolButtonType::FullScreen => (hex_to_vec4("#cbc5ce").unwrap(), 0.0),
+                GToolButtonType::Close => (hex_to_vec4("#ec4f48").unwrap(), 0.0),
             },
         }
     }

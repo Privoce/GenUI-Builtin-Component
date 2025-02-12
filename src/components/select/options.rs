@@ -70,11 +70,11 @@ impl LiveHook for GSelectOptions {
             }
         }
         // ----------------- background color -------------------------------------------
-        let bg_color = self.background_color.use_or("#ffffff");
+        let bg_color = self.background_color.use_or("#ffffff").unwrap();
         // ------------------ hover color -----------------------------------------------
-        let hover_color = self.hover_color.use_or("#ffffff");
+        let hover_color = self.hover_color.use_or("#ffffff").unwrap();
         // ------------------ pressed color ---------------------------------------------
-        let pressed_color = self.pressed_color.use_or("#ffffff");
+        let pressed_color = self.pressed_color.use_or("#ffffff").unwrap();
         // ------------------ border color ----------------------------------------------
         let border_color = self.border_color.get(self.theme, 600);
         let shadow_color = self.shadow_color.get(self.theme, 700);

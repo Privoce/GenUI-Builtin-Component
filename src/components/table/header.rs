@@ -131,11 +131,11 @@ impl Widget for GTableHeader {
 
 impl LiveHook for GTableHeader {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        let bg_color = self.background_color.use_or("#F9FAFB");
-        let hover_color = self.hover_color.use_or("#F9FAFB");
-        let pressed_color = self.pressed_color.use_or("#F9FAFB");
-        let border_color = self.border_color.use_or("#EAECF0");
-        let shadow_color = self.shadow_color.use_or("#FFFFFF00");
+        let bg_color = self.background_color.use_or("#F9FAFB").unwrap();
+        let hover_color = self.hover_color.use_or("#F9FAFB").unwrap();
+        let pressed_color = self.pressed_color.use_or("#F9FAFB").unwrap();
+        let border_color = self.border_color.use_or("#EAECF0").unwrap();
+        let shadow_color = self.shadow_color.use_or("#FFFFFF00").unwrap();
         self.draw_table_header.apply_over(
             cx,
             live! {

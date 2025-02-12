@@ -13,7 +13,10 @@ use crate::themes::Themes;
 use crate::utils::open_browser;
 use crate::utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool};
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, set_text_and_visible_fn, widget_area
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
+    default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter,
+    prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
+    set_text_and_visible_fn, widget_area,
 };
 use makepad_widgets::*;
 
@@ -242,7 +245,7 @@ impl Widget for GLink {
             return DrawStep::done();
         }
         let _ = self.set_scope_path(&scope.path);
-        let _ = get_font_family(&self.font_family, cx, &mut  self.draw_text.text_style.font);
+        let _ = get_font_family(&self.font_family, cx, &mut self.draw_text.text_style.font);
         let _ = self.draw_link.begin(cx, walk, self.layout);
         let _ = self
             .draw_text
@@ -256,7 +259,13 @@ impl Widget for GLink {
 }
 
 impl LiveHook for GLink {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    // fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    //     if !self.visible {
+    //         return;
+    //     }
+    //     self.render(cx);
+    // }
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
@@ -319,7 +328,7 @@ impl GLink {
         self.draw_text.redraw(cx);
         self.draw_link.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // backgroud visible is true, means link act as a button, text color should be plain
         let (
             background_color,
@@ -403,6 +412,8 @@ impl GLink {
                 },
             },
         );
+
+        Ok(())
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.clear_animation(cx);
@@ -530,50 +541,50 @@ impl GLink {
 }
 
 impl GLinkRef {
-    prop_setter!{
+    prop_setter! {
         GLink{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
-            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color);}},
-            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color);}},
-            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color);}},
-            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color);}},
-            set_underline_visible(visible: bool) {|c_ref| {c_ref.underline_visible = visible}},
-            set_underline_color(color: Vec4) {|c_ref| {c_ref.underline_color.replace(color);}},
-            set_underline_hover_color(color: Vec4) {|c_ref| {c_ref.underline_hover_color.replace(color);}},
-            set_underline_focus_color(color: Vec4) {|c_ref| {c_ref.underline_focus_color.replace(color);}},
-            set_underline_width(width: f32) {|c_ref| {c_ref.underline_width = width;}},
-            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius;}},
-            set_round(round: bool) {|c_ref| {c_ref.round = round;}},
-            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible;}},
-            set_text(text: ArcStringMut) {|c_ref| {c_ref.text = text;}},
-            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size;}},
-            set_color(color: Vec4) {|c_ref| {c_ref.color.replace(color);}},
-            set_text_hover_color(color: Vec4) {|c_ref| {c_ref.text_hover_color.replace(color);}},
-            set_text_focus_color(color: Vec4) {|c_ref| {c_ref.text_focus_color.replace(color);}},
-            set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family;}},
-            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor);}},
-            set_href(href: String) {|c_ref| {c_ref.href.replace(href);}},
-            set_link_type(link_type: LinkType) {|c_ref| {c_ref.link_type = link_type;}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
-            set_text_walk(walk: Walk) {|c_ref| {c_ref.text_walk = walk;}},
-            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus;}},
-            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key;}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key;}},
-            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos);}},
-            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
-            set_height(height: Size) {|c_ref| {c_ref.walk.height = height;}},
-            set_width(width: Size) {|c_ref| {c_ref.walk.width = width;}},
-            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll;}},
-            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x;}},
-            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y;}},
-            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding;}},
-            set_align(align: Align) {|c_ref| {c_ref.layout.align = align;}},
-            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow;}},
-            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing;}},
-            set_text_height(height: Size) {|c_ref| {c_ref.text_walk.height = height;}},
-            set_text_width(width: Size) {|c_ref| {c_ref.text_walk.width = width;}},
-            set_text_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.text_walk.abs_pos.replace(abs_pos);}},
-            set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin;}}
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color); Ok(())}},
+            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color); Ok(())}},
+            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color); Ok(())}},
+            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color); Ok(())}},
+            set_underline_visible(visible: bool) {|c_ref| {c_ref.underline_visible = visible; Ok(())}},
+            set_underline_color(color: Vec4) {|c_ref| {c_ref.underline_color.replace(color); Ok(())}},
+            set_underline_hover_color(color: Vec4) {|c_ref| {c_ref.underline_hover_color.replace(color); Ok(())}},
+            set_underline_focus_color(color: Vec4) {|c_ref| {c_ref.underline_focus_color.replace(color); Ok(())}},
+            set_underline_width(width: f32) {|c_ref| {c_ref.underline_width = width; Ok(())}},
+            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius; Ok(())}},
+            set_round(round: bool) {|c_ref| {c_ref.round = round; Ok(())}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
+            set_text(text: ArcStringMut) {|c_ref| {c_ref.text = text; Ok(())}},
+            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size; Ok(())}},
+            set_color(color: Vec4) {|c_ref| {c_ref.color.replace(color); Ok(())}},
+            set_text_hover_color(color: Vec4) {|c_ref| {c_ref.text_hover_color.replace(color); Ok(())}},
+            set_text_focus_color(color: Vec4) {|c_ref| {c_ref.text_focus_color.replace(color); Ok(())}},
+            set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
+            set_href(href: String) {|c_ref| {c_ref.href.replace(href); Ok(())}},
+            set_link_type(link_type: LinkType) {|c_ref| {c_ref.link_type = link_type; Ok(())}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_text_walk(walk: Walk) {|c_ref| {c_ref.text_walk = walk; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
+            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}},
+            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos); Ok(())}},
+            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
+            set_text_height(height: Size) {|c_ref| {c_ref.text_walk.height = height; Ok(())}},
+            set_text_width(width: Size) {|c_ref| {c_ref.text_walk.width = width; Ok(())}},
+            set_text_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.text_walk.abs_pos.replace(abs_pos); Ok(())}},
+            set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin; Ok(())}}
         }
     }
     prop_getter! {

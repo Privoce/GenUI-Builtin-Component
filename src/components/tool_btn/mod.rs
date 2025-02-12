@@ -208,7 +208,7 @@ impl GToolButton {
         self.draw_icon.redraw(cx);
         self.draw_tool_btn.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         if self.os_type.is_none() {
             self.os_type = Some(GOsType::get());
         }
@@ -230,11 +230,11 @@ impl GToolButton {
             GOsType::Mac | GOsType::Linux => 3.6,
         };
         let stroke_color = match self.os_type.as_ref().unwrap() {
-            GOsType::Windows | GOsType::Other => self.color.use_or("#768390"),
+            GOsType::Windows | GOsType::Other => self.color.use_or("#768390")?,
             GOsType::Mac | GOsType::Linux => vec4(0.0, 0.0, 0.0, 0.0),
         };
-        let stroke_hover_color = self.stroke_hover_color.use_or("#768390");
-        let stroke_focus_color = self.stroke_focus_color.use_or("#768390");
+        let stroke_hover_color = self.stroke_hover_color.use_or("#768390")?;
+        let stroke_focus_color = self.stroke_focus_color.use_or("#768390")?;
         // apply over props to draw_button ----------------------------------------------
         self.draw_tool_btn.apply_over(
             cx,
@@ -261,6 +261,7 @@ impl GToolButton {
             },
         );
         self.draw_icon.apply_type(Base::from(self.icon_type));
+        Ok(())
     }
     pub fn clear_animation(&mut self, cx: &mut Cx) {
         self.draw_icon.apply_over(

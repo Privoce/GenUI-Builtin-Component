@@ -249,8 +249,8 @@ impl GBreadCrumb {
             );
         });
     }
-    pub fn render(&mut self, cx: &mut Cx) {
-        self.deref_widget.render(cx);
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+        self.deref_widget.render(cx)
     }
     pub fn path(&self) -> &Vec<String> {
         &self.path

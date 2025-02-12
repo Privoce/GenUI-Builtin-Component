@@ -12,19 +12,23 @@ use crate::themes::{
 pub trait ThemeColor {
     /// Get the color of the theme. if color is none, return the default color
     fn get(&self, theme: Themes, default: u32) -> Vec4;
-    fn use_or(&self, hex: &str) -> Vec4;
+    fn use_or(&self, hex: &str) -> Result<Vec4, Box<dyn std::error::Error>>;
 }
 
 impl ThemeColor for Option<Vec4> {
     fn get(&self, theme: Themes, default: u32) -> Vec4 {
         get_color(theme, self.as_ref(), default)
     }
-    fn use_or(&self, hex: &str) -> Vec4 {
-        self.unwrap_or_else(|| hex_to_vec4(hex))
+    fn use_or(&self, hex: &str) -> Result<Vec4, Box<dyn std::error::Error>> {
+        if let Some(target) = self {
+            Ok(target.clone())
+        } else {
+            hex_to_vec4(hex)
+        }
     }
 }
 
-pub fn hex_to_vec4(hex: &str) -> Vec4 {
+pub fn hex_to_vec4(hex: &str) -> Result<Vec4, Box<dyn std::error::Error>> {
     // 去掉开头的 '#' 符号
     let hex = hex.trim_start_matches('#');
 
@@ -41,15 +45,15 @@ pub fn hex_to_vec4(hex: &str) -> Vec4 {
         let a = u8::from_str_radix(&hex[6..8], 16).unwrap();
         (r, g, b, a)
     } else {
-        panic!("invalid hex color: {}", hex);
+        return Err(format!("invalid hex color: {}", hex).into());
     };
 
-    Vec4 {
+    Ok(Vec4 {
         x: r as f32 / 255.0,
         y: g as f32 / 255.0,
         z: b as f32 / 255.0,
         w: a as f32 / 255.0,
-    }
+    })
 }
 
 /// v: color value, range: `[25, 50, 100 ,200, 300, 400, 500, 600, 700, 800, 900]`
@@ -91,7 +95,7 @@ macro_rules! theme_color {
 
             impl Default for $T {
                 fn default() -> Self {
-                    Self(crate::utils::hex_to_vec4(Self::_500))
+                    Self(crate::utils::hex_to_vec4(Self::_500).unwrap())
                 }
             }
 
@@ -111,7 +115,7 @@ macro_rules! theme_color {
                         800 => Self::_800,
                         900 => Self::_900,
                         _ => panic!("invalid target"),
-                    })
+                    }).unwrap()
                 }
 
                 fn get(&self) -> Vec4 {

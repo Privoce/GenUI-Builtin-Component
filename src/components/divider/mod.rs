@@ -96,12 +96,14 @@ impl LiveHook for GDivider {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
     }
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         if !self.visible {
             return;
         }
 
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GDivider render error: {:?}", e);
+        }
     }
 }
 
@@ -124,8 +126,8 @@ impl GDivider {
     pub fn redraw(&mut self, cx: &mut Cx) {
         self.deref_widget.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) {
-        self.deref_widget.render(cx);
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+        self.deref_widget.render(cx)
     }
     pub fn area(&self) -> Area {
         self.deref_widget.area()
@@ -150,39 +152,39 @@ impl GDivider {
 impl GDividerRef {
     prop_setter! {
         GDivider{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
-            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color);}},
-            set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color);}},
-            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color);}},
-            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color);}},
-            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color);}},
-            set_border_width(width: f64) {|c_ref| {c_ref.border_width = width as f32;}},
-            set_border_radius(radius: f64) {|c_ref| {c_ref.border_radius = radius as f32;}},
-            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset;}},
-            set_spread_radius(radius: f64) {|c_ref| {c_ref.spread_radius = radius as f32;}},
-            set_blur_radius(radius: f64) {|c_ref| {c_ref.blur_radius = radius as f32;}},
-            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible;}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
-            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor);}},
-            set_grab_key_focus(grab: bool) {|c_ref| {c_ref.grab_key_focus = grab;}},
-            set_block_signal_event(block: bool) {|c_ref| {c_ref.block_signal_event = block;}},
-            set_abs_pos(pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(pos);}},
-            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
-            set_height(height: Size) {|c_ref| {c_ref.walk.height = height;}},
-            set_width(width: Size) {|c_ref| {c_ref.walk.width = width;}},
-            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll;}},
-            set_clip_x(clip: bool) {|c_ref| {c_ref.layout.clip_x = clip;}},
-            set_clip_y(clip: bool) {|c_ref| {c_ref.layout.clip_y = clip;}},
-            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding;}},
-            set_align(align: Align) {|c_ref| {c_ref.layout.align = align;}},
-            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow;}},
-            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing;}},
-            set_dpi_factor(factor: f64) {|c_ref| {c_ref.dpi_factor.replace(factor);}},
-            set_optimize(optimize: ViewOptimize) {|c_ref| {c_ref.optimize = optimize;}},
-            set_capture_overload(overload: bool) {|c_ref| {c_ref.capture_overload = overload;}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key;}},
-            set_stroke_width(width: f32) {|c_ref| {c_ref.stroke_width = width;}},
-            set_direction(direction: Direction) {|c_ref| {c_ref.direction = direction;}}
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color); Ok(())}},
+            set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color); Ok(())}},
+            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color); Ok(())}},
+            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color); Ok(())}},
+            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color); Ok(())}},
+            set_border_width(width: f64) {|c_ref| {c_ref.border_width = width as f32; Ok(())}},
+            set_border_radius(radius: f64) {|c_ref| {c_ref.border_radius = radius as f32; Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset; Ok(())}},
+            set_spread_radius(radius: f64) {|c_ref| {c_ref.spread_radius = radius as f32; Ok(())}},
+            set_blur_radius(radius: f64) {|c_ref| {c_ref.blur_radius = radius as f32; Ok(())}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor); Ok(())}},
+            set_grab_key_focus(grab: bool) {|c_ref| {c_ref.grab_key_focus = grab; Ok(())}},
+            set_block_signal_event(block: bool) {|c_ref| {c_ref.block_signal_event = block; Ok(())}},
+            set_abs_pos(pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
+            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip: bool) {|c_ref| {c_ref.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool) {|c_ref| {c_ref.layout.clip_y = clip; Ok(())}},
+            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
+            set_dpi_factor(factor: f64) {|c_ref| {c_ref.dpi_factor.replace(factor); Ok(())}},
+            set_optimize(optimize: ViewOptimize) {|c_ref| {c_ref.optimize = optimize; Ok(())}},
+            set_capture_overload(overload: bool) {|c_ref| {c_ref.capture_overload = overload; Ok(())}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}},
+            set_stroke_width(width: f32) {|c_ref| {c_ref.stroke_width = width; Ok(())}},
+            set_direction(direction: Direction) {|c_ref| {c_ref.direction = direction; Ok(())}}
         }
     }
     prop_getter! {

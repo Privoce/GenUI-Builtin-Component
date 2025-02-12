@@ -429,7 +429,7 @@ impl GTag {
         self.draw_close.redraw(cx);
         self.draw_tag.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 500);
         let shadow_color = self.shadow_color.get(self.theme, 700);
@@ -509,6 +509,7 @@ impl GTag {
                 },
             );
         }
+        Ok(())
     }
     pub fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, focus_area: Area) {
         default_handle_animation!(self, cx, event);

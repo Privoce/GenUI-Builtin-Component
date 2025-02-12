@@ -346,7 +346,7 @@ impl Widget for GIcon {
 }
 
 impl LiveHook for GIcon {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
         if !self.visible {
             return;
         }
@@ -355,10 +355,13 @@ impl LiveHook for GIcon {
                 self.draw_type.replace(ty);
             }
             Err(e) => {
-                cx.apply_error(live_error_origin!(), index, nodes, e.to_string());
+                // cx.apply_error(live_error_origin!(), index, nodes, e.to_string());
+                error!("GIcon error: {:?}", e);
             }
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GIcon render error: {:?}", e);
+        }
     }
 }
 
@@ -382,7 +385,7 @@ impl GIcon {
         active_focus_lost: GIconEvent::FocusLost |e: FingerUpEvent| => GIconFocusLostParam{ e },
         active_clicked: GIconEvent::Clicked |e: FingerUpEvent| => GIconClickedParam{ e }
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         fn handle<T>(
             target: &mut Option<T>,
             cx: &mut Cx,
@@ -513,6 +516,7 @@ impl GIcon {
                 );
             }
         }
+        Ok(())
     }
     pub fn redraw(&self, cx: &mut Cx) {
         // self.draw_icon.redraw(cx);

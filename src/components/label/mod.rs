@@ -228,7 +228,9 @@ impl LiveHook for GLabel {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GLabel render error: {:?}", e);
+        }
     }
 }
 
@@ -247,7 +249,7 @@ impl GLabel {
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_text.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         let color = self.color.get(self.theme, 50);
         let stroke_hover_color = self.stroke_hover_color.get(self.theme, 25);
         let stroke_focus_color = self.stroke_focus_color.get(self.theme, 100);
@@ -268,6 +270,7 @@ impl GLabel {
             },
         );
         self.draw_text.wrap = self.wrap.clone();
+        Ok(())
     }
     pub fn clear_animation(&mut self, cx: &mut Cx) -> () {
         self.draw_text.apply_over(
@@ -337,26 +340,26 @@ impl GLabelRef {
     }
     prop_setter! {
         GLabel{
-            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme;}},
-            set_color(color: String){|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color));}},
-            set_stroke_hover_color(color: String){|c_ref| {c_ref.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color));}},
-            set_stroke_focus_color(color: String){|c_ref| {c_ref.stroke_focus_color.replace(crate::utils::hex_to_vec4(&color));}},
-            set_font_size(size: f64){|c_ref| {c_ref.font_size = size;}},
-            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor);}},
-            set_line_spacing(spacing: f64){|c_ref| {c_ref.line_spacing = spacing;}},
-            set_height_factor(factor: f64){|c_ref| {c_ref.height_factor = factor;}},
-            set_wrap(wrap: TextWrap){|c_ref| {c_ref.wrap = wrap;}},
-            set_font_family(font_family: LiveDependency){|c_ref| {c_ref.font_family = font_family;}},
-            set_visible(visible: bool){|c_ref| {c_ref.visible = visible;}},
-            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos);}},
-            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin;}},
-            set_height(height: Size){|c_ref| {c_ref.walk.height = height;}},
-            set_width(width: Size){|c_ref| {c_ref.walk.width = width;}},
-            set_padding(padding: Padding){|c_ref| {c_ref.padding = padding;}},
-            set_align(align: Align){|c_ref| {c_ref.align = align;}},
-            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key;}},
-            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key;}},
-            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus;}}
+            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_color(color: String){|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_stroke_hover_color(color: String){|c_ref| {c_ref.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_stroke_focus_color(color: String){|c_ref| {c_ref.stroke_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_font_size(size: f64){|c_ref| {c_ref.font_size = size; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
+            set_line_spacing(spacing: f64){|c_ref| {c_ref.line_spacing = spacing; Ok(())}},
+            set_height_factor(factor: f64){|c_ref| {c_ref.height_factor = factor; Ok(())}},
+            set_wrap(wrap: TextWrap){|c_ref| {c_ref.wrap = wrap; Ok(())}},
+            set_font_family(font_family: LiveDependency){|c_ref| {c_ref.font_family = font_family; Ok(())}},
+            set_visible(visible: bool){|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
+            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size){|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_padding(padding: Padding){|c_ref| {c_ref.padding = padding; Ok(())}},
+            set_align(align: Align){|c_ref| {c_ref.align = align; Ok(())}},
+            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}}
         }
     }
     prop_getter! {

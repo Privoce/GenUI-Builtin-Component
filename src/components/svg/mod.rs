@@ -194,11 +194,13 @@ impl Widget for GSvg {
 }
 
 impl LiveHook for GSvg {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GSvg render error: {:?}", e);
+        }
     }
 }
 
@@ -222,7 +224,7 @@ impl GSvg {
         active_focus_lost: GSvgEvent::FocusLost |e: FingerUpEvent| => GSvgFocusLostParam{ e },
         active_clicked: GSvgEvent::Clicked |e: FingerUpEvent| => GSvgClickedParam{ e }
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ------------------ hover color -----------------------------------------------
         let stroke_hover_color = self.stroke_hover_color.get(self.theme, 25);
         let stroke_focus_color = self.stroke_focus_color.get(self.theme, 50);
@@ -244,6 +246,7 @@ impl GSvg {
         );
 
         self.draw_svg.set_src(self.src.clone());
+        Ok(())
     }
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_svg.redraw(cx);
@@ -322,31 +325,31 @@ impl GSvg {
 impl GSvgRef {
     prop_setter!{
         GSvg{
-            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme;}},
-            set_brightness(brightness: f32){|c_ref| {c_ref.brightness = brightness;}},
-            set_curve(curve: f32){|c_ref| {c_ref.curve = curve;}},
-            set_linearize(linearize: f32){|c_ref| {c_ref.linearize = linearize;}},
-            set_scale(scale: f64){|c_ref| {c_ref.scale = scale;}},
-            set_color(color: Vec4){|c_ref| {c_ref.draw_svg.color = color;}},
-            set_draw_depth(draw_depth: f32){|c_ref| {c_ref.draw_svg.draw_depth = draw_depth;}},
-            set_stroke_hover_color(stroke_hover_color: Vec4){|c_ref| {c_ref.draw_svg.stroke_hover_color = stroke_hover_color;}},
-            set_stroke_focus_color(stroke_focus_color: Vec4){|c_ref| {c_ref.draw_svg.stroke_focus_color = stroke_focus_color;}},
-            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor);}},
-            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus;}},
-            set_visible(visible: bool){|c_ref| {c_ref.visible = visible;}},
-            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key;}},
-            set_abs_pos(abs_pos: Option<DVec2>){|c_ref| {c_ref.walk.abs_pos = abs_pos;}},
-            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin;}},
-            set_height(height: Size){|c_ref| {c_ref.walk.height = height;}},
-            set_width(width: Size){|c_ref| {c_ref.walk.width = width;}},
-            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll;}},
-            set_clip_x(clip_x: bool){|c_ref| {c_ref.layout.clip_x = clip_x;}},
-            set_clip_y(clip_y: bool){|c_ref| {c_ref.layout.clip_y = clip_y;}},
-            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding;}},
-            set_align(align: Align){|c_ref| {c_ref.layout.align = align;}},
-            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow;}},
-            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing;}},
-            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key;}}
+            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_brightness(brightness: f32){|c_ref| {c_ref.brightness = brightness; Ok(())}},
+            set_curve(curve: f32){|c_ref| {c_ref.curve = curve; Ok(())}},
+            set_linearize(linearize: f32){|c_ref| {c_ref.linearize = linearize; Ok(())}},
+            set_scale(scale: f64){|c_ref| {c_ref.scale = scale; Ok(())}},
+            set_color(color: Vec4){|c_ref| {c_ref.draw_svg.color = color; Ok(())}},
+            set_draw_depth(draw_depth: f32){|c_ref| {c_ref.draw_svg.draw_depth = draw_depth; Ok(())}},
+            set_stroke_hover_color(stroke_hover_color: Vec4){|c_ref| {c_ref.draw_svg.stroke_hover_color = stroke_hover_color; Ok(())}},
+            set_stroke_focus_color(stroke_focus_color: Vec4){|c_ref| {c_ref.draw_svg.stroke_focus_color = stroke_focus_color; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
+            set_visible(visible: bool){|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>){|c_ref| {c_ref.walk.abs_pos = abs_pos; Ok(())}},
+            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size){|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool){|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool){|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding; Ok(())}},
+            set_align(align: Align){|c_ref| {c_ref.layout.align = align; Ok(())}},
+            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
+            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
     prop_getter!{

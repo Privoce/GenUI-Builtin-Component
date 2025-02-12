@@ -261,16 +261,16 @@ impl GTabbarItem {
             },
         );
     }
-    pub fn render(&mut self, cx: &mut Cx) -> () {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
-        let bg_color = self.background_color.use_or("#FFFFFF");
+        let bg_color = self.background_color.use_or("#FFFFFF")?;
         // ------------------ hover color -----------------------------------------------
-        let hover_color = self.hover_color.use_or("#FFFFFF");
+        let hover_color = self.hover_color.use_or("#FFFFFF")?;
         // ------------------ focus color ---------------------------------------------
-        let focus_color = self.focus_color.use_or("#FFFFFF");
+        let focus_color = self.focus_color.use_or("#FFFFFF")?;
         // ------------------ border color ----------------------------------------------
-        let border_color = self.border_color.use_or("#FFFFFF");
-        let shadow_color = self.shadow_color.use_or("#FFFFFF");
+        let border_color = self.border_color.use_or("#FFFFFF")?;
+        let shadow_color = self.shadow_color.use_or("#FFFFFF")?;
         let background_visible = self.background_visible.to_f32();
         let selected = self.selected.to_f32();
         self.draw_item.apply_over(
@@ -303,6 +303,7 @@ impl GTabbarItem {
                 focus: (selected),
             },
         );
+        Ok(())
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.clear_animation(cx);

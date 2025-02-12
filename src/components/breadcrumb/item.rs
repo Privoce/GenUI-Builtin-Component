@@ -187,7 +187,10 @@ impl LiveHook for GBreadCrumbItem {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        
+        if let Err(e) = self.render(cx) {
+            error!("GBreadCrumbItem render error: {:?}", e);
+        }
     }
 }
 
@@ -235,7 +238,7 @@ impl GBreadCrumbItem {
             },
         );
     }
-    pub fn render(&mut self, cx: &mut Cx) {
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ------------------ text ------------------------------------------------------
         let color = self.color.get(self.theme, 50);
         let text_hover_color = self.text_hover_color.get(self.theme, 25);
@@ -272,6 +275,7 @@ impl GBreadCrumbItem {
             },
         );
         self.draw_text.wrap = self.wrap.clone();
+        Ok(())
     }
     pub fn redraw(&self, cx: &mut Cx) {
         self.draw_text.redraw(cx);
