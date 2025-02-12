@@ -16,7 +16,7 @@ use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
     active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
-    ref_render, set_event, set_scope_path, shader::draw_image::DrawGImage, utils::set_cursor,
+    ref_render, set_event, set_scope_path, shader::{draw_image::DrawGImage, source::Src}, utils::set_cursor,
     widget_area,
 };
 
@@ -185,8 +185,10 @@ pub struct GImage {
     #[redraw]
     #[live]
     pub draw_image: DrawGImage,
+    // #[live]
+    // pub src: LiveDependency,
     #[live]
-    pub src: LiveDependency,
+    pub src: Src,
     #[rust(Texture::new(cx))]
     pub texture: Option<Texture>,
     #[live(true)]
@@ -209,13 +211,8 @@ impl LiveHook for GImage {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if !self.visible {
             return;
-        }
+        }        
 
-        self.lazy_create_image_cache(cx);
-        let src = self.src.clone();
-        if !src.as_str().is_empty() {
-            let _ = self.load_image_dep_by_path(cx, src.as_str(), 0);
-        }
         self.render(cx);
     }
 }
@@ -330,12 +327,19 @@ impl GImage {
             },
         );
 
-        // self.draw_image.redraw(cx);
         self.lazy_create_image_cache(cx);
-        let source = self.src.clone();
-        if source.as_str().len() > 0 {
-            let _ = self.load_image_dep_by_path(cx, source.as_str(), 0);
-        }
+        match self.src.clone(){
+            Src::None => {},
+            Src::Live(live_dependency) => {
+                if !live_dependency.as_str().is_empty(){
+                    let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
+                }
+            },
+            _ => {
+                let src = self.src.to_string();
+                let _ = self.load(cx, &src);
+            }
+        } 
     }
     pub fn draw_walk_rotated_image(&mut self, cx: &mut Cx2d, walk: Walk) -> () {
         if let Some(image_texture) = &self.texture {
@@ -365,6 +369,85 @@ impl GImage {
             _ => (),
         }
     }
+    pub fn load(&mut self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
+        /// load from path as u8
+        fn fpath_u8<P>(path: P) -> Result<Vec<u8>, Box<dyn std::error::Error>>
+        where
+            P: AsRef<Path>,
+        {
+            let mut file = File::open(path)?;
+            let mut content: Vec<u8> = vec![];
+            file.read_to_end(&mut content)?;
+            Ok(content)
+        }
+
+        fn from_path<P>(
+            img: &mut GImage,
+            cx: &mut Cx,
+            path: P,
+        ) -> Result<(), Box<dyn std::error::Error>>
+        where
+            P: AsRef<Path>,
+        {
+            match imghdr::from_file(path.as_ref())? {
+                Some(ty) => match ty {
+                    imghdr::Type::Png => {
+                        let buf = fpath_u8(path.as_ref())?;
+                        let _ = img.load_png_from_data(cx, &buf, 0)?;
+                        Ok(())
+                    }
+                    imghdr::Type::Jpeg => {
+                        let buf = fpath_u8(path.as_ref())?;
+                        let _ = img.load_jpg_from_data(cx, &buf, 0)?;
+                        Ok(())
+                    }
+                    _ => return Err(ImageError::UnsupportedFormat.into()),
+                },
+                None => Err(ImageError::UnsupportedFormat.into()),
+            }
+        }
+
+        fn from_bytes(
+            img: &mut GImage,
+            cx: &mut Cx,
+            buf: Vec<u8>,
+        ) -> Result<(), Box<dyn std::error::Error>> {
+            match imghdr::from_bytes(&buf) {
+                Some(ty) => match ty {
+                    imghdr::Type::Png => img.load_png_from_data(cx, &buf, 0).map_err(|e| e.into()),
+                    imghdr::Type::Jpeg => img.load_jpg_from_data(cx, &buf, 0).map_err(|e| e.into()),
+                    _ => Err(ImageError::UnsupportedFormat.into()),
+                },
+                None => Err(ImageError::UnsupportedFormat.into()),
+            }
+        }
+
+        let src_type = SrcType::from_str(src)?;
+        let _ = match src_type {
+            SrcType::Path(path_buf) => from_path(self, cx, path_buf),
+            SrcType::Url(url) => {
+                // use reqwest::get do not jam the main thread
+                let (sender, reciver) = std::sync::mpsc::channel();
+                std::thread::spawn(move || {
+                    let buf = reqwest::blocking::get(&url)
+                        .map_err(|e| e.to_string())
+                        .and_then(|res| res.bytes().map_err(|e| e.to_string()))
+                        .map(|bytes| bytes.to_vec());
+                    sender.send(buf).unwrap();
+                });
+                let buf = reciver.recv()??;
+                from_bytes(self, cx, buf)
+            }
+            SrcType::Base64 { data, ty } => match ty {
+                imghdr::Type::Png => self.load_png_from_data(cx, &data,0).map_err(|e| e.into()),
+                imghdr::Type::Jpeg => self.load_jpg_from_data(cx, &data, 0).map_err(|e| e.into()),
+                _ => Err(ImageError::UnsupportedFormat.into()),
+            },
+        }?;
+        self.redraw(cx);
+        Ok(())
+    }
+    
 }
 
 pub enum SrcType {
@@ -405,6 +488,7 @@ impl FromStr for SrcType {
                 .map_err(|_| ImageError::UnsupportedFormat)
         }
     }
+    
 }
 
 impl GImageRef {
@@ -421,82 +505,11 @@ impl GImageRef {
     /// img.load(cx, "https://avatars.githubusercontent.com/u/67356158?s=48&v=4").unwrap();
     /// ```
     pub fn load(&self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
-        /// load from path as u8
-        fn fpath_u8<P>(path: P) -> Result<Vec<u8>, Box<dyn std::error::Error>>
-        where
-            P: AsRef<Path>,
-        {
-            let mut file = File::open(path)?;
-            let mut content: Vec<u8> = vec![];
-            file.read_to_end(&mut content)?;
-            Ok(content)
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load(cx, src)
+        } else {
+            Ok(())
         }
-
-        fn from_path<P>(
-            img: &GImageRef,
-            cx: &mut Cx,
-            path: P,
-        ) -> Result<(), Box<dyn std::error::Error>>
-        where
-            P: AsRef<Path>,
-        {
-            match imghdr::from_file(path.as_ref())? {
-                Some(ty) => match ty {
-                    imghdr::Type::Png => {
-                        let buf = fpath_u8(path.as_ref())?;
-                        let _ = img.load_png_from_data(cx, &buf)?;
-                        Ok(())
-                    }
-                    imghdr::Type::Jpeg => {
-                        let buf = fpath_u8(path.as_ref())?;
-                        let _ = img.load_jpg_from_data(cx, &buf)?;
-                        Ok(())
-                    }
-                    _ => return Err(ImageError::UnsupportedFormat.into()),
-                },
-                None => Err(ImageError::UnsupportedFormat.into()),
-            }
-        }
-
-        fn from_bytes(
-            img: &GImageRef,
-            cx: &mut Cx,
-            buf: Vec<u8>,
-        ) -> Result<(), Box<dyn std::error::Error>> {
-            match imghdr::from_bytes(&buf) {
-                Some(ty) => match ty {
-                    imghdr::Type::Png => img.load_png_from_data(cx, &buf).map_err(|e| e.into()),
-                    imghdr::Type::Jpeg => img.load_jpg_from_data(cx, &buf).map_err(|e| e.into()),
-                    _ => Err(ImageError::UnsupportedFormat.into()),
-                },
-                None => Err(ImageError::UnsupportedFormat.into()),
-            }
-        }
-
-        let src_type = SrcType::from_str(src)?;
-        let _ = match src_type {
-            SrcType::Path(path_buf) => from_path(self, cx, path_buf),
-            SrcType::Url(url) => {
-                // use reqwest::get do not jam the main thread
-                let (sender, reciver) = std::sync::mpsc::channel();
-                std::thread::spawn(move || {
-                    let buf = reqwest::blocking::get(&url)
-                        .map_err(|e| e.to_string())
-                        .and_then(|res| res.bytes().map_err(|e| e.to_string()))
-                        .map(|bytes| bytes.to_vec());
-                    sender.send(buf).unwrap();
-                });
-                let buf = reciver.recv()??;
-                from_bytes(self, cx, buf)
-            }
-            SrcType::Base64 { data, ty } => match ty {
-                imghdr::Type::Png => self.load_png_from_data(cx, &data).map_err(|e| e.into()),
-                imghdr::Type::Jpeg => self.load_jpg_from_data(cx, &data).map_err(|e| e.into()),
-                _ => Err(ImageError::UnsupportedFormat.into()),
-            },
-        }?;
-        self.redraw(cx);
-        Ok(())
     }
     /// Loads the image at the given `image_path` resource into this `ImageRef`.
     pub fn load_image_dep_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {

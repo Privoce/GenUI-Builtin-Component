@@ -19,3 +19,4 @@ pub mod draw_view;
 pub mod icon_lib;
 pub mod manual;
 pub mod register;
+pub mod source;
