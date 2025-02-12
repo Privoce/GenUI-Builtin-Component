@@ -14,6 +14,7 @@ pub mod draw_tab;
 pub mod draw_tab_pane;
 pub mod draw_text;
 pub mod draw_toggle;
+pub mod draw_image;
 pub mod draw_view;
 pub mod icon_lib;
 pub mod manual;

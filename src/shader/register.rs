@@ -30,4 +30,5 @@ pub fn register(cx: &mut Cx){
     crate::shader::draw_tab_pane::live_design(cx);
     crate::shader::draw_popup::live_design(cx);
     crate::shader::draw_shader::live_design(cx);
+    crate::shader::draw_image::live_design(cx);
 }

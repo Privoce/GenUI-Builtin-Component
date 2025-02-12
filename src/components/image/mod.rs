@@ -1,122 +1,131 @@
 mod event;
 pub mod register;
 
+use std::{
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
+
+use base64::{engine::general_purpose, Engine};
 pub use event::*;
 
-
 use image_cache::{ImageCacheImpl, ImageFit};
-use makepad_widgets::*;
+use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
-    active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_view::DrawGView, utils::set_cursor, widget_area
+    active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
+    ref_render, set_event, set_scope_path, shader::draw_image::DrawGImage, utils::set_cursor,
+    widget_area,
 };
 
 live_design! {
     link gen_base;
     use link::shaders::*;
-    
+
     pub GImageBase = {{GImage}} {
         width: 32.0,
         height: 32.0,
-        draw_image: {
-            texture image: texture2d
+        // draw_image: {
+        //     texture image: texture2d
 
-            fn rotation_vertex_expansion(rotation: float, w: float, h: float) -> vec2 {
-                let horizontal_expansion = (abs(cos(rotation)) * w + abs(sin(rotation)) * h) / w - 1.0;
-                let vertical_expansion = (abs(sin(rotation)) * w + abs(cos(rotation)) * h) / h - 1.0;
+        //     fn rotation_vertex_expansion(rotation: float, w: float, h: float) -> vec2 {
+        //         let horizontal_expansion = (abs(cos(rotation)) * w + abs(sin(rotation)) * h) / w - 1.0;
+        //         let vertical_expansion = (abs(sin(rotation)) * w + abs(cos(rotation)) * h) / h - 1.0;
 
-                return vec2(horizontal_expansion, vertical_expansion);
-            }
+        //         return vec2(horizontal_expansion, vertical_expansion);
+        //     }
 
-            fn rotate_2d_from_center(coord: vec2, a: float, size: vec2) -> vec2 {
-                let cos_a = cos(-a);
-                let sin_a = sin(-a);
+        //     fn rotate_2d_from_center(coord: vec2, a: float, size: vec2) -> vec2 {
+        //         let cos_a = cos(-a);
+        //         let sin_a = sin(-a);
 
-                let centered_coord = coord - vec2(0.5, 0.5);
+        //         let centered_coord = coord - vec2(0.5, 0.5);
 
-                // Denormalize the coordinates to use original proportions (between height and width)
-                let denorm_coord = vec2(centered_coord.x, centered_coord.y * size.y / size.x);
-                let demorm_rotated = vec2(denorm_coord.x * cos_a - denorm_coord.y * sin_a, denorm_coord.x * sin_a + denorm_coord.y * cos_a);
+        //         // Denormalize the coordinates to use original proportions (between height and width)
+        //         let denorm_coord = vec2(centered_coord.x, centered_coord.y * size.y / size.x);
+        //         let demorm_rotated = vec2(denorm_coord.x * cos_a - denorm_coord.y * sin_a, denorm_coord.x * sin_a + denorm_coord.y * cos_a);
 
-                // Restore the coordinates to use the texture coordinates proportions (between 0 and 1 in both axis)
-                let rotated = vec2(demorm_rotated.x, demorm_rotated.y * size.x / size.y);
+        //         // Restore the coordinates to use the texture coordinates proportions (between 0 and 1 in both axis)
+        //         let rotated = vec2(demorm_rotated.x, demorm_rotated.y * size.x / size.y);
 
-                return rotated + vec2(0.5, 0.5);
-            }
+        //         return rotated + vec2(0.5, 0.5);
+        //     }
 
-            fn get_color(self) -> vec4 {
-                let rot_padding = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y) / 2.0;
+        //     fn get_color(self) -> vec4 {
+        //         let rot_padding = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y) / 2.0;
 
-                // Current position is a traslated one, so let's get the original position
-                let current_pos = self.pos.xy - rot_padding;
-                let original_pos = rotate_2d_from_center(current_pos, self.rotation, self.rect_size);
+        //         // Current position is a traslated one, so let's get the original position
+        //         let current_pos = self.pos.xy - rot_padding;
+        //         let original_pos = rotate_2d_from_center(current_pos, self.rotation, self.rect_size);
 
-                // Scale the current position by the scale factor
-                let scaled_pos = original_pos / self.scale;
+        //         // Scale the current position by the scale factor
+        //         let scaled_pos = original_pos / self.scale;
 
-                // Take pixel color from the original image
-                let color = sample2d(self.image, scaled_pos).xyzw;
+        //         // Take pixel color from the original image
+        //         let color = sample2d(self.image, scaled_pos).xyzw;
 
-                let faded_color = color * vec4(1.0, 1.0, 1.0, self.opacity);
-                return faded_color;
-            }
+        //         let faded_color = color * vec4(1.0, 1.0, 1.0, self.opacity);
+        //         return faded_color;
+        //     }
 
-            fn pixel(self) -> vec4 {
-                let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
+        //     fn pixel(self) -> vec4 {
+        //         let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
 
-                // Debug
-                // let line_width = 0.01;
-                // if self.pos.x < line_width || self.pos.x > (self.scale + rot_expansion.x - line_width) || self.pos.y < line_width || self.pos.y > (self.scale + rot_expansion.y - line_width) {
-                //     return #c86;
-                // }
+        //         // Debug
+        //         // let line_width = 0.01;
+        //         // if self.pos.x < line_width || self.pos.x > (self.scale + rot_expansion.x - line_width) || self.pos.y < line_width || self.pos.y > (self.scale + rot_expansion.y - line_width) {
+        //         //     return #c86;
+        //         // }
 
-                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+        //         let sdf = Sdf2d::viewport(self.pos * self.rect_size);
 
-                let translation_offset = vec2(self.rect_size.x * rot_expansion.x / 2.0, self.rect_size.y * self.scale * rot_expansion.y / 2.0);
-                sdf.translate(translation_offset.x, translation_offset.y);
+        //         let translation_offset = vec2(self.rect_size.x * rot_expansion.x / 2.0, self.rect_size.y * self.scale * rot_expansion.y / 2.0);
+        //         sdf.translate(translation_offset.x, translation_offset.y);
 
-                let center = self.rect_size * 0.5;
-                sdf.rotate(self.rotation, center.x, center.y);
+        //         let center = self.rect_size * 0.5;
+        //         sdf.rotate(self.rotation, center.x, center.y);
 
-                let scaled_size = self.rect_size * self.scale;
-                sdf.box(0.0, 0.0, scaled_size.x, scaled_size.y, 1);
+        //         let scaled_size = self.rect_size * self.scale;
+        //         sdf.box(0.0, 0.0, scaled_size.x, scaled_size.y, 1);
 
-                sdf.fill_premul(Pal::premul(self.get_color()));
-                return sdf.result
-            }
+        //         sdf.fill_premul(Pal::premul(self.get_color()));
+        //         return sdf.result
+        //     }
 
-            fn vertex(self) -> vec4 {
-                let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
-                let adjusted_pos = vec2(
-                    self.rect_pos.x - self.rect_size.x * rot_expansion.x / 2.0,
-                    self.rect_pos.y - self.rect_size.y * rot_expansion.y / 2.0
-                );
+        //     fn vertex(self) -> vec4 {
+        //         let rot_expansion = rotation_vertex_expansion(self.rotation, self.rect_size.x, self.rect_size.y);
+        //         let adjusted_pos = vec2(
+        //             self.rect_pos.x - self.rect_size.x * rot_expansion.x / 2.0,
+        //             self.rect_pos.y - self.rect_size.y * rot_expansion.y / 2.0
+        //         );
 
-                let expanded_size = vec2(self.rect_size.x * (self.scale + rot_expansion.x), self.rect_size.y * (self.scale + rot_expansion.y));
-                let clipped: vec2 = clamp(
-                    self.geom_pos * expanded_size + adjusted_pos,
-                    self.draw_clip.xy,
-                    self.draw_clip.zw
-                );
+        //         let expanded_size = vec2(self.rect_size.x * (self.scale + rot_expansion.x), self.rect_size.y * (self.scale + rot_expansion.y));
+        //         let clipped: vec2 = clamp(
+        //             self.geom_pos * expanded_size + adjusted_pos,
+        //             self.draw_clip.xy,
+        //             self.draw_clip.zw
+        //         );
 
-                self.pos = (clipped - adjusted_pos) / self.rect_size;
-                return self.camera_projection * (self.camera_view * (
-                    self.view_transform * vec4(clipped.x, clipped.y, self.draw_depth + self.draw_zbias, 1.)
-                ));
-            }
+        //         self.pos = (clipped - adjusted_pos) / self.rect_size;
+        //         return self.camera_projection * (self.camera_view * (
+        //             self.view_transform * vec4(clipped.x, clipped.y, self.draw_depth + self.draw_zbias, 1.)
+        //         ));
+        //     }
 
-            shape: Solid,
-            fill: Image
-        }
+        //     shape: Solid,
+        //     fill: Image
+        // }
     }
 }
 
 /// # GImage Component
 /// The `GImage` component handles scalable images with adjustable rotation, scaling, and visibility, supporting event triggers such as hovering and clicking.
-/// 
+///
 /// ## Animation
 /// No animation is available for the `GImage` component.
-/// 
+///
 /// ## Event
 /// The `GImage` component can trigger various events in response to user interactions:
 /// - `HoverIn(GImageHoverParam)`: Triggered when the mouse pointer enters the image area.
@@ -168,9 +177,6 @@ pub struct GImage {
     pub min_width: i64,
     #[live(16)]
     pub min_height: i64,
-    // rotate -----------------
-    #[live(0.0)]
-    pub rotation: f32,
     // deref -----------------
     #[walk]
     pub walk: Walk,
@@ -178,7 +184,7 @@ pub struct GImage {
     pub layout: Layout,
     #[redraw]
     #[live]
-    pub draw_image: DrawGView,
+    pub draw_image: DrawGImage,
     #[live]
     pub src: LiveDependency,
     #[rust(Texture::new(cx))]
@@ -200,17 +206,16 @@ impl ImageCacheImpl for GImage {
 }
 
 impl LiveHook for GImage {
-    fn after_apply(
-        &mut self,
-        cx: &mut Cx,
-        _apply: &mut Apply,
-        _index: usize,
-        _nodes: &[LiveNode],
-    ) {
+    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if !self.visible {
             return;
         }
 
+        self.lazy_create_image_cache(cx);
+        let src = self.src.clone();
+        if !src.as_str().is_empty() {
+            let _ = self.load_image_dep_by_path(cx, src.as_str(), 0);
+        }
         self.render(cx);
     }
 }
@@ -313,15 +318,14 @@ impl GImage {
         hover_out: GImageEvent::HoverOut => GImageHoverParam,
         clicked: GImageEvent::Clicked => GImageClickedParam
     }
-    pub fn redraw(&self, cx: &mut Cx){
+    pub fn redraw(&self, cx: &mut Cx) {
         self.draw_image.redraw(cx);
     }
     pub fn render(&mut self, cx: &mut Cx) {
         self.draw_image.apply_over(
             cx,
             live! {
-                rotation: (self.rotation),
-                scale: (self.scale),
+                image_scale: (self.scale),
                 opacity: (self.opacity),
             },
         );
@@ -363,8 +367,173 @@ impl GImage {
     }
 }
 
+pub enum SrcType {
+    Path(PathBuf),
+    Url(String),
+    Base64 { data: Vec<u8>, ty: imghdr::Type },
+}
+
+impl FromStr for SrcType {
+    type Err = ImageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+        if s.starts_with("data:image") {
+            // remove the prefix, split `,`
+            let base_slice = s.split(',').collect::<Vec<&str>>();
+            let ty = base_slice.get(0).map_or_else(
+                || Err(ImageError::UnsupportedFormat),
+                |ty| match *ty {
+                    "data:image/png;base64" => Ok(imghdr::Type::Png),
+                    "data:image/jpeg;base64" => Ok(imghdr::Type::Jpeg),
+                    _ => return Err(ImageError::UnsupportedFormat),
+                },
+            )?;
+            base_slice
+                .get(1)
+                .map_or(Err(ImageError::UnsupportedFormat), |data| {
+                    let buf = general_purpose::STANDARD
+                        .decode(data)
+                        .map_err(|_| ImageError::UnsupportedFormat)?;
+                    Ok(SrcType::Base64 { data: buf, ty })
+                })
+        } else if s.starts_with("http") {
+            Ok(SrcType::Url(s.to_string()))
+        } else {
+            PathBuf::from_str(s)
+                .map(|path| SrcType::Path(path))
+                .map_err(|_| ImageError::UnsupportedFormat)
+        }
+    }
+}
+
 impl GImageRef {
-    prop_setter!{
+    /// ## Example
+    /// ```rust
+    /// let img = self.ui.gimage(id!(img));
+    /// // ---- path ----
+    /// let current = current_dir().unwrap().join("resources/facebook.png");
+    /// img.load(cx, current.display().to_string().as_str()).unwrap();
+    /// // ---- base64 ----
+    /// let PNG: &str = "data:image/png;base64, ....";
+    /// img.load(cx, PNG).unwrap();
+    /// // ---- url ----
+    /// img.load(cx, "https://avatars.githubusercontent.com/u/67356158?s=48&v=4").unwrap();
+    /// ```
+    pub fn load(&self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
+        /// load from path as u8
+        fn fpath_u8<P>(path: P) -> Result<Vec<u8>, Box<dyn std::error::Error>>
+        where
+            P: AsRef<Path>,
+        {
+            let mut file = File::open(path)?;
+            let mut content: Vec<u8> = vec![];
+            file.read_to_end(&mut content)?;
+            Ok(content)
+        }
+
+        fn from_path<P>(
+            img: &GImageRef,
+            cx: &mut Cx,
+            path: P,
+        ) -> Result<(), Box<dyn std::error::Error>>
+        where
+            P: AsRef<Path>,
+        {
+            match imghdr::from_file(path.as_ref())? {
+                Some(ty) => match ty {
+                    imghdr::Type::Png => {
+                        let buf = fpath_u8(path.as_ref())?;
+                        let _ = img.load_png_from_data(cx, &buf)?;
+                        Ok(())
+                    }
+                    imghdr::Type::Jpeg => {
+                        let buf = fpath_u8(path.as_ref())?;
+                        let _ = img.load_jpg_from_data(cx, &buf)?;
+                        Ok(())
+                    }
+                    _ => return Err(ImageError::UnsupportedFormat.into()),
+                },
+                None => Err(ImageError::UnsupportedFormat.into()),
+            }
+        }
+
+        fn from_bytes(
+            img: &GImageRef,
+            cx: &mut Cx,
+            buf: Vec<u8>,
+        ) -> Result<(), Box<dyn std::error::Error>> {
+            match imghdr::from_bytes(&buf) {
+                Some(ty) => match ty {
+                    imghdr::Type::Png => img.load_png_from_data(cx, &buf).map_err(|e| e.into()),
+                    imghdr::Type::Jpeg => img.load_jpg_from_data(cx, &buf).map_err(|e| e.into()),
+                    _ => Err(ImageError::UnsupportedFormat.into()),
+                },
+                None => Err(ImageError::UnsupportedFormat.into()),
+            }
+        }
+
+        let src_type = SrcType::from_str(src)?;
+        let _ = match src_type {
+            SrcType::Path(path_buf) => from_path(self, cx, path_buf),
+            SrcType::Url(url) => {
+                // use reqwest::get do not jam the main thread
+                let (sender, reciver) = std::sync::mpsc::channel();
+                std::thread::spawn(move || {
+                    let buf = reqwest::blocking::get(&url)
+                        .map_err(|e| e.to_string())
+                        .and_then(|res| res.bytes().map_err(|e| e.to_string()))
+                        .map(|bytes| bytes.to_vec());
+                    sender.send(buf).unwrap();
+                });
+                let buf = reciver.recv()??;
+                from_bytes(self, cx, buf)
+            }
+            SrcType::Base64 { data, ty } => match ty {
+                imghdr::Type::Png => self.load_png_from_data(cx, &data).map_err(|e| e.into()),
+                imghdr::Type::Jpeg => self.load_jpg_from_data(cx, &data).map_err(|e| e.into()),
+                _ => Err(ImageError::UnsupportedFormat.into()),
+            },
+        }?;
+        self.redraw(cx);
+        Ok(())
+    }
+    /// Loads the image at the given `image_path` resource into this `ImageRef`.
+    pub fn load_image_dep_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_image_dep_by_path(cx, image_path, 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
+    pub fn load_image_file_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_image_file_by_path(cx, image_path, 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads a JPEG into this `ImageRef` by decoding the given encoded JPEG `data`.
+    pub fn load_jpg_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_jpg_from_data(cx, data, 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads a PNG into this `ImageRef` by decoding the given encoded PNG `data`.
+    pub fn load_png_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_png_from_data(cx, data, 0)
+        } else {
+            Ok(())
+        }
+    }
+    prop_setter! {
         GImage{
             set_visible(visible: bool) {|c_ref|{c_ref.visible = visible;}},
             set_grab_key_focus(grab_key_focus: bool) {|c_ref|{c_ref.grab_key_focus = grab_key_focus;}},
@@ -374,7 +543,6 @@ impl GImageRef {
             set_fit(fit: ImageFit) {|c_ref|{c_ref.fit = fit;}},
             set_min_width(min_width: i64) {|c_ref|{c_ref.min_width = min_width;}},
             set_min_height(min_height: i64) {|c_ref|{c_ref.min_height = min_height;}},
-            set_rotation(rotation: f32) {|c_ref|{c_ref.rotation = rotation;}},
             set_abs_pos(abs_pos: DVec2) {|c_ref|{c_ref.walk.abs_pos.replace(abs_pos);}},
             set_margin(margin: Margin) {|c_ref|{c_ref.walk.margin = margin;}},
             set_height(height: Size) {|c_ref|{c_ref.walk.height = height;}},
@@ -389,7 +557,7 @@ impl GImageRef {
             set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key;}}
         }
     }
-    prop_getter!{
+    prop_getter! {
         GImage{
             get_visible(bool) {|| true}, {|c_ref| c_ref.visible},
             get_grab_key_focus(bool) {|| true}, {|c_ref| c_ref.grab_key_focus},
@@ -399,7 +567,6 @@ impl GImageRef {
             get_fit(ImageFit) {|| Default::default()}, {|c_ref| c_ref.fit},
             get_min_width(i64) {|| 16}, {|c_ref| c_ref.min_width},
             get_min_height(i64) {|| 16}, {|c_ref| c_ref.min_height},
-            get_rotation(f32) {|| 0.0}, {|c_ref| c_ref.rotation},
             get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
             get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
             get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},

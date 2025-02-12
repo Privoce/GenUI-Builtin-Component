@@ -230,7 +230,6 @@ impl LiveHook for GLabel {
         }
         self.render(cx);
     }
-    fn after_new_from_doc(&mut self, _cx: &mut Cx) {}
 }
 
 impl GLabel {
