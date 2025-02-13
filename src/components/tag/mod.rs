@@ -3,16 +3,15 @@ pub mod register;
 
 pub use event::*;
 
-
 use crate::shader::draw_icon_pixel::DrawGIconPixel;
 use crate::shader::draw_svg::DrawGSvg;
 use crate::shader::draw_text::DrawGText;
-use crate::utils::{get_font_family, set_cursor, BoolToF32, RectExp, ThemeColor};
+use crate::utils::{get_font_family, set_cursor, BoolToF32, RectExp, ThemeColor, ToBool};
 use crate::{
     active_event, animatie_fn, check_event_scope, default_handle_animation,
     default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option,
-    play_animation, ref_area, ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event,
-    set_scope_path, set_text_and_visible_fn, widget_area,
+    play_animation, prop_getter, prop_setter, ref_area, ref_area_ext, ref_event_option, ref_redraw,
+    ref_render, set_event, set_scope_path, set_text_and_visible_fn, widget_area,
 };
 use crate::{shader::draw_view::DrawGView, themes::Themes};
 use makepad_widgets::*;
@@ -21,7 +20,7 @@ live_design! {
     link gen_base;
     use link::shaders::*;
     use link::gen_theme::*;
-    
+
     pub GTagBase = {{GTag}}{
         spacing: 4.6,
         theme: Primary,
@@ -39,7 +38,7 @@ live_design! {
             height: Fit,
             width: Fit,
         }
-        cursor: Hand,
+        cursor: Default,
         icon_walk: {
             margin: 0,
         },
@@ -559,6 +558,125 @@ impl GTag {
 }
 
 impl GTagRef {
+    pub fn set_text(&self, cx: &mut Cx, text: String) {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.set_text(cx, &text);
+        }
+    }
+    prop_setter! {
+        GTag{
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_focus_color(color: String) {|c_ref| {c_ref.focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_shadow_color(color: String) {|c_ref| {c_ref.shadow_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_text_color(color: String) {|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_icon_color(color: String) {|c_ref| {c_ref.icon_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
+            set_border_width(width: f32) {|c_ref| {c_ref.border_width = width; Ok(())}},
+            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius; Ok(())}},
+            set_spread_radius(radius: f32) {|c_ref| {c_ref.spread_radius = radius; Ok(())}},
+            set_blur_radius(radius: f32) {|c_ref| {c_ref.blur_radius = radius; Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset; Ok(())}},
+            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size; Ok(())}},
+            set_height_factor(factor: f64) {|c_ref| {c_ref.height_factor = factor; Ok(())}},
+            set_line_scale(scale: f64) {|c_ref| {c_ref.line_scale = scale; Ok(())}},
+            set_icon_brightness(brightness: f32) {|c_ref| {c_ref.icon_brightness = brightness; Ok(())}},
+            set_icon_curve(curve: f32) {|c_ref| {c_ref.icon_curve = curve; Ok(())}},
+            set_icon_linearize(linearize: f32) {|c_ref| {c_ref.icon_linearize = linearize; Ok(())}},
+            set_icon_scale(scale: f64) {|c_ref| {c_ref.icon_scale = scale; Ok(())}},
+            set_icon_draw_depth(depth: f32) {|c_ref| {c_ref.icon_draw_depth = depth; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
+            set_closeable(closeable: bool) {|c_ref| {c_ref.closeable = closeable; Ok(())}},
+            set_text_height(height: Size) {|c_ref| {c_ref.text_walk.height = height; Ok(())}},
+            set_text_width(width: Size) {|c_ref| {c_ref.text_walk.width = width; Ok(())}},
+            set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin; Ok(())}},
+            set_text_abs_pos(pos: DVec2) {|c_ref| {c_ref.text_walk.abs_pos.replace(pos); Ok(())}},
+            set_grab_key_focus(focus: bool) {|c_ref| {c_ref.grab_key_focus = focus; Ok(())}},
+            set_icon_height(height: Size) {|c_ref| {c_ref.icon_walk.height = height; Ok(())}},
+            set_icon_width(width: Size) {|c_ref| {c_ref.icon_walk.width = width; Ok(())}},
+            set_icon_margin(margin: Margin) {|c_ref| {c_ref.icon_walk.margin = margin; Ok(())}},
+            set_icon_abs_pos(pos: DVec2) {|c_ref| {c_ref.icon_walk.abs_pos.replace(pos); Ok(())}},
+            set_icon_padding(padding: Padding) {|c_ref| {c_ref.icon_layout.padding = padding; Ok(())}},
+            set_icon_align(align: Align) {|c_ref| {c_ref.icon_layout.align = align; Ok(())}},
+            set_icon_clip_x(clip: bool) {|c_ref| {c_ref.icon_layout.clip_x = clip; Ok(())}},
+            set_icon_clip_y(clip: bool) {|c_ref| {c_ref.icon_layout.clip_y = clip; Ok(())}},
+            set_icon_scroll(scroll: DVec2) {|c_ref| {c_ref.icon_layout.scroll = scroll; Ok(())}},
+            set_icon_flow(flow: Flow) {|c_ref| {c_ref.icon_layout.flow = flow; Ok(())}},
+            set_icon_spacing(spacing: f64) {|c_ref| {c_ref.icon_layout.spacing = spacing; Ok(())}},
+            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_abs_pos(pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
+            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
+            set_clip_x(clip: bool) {|c_ref| {c_ref.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool) {|c_ref| {c_ref.layout.clip_y = clip; Ok(())}},
+            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
+            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
+            set_animation_key(key: bool) {|c_ref| {c_ref.animation_key = key; Ok(())}},
+            set_event_key(key: bool) {|c_ref| {c_ref.event_key = key; Ok(())}}
+        }
+    }
+
+    prop_getter! {
+        GTag{
+            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_background_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.background_color)}},
+            get_hover_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.hover_color)}},
+            get_focus_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.focus_color)}},
+            get_border_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.border_color)}},
+            get_shadow_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.shadow_color)}},
+            get_text_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
+            get_icon_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_icon.color)}},
+            get_background_visible(bool) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.background_visible.to_bool()}},
+            get_border_width(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.border_width}},
+            get_border_radius(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.border_radius}},
+            get_spread_radius(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.spread_radius}},
+            get_blur_radius(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.blur_radius}},
+            get_shadow_offset(Vec2) {|| Default::default()}, {|c_ref| {c_ref.draw_tag.shadow_offset}},
+            get_font_size(f64) {|| Default::default()}, {|c_ref| {c_ref.font_size}},
+            get_height_factor(f64) {|| Default::default()}, {|c_ref| {c_ref.height_factor}},
+            get_line_scale(f64) {|| Default::default()}, {|c_ref| {c_ref.line_scale}},
+            get_icon_brightness(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_icon.brightness}},
+            get_icon_curve(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_icon.curve}},
+            get_icon_linearize(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_icon.linearize}},
+            get_icon_scale(f64) {|| Default::default()}, {|c_ref| {c_ref.icon_scale}},
+            get_icon_draw_depth(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_icon.draw_depth}},
+            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_closeable(bool) {|| Default::default()}, {|c_ref| {c_ref.closeable}},
+            get_text_height(Size) {|| Default::default()}, {|c_ref| {c_ref.text_walk.height}},
+            get_text_width(Size) {|| Default::default()}, {|c_ref| {c_ref.text_walk.width}},
+            get_text_margin(Margin) {|| Default::default()}, {|c_ref| {c_ref.text_walk.margin}},
+            get_text_abs_pos(DVec2) {|| Default::default()}, {|c_ref| {c_ref.text_walk.abs_pos.unwrap_or_default()}},
+            get_grab_key_focus(bool) {|| Default::default()}, {|c_ref| {c_ref.grab_key_focus}},
+            get_icon_height(Size) {|| Default::default()}, {|c_ref| {c_ref.icon_walk.height}},
+            get_icon_width(Size) {|| Default::default()}, {|c_ref| {c_ref.icon_walk.width}},
+            get_icon_margin(Margin) {|| Default::default()}, {|c_ref| {c_ref.icon_walk.margin}},
+            get_icon_abs_pos(DVec2) {|| Default::default()}, {|c_ref| {c_ref.icon_walk.abs_pos.unwrap_or_default()}},
+            get_icon_padding(Padding) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.padding}},
+            get_icon_align(Align) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.align}},
+            get_icon_clip_x(bool) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.clip_x}},
+            get_icon_clip_y(bool) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.clip_y}},
+            get_icon_scroll(DVec2) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.scroll}},
+            get_icon_flow(Flow) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.flow}},
+            get_icon_spacing(f64) {|| Default::default()}, {|c_ref| {c_ref.icon_layout.spacing}},
+            get_height(Size) {|| Default::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {|| Default::default()}, {|c_ref| {c_ref.walk.width}},
+            get_margin(Margin) {|| Default::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_abs_pos(DVec2) {|| Default::default()}, {|c_ref| {c_ref.walk.abs_pos.unwrap_or_default()}},
+            get_align(Align) {|| Default::default()}, {|c_ref| {c_ref.layout.align}},
+            get_clip_x(bool) {|| Default::default()}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {|| Default::default()}, {|c_ref| {c_ref.layout.clip_y}},
+            get_scroll(DVec2) {|| Default::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_flow(Flow) {|| Default::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {|| Default::default()}, {|c_ref| {c_ref.layout.spacing}},
+            get_animation_key(bool) {|| Default::default()}, {|c_ref| {c_ref.animation_key}},
+            get_event_key(bool) {|| Default::default()}, {|c_ref| {c_ref.event_key}}
+        }
+    }
+
     ref_area!();
     ref_redraw!();
     ref_render!();

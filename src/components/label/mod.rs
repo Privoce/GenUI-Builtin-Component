@@ -365,9 +365,9 @@ impl GLabelRef {
     prop_getter! {
         GLabel{
             get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_stroke_hover_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.stroke_hover_color}},
-            get_stroke_focus_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.stroke_focus_color}},
-            get_color(Vec4) {|| Default::default()}, {|c_ref| {c_ref.draw_text.color}},
+            get_stroke_hover_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_hover_color)}},
+            get_stroke_focus_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_focus_color)}},
+            get_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
             get_font_size(f64) {|| Default::default()}, {|c_ref| {c_ref.font_size}},
             get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
             get_line_spacing(f64) {|| Default::default()}, {|c_ref| {c_ref.draw_text.text_style.line_spacing}},

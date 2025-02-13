@@ -56,6 +56,15 @@ pub fn hex_to_vec4(hex: &str) -> Result<Vec4, Box<dyn std::error::Error>> {
     })
 }
 
+pub fn vec4_to_hex(vec4: &Vec4) -> String {
+    let r = (vec4.x * 255.0) as u8;
+    let g = (vec4.y * 255.0) as u8;
+    let b = (vec4.z * 255.0) as u8;
+    let a = (vec4.w * 255.0) as u8;
+
+    format!("{:02X}{:02X}{:02X}{:02X}", r, g, b, a)
+}
+
 /// v: color value, range: `[25, 50, 100 ,200, 300, 400, 500, 600, 700, 800, 900]`
 pub fn get_color(theme: Themes, color: Option<&Vec4>, v: u32) -> Vec4 {
     return if let Some(target) = color {

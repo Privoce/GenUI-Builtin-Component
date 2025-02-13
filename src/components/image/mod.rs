@@ -403,6 +403,9 @@ impl FromStr for SrcType {
 }
 
 impl GImageRef {
+    pub fn set_src(&self, cx: &mut Cx, src: String) -> Result<(), Box<dyn std::error::Error>> {
+        self.load(cx, &src)
+    }
     /// ## Example
     /// ```rust
     /// let img = self.ui.gimage(id!(img));
