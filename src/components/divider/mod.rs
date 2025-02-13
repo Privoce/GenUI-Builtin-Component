@@ -190,11 +190,11 @@ impl GDividerRef {
     prop_getter! {
         GDivider{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_background_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.background_color}},
-            get_shadow_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.shadow_color}},
-            get_hover_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.hover_color}},
-            get_focus_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.focus_color}},
-            get_border_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.border_color}},
+            get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.background_color)}},
+            get_shadow_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.shadow_color)}},
+            get_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.hover_color)}},
+            get_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.focus_color)}},
+            get_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.border_color)}},
             get_border_width(f64) {|| 0.0}, {|c_ref| {c_ref.border_width as f64}},
             get_border_radius(f64) {|| 0.0}, {|c_ref| {c_ref.border_radius as f64}},
             get_shadow_offset(Vec2) {|| Vec2::default()}, {|c_ref| {c_ref.shadow_offset}},

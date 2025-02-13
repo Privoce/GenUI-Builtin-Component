@@ -5,7 +5,8 @@ use event::*;
 use makepad_widgets::*;
 
 use crate::{
-    event_bool, ref_area, ref_event_bool, ref_redraw, ref_render, set_event_bool, set_scope_path,
+    event_bool, prop_getter, prop_setter, ref_area, ref_event_bool, ref_redraw, ref_render,
+    set_event_bool, set_scope_path,
     shader::draw_loading::{DrawGLoading, GLoadingType},
     themes::Themes,
     utils::{BoolToF32, ThemeColor},
@@ -166,6 +167,26 @@ impl GLoading {
 }
 
 impl GLoadingRef {
+    prop_setter! {
+        GLoading{
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_stroke_color(color: String) {|c_ref| {c_ref.stroke_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_loading_type(ty: GLoadingType) {|c_ref| {c_ref.loading_type = ty; Ok(())}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
+        }
+    }
+    prop_getter! {
+        GLoading{
+            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
+            get_stroke_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_loading.stroke_color)}},
+            get_loading_type(GLoadingType) {|| GLoadingType::default()}, {|c_ref| {c_ref.loading_type}},
+            get_visible(bool) {|| Default::default()}, {|c_ref| {c_ref.visible}},
+            get_animation_key(bool) {|| true}, {|c_ref| {c_ref.animation_key}},
+            get_event_key(bool) {|| true}, {|c_ref| {c_ref.event_key}}
+        }
+    }
     ref_redraw!();
     ref_render!();
     ref_area!();

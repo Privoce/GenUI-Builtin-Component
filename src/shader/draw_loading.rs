@@ -140,7 +140,7 @@ impl DrawGLoading {
     }
 }
 
-#[derive(Live, LiveHook, Clone)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum GLoadingType {
@@ -148,4 +148,10 @@ pub enum GLoadingType {
     Circle = shader_enum(1),
     DotLine = shader_enum(2),
     CircleDot = shader_enum(3),
+}
+
+impl Default for GLoadingType {
+    fn default() -> Self {
+        GLoadingType::Circle
+    }
 }

@@ -673,7 +673,8 @@ impl GTagRef {
             get_flow(Flow) {|| Default::default()}, {|c_ref| {c_ref.layout.flow}},
             get_spacing(f64) {|| Default::default()}, {|c_ref| {c_ref.layout.spacing}},
             get_animation_key(bool) {|| Default::default()}, {|c_ref| {c_ref.animation_key}},
-            get_event_key(bool) {|| Default::default()}, {|c_ref| {c_ref.event_key}}
+            get_event_key(bool) {|| Default::default()}, {|c_ref| {c_ref.event_key}},
+            get_text(String) {|| Default::default()}, {|c_ref| {c_ref.text.as_ref().to_string()}}
         }
     }
 
