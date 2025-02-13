@@ -6,7 +6,7 @@ use makepad_widgets::*;
 
 
 use crate::{
-    animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_toggle::{DrawGToggle, GToggleType}, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor}, widget_area
+    animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_toggle::{DrawGToggle, GToggleType}, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -325,6 +325,52 @@ impl GToggle {
 }
 
 impl GToggleRef {
+    prop_setter!{
+        GToggle{
+            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
+            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
+            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_selected_color(color: String) {|c_ref| {c_ref.selected_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_stroke_color(color: String) {|c_ref| {c_ref.stroke_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_stroke_hover_color(color: String) {|c_ref| {c_ref.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_stroke_selected_color(color: String) {|c_ref| {c_ref.stroke_selected_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_border_width(width: f32) {|c_ref| {c_ref.border_width = width; Ok(())}},
+            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius; Ok(())}},
+            set_scale(scale: f32) {|c_ref| {c_ref.scale = scale; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor); Ok(())}},
+            set_selected(selected: bool) {|c_ref| {c_ref.selected = selected; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
+            set_toggle_type(toggle_type: GToggleType) {|c_ref| {c_ref.toggle_type = toggle_type; Ok(())}},
+            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
+        }
+    }
+    prop_getter!{
+        GToggle{
+            get_theme(Themes) {|| Default::default()}, {|c_ref| {c_ref.theme}},
+            get_background_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.background_color)}},
+            get_background_visible(bool) {|| Default::default()}, {|c_ref| {c_ref.draw_toggle.background_visible.to_bool()}},
+            get_hover_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.hover_color)}},
+            get_selected_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.selected_color)}},
+            get_stroke_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.stroke_color)}},
+            get_stroke_hover_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.stroke_hover_color)}},
+            get_stroke_selected_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.stroke_selected_color)}},
+            get_border_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.border_color)}},
+            get_border_width(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_toggle.border_width}},
+            get_border_radius(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_toggle.border_radius}},
+            get_scale(f32) {|| Default::default()}, {|c_ref| {c_ref.draw_toggle.scale}},
+            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or(MouseCursor::Hand)}},
+            get_selected(bool) {|| Default::default()}, {|c_ref| {c_ref.selected}},
+            get_grab_key_focus(bool) {|| Default::default()}, {|c_ref| {c_ref.grab_key_focus}},
+            get_toggle_type(GToggleType) {|| Default::default()}, {|c_ref| {c_ref.toggle_type.clone()}},
+            get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
+            get_animation_key(bool) {|| true}, {|c_ref| {c_ref.animation_key}},
+            get_event_key(bool) {|| true}, {|c_ref| {c_ref.event_key}}
+        }
+    }
     ref_area!();
     ref_redraw!();
     ref_render!();

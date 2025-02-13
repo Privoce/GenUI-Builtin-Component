@@ -6,7 +6,7 @@ live_design! {
     DrawGToggle = {{DrawGToggle}} {
 
         fn get_background_color(self) -> vec4 {
-            
+
             return mix(
                 mix(
                     self.background_color,
@@ -55,7 +55,7 @@ live_design! {
                         mix(self.rect_size.x - circle.x - offset - self.border_width,self.rect_size.x - circle.x - offset * 2.0 - self.border_width, self.hover),
                         self.selected
                     ), center, circle.x);
-                    
+
                     sdf.circle(mix(
                         mix(circle.x + self.border_width + offset, circle.x + self.border_width + offset * 2.0, self.hover),
                         mix(self.rect_size.x - circle.x - offset - self.border_width,self.rect_size.x - circle.x - offset * 2.0 - self.border_width, self.hover),
@@ -126,16 +126,22 @@ pub struct DrawGToggle {
 }
 
 impl DrawGToggle {
-    pub fn apply_type(&mut self, ty: GToggleType) -> (){
+    pub fn apply_type(&mut self, ty: GToggleType) -> () {
         self.toggle_type = ty;
     }
 }
 
-#[derive(Live, LiveHook, Clone)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum GToggleType {
     #[pick]
     Round = shader_enum(1),
     Rect = shader_enum(2),
+}
+
+impl Default for GToggleType {
+    fn default() -> Self {
+        GToggleType::Round
+    }
 }
