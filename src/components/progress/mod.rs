@@ -190,7 +190,9 @@ impl LiveHook for GProgress {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GProgress render error: {:?}", e);
+        }
     }
 }
 impl GProgress {

@@ -9,7 +9,7 @@ use super::{event::GRouterEvent, GRouter};
 
 live_design! {
     link gen_base;
-    
+
     pub GPageBase = {{GPage}}{}
 }
 
@@ -63,11 +63,10 @@ impl GPage {
     pub fn redraw(&mut self, cx: &mut Cx) {
         self.deref_widget.redraw(cx);
     }
-    pub fn render(&mut self, cx: &mut Cx) {
-        self.deref_widget.render(cx);
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+        self.deref_widget.render(cx)
     }
 }
-
 
 impl GPageRef {
     pub fn set_visible_and_redraw(&mut self, cx: &mut Cx, visible: bool) {

@@ -166,7 +166,9 @@ impl LiveHook for GToolButton {
             return;
         }
 
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GToolButton render error: {:?}", e);
+        }
     }
 }
 

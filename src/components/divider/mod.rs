@@ -153,11 +153,11 @@ impl GDividerRef {
     prop_setter! {
         GDivider{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_background_color(color: Vec4) {|c_ref| {c_ref.background_color.replace(color); Ok(())}},
-            set_shadow_color(color: Vec4) {|c_ref| {c_ref.shadow_color.replace(color); Ok(())}},
-            set_hover_color(color: Vec4) {|c_ref| {c_ref.hover_color.replace(color); Ok(())}},
-            set_focus_color(color: Vec4) {|c_ref| {c_ref.focus_color.replace(color); Ok(())}},
-            set_border_color(color: Vec4) {|c_ref| {c_ref.border_color.replace(color); Ok(())}},
+            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_shadow_color(color: String) {|c_ref| {c_ref.shadow_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_focus_color(color: String) {|c_ref| {c_ref.focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
+            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
             set_border_width(width: f64) {|c_ref| {c_ref.border_width = width as f32; Ok(())}},
             set_border_radius(radius: f64) {|c_ref| {c_ref.border_radius = radius as f32; Ok(())}},
             set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset; Ok(())}},

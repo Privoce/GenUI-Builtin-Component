@@ -98,7 +98,9 @@ impl LiveHook for GColor {
                     view.as_gview().borrow_mut().map(|mut view| {
                         view.theme = self.theme;
                         view.background_color.replace(color);
-                        view.render(cx);
+                        if let Err(e) = view.render(cx) {
+                            error!("GLabel render error: {:?}", e);
+                        }
                     });
                 });
             }

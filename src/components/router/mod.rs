@@ -140,7 +140,10 @@ impl GRouter {
                                     } else {
                                         child.visible = false;
                                     }
-                                    child.render(cx);
+                                    // child.render(cx);
+                                    if let Err(e) = child.render(cx) {
+                                        error!("Page::Bar render error: {:?}", e);
+                                    }
                                 });
                             }
                         }
@@ -155,7 +158,9 @@ impl GRouter {
                                     } else {
                                         child.visible = false;
                                     }
-                                    child.render(cx);
+                                    if let Err(e) = child.render(cx) {
+                                        error!("Page::Nav render error: {:?}", e);
+                                    }
                                 });
                             }
                         }

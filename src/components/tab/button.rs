@@ -218,7 +218,9 @@ impl Widget for GTabButton {
                     self.selected = true;
                     cx.widget_action(uid, &scope.path, GTabButtonEvent::Selected);
                 }
-                self.render(cx);
+                if let Err(e) = self.render(cx) {
+                    error!("GTabButton render error: {:?}", e);
+                }
             }
 
             _ => {}
@@ -235,7 +237,9 @@ impl Widget for GTabButton {
 
 impl LiveHook for GTabButton {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GTabButton render error: {:?}", e);
+        }
     }
 }
 

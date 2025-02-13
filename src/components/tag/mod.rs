@@ -255,7 +255,9 @@ impl LiveHook for GTag {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GTag render error: {:?}", e);
+        }
     }
 }
 

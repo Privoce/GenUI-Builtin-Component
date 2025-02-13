@@ -513,7 +513,7 @@ macro_rules! setter {
         {
             if let Some(mut c_ref) = self.borrow_mut() {
                 f(&mut c_ref)?;
-                c_ref.render(cx);
+                c_ref.render(cx)?;
             }
             Ok(())
         }

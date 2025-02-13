@@ -154,7 +154,9 @@ impl LiveHook for GToggle {
         if !self.visible {
             return;
         }
-        self.render(cx);
+        if let Err(e) = self.render(cx) {
+            error!("GToggle render error: {:?}", e);
+        }
     }
 }
 

@@ -212,7 +212,7 @@ impl GTabHeader {
             } else {
                 tab_btn_ref.as_origin_mut().unwrap().selected = false;
             }
-            tab_btn_ref.as_origin_mut().unwrap().render(cx);
+            tab_btn_ref.as_origin_mut().unwrap().render(cx).unwrap();
         }
     }
     pub fn set_items(&mut self, items: Vec<String>) {
