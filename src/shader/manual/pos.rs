@@ -24,7 +24,7 @@ impl Direction {
     }
 }
 
-#[derive(Live, LiveHook)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum Position4 {
@@ -33,6 +33,12 @@ pub enum Position4 {
     Top,
     #[pick]
     Bottom,
+}
+
+impl Default for Position4 {
+    fn default() -> Self {
+        Position4::Bottom
+    }
 }
 
 #[derive(Copy, Clone, Debug, Live, LiveHook)]
@@ -52,6 +58,12 @@ pub enum Position {
     Bottom = shader_enum(10),
     BottomLeft = shader_enum(11),
     BottomRight = shader_enum(12),
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Position::Bottom
+    }
 }
 
 impl Position {

@@ -9,10 +9,7 @@ use types::*;
 use makepad_widgets::*;
 
 use crate::{
-    animatie_fn, event_option, ref_event_option, set_event,
-    shader::{draw_view::DrawGView, manual::Position4},
-    utils::{set_cursor, BoolToF32},
-    widget_area,
+    animatie_fn, event_option, prop_getter, prop_setter, ref_event_option, ref_render, set_event, shader::{draw_view::DrawGView, manual::Position4}, utils::{set_cursor, BoolToF32}, widget_area
 };
 
 live_design! {
@@ -351,9 +348,56 @@ impl GCollapse {
         self.animator_play(cx, id!(open.off));
         self.animation_counter = true;
     }
+    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>>{
+        Ok(())
+    }
 }
 
 impl GCollapseRef {
+    prop_setter!{
+        GCollapse{
+            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
+            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c_ref| {c_ref.walk.height = height; Ok(())}},
+            set_width(width: Size){|c_ref| {c_ref.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip: bool){|c_ref| {c_ref.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool){|c_ref| {c_ref.layout.clip_y = clip; Ok(())}},
+            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding; Ok(())}},
+            set_align(align: Align){|c_ref| {c_ref.layout.align = align; Ok(())}},
+            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
+            set_fold(fold: f64){|c_ref| {c_ref.fold = fold; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
+            set_visible(visible: bool){|c_ref| {c_ref.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
+            set_position(position: Position4){|c_ref| {c_ref.position = position; Ok(())}},
+            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}}
+        }
+    }
+    prop_getter!{
+        GCollapse{
+            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
+            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
+            get_fold(f64) {||0.0}, {|c_ref| {c_ref.fold}},
+            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_grab_key_focus(bool) {||true}, {|c_ref| {c_ref.grab_key_focus}},
+            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
+            get_animation_key(bool) {||false}, {|c_ref| {c_ref.animation_key}},
+            get_position(Position4) {||Position4::default()}, {|c_ref| {c_ref.position}},
+            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
+        }
+    }
     ref_event_option! {
         opened => FingerUpEvent,
         closed => FingerUpEvent,
@@ -363,6 +407,7 @@ impl GCollapseRef {
         animate_open_on,
         animate_open_off
     }
+    ref_render!();
 }
 
 impl GCollapseSet {

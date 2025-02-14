@@ -500,32 +500,32 @@ live_design! {
     pub GLoading = <GLoadingBase>{}
     pub GState404 = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/404.png"),
+        src: Live(dep("crate://self/resources/icons/404.png")),
         fit: Vertical
     }
     pub GState502 = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/502.png"),
+        src: Live(dep("crate://self/resources/icons/502.png")),
         fit: Vertical
     }
     pub GStateNoData = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/no_data.png"),
+        src: Live(dep("crate://self/resources/icons/no_data.png")),
         fit: Vertical
     }
     pub GStateNoMsg = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/no_msg.png"),
+        src: Live(dep("crate://self/resources/icons/no_msg.png")),
         fit: Vertical
     }
     pub GStateNetWorkErr = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/network_err.png"),
+        src: Live(dep("crate://self/resources/icons/network_err.png")),
         fit: Vertical
     }
     pub GStateSearch = <GImage>{
         height: Fill,
-        src: dep("crate://self/resources/icons/searching.png"),
+        src: Live(dep("crate://self/resources/icons/searching.png")),
         fit: Vertical
     }
     pub GTag = <GTagBase>{}

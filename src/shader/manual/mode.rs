@@ -31,6 +31,12 @@ pub enum TriggerMode {
     Press = shader_enum(3),
 }
 
+impl Default for TriggerMode {
+    fn default() -> Self {
+        TriggerMode::Click
+    }
+}
+
 impl TriggerMode {
     pub fn is_click(&self) -> bool {
         matches!(self, TriggerMode::Click)
