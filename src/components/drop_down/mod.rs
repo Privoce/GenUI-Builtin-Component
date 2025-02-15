@@ -208,7 +208,6 @@ impl Widget for GDropDown {
             let mut map = global.map.borrow_mut();
             let popup_menu = map.get_mut(&self.popup.unwrap()).unwrap();
             popup_menu.begin(cx);
-
             match self.mode {
                 PopupMode::Popup | PopupMode::ToolTip => {
                     let area = self.area().rect(cx);
@@ -216,7 +215,7 @@ impl Widget for GDropDown {
                     popup_menu.draw_container(
                         cx,
                         scope,
-                        Some(self.position.clone()),
+                        Some(self.position),
                         angle_offset,
                         &mut self.redraw_flag,
                     );
@@ -274,7 +273,7 @@ impl Widget for GDropDown {
 
                     shift.x += self.offset_x as f64;
                     shift.y += self.offset_y as f64;
-
+                    
                     popup_menu.end(cx, scope, self.area(), shift);
                 }
 
