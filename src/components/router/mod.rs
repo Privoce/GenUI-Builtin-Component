@@ -12,7 +12,7 @@ use event::GRouterEvent;
 use makepad_widgets::*;
 use page::GPageWidgetRefExt;
 
-use types::{PageType, RouterStack, RouterStackItem};
+use types::{NavMode, PageType, RouterStack, RouterStackItem};
 
 use super::{
     tabbar::GTabbarWidgetExt,
@@ -45,6 +45,8 @@ pub struct GRouter {
     pub mode: RouterIndicatorMode,
     #[rust]
     pub nav_actions: Option<Box<dyn FnMut(&mut GRouter, &mut Cx)>>,
+    #[live]
+    pub nav_mode: NavMode,
 }
 
 impl LiveHook for GRouter {}
@@ -116,7 +118,10 @@ impl GRouter {
             if let GRouterEvent::NavBack(_current) = action.as_widget_action().cast() {
                 // get last item from stack
                 self.stack.pop().map(|last| {
-                    self.nav2(cx, &last.path);
+                    match self.nav_mode{
+                        NavMode::History => self.nav_history(cx, &last.path),
+                        NavMode::Switch => self.nav2(cx, &last.path),
+                    }
                 });
                 break;
             }
@@ -194,20 +199,7 @@ impl GRouter {
     }
     pub fn nav_to(&mut self, cx: &mut Cx, path: &[LiveId]) {
         let path = self.bar_scope_path(path);
-        self.active_page.as_ref().map(|path| {
-            // push stack
-            self.stack.push(RouterStackItem {
-                path: path.clone(),
-                ty: self.page_type,
-            });
-        });
-        self.set_visible_page(cx, &path);
-
-        if let Some(mut actions) = self.nav_actions.take() {
-            let _ = actions(self, cx);
-            // set back
-            self.nav_actions = Some(actions);
-        }
+        self.nav2(cx, &path);
     }
     pub fn nav_to_path(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope, path: &[LiveId]) {
         cx.widget_action(uid, &scope.path, GRouterEvent::NavTo(path[0]));
@@ -215,6 +207,14 @@ impl GRouter {
     pub fn nav_back(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope) {
         let path = scope.path.clone();
         cx.widget_action(uid, &scope.path, GRouterEvent::NavBack(path.last()));
+    }
+    fn nav_history(&mut self, cx: &mut Cx, path: &HeapLiveIdPath) {
+        self.set_visible_page(cx, path);
+        if let Some(mut actions) = self.nav_actions.take() {
+            let _ = actions(self, cx);
+            // set back
+            self.nav_actions = Some(actions);
+        }
     }
     fn nav2(&mut self, cx: &mut Cx, path: &HeapLiveIdPath) {
         self.active_page.as_ref().map(|path| {
@@ -224,12 +224,7 @@ impl GRouter {
                 ty: self.page_type,
             });
         });
-        self.set_visible_page(cx, path);
-        if let Some(mut actions) = self.nav_actions.take() {
-            let _ = actions(self, cx);
-            // set back
-            self.nav_actions = Some(actions);
-        }
+        self.nav_history(cx, path);
     }
     pub fn check_route(&mut self, path: &HeapLiveIdPath) -> PageType {
         if !self.bar_pages.iter().any(|x| x.contains(path).unwrap()) {

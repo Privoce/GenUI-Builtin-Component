@@ -1,4 +1,4 @@
-use makepad_widgets::{id, HeapLiveIdPath, LiveId};
+use makepad_widgets::*;
 
 // #[derive(Default, Debug)]
 // pub enum ActiveRouter {
@@ -6,6 +6,25 @@ use makepad_widgets::{id, HeapLiveIdPath, LiveId};
 //     None,
 //     Active(LiveId),
 // }
+
+#[derive(Clone, Copy, Live, LiveHook, LiveRegister)]
+#[live_ignore]
+pub enum NavMode {
+    #[pick]
+    /// History mode
+    /// - use history to navigate (nav_to or nav_back) till stack is empty
+    /// ```
+    /// nav_to: A -> B -> C -> D
+    /// nav_back: D -> C -> B -> A
+    /// ```
+    History,
+    /// Stack mode
+    /// ```
+    /// nav_to: A -> B -> C -> D
+    /// nav_back: D -> C -> D -> C
+    /// ```
+    Switch,
+}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PageType {
