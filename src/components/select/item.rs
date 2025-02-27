@@ -11,11 +11,13 @@ use super::{GSelectItemClickedParam, GSelectItemEvent};
 live_design! {
     link gen_base;
     use link::shaders::*;
+    use link::gen_theme::*;
     
     pub GSelectItemBase = {{GSelectItem}} {
         width: Fill,
         height: 36.0,
         align: {x: 0.0, y: 0.5},
+        font_family: (FONT_FAMILY),
         draw_item: {
             instance stroke_color: vec4,
             instance stroke_width: 1.4,
