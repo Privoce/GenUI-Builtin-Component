@@ -245,7 +245,7 @@ impl Widget for GSelect {
 }
 
 impl LiveHook for GSelect {
-    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
         if !self.visible {
             return;
         }
@@ -290,8 +290,8 @@ impl LiveHook for GSelect {
                 }
             },
         );
-        self.draw_text.redraw(cx);
-        self.draw_select.redraw(cx);
+        // self.draw_text.redraw(cx);
+        // self.draw_select.redraw(cx);
     }
 }
 

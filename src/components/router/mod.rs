@@ -417,8 +417,22 @@ impl GRouter {
         self.handle_nav_back(cx, actions);
         self.action_nav_to(cx, actions);
         self.indicator_nav_to(cx, &actions).map(|_| {
-            return;
+           return;
         });
+        self.redraw_active(cx);
+    }
+    pub fn redraw_active(&mut self, cx: &mut Cx) {
+        if self.scope_path.is_some(){
+            match self.page_type {
+                PageType::Bar => {
+                    self.gview(id!(bar_pages)).redraw(cx);
+                },
+                PageType::Nav => {
+                    self.gview(id!(nav_pages)).redraw(cx);
+                },
+                PageType::None => {},
+            }
+        }
     }
     /// ## Judget page is eq active page?
     /// - true: eq

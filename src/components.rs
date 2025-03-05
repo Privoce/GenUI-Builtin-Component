@@ -693,7 +693,7 @@ live_design! {
                 spacing: 6.0,
                 icon = <GImage>{
                     visible: false,
-                    src: dep("crate://self/resources/icons/logo.png"),
+                    src: Live(dep("crate://self/resources/icons/logo.png")),
                     height: 16.0,
                     width: 16.0,
                 },
