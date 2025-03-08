@@ -341,6 +341,11 @@ impl GCheckbox {
         let text_focus_color = self.text_focus_color.get(self.theme, 100);
         // selected --------------------------------------------------------------------
         let selected = self.selected.to_f32();
+        if self.selected{
+            self.play_animation(cx, id!(selected.on));
+        }else{
+            self.play_animation(cx, id!(selected.off));
+        }
         // ------------------ apply to draw_checkbox ---------------------------------------
         self.draw_checkbox_wrap.apply_over(
             cx,

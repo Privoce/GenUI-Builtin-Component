@@ -17,6 +17,7 @@ live_design! {
                 self.selected_color,
                 self.selected
             );
+            
         }
 
         fn get_border_color(self) -> vec4{
@@ -41,7 +42,7 @@ live_design! {
             let center = sz + self.border_width;
             sdf.box(self.border_width, self.border_width, sz * 2.0, sz * 2.0, 1.6);
             if self.background_visible == 1.0{
-                sdf.fill_keep(self.get_background_color())
+                sdf.fill(self.get_background_color());
             }
             sdf.stroke(self.get_border_color(), self.border_width);
             match self.check_type {
