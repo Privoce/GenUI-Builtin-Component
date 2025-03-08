@@ -426,7 +426,7 @@ impl Widget for GView {
         match event.hits_with_options(
             cx,
             self.area(),
-            HitOptions::new().with_sweep_area(sweep_area),
+            HitOptions::default().with_sweep_area(sweep_area),
         ) {
             Hit::KeyDown(e) => {
                 if self.grab_key_focus {

@@ -93,7 +93,7 @@ impl Widget for GUpload {
         let hit = event.hits_with_options(
             cx,
             self.area(),
-            HitOptions::new().with_sweep_area(sweep_area),
+            HitOptions::default().with_sweep_area(sweep_area),
         );
 
         self.handle_widget_event(cx, event, scope, hit, sweep_area)

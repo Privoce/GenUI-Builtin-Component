@@ -192,7 +192,7 @@ impl Widget for GButton {
         let hit = event.hits_with_options(
             cx,
             self.area(),
-            HitOptions::new().with_sweep_area(sweep_area),
+            HitOptions::default().with_sweep_area(sweep_area),
         );
 
         self.handle_widget_event(cx, event, hit, sweep_area)

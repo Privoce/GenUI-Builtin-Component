@@ -225,7 +225,7 @@ impl GSelectItem {
         match event.hits_with_options(
             cx,
             self.area(),
-            HitOptions::new().with_sweep_area(sweep_area),
+            HitOptions::default().with_sweep_area(sweep_area),
         ) {
             Hit::FingerHoverIn(_) => {
                 self.animator_play(cx, id!(hover.on));
