@@ -9,8 +9,7 @@ use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 
 use crate::{
-    animatie_fn, event_bool, event_option, prop_getter, prop_setter, ref_event_bool,
-    ref_event_option, set_event, set_event_bool,
+    animatie_fn, event_option, prop_getter, prop_setter, ref_event_option, set_event,
     shader::{draw_text::DrawGText, draw_view::DrawGView},
     themes::Themes,
     utils::{get_font_family, BoolToF32, ThemeColor, ToBool},
@@ -337,16 +336,16 @@ impl Widget for GInput {
         }
 
         match event.hits(cx, self.draw_input.area()) {
-            Hit::KeyFocus(_) => {
+            Hit::KeyFocus(e) => {
                 self.animator_play(cx, id!(focus.on));
                 self.force_new_edit_group();
                 // TODO: Select all if necessary
-                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocus);
+                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocus(e));
             }
-            Hit::KeyFocusLost(_) => {
+            Hit::KeyFocusLost(e) => {
                 self.animator_play(cx, id!(focus.off));
                 cx.hide_text_ime();
-                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocusLost);
+                cx.widget_action(uid, &scope.path, GInputEvent::KeyFocusLost(e));
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::ArrowLeft,
@@ -467,9 +466,20 @@ impl Widget for GInput {
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Escape,
-                ..
+                is_repeat,
+                modifiers,
+                time,
             }) => {
-                cx.widget_action(uid, &scope.path, GInputEvent::Escaped);
+                cx.widget_action(
+                    uid,
+                    &scope.path,
+                    GInputEvent::Escaped(KeyEvent {
+                        key_code: KeyCode::Escape,
+                        is_repeat,
+                        modifiers,
+                        time,
+                    }),
+                );
             }
             Hit::KeyDown(KeyEvent {
                 key_code: KeyCode::Backspace,
@@ -816,12 +826,11 @@ impl GInput {
         area_selection, draw_selection
     }
     event_option! {
-        changed: GInputEvent::Changed => GInputChangedParam
-    }
-    event_bool! {
-        key_focus: GInputEvent::KeyFocus,
-        key_focus_lost: GInputEvent::KeyFocusLost,
-        escaped: GInputEvent::Escaped
+        changed: GInputEvent::Changed => GInputChangedParam,
+        escaped: GInputEvent::Escaped => KeyEvent,
+        key_down_unhandled: GInputEvent::KeyDownUnhandled => KeyEvent,
+        key_focus: GInputEvent::KeyFocus => KeyFocusEvent,
+        key_focus_lost: GInputEvent::KeyFocusLost => KeyFocusEvent
     }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.draw_input.apply_over(
@@ -1241,13 +1250,12 @@ impl GInputRef {
             get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}}
         }
     }
-    ref_event_bool! {
-        key_focus,
-        key_focus_lost,
-        escaped
-    }
     ref_event_option! {
-        changed => GInputChangedParam
+        changed => GInputChangedParam,
+        key_focus => KeyFocusEvent,
+        key_focus_lost => KeyFocusEvent,
+        escaped => KeyEvent,
+        key_down_unhandled => KeyEvent
     }
     animatie_fn! {
         animate_hover_on,
@@ -1292,13 +1300,12 @@ impl GInputRef {
 }
 
 impl GInputSet {
-    set_event_bool! {
-        key_focus,
-        key_focus_lost,
-        escaped
-    }
     set_event! {
-        changed => GInputChangedParam
+        changed => GInputChangedParam,
+        key_focus => KeyFocusEvent,
+        key_focus_lost => KeyFocusEvent,
+        escaped => KeyEvent,
+        key_down_unhandled => KeyEvent
     }
 }
 

@@ -5,12 +5,7 @@ use event::*;
 use makepad_widgets::*;
 
 use crate::{
-    event_bool, prop_getter, prop_setter, ref_area, ref_event_bool, ref_redraw, ref_render,
-    set_event_bool, set_scope_path,
-    shader::draw_loading::{DrawGLoading, GLoadingType},
-    themes::Themes,
-    utils::{BoolToF32, ThemeColor},
-    widget_area,
+    event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_loading::{DrawGLoading, GLoadingType}, themes::Themes, utils::{BoolToF32, ThemeColor}, widget_area
 };
 
 live_design! {
@@ -106,9 +101,17 @@ impl LiveHook for GLoading {
         if self.pre_state != self.animation_key {
             let uid = self.widget_uid();
             if self.pre_state {
-                cx.widget_action(uid, &Scope::empty().path, GLoadingEvent::Closed);
+                cx.widget_action(
+                    uid,
+                    &Scope::empty().path,
+                    GLoadingEvent::Closed(GLoadingEventParam),
+                );
             } else {
-                cx.widget_action(uid, &Scope::empty().path, GLoadingEvent::Opened);
+                cx.widget_action(
+                    uid,
+                    &Scope::empty().path,
+                    GLoadingEvent::Opened(GLoadingEventParam),
+                );
             }
         }
     }
@@ -119,21 +122,29 @@ impl GLoading {
     widget_area! {
         area, draw_loading
     }
-    event_bool! {
-        opened: GLoadingEvent::Opened,
-        closed: GLoadingEvent::Closed
+    event_option! {
+        opened: GLoadingEvent::Opened => GLoadingEventParam,
+        closed: GLoadingEvent::Closed => GLoadingEventParam
     }
     pub fn active_opened(&mut self, cx: &mut Cx) -> () {
         if self.event_key {
             if let Some(path) = self.scope_path.as_ref() {
-                cx.widget_action(self.widget_uid(), path, GLoadingEvent::Opened);
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    GLoadingEvent::Opened(GLoadingEventParam),
+                );
             }
         }
     }
     pub fn active_closed(&mut self, cx: &mut Cx) -> () {
         if self.event_key {
             if let Some(path) = self.scope_path.as_ref() {
-                cx.widget_action(self.widget_uid(), path, GLoadingEvent::Closed);
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    GLoadingEvent::Closed(GLoadingEventParam),
+                );
             }
         }
     }
@@ -190,9 +201,9 @@ impl GLoadingRef {
     ref_redraw!();
     ref_render!();
     ref_area!();
-    ref_event_bool! {
-        opened,
-        closed
+    ref_event_option! {
+        opened => GLoadingEventParam,
+        closed => GLoadingEventParam
     }
     pub fn open(&mut self, cx: &mut Cx) -> () {
         if let Some(mut c_ref) = self.borrow_mut() {
@@ -219,8 +230,8 @@ impl GLoadingRef {
 }
 
 impl GLoadingSet {
-    set_event_bool! {
-        opened,
-        closed
+    set_event! {
+        opened => GLoadingEventParam,
+        closed => GLoadingEventParam
     }
 }
