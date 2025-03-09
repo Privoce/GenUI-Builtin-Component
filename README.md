@@ -1,7 +1,7 @@
-# GEN Components (v0.2.0)
+# GEN Components (v0.2.1)
 
-- version: `v0.2.0`
-- update date: 2025-01-20
+- version: `v0.2.1`
+- update date: 2025-03-09
 - author: [Will-YiFei Sheng](syf20020816@outlook.com)
 - makepad_widget version: `v0.6.0`
 - makepad branch: `gen_ui`
