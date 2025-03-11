@@ -140,17 +140,17 @@ impl Widget for GMenuItem {
         }
 
         match event.hits(cx, self.area()) {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 self.animator_play(cx, id!(hover.focus));
             }
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 self.animator_play(cx, id!(hover.on));
             }
             Hit::FingerHoverOut(_) => {
                 self.animator_play(cx, id!(hover.off));
             }
-            Hit::FingerHoverOver(f_h) => {
+            Hit::FingerHoverOver(f_h, _) => {
                 cx.widget_action(
                     self.widget_uid(),
                     &scope.path,

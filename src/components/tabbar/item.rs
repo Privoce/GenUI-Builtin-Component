@@ -157,7 +157,7 @@ impl Widget for GTabbarItem {
         default_handle_animation!(self, cx, event);
 
         match event.hits(cx, self.area()) {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(self.area());
                 }
@@ -166,7 +166,7 @@ impl Widget for GTabbarItem {
                     self.animate_focus_on(cx);
                 }
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 if !self.selected {
                     self.play_animation(cx, id!(hover.on));

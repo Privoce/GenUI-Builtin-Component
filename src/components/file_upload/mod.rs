@@ -181,7 +181,7 @@ impl GUpload {
         let uid = self.widget_uid();
 
         match hit {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(focus_area);
                 }

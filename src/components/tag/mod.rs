@@ -515,13 +515,13 @@ impl GTag {
     pub fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, focus_area: Area) {
         default_handle_animation!(self, cx, event);
         match hit {
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 default_hit_hover_in!(self, cx, Some(e));
             }
             Hit::FingerHoverOut(e) => {
                 default_hit_hover_out!(self, cx, Some(e));
             }
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 default_hit_finger_down!(self, cx, focus_area, Some(e));
             }
             Hit::FingerUp(e) => {

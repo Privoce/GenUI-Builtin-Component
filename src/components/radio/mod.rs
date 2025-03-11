@@ -534,13 +534,13 @@ impl GRadio {
         default_handle_animation!(self, cx, event);
 
         match hit {
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 default_hit_hover_in!(self, cx, Some(e));
             }
             Hit::FingerHoverOut(e) => {
                 default_hit_hover_out!(self, cx, Some(e));
             }
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(focus_area);
                 }

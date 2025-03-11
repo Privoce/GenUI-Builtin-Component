@@ -438,22 +438,22 @@ impl Widget for GView {
                     self.active_key_up(cx, e);
                 }
             }
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(self.area());
                 }
                 self.play_animation(cx, id!(hover.focus));
                 self.active_focus(cx, e);
             }
-            Hit::FingerMove(e) => {
+            Hit::FingerMove(e, _) => {
                 self.active_drag(cx, e);
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 self.play_animation(cx, id!(hover.on));
                 self.active_hover_in(cx, e);
             }
-            Hit::FingerHoverOver(e) => {
+            Hit::FingerHoverOver(e, _) => {
                 self.active_hover_over(cx, e);
             }
             Hit::FingerHoverOut(e) => {
@@ -756,22 +756,22 @@ impl Widget for GView {
                     self.active_key_up(cx, e);
                 }
             }
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(self.area());
                 }
                 self.play_animation(cx, id!(hover.focus));
                 self.active_focus(cx, e);
             }
-            Hit::FingerMove(e) => {
+            Hit::FingerMove(e, _) => {
                 self.active_drag(cx, e);
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 self.play_animation(cx, id!(hover.on));
                 self.active_hover_in(cx, e);
             }
-            Hit::FingerHoverOver(e) => {
+            Hit::FingerHoverOver(e, _) => {
                 self.active_hover_over(cx, e);
             }
             Hit::FingerHoverOut(e) => {

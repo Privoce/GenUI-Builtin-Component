@@ -225,7 +225,7 @@ impl Widget for GSelect {
         }
 
         match event.hits_with_sweep_area(cx, self.area(), self.area()) {
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 set_cursor(cx, self.cursor.as_ref());
                 self.animator_play(cx, id!(hover.on));
             }

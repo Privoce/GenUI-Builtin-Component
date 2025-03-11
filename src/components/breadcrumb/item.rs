@@ -292,10 +292,10 @@ impl GBreadCrumbItem {
     ) {
         default_handle_animation!(self, cx, event);
         match hit {
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 default_hit_finger_down!(self, cx, focus_area, Some(e));
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 default_hit_hover_in!(self, cx, Some(e));
             }
             Hit::FingerHoverOut(e) => {

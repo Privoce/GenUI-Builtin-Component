@@ -192,7 +192,7 @@ impl Widget for GTabButton {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         let uid = self.widget_uid();
         match event.hits(cx, self.draw_tab_btn.area()) {
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 set_cursor(cx, Some(&MouseCursor::Hand));
                 cx.widget_action(uid, &scope.path, GTabButtonEvent::HoverIn);
             }
@@ -251,7 +251,7 @@ impl GTabButton {
         action_fn: &mut dyn FnMut(&mut Cx, GTabButtonEvent),
     ) {
         match event.hits(cx, self.draw_tab_btn.area()) {
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 set_cursor(cx, Some(&MouseCursor::Hand));
             }
             Hit::FingerHoverOut(f_out) => {

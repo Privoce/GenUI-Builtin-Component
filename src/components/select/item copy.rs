@@ -233,7 +233,7 @@ impl GSelectItem {
             Hit::FingerHoverOut(_) => {
                 self.animator_play(cx, id!(hover.off));
             }
-            Hit::FingerDown(_) => {}
+            Hit::FingerDown(_, _) => {}
             Hit::FingerUp(se) => {
                 self.selected = !self.selected;
                 

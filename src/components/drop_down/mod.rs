@@ -329,13 +329,13 @@ impl Widget for GDropDown {
             //     // self.draw_view.redraw(cx);
             // }
             // template remove -------------------------------------------------------------------
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 cx.set_key_focus(self.area());
                 if self.trigger_mode.is_press() {
                     self.open_inner(cx, GDropDownToggleKind::Press(e));
                 }
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 cx.set_cursor(MouseCursor::Hand);
                 if self.trigger_mode.is_hover() {
                     self.open_inner(cx, GDropDownToggleKind::Hover(e));

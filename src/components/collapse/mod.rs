@@ -233,12 +233,12 @@ impl Widget for GCollapse {
         }
 
         match event.hits(cx, self.area_header()) {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(sweep_area);
                 }
             }
-            Hit::FingerHoverIn(f_in) => {
+            Hit::FingerHoverIn(f_in, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 cx.widget_action(uid, &scope.path, GCollapseEvent::Hover(f_in.clone()));
             }
@@ -277,12 +277,12 @@ impl Widget for GCollapse {
         }
 
         match event.hits(cx, self.area_header()) {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(self.area());
                 }
             }
-            Hit::FingerHoverIn(f_in) => {
+            Hit::FingerHoverIn(f_in, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 cx.widget_action(uid, &scope.path, GCollapseEvent::Hover(f_in.clone()));
             }

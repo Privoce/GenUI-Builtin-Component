@@ -483,7 +483,7 @@ impl GLink {
         default_handle_animation!(self, cx, event);
 
         match hit {
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 // if self.grab_key_focus {
                 //     cx.set_key_focus(focus_area);
                 // }
@@ -491,7 +491,7 @@ impl GLink {
                 // self.animator_play(cx, id!(hover.focus));
                 default_hit_finger_down!(self, cx, focus_area, e);
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 // let _ = set_cursor(cx, self.cursor.as_ref());
                 // self.animator_play(cx, id!(hover.on));
                 // cx.widget_action(uid, &scope.path, GLinkEvent::Hover(h.clone()));

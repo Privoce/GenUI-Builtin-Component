@@ -643,14 +643,14 @@ impl Widget for GInput {
                     );
                 }
             }
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 cx.set_cursor(MouseCursor::Text);
                 self.animator_play(cx, id!(hover.on));
             }
             Hit::FingerHoverOut(_) => {
                 self.animator_play(cx, id!(hover.off));
             }
-            Hit::FingerDown(FingerDownEvent { abs, tap_count, .. }) => {
+            Hit::FingerDown(FingerDownEvent { abs, tap_count, .. }, _) => {
                 let event = DrawEvent::default();
                 let mut cx = Cx2d::new(cx, &event);
                 let index_affinity = self.position_to_index_affinity(
@@ -667,7 +667,7 @@ impl Widget for GInput {
                 self.set_key_focus(&mut *cx);
                 self.draw_input.redraw(&mut *cx);
             }
-            Hit::FingerMove(FingerMoveEvent { abs, tap_count, .. }) => {
+            Hit::FingerMove(FingerMoveEvent { abs, tap_count, .. }, _) => {
                 let event: DrawEvent = DrawEvent::default();
                 let mut cx = Cx2d::new(cx, &event);
                 let index_affinity = self.position_to_index_affinity(

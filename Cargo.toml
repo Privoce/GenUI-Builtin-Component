@@ -14,8 +14,9 @@ keys = ["makepad", "widgets", "ui", "components", "genui"]
 base64 = "0.22.1"
 imghdr = "0.7.0"
 # makepad-widgets = {path="/Users/shengyifei/projects/makepad/robrix_makepad/widgets"}
-makepad-widgets = { git = "https://github.com/kevinaboos/makepad", branch = "hits_without_mark_as_handled" }
+# makepad-widgets = { git = "https://github.com/kevinaboos/makepad", branch = "hits_without_mark_as_handled" }
 # makepad-widgets = { path = "/Users/shengyifei/projects/makepad/makepad/widgets" }
+makepad-widgets = { git = "https://github.com/kevinaboos/makepad", branch = "hits_handling_redesign" }
 open = { version = "5.3.0", optional = true }
 reqwest = { version = "0.12.12", features = ["blocking"] }
 rfd = "0.15.0"

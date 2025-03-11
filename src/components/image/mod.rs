@@ -262,12 +262,12 @@ impl GImage {
     }
     pub fn handle_widget_event(&mut self, cx: &mut Cx, hit: Hit, focus_area: Area) {
         match hit {
-            Hit::FingerDown(_) => {
+            Hit::FingerDown(_, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(focus_area);
                 }
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 let _ = set_cursor(cx, self.cursor.as_ref());
                 self.active_hover_in(cx, e);
             }

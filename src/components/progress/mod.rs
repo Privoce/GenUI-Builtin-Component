@@ -424,7 +424,7 @@ impl GProgress {
         default_handle_animation!(self, cx, event);
 
         match hit {
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 if !self.read_only {
                     let _ = set_cursor(cx, self.cursor.as_ref());
                 }
@@ -435,7 +435,7 @@ impl GProgress {
                 self.play_animation(cx, id!(hover.off));
                 self.active_hover_out(cx, Some(e));
             }
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 if self.grab_key_focus {
                     cx.set_key_focus(focus_area);
                 }
@@ -457,7 +457,7 @@ impl GProgress {
                     self.active_focus_lost(cx, Some(e));
                 }
             }
-            Hit::FingerMove(e) => {
+            Hit::FingerMove(e, _) => {
                 if !self.read_only {
                     match self.progress_type {
                         GProgressType::Horizontal => {

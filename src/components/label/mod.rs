@@ -193,7 +193,7 @@ impl Widget for GLabel {
         }
         default_handle_animation!(self, cx, event);
         match event.hits(cx, self.area()) {
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 default_hit_hover_in!(self, cx, e.clone());
                 UnifiedEvent::hover_in(cx, self.widget_uid(), &scope.path, e);
             }
@@ -201,7 +201,7 @@ impl Widget for GLabel {
                 default_hit_hover_out!(self, cx, e.clone());
                 UnifiedEvent::hover_out(cx, self.widget_uid(), &scope.path, e);
             }
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 default_hit_finger_down!(self, cx, self.area(), e);
             }
             Hit::FingerUp(e) => {

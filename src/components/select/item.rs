@@ -245,13 +245,13 @@ impl GSelectItem {
             self.area(),
             HitOptions::default().with_sweep_area(sweep_area),
         ) {
-            Hit::FingerHoverIn(_) => {
+            Hit::FingerHoverIn(_, _) => {
                 self.animator_play(cx, id!(hover.on));
             }
             Hit::FingerHoverOut(_) => {
                 self.animator_play(cx, id!(hover.off));
             }
-            Hit::FingerDown(_) => {}
+            Hit::FingerDown(_, _) => {}
             Hit::FingerUp(se) => {
                 self.selected = !self.selected;
 

@@ -311,10 +311,10 @@ impl GSvg {
         default_handle_animation!(self, cx, event);
 
         match hit {
-            Hit::FingerDown(e) => {
+            Hit::FingerDown(e, _) => {
                 default_hit_finger_down!(self, cx, focus_area, e);
             }
-            Hit::FingerHoverIn(e) => {
+            Hit::FingerHoverIn(e, _) => {
                 default_hit_hover_in!(self, cx, e);
             }
             Hit::FingerHoverOut(e) => {
