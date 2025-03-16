@@ -8,17 +8,10 @@ use makepad_widgets::*;
 use shader::draw_text::TextWrap;
 
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_hover_in,
-    default_hit_hover_out, event_option, play_animation, ref_getter, prop_setter, ref_area,
-    ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
-    set_text_and_visible_fn,
-    shader::{
+    active_event, animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_setter, pure_after_apply, ref_area, ref_area_ext, ref_event_option, ref_getter, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, set_text_and_visible_fn, setter, shader::{
         draw_check_box::DrawGCheckbox, draw_radio::GChooseType, draw_text::DrawGText,
         draw_view::DrawGView,
-    },
-    themes::Themes,
-    utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool},
-    widget_area,
+    }, themes::Themes, utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -248,18 +241,23 @@ impl Widget for GCheckbox {
     set_text_and_visible_fn!();
 }
 
-impl LiveHook for GCheckbox {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GCheckbox render error: {:?}", e);
-        }
-    }
+// impl LiveHook for GCheckbox {
+//     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+//         if !self.visible {
+//             return;
+//         }
+//         if let Err(e) = self.render(cx) {
+//             error!("GCheckbox render error: {:?}", e);
+//         }
+//     }
+// }
+impl LiveHook for GCheckbox{
+    pure_after_apply!();
 }
 
+
 impl GCheckbox {
+    render_after_apply!("GCheckbox");
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -400,15 +398,15 @@ impl GCheckbox {
         }
         Ok(())
     }
-    pub fn toggle(&mut self, cx: &mut Cx, selected: bool) -> () {
-        self.selected = selected;
-        self.draw_checkbox.selected = selected.to_f32();
-        if selected {
-            self.play_animation(cx, id!(selected.on));
-        } else {
-            self.play_animation(cx, id!(selected.off));
-        }
-    }
+    // pub fn toggle(&mut self, cx: &mut Cx, selected: bool) -> () {
+    //     self.selected = selected;
+    //     self.draw_checkbox.selected = selected.to_f32();
+    //     if selected {
+    //         self.play_animation(cx, id!(selected.on));
+    //     } else {
+    //         self.play_animation(cx, id!(selected.off));
+    //     }
+    // }
     pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
         self.clear_animation(cx);
         self.draw_checkbox.apply_over(
@@ -552,19 +550,7 @@ impl GCheckbox {
     pub fn is_selected(&self) -> bool {
         self.selected
     }
-}
-
-impl GCheckboxRef {
-    pub fn set_selected(&self, cx: &mut Cx, selected: bool) -> () {
-        self.borrow_mut()
-            .map(|mut c_ref| c_ref.toggle(cx, selected));
-    }
-    pub fn set_text(&self, cx: &mut Cx, text: String) -> () {
-        if let Some(mut c_ref) = self.borrow_mut() {
-            c_ref.set_text(cx, &text);
-        }
-    }
-    prop_setter! {
+    setter! {
         GCheckbox{
             set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
             set_color(color: String) {|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
@@ -671,6 +657,19 @@ impl GCheckboxRef {
             get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
         }
     }
+}
+
+impl GCheckboxRef {
+    pub fn set_selected(&self, cx: &mut Cx, selected: bool) -> () {
+        self.borrow_mut()
+            .map(|mut c_ref| c_ref.toggle(cx, selected));
+    }
+    pub fn set_text(&self, cx: &mut Cx, text: String) -> () {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            c_ref.set_text(cx, &text);
+        }
+    }
+    
     ref_area!();
     ref_area_ext! {
         area_checkbox,

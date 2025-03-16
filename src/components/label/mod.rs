@@ -262,7 +262,7 @@ impl GLabel {
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_text.redraw(cx);
     }
-    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let color = self.color.get(self.theme, 50);
         let stroke_hover_color = self.stroke_hover_color.get(self.theme, 25);
         let stroke_focus_color = self.stroke_focus_color.get(self.theme, 100);
@@ -346,15 +346,15 @@ impl GLabel {
     }
     setter! {
         GLabel{
-            set_theme(theme: Themes){|c| {c.theme = theme; Ok(())}},
-            set_color(color: String){|c| {c.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_stroke_hover_color(color: String){|c| {c.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_stroke_focus_color(color: String){|c| {c.stroke_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_font_size(size: f64){|c| {c.font_size = size; Ok(())}},
+            set_theme(theme: Themes){|c| {c.theme = theme; c.render()}},
+            set_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); c.draw_text.color = color;  Ok(())}},
+            set_stroke_hover_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_stroke_focus_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_focus_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_font_size(size: f64){|c| {c.font_size = size; c.draw_text.text_style.font_size = size; Ok(())}},
             set_cursor(cursor: MouseCursor){|c| {c.cursor.replace(cursor); Ok(())}},
-            set_line_spacing(spacing: f64){|c| {c.line_spacing = spacing; Ok(())}},
-            set_height_factor(factor: f64){|c| {c.height_factor = factor; Ok(())}},
-            set_wrap(wrap: TextWrap){|c| {c.wrap = wrap; Ok(())}},
+            set_line_spacing(spacing: f64){|c| {c.line_spacing = spacing; c.draw_text.text_style.line_spacing = spacing; Ok(())}},
+            set_height_factor(factor: f64){|c| {c.height_factor = factor; c.draw_text.text_style.height_factor = factor; Ok(())}},
+            set_wrap(wrap: TextWrap){|c| {c.wrap = wrap; c.draw_text.wrap = wrap; Ok(())}},
             set_font_family(font_family: LiveDependency){|c| {c.font_family = font_family; Ok(())}},
             set_visible(visible: bool){|c| {c.visible = visible; Ok(())}},
             set_abs_pos(pos: DVec2){|c| {c.walk.abs_pos.replace(pos); Ok(())}},
@@ -371,26 +371,26 @@ impl GLabel {
     }
     getter! {
         GLabel{
-            get_theme(Themes) {|c_ref| {c_ref.theme}},
-            get_stroke_hover_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_hover_color)}},
-            get_stroke_focus_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_focus_color)}},
-            get_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
-            get_font_size(f64) {|c_ref| {c_ref.font_size}},
-            get_cursor(MouseCursor) {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_line_spacing(f64) {|c_ref| {c_ref.draw_text.text_style.line_spacing}},
-            get_height_factor(f64) {|c_ref| {c_ref.height_factor}},
-            get_wrap(TextWrap) {|c_ref| {c_ref.wrap.clone()}},
-            get_visible(bool) {|c_ref| {c_ref.visible}},
-            get_abs_pos(DVec2) {|c_ref| {c_ref.walk.abs_pos.unwrap_or_default()}},
-            get_margin(Margin) {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {|c_ref| {c_ref.walk.width}},
-            get_padding(Padding) {|c_ref| {c_ref.padding}},
-            get_align(Align) {|c_ref| {c_ref.align}},
-            get_animation_key(bool) {|c_ref| {c_ref.animation_key}},
-            get_event_key(bool) {|c_ref| {c_ref.event_key}},
-            get_grab_key_focus(bool) {|c_ref| {c_ref.grab_key_focus}},
-            get_text(String) {|c_ref| {c_ref.text.as_ref().to_string()}}
+            get_theme(Themes) {|c| {c.theme}},
+            get_stroke_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_hover_color)}},
+            get_stroke_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_focus_color)}},
+            get_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.color)}},
+            get_font_size(f64) {|c| {c.font_size}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_line_spacing(f64) {|c| {c.draw_text.text_style.line_spacing}},
+            get_height_factor(f64) {|c| {c.height_factor}},
+            get_wrap(TextWrap) {|c| {c.wrap.clone()}},
+            get_visible(bool) {|c| {c.visible}},
+            get_abs_pos(DVec2) {|c| {c.walk.abs_pos.unwrap_or_default()}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_padding(Padding) {|c| {c.padding}},
+            get_align(Align) {|c| {c.align}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_event_key(bool) {|c| {c.event_key}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_text(String) {|c| {c.text.as_ref().to_string()}}
         }
     }
 }

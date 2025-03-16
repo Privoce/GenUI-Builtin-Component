@@ -335,9 +335,9 @@ macro_rules! ref_animate_state {
 #[macro_export]
 macro_rules! ref_render {
     () => {
-        pub fn render(&self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+        pub fn render(&self) -> Result<(), Box<dyn std::error::Error>> {
             if let Some(mut c_ref) = self.borrow_mut() {
-                c_ref.render(cx)?;
+                c_ref.render()?;
             }
             Ok(())
         }
