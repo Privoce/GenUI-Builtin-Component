@@ -5,10 +5,7 @@ pub use event::*;
 
 use crate::utils::{set_cursor, BoolToF32, ThemeColor};
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
-    default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option,
-    play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_play_animation,
-    ref_redraw, ref_render, set_event, set_scope_path, widget_area,
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option, getter, play_animation, pure_after_apply, ref_area, ref_event_option, ref_getter_setter, ref_play_animation, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, setter, widget_area
 };
 use crate::{shader::draw_view::DrawGView, themes::Themes};
 use makepad_widgets::*;
@@ -228,18 +225,23 @@ impl Widget for GButton {
     }
 }
 
+// impl LiveHook for GButton {
+//     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+//         if !self.visible {
+//             return;
+//         }
+//         if let Err(e) = self.render(cx) {
+//             error!("GButton render error: {:?}", e);
+//         }
+//     }
+// }
+
 impl LiveHook for GButton {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GButton render error: {:?}", e);
-        }
-    }
+    pure_after_apply!();
 }
 
 impl GButton {
+    render_after_apply!("GButton");
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -260,7 +262,7 @@ impl GButton {
         active_focus_lost: GButtonEvent::FocusLost |e: FingerUpEvent| => GButtonFocusLostParam {e},
         active_clicked: GButtonEvent::Clicked |e: FingerUpEvent| => GButtonClickedParam {e}
     }
-    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 500);
         // ------------------ hover color -----------------------------------------------
@@ -272,22 +274,34 @@ impl GButton {
         let shadow_color = self.shadow_color.get(self.theme, 700);
         let background_visible = self.background_visible.to_f32();
         // apply over props to draw_button ----------------------------------------------
-        self.draw_button.apply_over(
-            cx,
-            live! {
-                background_color: (bg_color),
-                background_visible: (background_visible),
-                border_color: (border_color),
-                border_width: (self.border_width),
-                border_radius: (self.border_radius),
-                focus_color: (focus_color),
-                hover_color: (hover_color),
-                shadow_color: (shadow_color),
-                shadow_offset: (self.shadow_offset),
-                spread_radius: (self.spread_radius),
-                blur_radius: (self.blur_radius)
-            },
-        );
+        // self.draw_button.apply_over(
+        //     cx,
+        //     live! {
+        //         background_color: (bg_color),
+        //         background_visible: (background_visible),
+        //         border_color: (border_color),
+        //         border_width: (self.border_width),
+        //         border_radius: (self.border_radius),
+        //         focus_color: (focus_color),
+        //         hover_color: (hover_color),
+        //         shadow_color: (shadow_color),
+        //         shadow_offset: (self.shadow_offset),
+        //         spread_radius: (self.spread_radius),
+        //         blur_radius: (self.blur_radius)
+        //     },
+        // );
+        self.draw_button.background_color = bg_color;
+        self.draw_button.background_visible = background_visible;
+        self.draw_button.border_color = border_color;
+        self.draw_button.border_width = self.border_width;
+        self.draw_button.border_radius = self.border_radius;
+        self.draw_button.focus_color = focus_color;
+        self.draw_button.hover_color = hover_color;
+        self.draw_button.shadow_color = shadow_color;
+        self.draw_button.shadow_offset = self.shadow_offset;
+        self.draw_button.spread_radius = self.spread_radius;
+        self.draw_button.blur_radius = self.blur_radius;
+
         Ok(())
     }
     pub fn clear_animation(&mut self, cx: &mut Cx) {
@@ -357,10 +371,7 @@ impl GButton {
             self.slot.redraw(cx);
         }
     }
-}
-
-impl GButtonRef {
-    prop_setter! {
+    setter! {
         GButton{
             set_theme(theme: Themes){|c_ref| {c_ref.theme = theme; Ok(())}},
             set_background_color(color: String){|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
@@ -392,38 +403,41 @@ impl GButtonRef {
             set_event_key(key: bool){|c_ref| {c_ref.event_key = key; Ok(())}}
         }
     }
-    prop_getter! {
+    getter! {
         GButton{
-            get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.background_color)}},
-            get_background_visible(bool) {||true}, {|c_ref| {c_ref.background_visible}},
-            get_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.hover_color)}},
-            get_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.focus_color)}},
-            get_shadow_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.shadow_color)}},
-            get_spread_radius(f32) {||0.0}, {|c_ref| {c_ref.draw_button.spread_radius}},
-            get_blur_radius(f32) {||4.8}, {|c_ref| {c_ref.draw_button.blur_radius}},
-            get_shadow_offset(Vec2) {||Vec2::default()}, {|c_ref| {c_ref.draw_button.shadow_offset}},
-            get_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.border_color)}},
-            get_border_width(f32) {||0.0}, {|c_ref| {c_ref.draw_button.border_width}},
-            get_border_radius(f32) {||2.0}, {|c_ref| {c_ref.draw_button.border_radius}},
-            get_cursor(MouseCursor) {||MouseCursor::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
-            get_grab_key_focus(bool) {||true}, {|c_ref| {c_ref.grab_key_focus}},
-            get_animation_key(bool) {||true}, {|c_ref| {c_ref.animation_key}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
+            get_theme(Themes) {|c_ref| {c_ref.theme}},
+            get_background_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.background_color)}},
+            get_background_visible(bool) {|c_ref| {c_ref.background_visible}},
+            get_hover_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.hover_color)}},
+            get_focus_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.focus_color)}},
+            get_shadow_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.shadow_color)}},
+            get_spread_radius(f32) {|c_ref| {c_ref.draw_button.spread_radius}},
+            get_blur_radius(f32) {|c_ref| {c_ref.draw_button.blur_radius}},
+            get_shadow_offset(Vec2) {|c_ref| {c_ref.draw_button.shadow_offset}},
+            get_border_color(String) {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_button.border_color)}},
+            get_border_width(f32) {|c_ref| {c_ref.draw_button.border_width}},
+            get_border_radius(f32) {|c_ref| {c_ref.draw_button.border_radius}},
+            get_cursor(MouseCursor){|c_ref| {c_ref.cursor.unwrap_or_default()}},
+            get_visible(bool) {|c_ref| {c_ref.visible}},
+            get_grab_key_focus(bool) {|c_ref| {c_ref.grab_key_focus}},
+            get_animation_key(bool) {|c_ref| {c_ref.animation_key}},
+            get_abs_pos(DVec2) {|c_ref| {c_ref.walk.abs_pos.unwrap_or_default()}},
+            get_margin(Margin) {|c_ref| {c_ref.walk.margin}},
+            get_height(Size) {|c_ref| {c_ref.walk.height}},
+            get_width(Size) {|c_ref| {c_ref.walk.width}},
+            get_scroll(DVec2) {|c_ref| {c_ref.layout.scroll}},
+            get_clip_x(bool) {|c_ref| {c_ref.layout.clip_x}},
+            get_clip_y(bool) {|c_ref| {c_ref.layout.clip_y}},
+            get_padding(Padding) {|c_ref| {c_ref.layout.padding}},
+            get_align(Align) {|c_ref| {c_ref.layout.align}},
+            get_flow(Flow) {|c_ref| {c_ref.layout.flow}},
+            get_spacing(f64) {|c_ref| {c_ref.layout.spacing}},
+            get_event_key(bool) {|c_ref| {c_ref.event_key}}
         }
     }
+}
+
+impl GButtonRef {
     ref_event_option! {
         hover_in => GButtonHoverParam,
         hover_out => GButtonHoverParam,
@@ -446,6 +460,36 @@ impl GButtonRef {
         play_hover_off: id!(hover.off),
         play_focus_on: id!(hover.focus),
         play_focus_off: id!(hover.off)
+    }
+    ref_getter_setter!{
+        get_theme, set_theme -> Themes,
+        get_background_color, set_background_color -> String,
+        get_background_visible, set_background_visible -> bool,
+        get_hover_color, set_hover_color -> String,
+        get_focus_color, set_focus_color -> String,
+        get_shadow_color, set_shadow_color -> String,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_border_color, set_border_color -> String,
+        get_border_width, set_border_width -> f32,
+        get_border_radius, set_border_radius -> f32,
+        get_cursor, set_cursor -> MouseCursor,
+        get_visible, set_visible -> bool,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_abs_pos, set_abs_pos -> DVec2,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_event_key, set_event_key -> bool
     }
 }
 

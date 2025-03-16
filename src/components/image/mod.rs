@@ -15,7 +15,7 @@ use image_cache::{ImageCacheImpl, ImageFit};
 use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
-    active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
+    active_event, event_option, ref_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
     ref_render, set_event, set_scope_path,
     shader::{draw_image::DrawGImage, source::Src},
     utils::set_cursor,
@@ -484,7 +484,7 @@ impl GImageRef {
             set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GImage{
             get_visible(bool) {|| true}, {|c_ref| c_ref.visible},
             get_grab_key_focus(bool) {|| true}, {|c_ref| c_ref.grab_key_focus},

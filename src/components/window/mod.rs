@@ -5,7 +5,7 @@ pub use event::*;
 use makepad_widgets::*;
 use nav_control::NavControl;
 
-use crate::{prop_getter, themes::Themes, utils::ToBool};
+use crate::{ref_getter, themes::Themes, utils::ToBool};
 
 use super::{
     image::GImageWidgetExt,
@@ -558,7 +558,7 @@ impl GWindowRef {
     //         set_offset(offset: f64) {|c_ref| {c_ref.offset = offset;}}
     //     }
     // }
-    prop_getter! {
+    ref_getter! {
         GWindow{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.background_color}},

@@ -281,8 +281,7 @@ impl GRouter {
     /// .map(|_| {
     ///     let router = self.grouter(id!(app_router));
     ///     router.borrow().map(|router| {
-    ///         if !router.scope_path.is_empty() {
-    ///             // if is empty do not do next
+    ///         if router.scope_path.is_some() {
     ///             self.lifetime.next();
     ///         }
     ///     })

@@ -3,7 +3,7 @@ pub mod register;
 use makepad_widgets::*;
 
 use crate::{
-    animatie_fn, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw_mut, ref_render,
+    animatie_fn, ref_getter, prop_setter, ref_area, ref_event_option, ref_redraw_mut, ref_render,
     shader::manual::Direction, themes::Themes, utils::ToBool,
 };
 
@@ -187,7 +187,7 @@ impl GDividerRef {
             set_direction(direction: Direction) {|c_ref| {c_ref.direction = direction; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GDivider{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.background_color)}},

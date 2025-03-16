@@ -10,7 +10,7 @@ use shader::draw_text::TextWrap;
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_hover_in,
-    default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area,
+    default_hit_hover_out, event_option, play_animation, ref_getter, prop_setter, ref_area,
     ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
     set_text_and_visible_fn,
     shader::{
@@ -621,7 +621,7 @@ impl GRadioRef {
             set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GRadio{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},

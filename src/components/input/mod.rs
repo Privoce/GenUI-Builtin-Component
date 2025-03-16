@@ -9,7 +9,7 @@ use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 
 use crate::{
-    animatie_fn, event_option, prop_getter, prop_setter, ref_event_option, set_event,
+    animatie_fn, event_option, ref_getter, prop_setter, ref_event_option, set_event,
     shader::{draw_text::DrawGText, draw_view::DrawGView},
     themes::Themes,
     utils::{get_font_family, BoolToF32, ThemeColor, ToBool},
@@ -1199,7 +1199,7 @@ impl GInputRef {
             set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GInput{
             get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
             get_shadow_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.shadow_color)}},

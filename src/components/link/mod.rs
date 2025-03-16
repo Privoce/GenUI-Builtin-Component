@@ -14,7 +14,7 @@ use crate::utils::open_browser;
 use crate::utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool};
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
-    default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter,
+    default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_getter,
     prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
     set_text_and_visible_fn, widget_area,
 };
@@ -584,7 +584,7 @@ impl GLinkRef {
             set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GLink{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.background_color)}},

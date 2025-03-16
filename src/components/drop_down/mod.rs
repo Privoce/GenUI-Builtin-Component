@@ -8,7 +8,7 @@ use makepad_widgets::*;
 use std::rc::Rc;
 
 use crate::{
-    prop_getter, prop_setter, ref_area, ref_redraw_mut, shader::manual::{CloseMode, PopupMode, Position, TriggerMode}, themes::Themes, utils::ToBool
+    ref_getter, prop_setter, ref_area, ref_redraw_mut, shader::manual::{CloseMode, PopupMode, Position, TriggerMode}, themes::Themes, utils::ToBool
 };
 use icon_atlas::RefCell;
 
@@ -408,7 +408,7 @@ impl GDropDownRef {
             set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
-    prop_getter!{
+    ref_getter!{
         GDropDown{
             get_mode(PopupMode) {|| Default::default()}, {|c_ref| {c_ref.mode}},
             get_position(Position) {|| Default::default()}, {|c_ref| {c_ref.position}},

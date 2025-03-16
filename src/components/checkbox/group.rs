@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::view::GView, event_option, prop_getter, prop_setter, ref_actives, ref_area,
+    components::view::GView, event_option, ref_getter, prop_setter, ref_actives, ref_area,
     ref_event_option, ref_redraw_mut, ref_render, set_event, themes::Themes, utils::ToBool,
 };
 
@@ -229,7 +229,7 @@ impl GCheckboxGroupRef {
             set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
-    prop_getter! {
+    ref_getter! {
         GCheckboxGroup{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_view.background_color)}},

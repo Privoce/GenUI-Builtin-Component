@@ -1,20 +1,5 @@
-/// This macro generates the following functions: `text`, `set_text`, `set_text_and_visible`, `is_visible` in Widget trait
-#[macro_export]
-macro_rules! set_text_and_visible_fn {
-    () => {
-        fn text(&self) -> String {
-            self.text.as_ref().to_string()
-        }
-        fn set_text(&mut self, cx: &mut Cx, v: &str) {
-            self.text.as_mut_empty().push_str(v);
-            self.redraw(cx)
-        }
-        fn is_visible(&self) -> bool {
-            self.visible
-        }
-    };
-}
 
+#[deprecated]
 #[macro_export]
 macro_rules! widget_origin_fn {
     ($T: ty) => {
@@ -504,35 +489,7 @@ macro_rules! check_event_scope {
     };
 }
 
-#[macro_export]
-macro_rules! setter {
-    ($T: ty) => {
-        fn setter<F>(&self, cx: &mut Cx, f: F) -> Result<(), Box<dyn std::error::Error>>
-        where
-            F: FnOnce(&mut std::cell::RefMut<'_, $T>) -> Result<(), Box<dyn std::error::Error>>
-        {
-            if let Some(mut c_ref) = self.borrow_mut() {
-                f(&mut c_ref)?;
-                c_ref.render(cx)?;
-            }
-            Ok(())
-        }
-    };
-}
 
-#[macro_export]
-macro_rules! prop_setter {
-    ($T:ty {$(
-        $fn_name: ident ($arg: ident: $arg_ty: ty) {$code: expr }
-    ),*}) => {
-        crate::setter!($T);
-        $(
-            pub fn $fn_name(&self, cx: &mut Cx, $arg: $arg_ty) -> Result<(), Box<dyn std::error::Error>> {
-                return self.setter(cx, $code);
-            }
-        )*
-    };
-}
 
 #[macro_export]
 macro_rules! prop_setter_where {
@@ -551,26 +508,3 @@ macro_rules! prop_setter_where {
 
 }
 
-#[macro_export]
-macro_rules! prop_getter {
-    ($T:ty {$(
-        $fn_name: ident ($return_ty: ty) {$default: expr} , {$code: expr}
-    ),*}) => {
-        pub fn getter<T, F, D>(&self,default:D, f: F) -> T
-        where
-            F: Fn(&std::cell::Ref<'_, $T>) -> T,
-            D: Fn() -> T
-        {
-            if let Some(c_ref) = self.borrow() {
-                f(&c_ref)
-            } else {
-                default()
-            }
-        }
-        $(
-            pub fn $fn_name(&self) -> $return_ty{
-                self.getter($default, $code)
-            }
-        )*
-    };
-}

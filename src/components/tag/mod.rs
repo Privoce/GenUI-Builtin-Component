@@ -10,7 +10,7 @@ use crate::utils::{get_font_family, set_cursor, BoolToF32, RectExp, ThemeColor, 
 use crate::{
     active_event, animatie_fn, check_event_scope, default_handle_animation,
     default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option,
-    play_animation, prop_getter, prop_setter, ref_area, ref_area_ext, ref_event_option, ref_redraw,
+    play_animation, ref_getter, prop_setter, ref_area, ref_area_ext, ref_event_option, ref_redraw,
     ref_render, set_event, set_scope_path, set_text_and_visible_fn, widget_area,
 };
 use crate::{shader::draw_view::DrawGView, themes::Themes};
@@ -620,7 +620,7 @@ impl GTagRef {
         }
     }
 
-    prop_getter! {
+    ref_getter! {
         GTag{
             get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_tag.background_color)}},

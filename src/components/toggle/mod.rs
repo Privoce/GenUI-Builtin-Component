@@ -6,7 +6,7 @@ use makepad_widgets::*;
 
 
 use crate::{
-    animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_toggle::{DrawGToggle, GToggleType}, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor, ToBool}, widget_area
+    animatie_fn, default_handle_animation, default_hit_hover_in, default_hit_hover_out, event_option, play_animation, ref_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_toggle::{DrawGToggle, GToggleType}, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -348,7 +348,7 @@ impl GToggleRef {
             set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
-    prop_getter!{
+    ref_getter!{
         GToggle{
             get_theme(Themes) {|| Default::default()}, {|c_ref| {c_ref.theme}},
             get_background_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_toggle.background_color)}},
