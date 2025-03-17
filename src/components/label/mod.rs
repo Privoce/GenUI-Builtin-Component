@@ -262,7 +262,7 @@ impl GLabel {
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_text.redraw(cx);
     }
-    pub fn render(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         let color = self.color.get(self.theme, 50);
         let stroke_hover_color = self.stroke_hover_color.get(self.theme, 25);
         let stroke_focus_color = self.stroke_focus_color.get(self.theme, 100);
@@ -346,27 +346,27 @@ impl GLabel {
     }
     setter! {
         GLabel{
-            set_theme(theme: Themes){|c| {c.theme = theme; c.render()}},
-            set_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); c.draw_text.color = color;  Ok(())}},
-            set_stroke_hover_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
-            set_stroke_focus_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_focus_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
-            set_font_size(size: f64){|c| {c.font_size = size; c.draw_text.text_style.font_size = size; Ok(())}},
-            set_cursor(cursor: MouseCursor){|c| {c.cursor.replace(cursor); Ok(())}},
-            set_line_spacing(spacing: f64){|c| {c.line_spacing = spacing; c.draw_text.text_style.line_spacing = spacing; Ok(())}},
-            set_height_factor(factor: f64){|c| {c.height_factor = factor; c.draw_text.text_style.height_factor = factor; Ok(())}},
-            set_wrap(wrap: TextWrap){|c| {c.wrap = wrap; c.draw_text.wrap = wrap; Ok(())}},
-            set_font_family(font_family: LiveDependency){|c| {c.font_family = font_family; Ok(())}},
-            set_visible(visible: bool){|c| {c.visible = visible; Ok(())}},
-            set_abs_pos(pos: DVec2){|c| {c.walk.abs_pos.replace(pos); Ok(())}},
-            set_margin(margin: Margin){|c| {c.walk.margin = margin; Ok(())}},
-            set_height(height: Size){|c| {c.walk.height = height; Ok(())}},
-            set_width(width: Size){|c| {c.walk.width = width; Ok(())}},
-            set_padding(padding: Padding){|c| {c.padding = padding; Ok(())}},
-            set_align(align: Align){|c| {c.align = align; Ok(())}},
-            set_animation_key(animation_key: bool){|c| {c.animation_key = animation_key; Ok(())}},
-            set_event_key(event_key: bool){|c| {c.event_key = event_key; Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool){|c| {c.grab_key_focus = grab_key_focus; Ok(())}},
-            set_text(text: String){|c| {c.text.as_mut_empty().push_str(&text); Ok(())}}
+            set_theme(theme: Themes){|c, cx| {c.theme = theme; c.render(cx)}},
+            set_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); c.draw_text.color = color;  Ok(())}},
+            set_stroke_hover_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_stroke_focus_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_focus_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_font_size(size: f64){|c, _cx| {c.font_size = size; c.draw_text.text_style.font_size = size; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c, _cx| {c.cursor.replace(cursor); Ok(())}},
+            set_line_spacing(spacing: f64){|c, _cx| {c.line_spacing = spacing; c.draw_text.text_style.line_spacing = spacing; Ok(())}},
+            set_height_factor(factor: f64){|c, _cx| {c.height_factor = factor; c.draw_text.text_style.height_factor = factor; Ok(())}},
+            set_wrap(wrap: TextWrap){|c, _cx| {c.wrap = wrap; c.draw_text.wrap = wrap; Ok(())}},
+            set_font_family(font_family: LiveDependency){|c, _cx| {c.font_family = font_family; Ok(())}},
+            set_visible(visible: bool){|c, _cx| {c.visible = visible; Ok(())}},
+            set_abs_pos(pos: DVec2){|c, _cx| {c.walk.abs_pos.replace(pos); Ok(())}},
+            set_margin(margin: Margin){|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size){|c, _cx| {c.walk.width = width; Ok(())}},
+            set_padding(padding: Padding){|c, _cx| {c.padding = padding; Ok(())}},
+            set_align(align: Align){|c, _cx| {c.align = align; Ok(())}},
+            set_animation_key(animation_key: bool){|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool){|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_text(text: String){|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}}
         }
     }
     getter! {

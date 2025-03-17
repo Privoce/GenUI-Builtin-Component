@@ -11,7 +11,7 @@ macro_rules! render_after_apply {
             if !self.visible {
                 return;
             }
-            if let Err(e) = self.render() {
+            if let Err(e) = self.render(cx) {
                 error!("{} render error: {:?}", $Name, e);
             }
         }
@@ -42,9 +42,9 @@ macro_rules! setter {
         #[allow(unused_variables)]
         fn setter<F>(&mut self, cx: &mut Cx, f: F) -> Result<(), Box<dyn std::error::Error>>
         where
-            F: FnOnce(&mut $T) -> Result<(), Box<dyn std::error::Error>>
+            F: FnOnce(&mut $T, &mut Cx) -> Result<(), Box<dyn std::error::Error>>
         {
-            f(self)
+            f(self, cx)
         }
 
         $(

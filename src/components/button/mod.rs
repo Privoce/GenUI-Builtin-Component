@@ -262,7 +262,7 @@ impl GButton {
         active_focus_lost: GButtonEvent::FocusLost |e: FingerUpEvent| => GButtonFocusLostParam {e},
         active_clicked: GButtonEvent::Clicked |e: FingerUpEvent| => GButtonClickedParam {e}
     }
-    pub fn render(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 500);
         // ------------------ hover color -----------------------------------------------
@@ -373,34 +373,34 @@ impl GButton {
     }
     setter! {
         GButton{
-            set_theme(theme: Themes){|c| {c.theme = theme; c.render()}},
-            set_background_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.background_color.replace(color); c.draw_button.background_color = color; Ok(())}},
-            set_background_visible(visible: bool){|c| {c.background_visible = visible; c.draw_button.background_visible = visible.to_f32(); Ok(())}},
-            set_hover_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.hover_color.replace(color); c.draw_button.hover_color = color; Ok(())}},
-            set_focus_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.focus_color.replace(color); c.draw_button.focus_color = color; Ok(())}},
-            set_shadow_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.shadow_color.replace(color); c.draw_button.shadow_color = color; Ok(())}},
-            set_spread_radius(radius: f32){|c| {c.spread_radius = radius; Ok(())}},
-            set_blur_radius(radius: f32){|c| {c.blur_radius = radius; Ok(())}},
-            set_shadow_offset(offset: Vec2){|c| {c.shadow_offset = offset; Ok(())}},
-            set_border_color(color: String){|c| {let color = crate::utils::hex_to_vec4(&color)?; c.border_color.replace(color); c.draw_button.border_color = color; Ok(())}},
-            set_border_width(width: f32){|c| {c.border_width = width; Ok(())}},
-            set_border_radius(radius: f32){|c| {c.border_radius = radius; Ok(())}},
-            set_cursor(cursor: MouseCursor){|c| {c.cursor.replace(cursor); Ok(())}},
-            set_visible(visible: bool){|c| {c.visible = visible; Ok(())}},
-            set_grab_key_focus(grab: bool){|c| {c.grab_key_focus = grab; Ok(())}},
-            set_animation_key(key: bool){|c| {c.animation_key = key; Ok(())}},
-            set_abs_pos(pos: DVec2){|c| {c.walk.abs_pos.replace(pos); Ok(())}},
-            set_margin(margin: Margin){|c| {c.walk.margin = margin; Ok(())}},
-            set_height(height: Size){|c| {c.walk.height = height; Ok(())}},
-            set_width(width: Size){|c| {c.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2){|c| {c.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip: bool){|c| {c.layout.clip_x = clip; Ok(())}},
-            set_clip_y(clip: bool){|c| {c.layout.clip_y = clip; Ok(())}},
-            set_padding(padding: Padding){|c| {c.layout.padding = padding; Ok(())}},
-            set_align(align: Align){|c| {c.layout.align = align; Ok(())}},
-            set_flow(flow: Flow){|c| {c.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64){|c| {c.layout.spacing = spacing; Ok(())}},
-            set_event_key(key: bool){|c| {c.event_key = key; Ok(())}}
+            set_theme(theme: Themes){|c, cx| {c.theme = theme; c.render(cx)}},
+            set_background_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.background_color.replace(color); c.draw_button.background_color = color; Ok(())}},
+            set_background_visible(visible: bool){|c, _cx| {c.background_visible = visible; c.draw_button.background_visible = visible.to_f32(); Ok(())}},
+            set_hover_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.hover_color.replace(color); c.draw_button.hover_color = color; Ok(())}},
+            set_focus_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.focus_color.replace(color); c.draw_button.focus_color = color; Ok(())}},
+            set_shadow_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.shadow_color.replace(color); c.draw_button.shadow_color = color; Ok(())}},
+            set_spread_radius(radius: f32){|c, _cx| {c.spread_radius = radius; c.draw_button.spread_radius = radius; Ok(())}},
+            set_blur_radius(radius: f32){|c, _cx| {c.blur_radius = radius; c.draw_button.blur_radius = radius; Ok(())}},
+            set_shadow_offset(offset: Vec2){|c, _cx| {c.shadow_offset = offset; c.draw_button.shadow_offset = offset; Ok(())}},
+            set_border_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.border_color.replace(color); c.draw_button.border_color = color; Ok(())}},
+            set_border_width(width: f32){|c, _cx| {c.border_width = width; c.draw_button.border_width = width; Ok(())}},
+            set_border_radius(radius: f32){|c, _cx| {c.border_radius = radius; c.draw_button.border_radius = radius; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c, _cx| {c.cursor.replace(cursor); Ok(())}},
+            set_visible(visible: bool){|c, _cx| {c.visible = visible; Ok(())}},
+            set_grab_key_focus(grab: bool){|c, _cx| {c.grab_key_focus = grab; Ok(())}},
+            set_animation_key(key: bool){|c, _cx| {c.animation_key = key; Ok(())}},
+            set_abs_pos(pos: DVec2){|c, _cx| {c.walk.abs_pos.replace(pos); Ok(())}},
+            set_margin(margin: Margin){|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size){|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2){|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip: bool){|c, _cx| {c.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool){|c, _cx| {c.layout.clip_y = clip; Ok(())}},
+            set_padding(padding: Padding){|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align){|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow){|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64){|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_event_key(key: bool){|c, _cx| {c.event_key = key; Ok(())}}
         }
     }
     getter! {
