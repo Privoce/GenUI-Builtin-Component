@@ -3,7 +3,7 @@ use std::fmt::Display;
 use makepad_widgets::*;
 
 use crate::{shader::icon_lib::types::base::Base, utils::hex_to_vec4, };
-#[derive(Live, LiveHook, Clone)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum GOsType {
