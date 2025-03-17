@@ -117,7 +117,7 @@ impl DrawGRadio {
     }
 }
 
-#[derive(Live, LiveHook, Clone)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum GChooseType {
