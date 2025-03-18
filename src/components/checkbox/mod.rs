@@ -659,7 +659,8 @@ impl GCheckbox {
             get_visible(bool) {|c| {c.visible}},
             get_animation_key(bool) {|c| {c.animation_key}},
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
-            get_event_key(bool) {|c| {c.event_key}}
+            get_event_key(bool) {|c| {c.event_key}},
+            get_text(String) {|c| {c.text.as_ref().to_string()}}
         }
     }
 }
@@ -715,7 +716,8 @@ impl GCheckboxRef {
         get_visible, set_visible -> bool,
         get_animation_key, set_animation_key -> bool,
         get_grab_key_focus, set_grab_key_focus -> bool,
-        get_event_key, set_event_key -> bool
+        get_event_key, set_event_key -> bool,
+        get_text, set_text -> String
     }
     ref_area!();
     ref_area_ext! {

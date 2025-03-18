@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::view::GView, event_option, getter, ref_actives, ref_area, ref_event_option, ref_redraw_mut, ref_render, set_event, setter, themes::Themes, utils::ToBool
+    components::view::GView, event_option, getter, ref_actives, ref_area, ref_event_option, ref_getter_setter, ref_redraw_mut, ref_render, set_event, setter, themes::Themes, utils::ToBool
 };
 
 use super::{
@@ -116,7 +116,7 @@ impl GCheckboxGroup {
             set_cursor(cursor: MouseCursor) {|c, _cx| {c.cursor = Some(cursor); Ok(())}},
             set_grab_key_focus(grab: bool) {|c, _cx| {c.grab_key_focus = grab; Ok(())}},
             set_block_signal_event(block: bool) {|c, _cx| {c.block_signal_event = block; Ok(())}},
-            set_abs_pos(pos: DVec2) {|c, _cx| {c.walk.abs_pos.replace(pos); Ok(())}},
+            set_abs_pos(pos: Option<DVec2>) {|c, _cx| {c.walk.abs_pos = pos; Ok(())}},
             set_margin(margin: Margin) {|c, _cx| {c.walk.margin = margin; Ok(())}},
             set_height(height: Size) {|c, _cx| {c.walk.height = height; Ok(())}},
             set_width(width: Size) {|c, _cx| {c.walk.width = width; Ok(())}},
@@ -151,7 +151,7 @@ impl GCheckboxGroup {
             get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
             get_block_signal_event(bool) {|c| {c.block_signal_event}},
-            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos.clone()}},
             get_margin(Margin) {|c| {c.walk.margin}},
             get_height(Size) {|c| {c.walk.height}},
             get_width(Size) {|c| {c.walk.width}},
@@ -162,7 +162,7 @@ impl GCheckboxGroup {
             get_align(Align) {|c| {c.layout.align}},
             get_flow(Flow) {|c| {c.layout.flow}},
             get_spacing(f64) {|c| {c.layout.spacing}},
-            get_dpi_factor(Option<f64>) {|c| {c.dpi_factor}},
+            get_dpi_factor(f64) {|c| {c.dpi_factor.unwrap_or_default()}},
             get_optimize(ViewOptimize) {|c| {c.optimize}},
             get_capture_overload(bool) {|c| {c.capture_overload}},
             get_event_key(bool) {|c| {c.event_key}},
@@ -260,11 +260,40 @@ impl GCheckboxGroup {
 
 #[allow(dead_code)]
 impl GCheckboxGroupRef {
-    pub fn set_selected(&self, cx: &mut Cx, selected: Vec<i32>) -> () {
-        self.borrow_mut()
-            .map(|mut c_ref| c_ref.set_selected(cx, selected));
+    ref_getter_setter!{
+        get_theme, set_theme -> Themes,
+        get_background_color, set_background_color -> String,
+        get_shadow_color, set_shadow_color -> String,
+        get_hover_color, set_hover_color -> String,
+        get_focus_color, set_focus_color -> String,
+        get_border_color, set_border_color -> String,
+        get_border_width, set_border_width -> f64,
+        get_border_radius, set_border_radius -> f64,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_spread_radius, set_spread_radius -> f64,
+        get_blur_radius, set_blur_radius -> f64,
+        get_background_visible, set_background_visible -> bool,
+        get_visible, set_visible -> bool,
+        get_cursor, set_cursor -> MouseCursor,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_block_signal_event, set_block_signal_event -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_dpi_factor, set_dpi_factor -> f64,
+        get_optimize, set_optimize -> ViewOptimize,
+        get_capture_overload, set_capture_overload -> bool,
+        get_event_key, set_event_key -> bool,
+        get_selected, set_selected -> Vec<i32>
     }
-    
     ref_event_option! {
         changed => GCheckboxGroupEventParam
     }
