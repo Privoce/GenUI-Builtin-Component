@@ -5,7 +5,7 @@ use event::*;
 use makepad_widgets::*;
 
 use crate::{
-    event_option, ref_getter, prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path, shader::draw_loading::{DrawGLoading, GLoadingType}, themes::Themes, utils::{BoolToF32, ThemeColor}, widget_area
+    event_option, getter, ref_area, ref_event_option, ref_getter_setter, ref_redraw, ref_render, set_event, set_scope_path, setter, shader::draw_loading::{DrawGLoading, GLoadingType}, themes::Themes, utils::{BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -175,28 +175,39 @@ impl GLoading {
     pub fn redraw(&self, cx: &mut Cx) {
         self.draw_loading.redraw(cx);
     }
+    setter! {
+        GLoading{
+            set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.render(cx)}},
+            set_stroke_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_color.replace(color); c.draw_loading.stroke_color = color; Ok(())}},
+            set_loading_type(ty: GLoadingType) {|c, _cx| {c.loading_type = ty; c.draw_loading.loading_type = ty; Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool) {|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_opened(opened: bool){|c, _cx| {c.draw_loading.opened = opened.to_f32(); Ok(())}}
+        }
+    }
+    getter! {
+        GLoading{
+            get_theme(Themes) {|c| {c.theme}},
+            get_stroke_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_loading.stroke_color)}},
+            get_loading_type(GLoadingType) {|c| {c.loading_type}},
+            get_visible(bool) {|c| {c.visible}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_event_key(bool) {|c| {c.event_key}},
+            get_opened(bool) {|c| {c.draw_loading.opened.to_bool()}}
+        }
+    }
 }
 
 impl GLoadingRef {
-    prop_setter! {
-        GLoading{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_stroke_color(color: String) {|c_ref| {c_ref.stroke_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_loading_type(ty: GLoadingType) {|c_ref| {c_ref.loading_type = ty; Ok(())}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
-        }
-    }
-    ref_getter! {
-        GLoading{
-            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_stroke_color(String) {|| Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_loading.stroke_color)}},
-            get_loading_type(GLoadingType) {|| GLoadingType::default()}, {|c_ref| {c_ref.loading_type}},
-            get_visible(bool) {|| Default::default()}, {|c_ref| {c_ref.visible}},
-            get_animation_key(bool) {|| true}, {|c_ref| {c_ref.animation_key}},
-            get_event_key(bool) {|| true}, {|c_ref| {c_ref.event_key}}
-        }
+    ref_getter_setter! {
+        get_theme, set_theme -> Themes,
+        get_stroke_color, set_stroke_color -> String,
+        get_loading_type, set_loading_type -> GLoadingType,
+        get_visible, set_visible -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_event_key, set_event_key -> bool,
+        get_opened, set_opened -> bool
     }
     ref_redraw!();
     ref_render!();

@@ -1,7 +1,9 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::view::GView, event_option, getter, ref_actives, ref_area, ref_event_option, ref_getter_setter, ref_redraw_mut, ref_render, set_event, setter, themes::Themes, utils::ToBool
+    components::view::GView, event_option, getter, ref_actives, ref_area, ref_event_option,
+    ref_getter_setter, ref_redraw_mut, ref_render, set_event, setter, themes::Themes,
+    utils::ToBool,
 };
 
 use super::{
@@ -94,7 +96,7 @@ impl LiveHook for GRadioGroup {
             self.set_selected(cx, self.selected);
         }
     }
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_apply_from_doc(cx);
     }
 }
@@ -166,7 +168,7 @@ impl GRadioGroup {
         let value = self
             .get(self.selected as usize)
             .and_then(|(_, child)| child.get_value());
-            
+
         if let Some(path) = self.scope_path.as_ref() {
             cx.widget_action(
                 self.widget_uid(),
@@ -262,7 +264,7 @@ impl GRadioGroup {
 }
 
 impl GRadioGroupRef {
-    ref_getter_setter!{
+    ref_getter_setter! {
         get_theme, set_theme -> Themes,
         get_background_color, set_background_color -> String,
         get_shadow_color, set_shadow_color -> String,

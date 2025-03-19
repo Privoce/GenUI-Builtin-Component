@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use makepad_widgets::{DVec2, LiveDependency, LiveId, Rect, Vec2, Vec4};
+use makepad_widgets::{vec2, vec3, vec4, DVec2, LiveDependency, LiveId, Rect, Vec2, Vec3, Vec4};
 
 use crate::themes::{
     ThemeColorValue, ThemeDark, ThemeError, ThemeInfo, ThemePrimary, ThemeSuccess, ThemeWarning,
@@ -172,6 +172,40 @@ pub trait BoolToF32 {
 impl BoolToF32 for bool {
     fn to_f32(&self) -> f32 {
         *self as u8 as f32
+    }
+}
+
+pub trait FloatToVec {
+    fn to_vec2(self) -> Vec2;
+    fn to_vec3(self) -> Vec3;
+    fn to_vec4(self) -> Vec4;
+}
+
+impl FloatToVec for f64 {
+    fn to_vec2(self) -> Vec2 {
+        vec2(self as f32, self as f32)
+    }
+
+    fn to_vec3(self) -> Vec3 {
+        vec3(self as f32, self as f32, self as f32)
+    }
+
+    fn to_vec4(self) -> Vec4 {
+        vec4(self as f32, self as f32, self as f32, self as f32)
+    }
+}
+
+impl FloatToVec for f32 {
+    fn to_vec2(self) -> Vec2 {
+        vec2(self, self)
+    }
+
+    fn to_vec3(self) -> Vec3 {
+        vec3(self, self, self)
+    }
+
+    fn to_vec4(self) -> Vec4 {
+        vec4(self, self, self, self)
     }
 }
 

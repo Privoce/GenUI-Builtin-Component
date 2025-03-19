@@ -9,7 +9,11 @@ use types::*;
 use makepad_widgets::*;
 
 use crate::{
-    animatie_fn, event_option, ref_getter, prop_setter, ref_event_option, ref_render, set_event, shader::{draw_view::DrawGView, manual::Position4}, utils::{set_cursor, BoolToF32}, widget_area
+    animatie_fn, event_option, getter, ref_event_option, ref_getter_setter, ref_render, set_event,
+    setter,
+    shader::{draw_view::DrawGView, manual::Position4},
+    utils::{set_cursor, BoolToF32},
+    widget_area,
 };
 
 live_design! {
@@ -348,13 +352,13 @@ impl GCollapse {
         self.animator_play(cx, id!(open.off));
         self.animation_counter = true;
     }
-    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>>{
+    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 }
 
 impl GCollapseRef {
-    prop_setter!{
+    prop_setter! {
         GCollapse{
             set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
             set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
@@ -376,7 +380,7 @@ impl GCollapseRef {
             set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}}
         }
     }
-    ref_getter!{
+    ref_getter! {
         GCollapse{
             get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
             get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
