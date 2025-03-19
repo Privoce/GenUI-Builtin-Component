@@ -9,11 +9,7 @@ use types::*;
 use makepad_widgets::*;
 
 use crate::{
-    animatie_fn, event_option, getter, ref_event_option, ref_getter_setter, ref_render, set_event,
-    setter,
-    shader::{draw_view::DrawGView, manual::Position4},
-    utils::{set_cursor, BoolToF32},
-    widget_area,
+    animatie_fn, event_option, getter, ref_event_option, ref_getter_setter, ref_redraw_mut, ref_render, set_event, setter, shader::{draw_view::DrawGView, manual::Position4}, utils::{set_cursor, BoolToF32}, widget_area
 };
 
 live_design! {
@@ -355,52 +351,77 @@ impl GCollapse {
     pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
+    pub fn redraw(&self, cx: &mut Cx) -> () {
+        self.header.redraw(cx);
+        self.body.redraw(cx);
+        self.draw_collapse.redraw(cx);
+    }
+    setter! {
+        GCollapse{
+            set_abs_pos(pos: Option<DVec2>){|c, _cx| {c.walk.abs_pos = pos; Ok(())}},
+            set_margin(margin: Margin){|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size){|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2){|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip: bool){|c, _cx| {c.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool){|c, _cx| {c.layout.clip_y = clip; Ok(())}},
+            set_padding(padding: Padding){|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align){|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow){|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64){|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_fold(fold: f64){|c, _cx| {c.fold = fold; Ok(())}},
+            set_cursor(cursor: MouseCursor){|c, _cx| {c.cursor.replace(cursor); Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_visible(visible: bool){|c, _cx| {c.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool){|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_position(position: Position4){|c, _cx| {c.position = position; Ok(())}},
+            set_event_key(event_key: bool){|c, _cx| {c.event_key = event_key; Ok(())}}
+        }
+    }
+    getter! {
+        GCollapse{
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_fold(f64) {|c| {c.fold}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_visible(bool) {|c| {c.visible}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_position(Position4) {|c| {c.position}},
+            get_event_key(bool) {|c| {c.event_key}}
+        }
+    }
 }
 
 impl GCollapseRef {
-    prop_setter! {
-        GCollapse{
-            set_abs_pos(pos: DVec2){|c_ref| {c_ref.walk.abs_pos.replace(pos); Ok(())}},
-            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size){|c_ref| {c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size){|c_ref| {c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip: bool){|c_ref| {c_ref.layout.clip_x = clip; Ok(())}},
-            set_clip_y(clip: bool){|c_ref| {c_ref.layout.clip_y = clip; Ok(())}},
-            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align){|c_ref| {c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
-            set_fold(fold: f64){|c_ref| {c_ref.fold = fold; Ok(())}},
-            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
-            set_visible(visible: bool){|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
-            set_position(position: Position4){|c_ref| {c_ref.position = position; Ok(())}},
-            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}}
-        }
-    }
-    ref_getter! {
-        GCollapse{
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_fold(f64) {||0.0}, {|c_ref| {c_ref.fold}},
-            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_grab_key_focus(bool) {||true}, {|c_ref| {c_ref.grab_key_focus}},
-            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
-            get_animation_key(bool) {||false}, {|c_ref| {c_ref.animation_key}},
-            get_position(Position4) {||Position4::default()}, {|c_ref| {c_ref.position}},
-            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
-        }
+    ref_getter_setter! {
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_fold, set_fold -> f64,
+        get_cursor, set_cursor -> MouseCursor,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_visible, set_visible -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_position, set_position -> Position4,
+        get_event_key, set_event_key -> bool
     }
     ref_event_option! {
         opened => FingerUpEvent,
@@ -412,6 +433,7 @@ impl GCollapseRef {
         animate_open_off
     }
     ref_render!();
+    ref_redraw_mut!();
 }
 
 impl GCollapseSet {

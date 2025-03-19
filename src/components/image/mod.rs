@@ -15,11 +15,7 @@ use image_cache::{ImageCacheImpl, ImageFit};
 use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
-    active_event, event_option, getter, ref_area, ref_event_option, ref_getter_setter, ref_redraw,
-    ref_render, set_event, set_scope_path, setter,
-    shader::{draw_image::DrawGImage, source::Src},
-    utils::{set_cursor, FloatToVec},
-    widget_area,
+    active_event, event_option, getter, pure_after_apply, ref_area, ref_event_option, ref_getter_setter, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, setter, shader::{draw_image::DrawGImage, source::Src}, utils::{set_cursor, FloatToVec}, widget_area
 };
 
 live_design! {
@@ -118,15 +114,16 @@ impl ImageCacheImpl for GImage {
 }
 
 impl LiveHook for GImage {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
+    // fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    //     if !self.visible {
+    //         return;
+    //     }
 
-        if let Err(e) = self.render(cx) {
-            error!("GImage render error: {:?}", e);
-        }
-    }
+    //     if let Err(e) = self.render(cx) {
+    //         error!("GImage render error: {:?}", e);
+    //     }
+    // }
+    pure_after_apply!();
 }
 
 impl Widget for GImage {
@@ -213,6 +210,7 @@ impl Widget for GImage {
 }
 
 impl GImage {
+    render_after_apply!("GImage");
     set_scope_path!();
     widget_area! {
         area, draw_image
