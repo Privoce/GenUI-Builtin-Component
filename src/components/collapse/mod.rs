@@ -9,7 +9,7 @@ use types::*;
 use makepad_widgets::*;
 
 use crate::{
-    animatie_fn, event_option, getter, ref_event_option, ref_getter_setter, ref_redraw_mut, ref_render, set_event, setter, shader::{draw_view::DrawGView, manual::Position4}, utils::{set_cursor, BoolToF32}, widget_area
+    animatie_fn, event_option, getter, ref_event_option, ref_getter_setter, ref_redraw, ref_render, set_event, setter, shader::{draw_view::DrawGView, manual::Position4}, utils::{set_cursor, BoolToF32}, widget_area
 };
 
 live_design! {
@@ -433,7 +433,8 @@ impl GCollapseRef {
         animate_open_off
     }
     ref_render!();
-    ref_redraw_mut!();
+    // ref_redraw_mut!();
+    ref_redraw!();
 }
 
 impl GCollapseSet {

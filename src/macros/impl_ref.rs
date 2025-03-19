@@ -50,3 +50,159 @@ macro_rules! ref_getter_setter {
         )*
     };
 }
+
+
+/// # Generate Ref Event Function
+///```rust
+/// impl GBreadCrumbItemRef {
+///
+///     ref_event_option!{
+///         clicked => GBreadCrumbEventItemParam,
+///         hover => GBreadCrumbEventItemParam
+///     }
+///     // pub fn clicked(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let Some(c_ref) = self.borrow() {
+///     //         return c_ref.clicked(actions);
+///     //     }
+///     //     None
+///     // }
+///     // pub fn hover(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let Some(c_ref) = self.borrow() {
+///     //         return c_ref.hover(actions);
+///     //     }
+///     //     None
+///     // }
+/// }
+/// ```
+#[macro_export]
+macro_rules! ref_event_option {
+    ($($event_fn: ident => $return: ty),*) => {
+        $(
+            pub fn $event_fn(&self, actions: &Actions) -> Option<$return> {
+                if let Some(c_ref) = self.borrow() {
+                    return c_ref.$event_fn(actions);
+                }
+                None
+            }
+        )*
+    };
+}
+
+///```rust
+/// impl GBreadCrumbItemRef {
+///     ref_event_bool!{
+///         clicked
+///     }
+/// }
+/// ```
+#[macro_export]
+macro_rules! ref_event_bool {
+    ($($event_fn: ident),*) => {
+        $(
+            pub fn $event_fn(&self, actions: &Actions) -> bool {
+                if let Some(c_ref) = self.borrow() {
+                    return c_ref.$event_fn(actions);
+                }
+                false
+            }
+        )*
+    };
+}
+
+#[macro_export]
+macro_rules! ref_play_animation {
+    ($($an_fn: ident : $state: expr),*) => {
+        $(
+            pub fn $an_fn(&self, cx: &mut Cx) -> () {
+                if let Some(mut c_ref) = self.borrow_mut() {
+                    c_ref.play_animation(cx, $state);
+                }
+            }
+        )*
+    };
+}
+
+
+/// # Generate Area Function
+#[macro_export]
+macro_rules! ref_area {
+    () => {
+        pub fn area(&self) -> Area {
+            if let Some(c_ref) = self.borrow() {
+                return c_ref.area();
+            }
+            Area::Empty
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ref_area_ext {
+    ($($area_fn: ident),*) => {
+        $(
+            pub fn $area_fn(&self) -> Area {
+                if let Some(c_ref) = self.borrow() {
+                    return c_ref.$area_fn();
+                }
+                Area::Empty
+            }
+        )*
+    };
+}
+
+#[macro_export]
+macro_rules! ref_redraw {
+    () => {
+        pub fn redraw(&self, cx: &mut Cx) -> () {
+            if let Some(c_ref) = self.borrow() {
+                c_ref.redraw(cx);
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ref_redraw_mut {
+    () => {
+        pub fn redraw(&mut self, cx: &mut Cx) -> () {
+            if let Some(mut c_ref) = self.borrow_mut() {
+                c_ref.redraw(cx);
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ref_animate_state {
+    () => {
+        pub fn animate_state(&self) -> GLabelState {
+            if let Some(c_ref) = self.borrow() {
+                return c_ref.animate_state();
+            }
+            GLabelState::None
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ref_render {
+    () => {
+        pub fn render(&self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+            if let Some(mut c_ref) = self.borrow_mut() {
+                c_ref.render(cx)?;
+            }
+            Ok(())
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ref_actives {
+    ($($event_fn: ident : $e_ty: ty),*) => {
+       $(
+            pub fn $event_fn(&self, cx: &mut Cx, e: $e_ty) -> () {
+                self.borrow_mut().map(|mut c_ref| c_ref.$event_fn(cx, e));
+            }
+       )*
+    };
+}
