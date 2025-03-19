@@ -35,7 +35,7 @@ macro_rules! ref_getter_setter {
         $(
             pub fn $fn_set(&self, cx: &mut Cx, value: $value_ty) -> Result<(), Box<dyn std::error::Error>>{
                 if let Some(mut c_ref) = self.borrow_mut() {
-                    c_ref.$fn_set(cx, value);
+                    c_ref.$fn_set(cx, value)?;
                 }
                 Ok(())
             }

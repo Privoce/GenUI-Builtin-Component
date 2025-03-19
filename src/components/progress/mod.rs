@@ -6,21 +6,20 @@ use core::panic;
 use event::*;
 use makepad_widgets::*;
 
-
 use crate::{
     active_event, animatie_fn, default_handle_animation, event_option, play_animation, ref_area,
     ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
     shader::draw_progress::{DrawGProgress, GProgressType},
     themes::Themes,
     utils::{round_to_two_decimals, set_cursor, BoolToF32, ThemeColor},
-    widget_area, widget_origin_fn,
+    widget_area,
 };
 
 live_design! {
     link gen_base;
     use link::shaders::*;
     use link::gen_theme::GLOBAL_DURATION;
-    
+
     pub GProgressBase = {{GProgress}}{
         height: 16.0,
         width: 300.0,
@@ -512,7 +511,6 @@ impl GProgressRef {
         animate_focus_on,
         animate_focus_off
     }
-    widget_origin_fn!(GProgress);
     pub fn get(&self) -> Option<f64> {
         self.borrow().map(|x| x.get())
     }

@@ -70,7 +70,7 @@ impl Widget for GRadioGroup {
             }
         }
         if let Some(value) = flag {
-            self.set_selected(cx, selected);
+            let _ = self.set_selected(cx, selected);
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
@@ -93,7 +93,7 @@ impl LiveHook for GRadioGroup {
         if self.selected < 0 {
             let _ = self.find_selected();
         } else {
-            self.set_selected(cx, self.selected);
+            let _ = self.set_selected(cx, self.selected);
         }
     }
     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
@@ -102,7 +102,11 @@ impl LiveHook for GRadioGroup {
 }
 
 impl GRadioGroup {
-    pub fn set_selected(&mut self, cx: &mut Cx, selected: i32) -> () {
+    pub fn set_selected(
+        &mut self,
+        cx: &mut Cx,
+        selected: i32,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         self.selected = selected;
 
         // loop all gradio child and let selected == false except self.selected is true
@@ -116,6 +120,7 @@ impl GRadioGroup {
                     panic!("GRadioGroup only allows GRadio as child!");
                 }
             });
+        Ok(())
     }
     fn find_selected(&mut self) -> () {
         let mut flag = false;
@@ -187,7 +192,7 @@ impl GRadioGroup {
             panic!("Index out of range!");
         }
 
-        self.set_selected(cx, index);
+        let _ = self.set_selected(cx, index);
         self.active_selected(cx, None);
     }
     setter! {

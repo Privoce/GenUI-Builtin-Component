@@ -89,7 +89,7 @@ impl LiveHook for GCheckboxGroup {
         if self.selected.len() == 0 {
             let _ = self.find_selected();
         } else {
-            self.set_selected(cx, self.selected.clone());
+            let _ = self.set_selected(cx, self.selected.clone());
         }
     }
     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
@@ -169,7 +169,7 @@ impl GCheckboxGroup {
             get_selected(Vec<i32>) {|c| {c.selected.clone()}}
         }
     }
-    pub fn set_selected(&mut self, cx: &mut Cx, selected: Vec<i32>) -> () {
+    pub fn set_selected(&mut self, cx: &mut Cx, selected: Vec<i32>) -> Result<(), Box<dyn std::error::Error>> {
         // loop all gcheckbox child and let selected == false except self.selected is true
         self.children
             .iter_mut()
@@ -185,6 +185,7 @@ impl GCheckboxGroup {
             });
 
         self.selected = selected;
+        Ok(())
     }
     fn find_selected(&mut self) -> () {
         self.selected = self.children.iter().enumerate().fold(
@@ -237,7 +238,7 @@ impl GCheckboxGroup {
             panic!("Index out of range!");
         }
 
-        self.set_selected(cx, index.iter().map(|x| *x as i32).collect());
+        let _ = self.set_selected(cx, index.iter().map(|x| *x as i32).collect());
         self.active_selected(cx, None);
     }
     pub fn values(&self) -> Vec<Option<String>> {
