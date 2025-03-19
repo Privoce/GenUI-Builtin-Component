@@ -9,11 +9,7 @@ use types::{Edit, EditKind, History};
 use unicode_segmentation::{GraphemeCursor, UnicodeSegmentation};
 
 use crate::{
-    animatie_fn, event_option, ref_getter, prop_setter, ref_event_option, set_event,
-    shader::{draw_text::DrawGText, draw_view::DrawGView},
-    themes::Themes,
-    utils::{get_font_family, BoolToF32, ThemeColor, ToBool},
-    widget_area,
+    animatie_fn, event_option, getter, pure_after_apply, ref_event_option, ref_getter_setter, render_after_apply, set_event, setter, shader::{draw_text::DrawGText, draw_view::DrawGView}, themes::Themes, utils::{get_font_family, hex_to_vec4, BoolToF32, ThemeColor, ToBool}, widget_area
 };
 
 live_design! {
@@ -207,7 +203,7 @@ pub struct GInput {
     #[live]
     pub font_family: LiveDependency,
     #[live(1.0)]
-    cursor_border_radius: f64,
+    cursor_border_radius: f32,
     // deref --------------
     #[animator]
     animator: Animator,
@@ -717,17 +713,19 @@ impl Widget for GInput {
 }
 
 impl LiveHook for GInput {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GInput render error: {:?}", e);
-        }
-    }
+    // fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    //     if !self.visible {
+    //         return;
+    //     }
+    //     if let Err(e) = self.render(cx) {
+    //         error!("GInput render error: {:?}", e);
+    //     }
+    // }
+    pure_after_apply!();
 }
 
 impl GInput {
+    render_after_apply!("GInput");
     pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
         // ----------------- background color -------------------------------------------
         let bg_color = self.background_color.get(self.theme, 25);
@@ -787,7 +785,7 @@ impl GInput {
                 }
             },
         );
-        self.draw_text.wrap = self.wrap.clone();
+        self.draw_text.wrap = self.wrap;
         // draw cursor -------------------------------------------------------------
         self.draw_cursor.apply_over(
             cx,
@@ -1145,110 +1143,159 @@ impl GInput {
             self.cursor = cursor;
         }
     }
+    setter! {
+        GInput{
+            set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.render(cx)}},
+            set_shadow_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?; c.shadow_color.replace(color); c.draw_input.shadow_color = color; Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.spread_radius = radius; c.draw_input.spread_radius = radius; Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.blur_radius = radius; c.draw_input.blur_radius = radius; Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.shadow_offset = offset; c.draw_input.shadow_offset = offset; Ok(())}},
+            set_placeholder_color(color: String) {|c, cx| {let color = hex_to_vec4(&color)?;c.placeholder_color.replace(color); c.draw_text.apply_over(cx, live!{placeholder_color:(color)}); Ok(())}},
+            set_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.color.replace(color); c.draw_text.color = color; Ok(())}},
+            set_cursor_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.cursor_color.replace(color); c.draw_cursor.background_color = color; Ok(())}},
+            set_select_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.select_color.replace(color); c.draw_selection.background_color = color; Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.background_color.replace(color); c.draw_input.background_color = color; Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.background_visible = visible; c.draw_input.background_visible = visible.to_f32(); Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_hover_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.hover_color.replace(color); c.draw_input.hover_color = color; Ok(())}},
+            set_text_hover_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.text_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_text_focus_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.text_focus_color.replace(color); c.draw_text.stroke_focus_color = color; Ok(())}},
+            set_cursor_hover_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.cursor_hover_color.replace(color); c.draw_cursor.hover_color = color; Ok(())}},
+            set_cursor_focus_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.cursor_focus_color.replace(color); c.draw_cursor.focus_color = color; Ok(())}},
+            set_select_hover_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.select_hover_color.replace(color); c.draw_selection.hover_color = color; Ok(())}},
+            set_select_focus_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.select_focus_color.replace(color); c.draw_selection.focus_color = color; Ok(())}},
+            set_focus_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.focus_color.replace(color); c.draw_input.focus_color = color; Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = hex_to_vec4(&color)?;c.border_color.replace(color); c.draw_input.border_color = color; Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.border_width = width; c.draw_input.border_width = width; Ok(())}},
+            set_border_radius(radius: f32) {|c, _cx| {c.border_radius = radius; c.draw_input.border_radius = radius; Ok(())}},
+            // set_text_align(align: Align) {|c, _cx| {c.text_align = align; Ok(())}},
+            set_font_size(size: f64) {|c, _cx| {c.font_size = size; c.draw_text.text_style.font_size = size; Ok(())}},
+            set_height_factor(factor: f64) {|c, _cx| {c.height_factor = factor; Ok(())}},
+            set_wrap(wrap: TextWrap) {|c, _cx| {c.wrap = wrap; c.draw_text.wrap = wrap; Ok(())}},
+            // set_font_family(font_family: LiveDependency) {|c, _cx| {c.font_family = font_family; Ok(())}},
+            set_cursor_border_radius(radius: f32) {|c, _cx| {c.cursor_border_radius = radius; c.draw_cursor.border_radius = radius; Ok(())}},
+            set_cursor_width(width: f64) {|c, _cx| {c.cursor_width = width; Ok(())}},
+            set_read_only(read_only: bool) {|c, _cx| {c.read_only = read_only; Ok(())}},
+            set_numeric_only(numeric_only: bool) {|c, _cx| {c.numeric_only = numeric_only; Ok(())}},
+            set_placeholder(placeholder: String) {|c, _cx| {c.placeholder = placeholder; Ok(())}},
+            set_text(text: String) {|c, _cx| {c.text = text; Ok(())}},
+            set_cursor(cursor: Cursor) {|c, _cx| {c.cursor = cursor; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.walk.abs_pos = abs_pos; Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx| {c.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx| {c.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.layout.spacing = spacing; Ok(())}}
+        }
+    }
+    getter! {
+        GInput{
+            get_theme(Themes) {|c| {c.theme}},
+            get_shadow_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_input.shadow_color)}},
+            get_spread_radius(f32) {|c| {c.draw_input.spread_radius}},
+            get_blur_radius(f32) {|c| {c.draw_input.blur_radius}},
+            get_shadow_offset(Vec2) {|c| {c.draw_input.shadow_offset}},
+            get_placeholder_color(String) {|c| {c.placeholder_color.as_ref().map_or("#98A2B3".to_string(), |v| crate::utils::vec4_to_hex(v))}},
+            get_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.color)}},
+            get_cursor_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_cursor.background_color)}},
+            get_select_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_selection.background_color)}},
+            get_background_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_input.background_color)}},
+            get_background_visible(bool) {|c| {c.draw_input.background_visible.to_bool()}},
+            get_visible(bool) {|c| {c.visible}},
+            get_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_input.hover_color)}},
+            get_text_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_hover_color)}},
+            get_text_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_focus_color)}},
+            get_cursor_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_cursor.hover_color)}},
+            get_cursor_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_cursor.focus_color)}},
+            get_select_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_selection.hover_color)}},
+            get_select_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_selection.focus_color)}},
+            get_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_input.focus_color)}},
+            get_border_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_input.border_color)}},
+            get_border_width(f32) {|c| {c.draw_input.border_width}},
+            get_border_radius(f32) {|c| {c.draw_input.border_radius}},
+            // get_text_align(Align) {||Align::default()}, {|c| {c.draw_text.text_style}},
+            get_font_size(f64) {|c| {c.draw_text.text_style.font_size}},
+            get_height_factor(f64) {|c| {c.draw_text.text_style.height_factor}},
+            get_wrap(TextWrap) {|c| {c.draw_text.wrap.clone()}},
+            // get_font_family(LiveDependency) {||LiveDependency::default()}, {|c| {c.draw_text.text_style.font}},
+            get_cursor_border_radius(f32) {|c| {c.draw_cursor.border_radius}},
+            get_cursor_width(f64) {|c| {c.cursor_width}},
+            get_read_only(bool) {|c| {c.read_only}},
+            get_numeric_only(bool) {|c| {c.numeric_only}},
+            get_placeholder(String) {|c| {c.placeholder.to_string()}},
+            get_text(String) {|c| {c.text.to_string()}},
+            get_cursor(Cursor) {|c| {c.cursor}},
+            get_event_key(bool) {|c| {c.event_key}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}}
+        }
+    }
 }
 
 impl GInputRef {
-    prop_setter! {
-        GInput{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_shadow_color(color: String) {|c_ref| {c_ref.shadow_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_spread_radius(radius: f32) {|c_ref| {c_ref.spread_radius = radius; Ok(())}},
-            set_blur_radius(radius: f32) {|c_ref| {c_ref.blur_radius = radius; Ok(())}},
-            set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.shadow_offset = offset; Ok(())}},
-            set_placeholder_color(color: String) {|c_ref| {c_ref.placeholder_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_color(color: String) {|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_cursor_color(color: String) {|c_ref| {c_ref.cursor_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_select_color(color: String) {|c_ref| {c_ref.select_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_hover_color(color: String) {|c_ref| {c_ref.text_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_focus_color(color: String) {|c_ref| {c_ref.text_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_cursor_hover_color(color: String) {|c_ref| {c_ref.cursor_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_cursor_focus_color(color: String) {|c_ref| {c_ref.cursor_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_select_hover_color(color: String) {|c_ref| {c_ref.select_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_select_focus_color(color: String) {|c_ref| {c_ref.select_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_focus_color(color: String) {|c_ref| {c_ref.focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_border_width(width: f32) {|c_ref| {c_ref.border_width = width; Ok(())}},
-            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius; Ok(())}},
-            // set_text_align(align: Align) {|c_ref| {c_ref.text_align = align; Ok(())}},
-            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size; Ok(())}},
-            set_height_factor(factor: f64) {|c_ref| {c_ref.height_factor = factor; Ok(())}},
-            set_wrap(wrap: TextWrap) {|c_ref| {c_ref.wrap = wrap; Ok(())}},
-            // set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family; Ok(())}},
-            set_cursor_border_radius(radius: f32) {|c_ref| {c_ref.cursor_border_radius = radius as f64; Ok(())}},
-            set_cursor_width(width: f64) {|c_ref| {c_ref.cursor_width = width; Ok(())}},
-            set_read_only(read_only: bool) {|c_ref| {c_ref.read_only = read_only; Ok(())}},
-            set_numeric_only(numeric_only: bool) {|c_ref| {c_ref.numeric_only = numeric_only; Ok(())}},
-            set_placeholder(placeholder: String) {|c_ref| {c_ref.placeholder = placeholder; Ok(())}},
-            set_text(text: String) {|c_ref| {c_ref.text = text; Ok(())}},
-            set_cursor(cursor: Cursor) {|c_ref| {c_ref.cursor = cursor; Ok(())}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}},
-            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos); Ok(())}},
-            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
-            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
-            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}}
-        }
-    }
-    ref_getter! {
-        GInput{
-            get_theme(Themes) {||Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_shadow_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.shadow_color)}},
-            get_spread_radius(f32) {||1.0}, {|c_ref| {c_ref.draw_input.spread_radius}},
-            get_blur_radius(f32) {||4.8}, {|c_ref| {c_ref.draw_input.blur_radius}},
-            get_shadow_offset(Vec2) {||Vec2::default()}, {|c_ref| {c_ref.draw_input.shadow_offset}},
-            get_placeholder_color(String) {||"#98A2B3".to_string()}, {|c_ref| {c_ref.placeholder_color.as_ref().map_or("#98A2B3".to_string(), |v| crate::utils::vec4_to_hex(v))}},
-            get_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
-            get_cursor_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_cursor.background_color)}},
-            get_select_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_selection.background_color)}},
-            get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.background_color)}},
-            get_background_visible(bool) {||true}, {|c_ref| {c_ref.draw_input.background_visible.to_bool()}},
-            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
-            get_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.hover_color)}},
-            get_text_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_hover_color)}},
-            get_text_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_focus_color)}},
-            get_cursor_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_cursor.hover_color)}},
-            get_cursor_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_cursor.focus_color)}},
-            get_select_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_selection.hover_color)}},
-            get_select_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_selection.focus_color)}},
-            get_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.focus_color)}},
-            get_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_input.border_color)}},
-            get_border_width(f32) {||1.0}, {|c_ref| {c_ref.draw_input.border_width}},
-            get_border_radius(f32) {||2.0}, {|c_ref| {c_ref.draw_input.border_radius}},
-            // get_text_align(Align) {||Align::default()}, {|c_ref| {c_ref.draw_text.text_style}},
-            get_font_size(f64) {||9.0}, {|c_ref| {c_ref.draw_text.text_style.font_size}},
-            get_height_factor(f64) {||1.3}, {|c_ref| {c_ref.draw_text.text_style.height_factor}},
-            get_wrap(TextWrap) {||TextWrap::Word}, {|c_ref| {c_ref.draw_text.wrap.clone()}},
-            // get_font_family(LiveDependency) {||LiveDependency::default()}, {|c_ref| {c_ref.draw_text.text_style.font}},
-            get_cursor_border_radius(f32) {||1.0}, {|c_ref| {c_ref.draw_cursor.border_radius}},
-            get_cursor_width(f64) {||2.0}, {|c_ref| {c_ref.cursor_width}},
-            get_read_only(bool) {||false}, {|c_ref| {c_ref.read_only}},
-            get_numeric_only(bool) {||false}, {|c_ref| {c_ref.numeric_only}},
-            get_placeholder(String) {||String::default()}, {|c_ref| {c_ref.placeholder.to_string()}},
-            get_text(String) {||String::default()}, {|c_ref| {c_ref.text.to_string()}},
-            get_cursor(Cursor) {||Cursor::default()}, {|c_ref| {c_ref.cursor}},
-            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}}
-        }
+    ref_getter_setter! {
+        get_theme, set_theme -> Themes,
+        get_shadow_color, set_shadow_color -> String,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_placeholder_color, set_placeholder_color -> String,
+        get_color, set_color -> String,
+        get_cursor_color, set_cursor_color -> String,
+        get_select_color, set_select_color -> String,
+        get_background_color, set_background_color -> String,
+        get_background_visible, set_background_visible -> bool,
+        get_visible, set_visible -> bool,
+        get_hover_color, set_hover_color -> String,
+        get_text_hover_color, set_text_hover_color -> String,
+        get_text_focus_color, set_text_focus_color -> String,
+        get_cursor_hover_color, set_cursor_hover_color -> String,
+        get_cursor_focus_color, set_cursor_focus_color -> String,
+        get_select_hover_color, set_select_hover_color -> String,
+        get_select_focus_color, set_select_focus_color -> String,
+        get_focus_color, set_focus_color -> String,
+        get_border_color, set_border_color -> String,
+        get_border_width, set_border_width -> f32,
+        get_border_radius, set_border_radius -> f32,
+        // get_text_align, set_text_align -> Align,
+        get_font_size, set_font_size -> f64,
+        get_height_factor, set_height_factor -> f64,
+        get_wrap, set_wrap -> TextWrap,
+        // get_font_family, set_font_family -> LiveDependency,
+        get_cursor_border_radius, set_cursor_border_radius -> f32,
+        get_cursor_width, set_cursor_width -> f64,
+        get_read_only, set_read_only -> bool,
+        get_numeric_only, set_numeric_only -> bool,
+        get_placeholder, set_placeholder -> String,
+        get_text, set_text -> String,
+        get_cursor, set_cursor -> Cursor,
+        get_event_key, set_event_key -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64
     }
     ref_event_option! {
         changed => GInputChangedParam,
