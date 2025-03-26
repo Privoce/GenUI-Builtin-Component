@@ -555,13 +555,13 @@ impl GTag {
             _ => (),
         }
     }
-    pub fn set_visible(&mut self, cx: &mut Cx, visible: bool) {
-        self.visible = visible;
-        if visible {
-            self.clear_animation(cx);
-            self.redraw(cx);
-        }
-    }
+    // pub fn set_visible(&mut self, cx: &mut Cx, visible: bool) {
+    //     self.visible = visible;
+    //     if visible {
+    //         self.clear_animation(cx);
+    //         self.redraw(cx);
+    //     }
+    // }
     setter! {
         GTag{
             set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.render(cx)}},
@@ -618,7 +618,8 @@ impl GTag {
             set_spacing(spacing: f64) {|c, _cx| {c.layout.spacing = spacing; Ok(())}},
             set_animation_key(key: bool) {|c, _cx| {c.animation_key = key; Ok(())}},
             set_event_key(key: bool) {|c, _cx| {c.event_key = key; Ok(())}},
-            set_text(text: String){|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}}
+            set_text(text: String){|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible;Ok(())}}
         }
     }
     getter! {
@@ -677,7 +678,8 @@ impl GTag {
             get_spacing(f64) {|c| {c.layout.spacing}},
             get_animation_key(bool) {|c| {c.animation_key}},
             get_event_key(bool) {|c| {c.event_key}},
-            get_text(String) {|c| {c.text.as_ref().to_string()}}
+            get_text(String) {|c| {c.text.as_ref().to_string()}},
+            get_visible(bool) {|c| {c.visible}}
         }
     }
 }
@@ -738,7 +740,8 @@ impl GTagRef {
         get_spacing, set_spacing -> f64,
         get_animation_key, set_animation_key -> bool,
         get_event_key, set_event_key -> bool,
-        get_text, set_text -> String
+        get_text, set_text -> String,
+        get_visible, set_visible -> bool
     }
     ref_area!();
     ref_redraw!();

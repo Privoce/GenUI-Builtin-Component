@@ -8,7 +8,11 @@ use std::{cell::RefCell, collections::HashMap};
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animatie_fn, event_option, getter, play_animation, ref_area, ref_event_option, ref_getter_setter, ref_redraw_mut, ref_render, set_event, set_scope_path, setter, shader::draw_view::DrawGView, themes::Themes, utils::{set_cursor, BoolToF32, ThemeColor, ToBool}
+    active_event, animatie_fn, event_option, getter, play_animation, ref_area, ref_event_option,
+    ref_getter_setter, ref_redraw_mut, ref_render, set_event, set_scope_path, setter,
+    shader::draw_view::DrawGView,
+    themes::Themes,
+    utils::{set_cursor, BoolToF32, ThemeColor, ToBool},
 };
 
 live_design! {

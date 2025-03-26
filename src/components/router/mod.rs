@@ -21,7 +21,7 @@ use super::{
 
 live_design! {
     link gen_base;
-    
+
     pub GRouterBase = {{GRouter}}{}
 }
 
@@ -117,11 +117,9 @@ impl GRouter {
         for action in actions {
             if let GRouterEvent::NavBack(_current) = action.as_widget_action().cast() {
                 // get last item from stack
-                self.stack.pop().map(|last| {
-                    match self.nav_mode{
-                        NavMode::History => self.nav_history(cx, &last.path),
-                        NavMode::Switch => self.nav2(cx, &last.path),
-                    }
+                self.stack.pop().map(|last| match self.nav_mode {
+                    NavMode::History => self.nav_history(cx, &last.path),
+                    NavMode::Switch => self.nav2(cx, &last.path),
                 });
                 break;
             }
@@ -416,20 +414,20 @@ impl GRouter {
         self.handle_nav_back(cx, actions);
         self.action_nav_to(cx, actions);
         self.indicator_nav_to(cx, &actions).map(|_| {
-           return;
+            return;
         });
         self.redraw_active(cx);
     }
     pub fn redraw_active(&mut self, cx: &mut Cx) {
-        if self.scope_path.is_some(){
+        if self.scope_path.is_some() {
             match self.page_type {
                 PageType::Bar => {
                     self.gview(id!(bar_pages)).redraw(cx);
-                },
+                }
                 PageType::Nav => {
                     self.gview(id!(nav_pages)).redraw(cx);
-                },
-                PageType::None => {},
+                }
+                PageType::None => {}
             }
         }
     }
@@ -459,4 +457,22 @@ impl GRouterRef {
             router.handle_nav_events(cx, actions);
         });
     }
+}
+
+#[macro_export]
+macro_rules! nav_to {
+    (
+        $path: tt, $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
+    };
+}
+
+#[macro_export]
+macro_rules! nav_back {
+    (
+        $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_back($cx, $uid, $scope);
+    };
 }
