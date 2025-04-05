@@ -47,6 +47,8 @@ pub struct GRouter {
     pub nav_actions: Option<Box<dyn FnMut(&mut GRouter, &mut Cx)>>,
     #[live]
     pub nav_mode: NavMode,
+    #[rust]
+    pub default_page: Option<HeapLiveIdPath>,
 }
 
 impl LiveHook for GRouter {}
@@ -199,10 +201,21 @@ impl GRouter {
         let path = self.bar_scope_path(path);
         self.nav2(cx, &path);
     }
+    pub fn nav_back(&mut self, cx: &mut Cx) {
+        if let Some(last) = self.stack.pop() {
+            match self.nav_mode {
+                NavMode::History => self.nav_history(cx, &last.path),
+                NavMode::Switch => self.nav2(cx, &last.path),
+            }
+        } else {
+            let path = self.default_page.as_ref().cloned().unwrap();
+            self.nav2(cx, &path);
+        }
+    }
     pub fn nav_to_path(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope, path: &[LiveId]) {
         cx.widget_action(uid, &scope.path, GRouterEvent::NavTo(path[0]));
     }
-    pub fn nav_back(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope) {
+    pub fn nav_back_path(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope) {
         let path = scope.path.clone();
         cx.widget_action(uid, &scope.path, GRouterEvent::NavBack(path.last()));
     }
@@ -383,7 +396,8 @@ impl GRouter {
         if self.scope_path.is_some() {
             let mut path = self.scope_path.as_ref().unwrap().clone();
             path.push(id[0].clone());
-            self.active_page.replace(path);
+            self.active_page.replace(path.clone());
+            self.default_page.replace(path);
         }
         self
     }
@@ -452,6 +466,11 @@ impl GRouterRef {
             router.nav_to(cx, path);
         });
     }
+    pub fn nav_back(&self, cx: &mut Cx) {
+        self.borrow_mut().map(|mut router| {
+            router.nav_back(cx);
+        });
+    }
     pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
         self.borrow_mut().map(|mut router| {
             router.handle_nav_events(cx, actions);
@@ -473,6 +492,6 @@ macro_rules! nav_back {
     (
         $cx: expr, $uid: expr, $scope: expr
     ) => {
-        gen_components::GRouter::nav_back($cx, $uid, $scope);
+        gen_components::GRouter::nav_back_path($cx, $uid, $scope);
     };
 }

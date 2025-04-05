@@ -39,7 +39,7 @@ impl Widget for GPage {
                         GRouter::nav_to_path(cx, self.widget_uid(), scope, path.as_slice());
                     }
                     GRouterEvent::NavBack(_) => {
-                        GRouter::nav_back(cx, self.widget_uid(), scope);
+                        GRouter::nav_back_path(cx, self.widget_uid(), scope);
                     }
                     GRouterEvent::None => (),
                 }
