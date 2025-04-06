@@ -1,7 +1,7 @@
-# GEN Components (v0.2.1)
+# GEN Components (v0.2.2)
 
-- version: `v0.2.1`
-- update date: 2025-03-09
+- version: `v0.2.2`
+- update date: 2025-04-06
 - author: [Will-YiFei Sheng](syf20020816@outlook.com)
 - makepad_widget version: `v0.6.0`
 - makepad branch: `gen_ui`
@@ -129,7 +129,6 @@
 ## Example Project
 - [x] AWS Personal Cloud Drive GUI (亚马逊个人云盘GUI界面, 仅实现上传，查看，验证功能)
 - [x] GenUI Builtin Component Lib (GenUI内置组件库学习页面)
-- [ ] Fake Phone (仿手机系统)
 
 ## Plan
 
