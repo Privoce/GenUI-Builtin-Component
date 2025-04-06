@@ -1,6 +1,17 @@
-# V0.2.1
+## V0.2.2
 
-## Updates
+### General
+
+- [x] new getter
+- [x] new setter
+- [x] better macros
+- [x] less render
+- [x] Use features to distinguish between development and release environments
+
+
+## V0.2.1
+
+### General
 
 1. `GImage`
    1. remove prop `rotation` (use wrapper view instead)
