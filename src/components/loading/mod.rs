@@ -74,7 +74,7 @@ impl Widget for GLoading {
             self.next_frame = cx.new_next_frame();
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

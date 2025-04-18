@@ -33,7 +33,7 @@ impl Widget for GVTableBody {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         self.draw_table_body.begin(cx, walk, self.layout);
         for (_index, (_id, child)) in self.children.iter().enumerate() {
-            if child.is_visible() {
+            if child.visible() {
                 let child_walk = child.walk(cx);
                 let _ = child.draw_walk(cx, scope, child_walk);
             }
@@ -43,7 +43,7 @@ impl Widget for GVTableBody {
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         for (_index, (_id, child)) in self.children.iter().enumerate() {
-            if child.is_visible() {
+            if child.visible() {
                 child.handle_event(cx, event, scope);
             }
         }

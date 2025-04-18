@@ -220,7 +220,7 @@ impl Widget for GLabel {
             _ => (),
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

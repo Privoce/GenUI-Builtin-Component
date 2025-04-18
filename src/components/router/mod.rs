@@ -185,7 +185,7 @@ impl GRouter {
             let mut res = None;
 
             for (id, child) in active_router.children.iter() {
-                if child.is_visible() && !self.mode.eq_bind(id) {
+                if child.visible() && !self.mode.eq_bind(id) {
                     let mut p = self.scope_path.as_ref().unwrap().clone();
                     p.push(*id);
                     res.replace(p);
@@ -334,7 +334,7 @@ impl GRouter {
                 for (id, child) in bar.children.iter() {
                     if !self.mode.eq_bind(id) {
                         let bar_path = self.bar_scope_path(&[id.clone()]);
-                        if child.is_visible() && flag {
+                        if child.visible() && flag {
                             self.ty(PageType::Bar);
                             self.active_page.replace(bar_path.clone());
                             flag = false;
@@ -346,7 +346,7 @@ impl GRouter {
             self.gview(id!(nav_pages)).borrow().map(|nav| {
                 for (id, child) in nav.children.iter() {
                     let nav_path = self.nav_scope_path(&[id.clone()]);
-                    if child.is_visible() && flag {
+                    if child.visible() && flag {
                         self.ty(PageType::Nav);
                         self.active_page.replace(nav_path.clone());
                         flag = false;
@@ -365,7 +365,7 @@ impl GRouter {
         for bar in self.bar_pages.clone().iter() {
             if flag {
                 self.gview(id!(bar_pages)).borrow().map(|container| {
-                    if container.widget(&[bar.last()]).is_visible() {
+                    if container.widget(&[bar.last()]).visible() {
                         self.ty(PageType::Bar);
                         self.active_page.replace(bar.clone());
                         flag = false;
@@ -378,7 +378,7 @@ impl GRouter {
         for nav in self.nav_pages.clone().iter() {
             if flag {
                 self.gview(id!(nav_pages)).borrow().map(|container| {
-                    if container.widget(&[nav.last()]).is_visible() {
+                    if container.widget(&[nav.last()]).visible() {
                         self.ty(PageType::Nav);
                         self.active_page.replace(nav.clone());
                     }

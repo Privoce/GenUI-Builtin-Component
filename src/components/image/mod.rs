@@ -204,7 +204,7 @@ impl Widget for GImage {
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, hit, focus_area)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
@@ -470,7 +470,7 @@ impl GImageRef {
     /// Loads the image at the given `image_path` on disk into this `ImageRef`.
     pub fn load_image_file_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
         if let Some(mut inner) = self.borrow_mut() {
-            inner.load_image_file_by_path(cx, image_path, 0)
+            inner.load_image_file_by_path(cx, Path::new(image_path), 0)
         } else {
             Ok(())
         }

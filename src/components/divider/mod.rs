@@ -86,7 +86,7 @@ impl Widget for GDivider {
         // let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
         self.deref_widget.handle_event(cx, event, scope)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

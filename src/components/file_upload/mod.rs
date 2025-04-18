@@ -75,7 +75,7 @@ impl Widget for GUpload {
         }
         self.set_scope_path(&scope.path);
         self.draw_upload.begin(cx, walk, self.layout);
-        if self.icon.is_visible(){
+        if self.icon.visible(){
             let icon_walk = self.icon.walk(cx);
             let _ = self.icon.draw_walk(cx, scope, icon_walk);
         }
@@ -89,7 +89,7 @@ impl Widget for GUpload {
         scope: &mut Scope,
         sweep_area: Area,
     ) {
-        if !self.is_visible(){return;}
+        if !self.visible(){return;}
         let hit = event.hits_with_options(
             cx,
             self.area(),
@@ -99,12 +99,12 @@ impl Widget for GUpload {
         self.handle_widget_event(cx, event, scope, hit, sweep_area)
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible(){return;}
+        if !self.visible(){return;}
         let focus_area = self.area();
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, event, scope, hit, focus_area)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
@@ -165,7 +165,7 @@ impl GUpload {
         selected: GUploadEvent::Selected => GUploadSelectedParam
     }
     pub fn redraw(&self, cx:&mut Cx)->(){
-        if self.icon.is_visible(){
+        if self.icon.visible(){
             self.icon.redraw(cx);
         }
         self.draw_upload.redraw(cx);

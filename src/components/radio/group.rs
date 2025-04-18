@@ -39,7 +39,7 @@ impl Widget for GRadioGroup {
         self.deref_widget.draw_walk(cx, scope, walk)
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         if self.animator_handle_event(cx, event).must_redraw() {
@@ -82,7 +82,7 @@ impl Widget for GRadioGroup {
             );
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

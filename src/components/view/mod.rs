@@ -586,7 +586,7 @@ impl Widget for GView {
             if step < self.children.len() {
                 //let id = self.draw_order[step];
                 if let Some((id, child)) = self.children.get_mut(step) {
-                    if child.is_visible() {
+                    if child.visible() {
                         let walk = child.walk(cx);
                         if resume {
                             scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk))?;
@@ -797,7 +797,7 @@ impl Widget for GView {
             scroll_bars.handle_scroll_event(cx, event, scope, &mut Vec::new());
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

@@ -136,7 +136,7 @@ impl Widget for GToolButton {
         scope: &mut Scope,
         sweep_area: Area,
     ) {
-        if !self.is_visible(){
+        if !self.visible(){
             return;
         }
         let hit = event.hits_with_options(
@@ -148,14 +148,14 @@ impl Widget for GToolButton {
         self.handle_widget_event(cx, event, scope, hit, sweep_area)
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible(){
+        if !self.visible(){
             return;
         }
         let focus_area = self.area();
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, event, scope, hit, focus_area)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

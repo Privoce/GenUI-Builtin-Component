@@ -54,7 +54,7 @@ impl Widget for GPage {
             );
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

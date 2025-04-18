@@ -90,7 +90,7 @@ impl Widget for GShader {
             self.next_frame = cx.new_next_frame();
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {

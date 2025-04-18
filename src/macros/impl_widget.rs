@@ -12,7 +12,7 @@ macro_rules! set_text_and_visible_fn {
             self.text.as_mut_empty().push_str(v);
             self.redraw(cx)
         }
-        fn is_visible(&self) -> bool {
+        fn visible(&self) -> bool {
             self.visible
         }
     };

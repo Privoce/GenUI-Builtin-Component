@@ -209,7 +209,7 @@ impl Widget for GButton {
 
         let _ = self.draw_button.begin(cx, walk, self.layout);
 
-        if self.slot.is_visible() {
+        if self.slot.visible() {
             let slot_walk = self.slot.walk(cx);
             let _ = self.slot.draw_walk(cx, scope, slot_walk);
         }
@@ -220,7 +220,7 @@ impl Widget for GButton {
 
         DrawStep::done()
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
@@ -367,7 +367,7 @@ impl GButton {
     }
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_button.redraw(cx);
-        if self.slot.is_visible() {
+        if self.slot.visible() {
             self.slot.redraw(cx);
         }
     }

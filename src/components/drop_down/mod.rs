@@ -246,7 +246,7 @@ impl Widget for GDropDown {
             _ => {}
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
