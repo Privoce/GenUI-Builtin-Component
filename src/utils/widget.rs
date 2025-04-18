@@ -1,7 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
 use makepad_widgets::{
-    font_atlas::FontLoader, Cx, Cx2d, DVec2, Font, LiveDependency, MouseCursor, Rect,
+    font_atlas::{CxFontsAtlasRc, FontLoader},
+    Cx, Cx2d, DVec2, Font, LiveDependency, MouseCursor, Rect,
 };
 
 use super::ToPath;
@@ -10,15 +11,22 @@ pub fn get_font_family(font_family: &LiveDependency, cx: &mut Cx2d, font: &mut F
     let font_family = font_family.clone();
 
     if font_family.as_str() != font.path.as_str() {
-        let loader = cx.get_global::<Rc<RefCell<FontLoader>>>().clone();
-        let font_id = Some(
-            loader
-                .borrow_mut()
-                .get_or_load(cx, &font_family.to_pathbuf().display().to_string()),
-        );
-
+        // let atlas = cx.get_global::<CxFontsAtlasRc>().clone();
+        // let font_id = Some(
+        //     atlas
+        //         .0
+        //         .borrow_mut()
+        //         .get_or_load_font(cx, font_family.as_str()),
+        // );
+        {
+            let font_loader = cx.get_global::<Rc<RefCell<FontLoader>>>().clone();
+            let mut fonts_atlas = cx.get_global::<CxFontsAtlasRc>().0.borrow_mut();
+            fonts_atlas.reset_fonts_atlas(&mut *font_loader.borrow_mut());
+        }
+        let font_loader = cx.get_global::<Rc<RefCell<FontLoader>>>().clone();
+        let id = font_loader.borrow_mut().get_or_load(cx, font_family.as_str());
         *font = Font {
-            font_id,
+            font_id: Some(id),
             path: font_family,
         };
     }

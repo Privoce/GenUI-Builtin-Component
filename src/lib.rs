@@ -6,6 +6,7 @@ pub mod event;
 pub mod shader;
 pub mod themes;
 pub mod utils;
+mod macros;
 
 pub use components::*;
 

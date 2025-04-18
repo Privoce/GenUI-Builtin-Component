@@ -46,17 +46,17 @@ pub struct GColor {
 
 impl Widget for GColor {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.is_visible() {
+        if !self.visible() {
             return DrawStep::done();
         }
 
         let _ = self.draw_color.begin(cx, walk, self.layout);
-        if self.header.is_visible() {
+        if self.header.visible() {
             let header_walk = self.header.walk(cx);
             let _ = self.header.draw_walk(cx, scope, header_walk);
         }
 
-        if self.colors.is_visible() {
+        if self.colors.visible() {
             let colors_walk = self.colors.walk(cx);
             let _ = self.colors.draw_walk(cx, scope, colors_walk);
         }
@@ -65,30 +65,30 @@ impl Widget for GColor {
         DrawStep::done()
     }
 
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
 
 impl LiveHook for GColor {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         if let Err(e) = self.render(cx) {
             error!("GColor render error: {:?}", e);
         }
-        if self.header.is_visible() {
+        if self.header.visible() {
             self.header.theme = self.theme;
             self.header
                 .glabel(id!(theme_name))
-                .set_text(cx, self.theme.to_string());
+                .set_text(cx, self.theme.to_string()).unwrap();
             self.header
                 .glabel(id!(theme_main))
-                .set_text(cx, self.theme.hex(500).to_string());
+                .set_text(cx, self.theme.hex(500).to_string()).unwrap();
         }
 
-        if self.colors.is_visible() {
+        if self.colors.visible() {
             self.colors.children.clear();
             for (index, color) in self.theme.to_vec().into_iter().enumerate() {
                 self.colors
@@ -111,10 +111,10 @@ impl LiveHook for GColor {
 impl GColor {
     pub fn redraw(&mut self, cx: &mut Cx) {
         self.draw_color.redraw(cx);
-        if self.header.is_visible() {
+        if self.header.visible() {
             self.header.redraw(cx);
         }
-        if self.colors.is_visible() {
+        if self.colors.visible() {
             self.colors.redraw(cx);
         }
     }

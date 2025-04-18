@@ -1,4 +1,4 @@
-use makepad_widgets::Cursor;
+use makepad_widgets::text::selection::Cursor;
 
 /// The kind of edit
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

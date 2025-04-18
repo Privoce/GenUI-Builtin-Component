@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-#[derive(Live, LiveHook, Clone)]
+#[derive(Live, LiveHook, Clone, Copy)]
 #[live_ignore]
 #[repr(u32)]
 pub enum Direction {

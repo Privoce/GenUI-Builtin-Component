@@ -78,20 +78,20 @@ pub struct GMenu {
 
 impl Widget for GMenu {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.is_visible() {
+        if !self.visible() {
             return DrawStep::done();
         }
 
         self.draw_menu.begin(cx, walk, self.layout);
-        if self.header.is_visible() {
+        if self.header.visible() {
             let header_walk = self.header.walk(cx);
             let _ = self.header.draw_walk(cx, scope, header_walk);
         }
-        if self.body.is_visible() {
+        if self.body.visible() {
             let body_walk = self.body.walk(cx);
             let _ = self.body.draw_walk(cx, scope, body_walk);
         }
-        if self.footer.is_visible() {
+        if self.footer.visible() {
             let footer_walk = self.footer.walk(cx);
             let _ = self.footer.draw_walk(cx, scope, footer_walk);
         }
@@ -99,13 +99,13 @@ impl Widget for GMenu {
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
-        if self.header.is_visible() {
+        if self.header.visible() {
             self.header.handle_event(cx, event, scope);
         }
-        if self.body.is_visible() {
+        if self.body.visible() {
             let actions = cx.capture_actions(|cx| self.body.handle_event(cx, event, scope));
             let mut fresh = None;
             for (index, ((id, child), item_mode)) in self
@@ -157,28 +157,28 @@ impl Widget for GMenu {
                 );
             }
         }
-        if self.footer.is_visible() {
+        if self.footer.visible() {
             self.footer.handle_event(cx, event, scope);
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
 
 impl LiveHook for GMenu {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
-        if self.header.is_visible() {
+        if self.header.visible() {
             self.header.after_apply(cx, apply, index, nodes);
         }
-        if self.body.is_visible() {
+        if self.body.visible() {
             self.body.after_apply(cx, apply, index, nodes);
             let _ = self.find_selected();
         }
-        if self.footer.is_visible() {
+        if self.footer.visible() {
             self.footer.after_apply(cx, apply, index, nodes);
         }
         self.render(cx);
@@ -237,18 +237,18 @@ impl GMenu {
     }
 
     pub fn redraw(&mut self, cx: &mut Cx) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
 
         self.draw_menu.redraw(cx);
-        if self.header.is_visible() {
+        if self.header.visible() {
             self.header.redraw(cx);
         }
-        if self.body.is_visible() {
+        if self.body.visible() {
             self.body.redraw(cx);
         }
-        if self.footer.is_visible() {
+        if self.footer.visible() {
             self.footer.redraw(cx);
         }
     }

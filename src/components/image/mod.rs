@@ -15,11 +15,7 @@ use image_cache::{ImageCacheImpl, ImageFit};
 use makepad_widgets::{image_cache::ImageError, *};
 
 use crate::{
-    active_event, event_option, prop_getter, prop_setter, ref_area, ref_event_option, ref_redraw,
-    ref_render, set_event, set_scope_path,
-    shader::{draw_image::DrawGImage, source::Src},
-    utils::set_cursor,
-    widget_area,
+    active_event, event_option, getter, pure_after_apply, ref_area, ref_event_option, ref_getter_setter, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, setter, shader::{draw_image::DrawGImage, source::Src}, utils::{set_cursor, FloatToVec}, widget_area
 };
 
 live_design! {
@@ -118,15 +114,16 @@ impl ImageCacheImpl for GImage {
 }
 
 impl LiveHook for GImage {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
+    // fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    //     if !self.visible {
+    //         return;
+    //     }
 
-        if let Err(e) = self.render(cx) {
-            error!("GImage render error: {:?}", e);
-        }
-    }
+    //     if let Err(e) = self.render(cx) {
+    //         error!("GImage render error: {:?}", e);
+    //     }
+    // }
+    pure_after_apply!();
 }
 
 impl Widget for GImage {
@@ -207,12 +204,13 @@ impl Widget for GImage {
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, hit, focus_area)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
 
 impl GImage {
+    render_after_apply!("GImage");
     set_scope_path!();
     widget_area! {
         area, draw_image
@@ -360,6 +358,158 @@ impl GImage {
         self.redraw(cx);
         Ok(())
     }
+    setter! {
+        GImage{
+            set_visible(visible: bool) {|c, _cx|{c.visible = visible; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c, _cx|{c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_opacity(opacity: f32) {|c, _cx|{c.opacity = opacity; c.draw_image.opacity = opacity; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx|{c.cursor.replace(cursor); Ok(())}},
+            set_scale(scale: f64) {|c, _cx|{c.scale = scale; c.draw_image.image_scale = scale.to_vec2(); Ok(())}},
+            set_fit(fit: ImageFit) {|c, _cx|{c.fit = fit; Ok(())}},
+            set_min_width(min_width: i64) {|c, _cx|{c.min_width = min_width; Ok(())}},
+            set_min_height(min_height: i64) {|c, _cx|{c.min_height = min_height; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx|{c.walk.abs_pos= abs_pos; Ok(())}},
+            set_margin(margin: Margin) {|c, _cx|{c.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c, _cx|{c.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c, _cx|{c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx|{c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx|{c.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx|{c.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c, _cx|{c.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c, _cx|{c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c, _cx|{c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx|{c.layout.spacing = spacing; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx|{c.event_key = event_key; Ok(())}},
+            set_src(src: String) {|c, cx| c.load(cx, &src)}
+        }
+    }
+    getter! {
+        GImage{
+            get_visible(bool) {|c| c.visible},
+            get_grab_key_focus(bool) {|c| c.grab_key_focus},
+            get_opacity(f32) {|c| c.opacity},
+            get_cursor(MouseCursor) {|c| c.cursor.unwrap_or_default()},
+            get_scale(f64) {|c| c.scale},
+            get_fit(ImageFit) {|c| c.fit},
+            get_min_width(i64) {|c| c.min_width},
+            get_min_height(i64) {|c| c.min_height},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_event_key(bool) {|c| c.event_key},
+            get_src(Src) {|c| c.src.clone()}
+        }
+    }
+}
+
+impl GImageRef {
+    ref_getter_setter! {
+        get_visible, set_visible -> bool,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_opacity, set_opacity -> f32,
+        get_cursor, set_cursor -> MouseCursor,
+        get_scale, set_scale -> f64,
+        get_fit, set_fit -> ImageFit,
+        get_min_width, set_min_width -> i64,
+        get_min_height, set_min_height -> i64,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_event_key, set_event_key -> bool
+    }
+    pub fn set_src(&self, cx: &mut Cx, src: String) -> Result<(), Box<dyn std::error::Error>> {
+        self.load(cx, &src)
+    }
+    pub fn get_src(&self) -> Src {
+        self.borrow().map_or(Src::None, |inner| inner.src.clone())
+    }
+    /// ## Example
+    /// ```rust
+    /// let img = self.ui.gimage(id!(img));
+    /// // ---- path ----
+    /// let current = current_dir().unwrap().join("resources/facebook.png");
+    /// img.load(cx, current.display().to_string().as_str()).unwrap();
+    /// // ---- base64 ----
+    /// let PNG: &str = "data:image/png;base64, ....";
+    /// img.load(cx, PNG).unwrap();
+    /// // ---- url ----
+    /// img.load(cx, "https://avatars.githubusercontent.com/u/67356158?s=48&v=4").unwrap();
+    /// ```
+    pub fn load(&self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load(cx, src)
+        } else {
+            Ok(())
+        }
+    }
+    /// Loads the image at the given `image_path` resource into this `ImageRef`.
+    pub fn load_image_dep_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_image_dep_by_path(cx, image_path, 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
+    pub fn load_image_file_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_image_file_by_path(cx, Path::new(image_path), 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads a JPEG into this `ImageRef` by decoding the given encoded JPEG `data`.
+    pub fn load_jpg_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_jpg_from_data(cx, data, 0)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Loads a PNG into this `ImageRef` by decoding the given encoded PNG `data`.
+    pub fn load_png_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
+        if let Some(mut inner) = self.borrow_mut() {
+            inner.load_png_from_data(cx, data, 0)
+        } else {
+            Ok(())
+        }
+    }
+    
+    ref_redraw!();
+    ref_area!();
+    ref_render!();
+    ref_event_option! {
+        hover_in => GImageHoverParam,
+        hover_out => GImageHoverParam,
+        clicked => GImageClickedParam
+    }
+}
+
+impl GImageSet {
+    set_event! {
+        hover_in => GImageHoverParam,
+        hover_out => GImageHoverParam,
+        clicked => GImageClickedParam
+    }
 }
 
 pub enum SrcType {
@@ -399,129 +549,5 @@ impl FromStr for SrcType {
                 .map(|path| SrcType::Path(path))
                 .map_err(|_| ImageError::UnsupportedFormat)
         }
-    }
-}
-
-impl GImageRef {
-    pub fn set_src(&self, cx: &mut Cx, src: String) -> Result<(), Box<dyn std::error::Error>> {
-        self.load(cx, &src)
-    }
-    /// ## Example
-    /// ```rust
-    /// let img = self.ui.gimage(id!(img));
-    /// // ---- path ----
-    /// let current = current_dir().unwrap().join("resources/facebook.png");
-    /// img.load(cx, current.display().to_string().as_str()).unwrap();
-    /// // ---- base64 ----
-    /// let PNG: &str = "data:image/png;base64, ....";
-    /// img.load(cx, PNG).unwrap();
-    /// // ---- url ----
-    /// img.load(cx, "https://avatars.githubusercontent.com/u/67356158?s=48&v=4").unwrap();
-    /// ```
-    pub fn load(&self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
-        if let Some(mut inner) = self.borrow_mut() {
-            inner.load(cx, src)
-        } else {
-            Ok(())
-        }
-    }
-    /// Loads the image at the given `image_path` resource into this `ImageRef`.
-    pub fn load_image_dep_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            inner.load_image_dep_by_path(cx, image_path, 0)
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
-    pub fn load_image_file_by_path(&self, cx: &mut Cx, image_path: &str) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            inner.load_image_file_by_path(cx, image_path, 0)
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Loads a JPEG into this `ImageRef` by decoding the given encoded JPEG `data`.
-    pub fn load_jpg_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            inner.load_jpg_from_data(cx, data, 0)
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Loads a PNG into this `ImageRef` by decoding the given encoded PNG `data`.
-    pub fn load_png_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            inner.load_png_from_data(cx, data, 0)
-        } else {
-            Ok(())
-        }
-    }
-    prop_setter! {
-        GImage{
-            set_visible(visible: bool) {|c_ref|{c_ref.visible = visible; Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool) {|c_ref|{c_ref.grab_key_focus = grab_key_focus; Ok(())}},
-            set_opacity(opacity: f32) {|c_ref|{c_ref.opacity = opacity; Ok(())}},
-            set_cursor(cursor: MouseCursor) {|c_ref|{c_ref.cursor.replace(cursor); Ok(())}},
-            set_scale(scale: f64) {|c_ref|{c_ref.scale = scale; Ok(())}},
-            set_fit(fit: ImageFit) {|c_ref|{c_ref.fit = fit; Ok(())}},
-            set_min_width(min_width: i64) {|c_ref|{c_ref.min_width = min_width; Ok(())}},
-            set_min_height(min_height: i64) {|c_ref|{c_ref.min_height = min_height; Ok(())}},
-            set_abs_pos(abs_pos: DVec2) {|c_ref|{c_ref.walk.abs_pos.replace(abs_pos); Ok(())}},
-            set_margin(margin: Margin) {|c_ref|{c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size) {|c_ref|{c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size) {|c_ref|{c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2) {|c_ref|{c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip_x: bool) {|c_ref|{c_ref.layout.clip_x = clip_x; Ok(())}},
-            set_clip_y(clip_y: bool) {|c_ref|{c_ref.layout.clip_y = clip_y; Ok(())}},
-            set_padding(padding: Padding) {|c_ref|{c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align) {|c_ref|{c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow) {|c_ref|{c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64) {|c_ref|{c_ref.layout.spacing = spacing; Ok(())}},
-            set_event_key(event_key: bool) {|c_ref|{c_ref.event_key = event_key; Ok(())}}
-        }
-    }
-    prop_getter! {
-        GImage{
-            get_visible(bool) {|| true}, {|c_ref| c_ref.visible},
-            get_grab_key_focus(bool) {|| true}, {|c_ref| c_ref.grab_key_focus},
-            get_opacity(f32) {|| 1.0}, {|c_ref| c_ref.opacity},
-            get_cursor(MouseCursor) {|| Default::default()}, {|c_ref| c_ref.cursor.unwrap_or_default()},
-            get_scale(f64) {|| 1.0}, {|c_ref| c_ref.scale},
-            get_fit(ImageFit) {|| Default::default()}, {|c_ref| c_ref.fit},
-            get_min_width(i64) {|| 16}, {|c_ref| c_ref.min_width},
-            get_min_height(i64) {|| 16}, {|c_ref| c_ref.min_height},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_event_key(bool) {||true}, {|c_ref| c_ref.event_key}
-        }
-    }
-    ref_redraw!();
-    ref_area!();
-    ref_render!();
-    ref_event_option! {
-        hover_in => GImageHoverParam,
-        hover_out => GImageHoverParam,
-        clicked => GImageClickedParam
-    }
-}
-
-impl GImageSet {
-    set_event! {
-        hover_in => GImageHoverParam,
-        hover_out => GImageHoverParam,
-        clicked => GImageClickedParam
     }
 }

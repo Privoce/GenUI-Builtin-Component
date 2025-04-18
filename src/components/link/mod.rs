@@ -13,10 +13,7 @@ use crate::themes::Themes;
 use crate::utils::open_browser;
 use crate::utils::{get_font_family, set_cursor, BoolToF32, ThemeColor, ToBool};
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
-    default_hit_hover_in, default_hit_hover_out, event_option, play_animation, prop_getter,
-    prop_setter, ref_area, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
-    set_text_and_visible_fn, widget_area,
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_hover_in, default_hit_hover_out, event_option, getter, play_animation, pure_after_apply, ref_area, ref_event_option, ref_getter_setter, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, set_text_and_visible_fn, setter, widget_area
 };
 use makepad_widgets::*;
 
@@ -259,18 +256,19 @@ impl Widget for GLink {
 }
 
 impl LiveHook for GLink {
-
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GLink render error: {:?}", e);
-        }
-    }
+    // fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    //     if !self.visible {
+    //         return;
+    //     }
+    //     if let Err(e) = self.render(cx) {
+    //         error!("GLink render error: {:?}", e);
+    //     }
+    // }
+    pure_after_apply!();
 }
 
 impl GLink {
+    render_after_apply!("GLink");
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -535,98 +533,141 @@ impl GLink {
             _ => (),
         }
     }
+    setter! {
+        GLink{
+            set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.render(cx)}},
+            set_background_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.background_color.replace(color); c.draw_link.background_color = color; Ok(())}},
+            set_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.hover_color.replace(color); c.draw_link.hover_color = color; Ok(())}},
+            set_focus_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.focus_color.replace(color); c.draw_link.focus_color = color; Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.border_color.replace(color); c.draw_link.border_color = color; Ok(())}},
+            set_underline_visible(visible: bool) {|c, _cx| {c.underline_visible = visible; c.draw_link.underline_visible = visible.to_f32(); Ok(())}},
+            set_underline_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.underline_color.replace(color); c.draw_link.underline_color = color; Ok(())}},
+            set_underline_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.underline_hover_color.replace(color); c.draw_link.underline_hover_color = color; Ok(())}},
+            set_underline_focus_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.underline_focus_color.replace(color); c.draw_link.underline_focus_color = color; Ok(())}},
+            set_underline_width(width: f32) {|c, _cx| {c.underline_width = width; c.draw_link.underline_width = width; Ok(())}},
+            set_border_radius(radius: f32) {|c, _cx| {c.border_radius = radius; c.draw_link.border_radius = radius; Ok(())}},
+            set_round(round: bool) {|c, cx| {c.round = round; c.render(cx)}},
+            set_background_visible(visible: bool) {|c, _cx| {c.background_visible = visible; c.draw_link.background_visible = visible.to_f32(); Ok(())}},
+            set_text(text: String){|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}},
+            set_font_size(size: f64) {|c, _cx| {c.font_size = size; c.draw_text.text_style.font_size = size; Ok(())}},
+            set_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); c.draw_text.color = color; Ok(())}},
+            set_text_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.text_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_text_focus_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.text_focus_color.replace(color); c.draw_text.stroke_focus_color = color; Ok(())}},
+            set_font_family(font_family: LiveDependency) {|c, _cx| {c.font_family = font_family; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.cursor.replace(cursor); Ok(())}},
+            set_href(href: Option<String>) {|c, _cx| {c.href = href; Ok(())}},
+            set_link_type(link_type: LinkType) {|c, _cx| {c.link_type = link_type; Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_text_walk(walk: Walk) {|c, _cx| {c.text_walk = walk; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_animation_key(animation_key: bool) {|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.walk.abs_pos = abs_pos; Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx| {c.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx| {c.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_text_height(height: Size) {|c, _cx| {c.text_walk.height = height; Ok(())}},
+            set_text_width(width: Size) {|c, _cx| {c.text_walk.width = width; Ok(())}},
+            set_text_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.text_walk.abs_pos = abs_pos; Ok(())}},
+            set_text_margin(margin: Margin) {|c, _cx| {c.text_walk.margin = margin; Ok(())}}
+        }
+    }
+    getter! {
+        GLink{
+            get_theme(Themes) {|c| {c.theme}},
+            get_background_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.background_color)}},
+            get_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.hover_color)}},
+            get_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.focus_color)}},
+            get_border_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.border_color)}},
+            get_underline_visible(bool) {|c| {c.draw_link.underline_visible.to_bool()}},
+            get_underline_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.underline_color)}},
+            get_underline_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.underline_hover_color)}},
+            get_underline_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_link.underline_focus_color)}},
+            get_underline_width(f32) {|c| {c.draw_link.underline_width}},
+            get_border_radius(f32) {|c| {c.draw_link.border_radius}},
+            get_round(bool) {|c| {c.round}},
+            get_background_visible(bool) {|c| {c.background_visible}},
+            get_font_size(f64) {|c| {c.font_size}},
+            get_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.color)}},
+            get_text_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_hover_color)}},
+            get_text_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_focus_color)}},
+            // get_font_family(LiveDependency) {|| LiveDependency::default()}, {|c| {c.font_family}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_href(Option<String>) {|c| {c.href.clone()}},
+            get_link_type(LinkType) {|c| {c.link_type}},
+            get_visible(bool) {|c| {c.visible}},
+            get_text_height(Size) {|c| {c.text_walk.height}},
+            get_text_width(Size) {|c| {c.text_walk.width}},
+            get_text_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_text_margin(Margin) {|c| {c.walk.margin}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_event_key(bool) {|c| {c.event_key}},
+            get_text(String) {|c| {c.text.as_ref().to_string()}}
+        }
+    }
 }
 
 impl GLinkRef {
-    prop_setter! {
-        GLink{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_focus_color(color: String) {|c_ref| {c_ref.focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_underline_visible(visible: bool) {|c_ref| {c_ref.underline_visible = visible; Ok(())}},
-            set_underline_color(color: String) {|c_ref| {c_ref.underline_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_underline_hover_color(color: String) {|c_ref| {c_ref.underline_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_underline_focus_color(color: String) {|c_ref| {c_ref.underline_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_underline_width(width: f32) {|c_ref| {c_ref.underline_width = width; Ok(())}},
-            set_border_radius(radius: f32) {|c_ref| {c_ref.border_radius = radius; Ok(())}},
-            set_round(round: bool) {|c_ref| {c_ref.round = round; Ok(())}},
-            set_background_visible(visible: bool) {|c_ref| {c_ref.background_visible = visible; Ok(())}},
-            set_text(text: ArcStringMut) {|c_ref| {c_ref.text = text; Ok(())}},
-            set_font_size(size: f64) {|c_ref| {c_ref.font_size = size; Ok(())}},
-            set_color(color: String) {|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_hover_color(color: String) {|c_ref| {c_ref.text_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_focus_color(color: String) {|c_ref| {c_ref.text_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family; Ok(())}},
-            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
-            set_href(href: String) {|c_ref| {c_ref.href.replace(href); Ok(())}},
-            set_link_type(link_type: LinkType) {|c_ref| {c_ref.link_type = link_type; Ok(())}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_text_walk(walk: Walk) {|c_ref| {c_ref.text_walk = walk; Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
-            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}},
-            set_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(abs_pos); Ok(())}},
-            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
-            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
-            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
-            set_text_height(height: Size) {|c_ref| {c_ref.text_walk.height = height; Ok(())}},
-            set_text_width(width: Size) {|c_ref| {c_ref.text_walk.width = width; Ok(())}},
-            set_text_abs_pos(abs_pos: DVec2) {|c_ref| {c_ref.text_walk.abs_pos.replace(abs_pos); Ok(())}},
-            set_text_margin(margin: Margin) {|c_ref| {c_ref.text_walk.margin = margin; Ok(())}}
-        }
-    }
-    prop_getter! {
-        GLink{
-            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.background_color)}},
-            get_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.hover_color)}},
-            get_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.focus_color)}},
-            get_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.border_color)}},
-            get_underline_visible(bool) {|| true}, {|c_ref| {c_ref.draw_link.underline_visible.to_bool()}},
-            get_underline_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.underline_color)}},
-            get_underline_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.underline_hover_color)}},
-            get_underline_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_link.underline_focus_color)}},
-            get_underline_width(f32) {|| 1.0}, {|c_ref| {c_ref.draw_link.underline_width}},
-            get_border_radius(f32) {|| 4.0}, {|c_ref| {c_ref.draw_link.border_radius}},
-            get_round(bool) {|| false}, {|c_ref| {c_ref.round}},
-            get_background_visible(bool) {|| false}, {|c_ref| {c_ref.background_visible}},
-            get_font_size(f64) {|| 10.0}, {|c_ref| {c_ref.font_size}},
-            get_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
-            get_text_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_hover_color)}},
-            get_text_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_focus_color)}},
-            // get_font_family(LiveDependency) {|| LiveDependency::default()}, {|c_ref| {c_ref.font_family}},
-            get_cursor(MouseCursor) {|| MouseCursor::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_href(Option<String>) {|| None}, {|c_ref| {c_ref.href.clone()}},
-            get_link_type(LinkType) {|| LinkType::default()}, {|c_ref| {c_ref.link_type}},
-            get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
-            get_text_height(Size) {|| Size::default()}, {|c_ref| {c_ref.text_walk.height}},
-            get_text_width(Size) {|| Size::default()}, {|c_ref| {c_ref.text_walk.width}},
-            get_text_abs_pos(Option<DVec2>) {|| None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_text_margin(Margin) {|| Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_grab_key_focus(bool) {||false}, {|c_ref| {c_ref.grab_key_focus}},
-            get_animation_key(bool) {||true}, {|c_ref| {c_ref.animation_key}},
-            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
-        }
+    ref_getter_setter! {
+        get_theme, set_theme -> Themes,
+        get_background_color, set_background_color -> String,
+        get_hover_color, set_hover_color -> String,
+        get_focus_color, set_focus_color -> String,
+        get_border_color, set_border_color -> String,
+        get_underline_visible, set_underline_visible -> bool,
+        get_underline_color, set_underline_color -> String,
+        get_underline_hover_color, set_underline_hover_color -> String,
+        get_underline_focus_color, set_underline_focus_color -> String,
+        get_underline_width, set_underline_width -> f32,
+        get_border_radius, set_border_radius -> f32,
+        get_round, set_round -> bool,
+        get_background_visible, set_background_visible -> bool,
+        get_text, set_text -> String,
+        get_font_size, set_font_size -> f64,
+        get_color, set_color -> String,
+        get_text_hover_color, set_text_hover_color -> String,
+        get_text_focus_color, set_text_focus_color -> String,
+        get_cursor, set_cursor -> MouseCursor,
+        get_href, set_href -> Option<String>,
+        get_link_type, set_link_type -> LinkType,
+        get_visible, set_visible -> bool,
+        get_text_height, set_text_height -> Size,
+        get_text_width, set_text_width -> Size,
+        get_text_abs_pos, set_text_abs_pos -> Option<DVec2>,
+        get_text_margin, set_text_margin -> Margin,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_event_key, set_event_key -> bool
     }
     ref_area!();
     ref_redraw!();

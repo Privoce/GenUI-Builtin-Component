@@ -86,7 +86,7 @@ impl Widget for GTableHeader {
                 if let Some(child) = self.children.get_mut(&id) {
                     // is the child visible?
                     // true -> draw the child walk
-                    if child.is_visible() {
+                    if child.visible() {
                         let walk = child.walk(cx);
                         // if resumed
                         if !resumed {
@@ -124,7 +124,7 @@ impl Widget for GTableHeader {
     //     self.deref_widget.handle_event(cx, event, scope)
     // }
 
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

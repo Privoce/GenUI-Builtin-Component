@@ -57,7 +57,7 @@ impl Widget for GTableRow {
                 if let Some(child) = self.children.get_mut(&id) {
                     // is the child visible?
                     // true -> draw the child walk
-                    if child.is_visible() {
+                    if child.visible() {
                         let walk = child.walk(cx);
                         // if resumed
                         if !resumed {
@@ -98,7 +98,7 @@ impl Widget for GTableRow {
         }
     }
     
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

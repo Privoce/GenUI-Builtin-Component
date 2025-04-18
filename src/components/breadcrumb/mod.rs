@@ -133,8 +133,11 @@ impl Widget for GBreadCrumb {
             }
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
+    }
+    fn set_visible(&mut self, cx:&mut Cx, visible:bool) {
+        self.visible = visible;
     }
 }
 

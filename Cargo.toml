@@ -9,6 +9,10 @@ repsitory = "https://github.com/Privoce/GenUI-Builtin-Component"
 keys = ["makepad", "widgets", "ui", "components", "genui"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+dev = []
+release = []
+default = ["dev"]
 
 [dependencies]
 base64 = "0.22.1"

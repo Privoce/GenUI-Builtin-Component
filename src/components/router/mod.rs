@@ -21,7 +21,7 @@ use super::{
 
 live_design! {
     link gen_base;
-    
+
     pub GRouterBase = {{GRouter}}{}
 }
 
@@ -47,6 +47,8 @@ pub struct GRouter {
     pub nav_actions: Option<Box<dyn FnMut(&mut GRouter, &mut Cx)>>,
     #[live]
     pub nav_mode: NavMode,
+    #[rust]
+    pub default_page: Option<HeapLiveIdPath>,
 }
 
 impl LiveHook for GRouter {}
@@ -117,11 +119,9 @@ impl GRouter {
         for action in actions {
             if let GRouterEvent::NavBack(_current) = action.as_widget_action().cast() {
                 // get last item from stack
-                self.stack.pop().map(|last| {
-                    match self.nav_mode{
-                        NavMode::History => self.nav_history(cx, &last.path),
-                        NavMode::Switch => self.nav2(cx, &last.path),
-                    }
+                self.stack.pop().map(|last| match self.nav_mode {
+                    NavMode::History => self.nav_history(cx, &last.path),
+                    NavMode::Switch => self.nav2(cx, &last.path),
                 });
                 break;
             }
@@ -185,7 +185,7 @@ impl GRouter {
             let mut res = None;
 
             for (id, child) in active_router.children.iter() {
-                if child.is_visible() && !self.mode.eq_bind(id) {
+                if child.visible() && !self.mode.eq_bind(id) {
                     let mut p = self.scope_path.as_ref().unwrap().clone();
                     p.push(*id);
                     res.replace(p);
@@ -201,10 +201,21 @@ impl GRouter {
         let path = self.bar_scope_path(path);
         self.nav2(cx, &path);
     }
+    pub fn nav_back(&mut self, cx: &mut Cx) {
+        if let Some(last) = self.stack.pop() {
+            match self.nav_mode {
+                NavMode::History => self.nav_history(cx, &last.path),
+                NavMode::Switch => self.nav2(cx, &last.path),
+            }
+        } else {
+            let path = self.default_page.as_ref().cloned().unwrap();
+            self.nav2(cx, &path);
+        }
+    }
     pub fn nav_to_path(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope, path: &[LiveId]) {
         cx.widget_action(uid, &scope.path, GRouterEvent::NavTo(path[0]));
     }
-    pub fn nav_back(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope) {
+    pub fn nav_back_path(cx: &mut Cx, uid: WidgetUid, scope: &mut Scope) {
         let path = scope.path.clone();
         cx.widget_action(uid, &scope.path, GRouterEvent::NavBack(path.last()));
     }
@@ -281,8 +292,7 @@ impl GRouter {
     /// .map(|_| {
     ///     let router = self.grouter(id!(app_router));
     ///     router.borrow().map(|router| {
-    ///         if !router.scope_path.is_empty() {
-    ///             // if is empty do not do next
+    ///         if router.scope_path.is_some() {
     ///             self.lifetime.next();
     ///         }
     ///     })
@@ -324,7 +334,7 @@ impl GRouter {
                 for (id, child) in bar.children.iter() {
                     if !self.mode.eq_bind(id) {
                         let bar_path = self.bar_scope_path(&[id.clone()]);
-                        if child.is_visible() && flag {
+                        if child.visible() && flag {
                             self.ty(PageType::Bar);
                             self.active_page.replace(bar_path.clone());
                             flag = false;
@@ -336,7 +346,7 @@ impl GRouter {
             self.gview(id!(nav_pages)).borrow().map(|nav| {
                 for (id, child) in nav.children.iter() {
                     let nav_path = self.nav_scope_path(&[id.clone()]);
-                    if child.is_visible() && flag {
+                    if child.visible() && flag {
                         self.ty(PageType::Nav);
                         self.active_page.replace(nav_path.clone());
                         flag = false;
@@ -355,7 +365,7 @@ impl GRouter {
         for bar in self.bar_pages.clone().iter() {
             if flag {
                 self.gview(id!(bar_pages)).borrow().map(|container| {
-                    if container.widget(&[bar.last()]).is_visible() {
+                    if container.widget(&[bar.last()]).visible() {
                         self.ty(PageType::Bar);
                         self.active_page.replace(bar.clone());
                         flag = false;
@@ -368,7 +378,7 @@ impl GRouter {
         for nav in self.nav_pages.clone().iter() {
             if flag {
                 self.gview(id!(nav_pages)).borrow().map(|container| {
-                    if container.widget(&[nav.last()]).is_visible() {
+                    if container.widget(&[nav.last()]).visible() {
                         self.ty(PageType::Nav);
                         self.active_page.replace(nav.clone());
                     }
@@ -386,7 +396,8 @@ impl GRouter {
         if self.scope_path.is_some() {
             let mut path = self.scope_path.as_ref().unwrap().clone();
             path.push(id[0].clone());
-            self.active_page.replace(path);
+            self.active_page.replace(path.clone());
+            self.default_page.replace(path);
         }
         self
     }
@@ -417,20 +428,20 @@ impl GRouter {
         self.handle_nav_back(cx, actions);
         self.action_nav_to(cx, actions);
         self.indicator_nav_to(cx, &actions).map(|_| {
-           return;
+            return;
         });
         self.redraw_active(cx);
     }
     pub fn redraw_active(&mut self, cx: &mut Cx) {
-        if self.scope_path.is_some(){
+        if self.scope_path.is_some() {
             match self.page_type {
                 PageType::Bar => {
                     self.gview(id!(bar_pages)).redraw(cx);
-                },
+                }
                 PageType::Nav => {
                     self.gview(id!(nav_pages)).redraw(cx);
-                },
-                PageType::None => {},
+                }
+                PageType::None => {}
             }
         }
     }
@@ -455,9 +466,32 @@ impl GRouterRef {
             router.nav_to(cx, path);
         });
     }
+    pub fn nav_back(&self, cx: &mut Cx) {
+        self.borrow_mut().map(|mut router| {
+            router.nav_back(cx);
+        });
+    }
     pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
         self.borrow_mut().map(|mut router| {
             router.handle_nav_events(cx, actions);
         });
     }
+}
+
+#[macro_export]
+macro_rules! nav_to {
+    (
+        $path: tt, $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
+    };
+}
+
+#[macro_export]
+macro_rules! nav_back {
+    (
+        $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_back_path($cx, $uid, $scope);
+    };
 }

@@ -84,15 +84,15 @@ pub struct GSubMenu {
 
 impl Widget for GSubMenu {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.is_visible() {
+        if !self.visible() {
             return DrawStep::done();
         }
         self.draw_sub_menu.begin(cx, walk, self.layout);
-        if self.title.is_visible() {
+        if self.title.visible() {
             let title_walk = self.title.walk(cx);
             let _ = self.title.draw_walk(cx, scope, title_walk);
         }
-        if self.items.is_visible() {
+        if self.items.visible() {
             let items_walk = self.items.walk(cx);
             let _ = self.items.draw_walk(cx, scope, items_walk);
         }
@@ -105,10 +105,10 @@ impl Widget for GSubMenu {
             return;
         }
 
-        if self.title.is_visible() {
+        if self.title.visible() {
             let _ = self.title.handle_event(cx, event, scope);
         }
-        if self.items.is_visible() {
+        if self.items.visible() {
             let actions = cx.capture_actions(|cx| self.items.handle_event(cx, event, scope));
 
             let mut fresh = None;
@@ -158,10 +158,10 @@ impl Widget for GSubMenu {
 
 impl LiveHook for GSubMenu {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        if self.title.is_visible() {
+        if self.title.visible() {
             self.title.after_apply(cx, apply, index, nodes);
         }
-        if self.items.is_visible() {
+        if self.items.visible() {
             self.items.after_apply(cx, apply, index, nodes);
             let _ = self.find_selected();
         }
@@ -240,14 +240,14 @@ impl GSubMenu {
         self.selected = MenuItemMode::selected(&self.item_modes);
     }
     pub fn redraw(&mut self, cx: &mut Cx) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         self.draw_sub_menu.redraw(cx);
-        if self.title.is_visible() {
+        if self.title.visible() {
             self.title.redraw(cx);
         }
-        if self.items.is_visible() {
+        if self.items.visible() {
             self.items.redraw(cx);
         }
     }

@@ -9,9 +9,9 @@ use shader::draw_text::TextWrap;
 
 use crate::{
     active_event, animatie_fn, default_handle_animation, default_hit_hover_in,
-    default_hit_hover_out, event_option, play_animation, prop_getter, prop_setter, ref_area,
-    ref_area_ext, ref_event_option, ref_redraw, ref_render, set_event, set_scope_path,
-    set_text_and_visible_fn,
+    default_hit_hover_out, event_option, getter, play_animation, pure_after_apply, ref_area,
+    ref_area_ext, ref_event_option, ref_getter_setter, ref_redraw, ref_render, render_after_apply,
+    set_event, set_scope_path, setter,
     shader::{
         draw_check_box::DrawGCheckbox, draw_radio::GChooseType, draw_text::DrawGText,
         draw_view::DrawGView,
@@ -226,7 +226,7 @@ impl Widget for GCheckbox {
         scope: &mut Scope,
         sweep_area: Area,
     ) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         let hit = event.hits_with_options(
@@ -238,28 +238,35 @@ impl Widget for GCheckbox {
         self.handle_widget_event(cx, event, scope, hit, sweep_area)
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         let focus_area = self.area();
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, event, scope, hit, focus_area)
     }
-    set_text_and_visible_fn!();
-}
-
-impl LiveHook for GCheckbox {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GCheckbox render error: {:?}", e);
-        }
+    // set_text_and_visible_fn!();
+    fn visible(&self) -> bool {
+        self.visible
     }
 }
 
+// impl LiveHook for GCheckbox {
+//     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+//         if !self.visible {
+//             return;
+//         }
+//         if let Err(e) = self.render(cx) {
+//             error!("GCheckbox render error: {:?}", e);
+//         }
+//     }
+// }
+impl LiveHook for GCheckbox {
+    pure_after_apply!();
+}
+
 impl GCheckbox {
+    render_after_apply!("GCheckbox");
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -341,9 +348,9 @@ impl GCheckbox {
         let text_focus_color = self.text_focus_color.get(self.theme, 100);
         // selected --------------------------------------------------------------------
         let selected = self.selected.to_f32();
-        if self.selected{
+        if self.selected {
             self.play_animation(cx, id!(selected.on));
-        }else{
+        } else {
             self.play_animation(cx, id!(selected.off));
         }
         // ------------------ apply to draw_checkbox ---------------------------------------
@@ -381,7 +388,7 @@ impl GCheckbox {
                 selected: (selected)
             },
         );
-        self.draw_checkbox.apply_type(self.checkbox_type.clone());
+        self.draw_checkbox.apply_type(self.checkbox_type);
         if self.text_visible {
             self.draw_text.apply_over(
                 cx,
@@ -396,7 +403,7 @@ impl GCheckbox {
                     }
                 },
             );
-            self.draw_text.wrap = self.wrap.clone();
+            self.draw_text.wrap = self.wrap;
         }
         Ok(())
     }
@@ -546,130 +553,171 @@ impl GCheckbox {
             _ => (),
         }
     }
-    pub fn value(&self) -> Option<String> {
-        self.value.clone()
+    setter! {
+        GCheckbox{
+            set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.render(cx)}},
+            set_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); Ok(())}},
+            set_text_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.text_hover_color.replace(color); c.draw_text.stroke_hover_color = color; Ok(())}},
+            set_text_focus_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.text_focus_color.replace(color); c.draw_text.stroke_focus_color = color; Ok(())}},
+            set_font_size(font_size: f64) {|c, _cx| {c.font_size = font_size; c.draw_text.text_style.font_size = font_size; Ok(())}},
+            set_height_factor(height_factor: f64) {|c, _cx| {c.height_factor = height_factor; c.draw_text.text_style.height_factor = height_factor; Ok(())}},
+            set_wrap(wrap: TextWrap) {|c, _cx| {c.wrap = wrap; c.draw_text.wrap = wrap; Ok(())}},
+            // set_font_family(font_family: LiveDependency) {|c, _cx| {c.font_family = font_family; Ok(())}},
+            set_text_visible(text_visible: bool) {|c, _cx| {c.text_visible = text_visible; Ok(())}},
+            set_size(size: f32) {|c, _cx| {c.size = size; c.draw_checkbox.size = size; Ok(())}},
+            set_checkbox_background_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.checkbox_background_color.replace(color); c.draw_checkbox.background_color = color; Ok(())}},
+            set_checkbox_background_visible(visible: bool) {|c, _cx| {c.checkbox_background_visible = visible; c.draw_checkbox.background_visible = visible.to_f32(); Ok(())}},
+            set_checkbox_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.checkbox_hover_color.replace(color); c.draw_checkbox.hover_color = color; Ok(())}},
+            set_checkbox_selected_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.checkbox_selected_color.replace(color); c.draw_checkbox.selected_color = color; Ok(())}},
+            set_stroke_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_color.replace(color); c.draw_checkbox.stroke_color = color; Ok(())}},
+            set_stroke_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_hover_color.replace(color); c.draw_checkbox.stroke_hover_color = color; Ok(())}},
+            set_stroke_selected_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.stroke_selected_color.replace(color); c.draw_checkbox.stroke_selected_color = color; Ok(())}},
+            set_checkbox_border_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.checkbox_border_color.replace(color); c.draw_checkbox.border_color = color; Ok(())}},
+            set_checkbox_border_width(border_width: f32) {|c, _cx| {c.checkbox_border_width = border_width; c.draw_checkbox.border_width = border_width; Ok(())}},
+            set_scale(scale: f32) {|c, _cx| {c.scale = scale; c.draw_checkbox.scale = scale; Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.background_color.replace(color); c.draw_checkbox_wrap.background_color = color; Ok(())}},
+            set_hover_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.hover_color.replace(color); c.draw_checkbox_wrap.hover_color = color; Ok(())}},
+            set_focus_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.focus_color.replace(color); c.draw_checkbox_wrap.focus_color = color; Ok(())}},
+            set_shadow_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.shadow_color.replace(color); c.draw_checkbox_wrap.shadow_color = color; Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.border_color.replace(color); c.draw_checkbox_wrap.border_color = color; Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.background_visible = visible; c.draw_checkbox_wrap.background_visible = visible.to_f32(); Ok(())}},
+            set_border_width(border_width: f32) {|c, _cx| {c.border_width = border_width; c.draw_checkbox_wrap.border_width = border_width; Ok(())}},
+            set_border_radius(border_radius: f32) {|c, _cx| {c.border_radius = border_radius; c.draw_checkbox_wrap.border_radius = border_radius; Ok(())}},
+            set_spread_radius(spread_radius: f32) {|c, _cx| {c.spread_radius = spread_radius; c.draw_checkbox_wrap.spread_radius = spread_radius; Ok(())}},
+            set_blur_radius(blur_radius: f32) {|c, _cx| {c.blur_radius = blur_radius; c.draw_checkbox_wrap.blur_radius = blur_radius; Ok(())}},
+            set_shadow_offset(shadow_offset: Vec2) {|c, _cx| {c.shadow_offset = shadow_offset; c.draw_checkbox_wrap.shadow_offset = shadow_offset; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.cursor = Some(cursor); Ok(())}},
+            set_value(value: Option<String>) {|c, _cx| {c.value = value; Ok(())}},
+            set_checkbox_type(checkbox_type: GChooseType) {|c, _cx| {c.checkbox_type = checkbox_type; c.draw_checkbox.check_type = checkbox_type; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.walk.abs_pos = abs_pos; Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx| {c.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx| {c.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool) {|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_selected(selected: bool) {|c, cx| {c.toggle(cx, selected); Ok(())}},
+            set_text(text: String) {|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}}
+        }
     }
-    pub fn is_selected(&self) -> bool {
-        self.selected
+    getter! {
+        GCheckbox{
+            get_theme(Themes) {|c| {c.theme}},
+            get_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.color)}},
+            get_text_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_hover_color)}},
+            get_text_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_text.stroke_focus_color)}},
+            get_font_size(f64) {|c| {c.draw_text.text_style.font_size}},
+            get_height_factor(f64) {|c| {c.draw_text.text_style.height_factor}},
+            get_wrap(TextWrap) {|c| {c.draw_text.wrap.clone()}},
+            // get_font_family(LiveDependency) {|| LiveDependency::default()}, {|c| {c.draw_text.text_style.font}},
+            get_text_visible(bool) {|c| {c.text_visible}},
+            get_size(f32) {|c| {c.draw_checkbox.size}},
+            get_checkbox_background_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.background_color)}},
+            get_checkbox_background_visible(bool) {|c| {c.draw_checkbox.background_visible.to_bool()}},
+            get_checkbox_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.hover_color)}},
+            get_checkbox_selected_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.selected_color)}},
+            get_stroke_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.stroke_color)}},
+            get_stroke_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.stroke_hover_color)}},
+            get_stroke_selected_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.stroke_selected_color)}},
+            get_checkbox_border_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox.border_color)}},
+            get_checkbox_border_width(f32) {|c| {c.draw_checkbox.border_width}},
+            get_scale(f32) {|c| {c.draw_checkbox.scale}},
+            get_background_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox_wrap.background_color)}},
+            get_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox_wrap.hover_color)}},
+            get_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox_wrap.focus_color)}},
+            get_shadow_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox_wrap.shadow_color)}},
+            get_border_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_checkbox_wrap.border_color)}},
+            get_background_visible(bool) {|c| {c.draw_checkbox_wrap.background_visible.to_bool()}},
+            get_border_width(f32) {|c| {c.draw_checkbox_wrap.border_width}},
+            get_border_radius(f32) {|c| {c.draw_checkbox_wrap.border_radius}},
+            get_spread_radius(f32) {|c| {c.draw_checkbox_wrap.spread_radius}},
+            get_blur_radius(f32) {|c| {c.draw_checkbox_wrap.blur_radius}},
+            get_shadow_offset(Vec2) {|c| {c.draw_checkbox_wrap.shadow_offset}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_value(Option<String>) {|c| {c.value.clone()}},
+            get_checkbox_type(GChooseType) {|c| {c.draw_checkbox.check_type.clone()}},
+            get_selected(bool) {|c| {c.selected}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_visible(bool) {|c| {c.visible}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_event_key(bool) {|c| {c.event_key}},
+            get_text(String) {|c| {c.text.as_ref().to_string()}}
+        }
     }
 }
 
 impl GCheckboxRef {
-    pub fn set_selected(&self, cx: &mut Cx, selected: bool) -> () {
-        self.borrow_mut()
-            .map(|mut c_ref| c_ref.toggle(cx, selected));
-    }
-    pub fn set_text(&self, cx: &mut Cx, text: String) -> () {
-        if let Some(mut c_ref) = self.borrow_mut() {
-            c_ref.set_text(cx, &text);
-        }
-    }
-    prop_setter! {
-        GCheckbox{
-            set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_color(color: String) {|c_ref| {c_ref.color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_hover_color(color: String) {|c_ref| {c_ref.text_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_text_focus_color(color: String) {|c_ref| {c_ref.text_focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_font_size(font_size: f64) {|c_ref| {c_ref.font_size = font_size; Ok(())}},
-            set_height_factor(height_factor: f64) {|c_ref| {c_ref.height_factor = height_factor; Ok(())}},
-            set_wrap(wrap: TextWrap) {|c_ref| {c_ref.wrap = wrap; Ok(())}},
-            // set_font_family(font_family: LiveDependency) {|c_ref| {c_ref.font_family = font_family; Ok(())}},
-            set_text_visible(text_visible: bool) {|c_ref| {c_ref.text_visible = text_visible; Ok(())}},
-            set_size(size: f32) {|c_ref| {c_ref.size = size; Ok(())}},
-            set_checkbox_background_color(color: String) {|c_ref| {c_ref.checkbox_background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_checkbox_background_visible(checkbox_background_visible: bool) {|c_ref| {c_ref.checkbox_background_visible = checkbox_background_visible; Ok(())}},
-            set_checkbox_hover_color(color: String) {|c_ref| {c_ref.checkbox_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_checkbox_selected_color(color: String) {|c_ref| {c_ref.checkbox_selected_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_stroke_color(color: String) {|c_ref| {c_ref.stroke_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_stroke_hover_color(color: String) {|c_ref| {c_ref.stroke_hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_stroke_selected_color(color: String) {|c_ref| {c_ref.stroke_selected_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_checkbox_border_color(color: String) {|c_ref| {c_ref.checkbox_border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_checkbox_border_width(border_width: f32) {|c_ref| {c_ref.checkbox_border_width = border_width; Ok(())}},
-            set_scale(scale: f32) {|c_ref| {c_ref.scale = scale; Ok(())}},
-            set_background_color(color: String) {|c_ref| {c_ref.background_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_hover_color(color: String) {|c_ref| {c_ref.hover_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_focus_color(color: String) {|c_ref| {c_ref.focus_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_shadow_color(color: String) {|c_ref| {c_ref.shadow_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_border_color(color: String) {|c_ref| {c_ref.border_color.replace(crate::utils::hex_to_vec4(&color)?); Ok(())}},
-            set_background_visible(background_visible: bool) {|c_ref| {c_ref.background_visible = background_visible; Ok(())}},
-            set_border_width(border_width: f32) {|c_ref| {c_ref.border_width = border_width; Ok(())}},
-            set_border_radius(border_radius: f32) {|c_ref| {c_ref.border_radius = border_radius; Ok(())}},
-            set_spread_radius(spread_radius: f32) {|c_ref| {c_ref.spread_radius = spread_radius; Ok(())}},
-            set_blur_radius(blur_radius: f32) {|c_ref| {c_ref.blur_radius = blur_radius; Ok(())}},
-            set_shadow_offset(shadow_offset: Vec2) {|c_ref| {c_ref.shadow_offset = shadow_offset; Ok(())}},
-            set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor); Ok(())}},
-            set_value(value: Option<String>) {|c_ref| {c_ref.value = value; Ok(())}},
-            set_checkbox_type(checkbox_type: GChooseType) {|c_ref| {c_ref.checkbox_type = checkbox_type; Ok(())}},
-            set_abs_pos(abs_pos: Option<DVec2>) {|c_ref| {c_ref.walk.abs_pos = abs_pos; Ok(())}},
-            set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size) {|c_ref| {c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size) {|c_ref| {c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip_x: bool) {|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
-            set_clip_y(clip_y: bool) {|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
-            set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align) {|c_ref| {c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
-            set_visible(visible: bool) {|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_animation_key(animation_key: bool) {|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool) {|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
-            set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key; Ok(())}}
-        }
-    }
-    prop_getter! {
-        GCheckbox{
-            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.color)}},
-            get_text_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_hover_color)}},
-            get_text_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_text.stroke_focus_color)}},
-            get_font_size(f64) {|| 12.0}, {|c_ref| {c_ref.draw_text.text_style.font_size}},
-            get_height_factor(f64) {|| 0.0}, {|c_ref| {c_ref.draw_text.text_style.height_factor}},
-            get_wrap(TextWrap) {|| TextWrap::Word}, {|c_ref| {c_ref.draw_text.wrap.clone()}},
-            // get_font_family(LiveDependency) {|| LiveDependency::default()}, {|c_ref| {c_ref.draw_text.text_style.font}},
-            get_text_visible(bool) {|| true}, {|c_ref| {c_ref.text_visible}},
-            get_size(f32) {|| 8.0}, {|c_ref| {c_ref.draw_checkbox.size}},
-            get_checkbox_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.background_color)}},
-            get_checkbox_background_visible(bool) {|| true}, {|c_ref| {c_ref.draw_checkbox.background_visible.to_bool()}},
-            get_checkbox_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.hover_color)}},
-            get_checkbox_selected_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.selected_color)}},
-            get_stroke_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.stroke_color)}},
-            get_stroke_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.stroke_hover_color)}},
-            get_stroke_selected_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.stroke_selected_color)}},
-            get_checkbox_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox.border_color)}},
-            get_checkbox_border_width(f32) {|| 1.0}, {|c_ref| {c_ref.draw_checkbox.border_width}},
-            get_scale(f32) {|| 0.48}, {|c_ref| {c_ref.draw_checkbox.scale}},
-            get_background_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox_wrap.background_color)}},
-            get_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox_wrap.hover_color)}},
-            get_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox_wrap.focus_color)}},
-            get_shadow_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox_wrap.shadow_color)}},
-            get_border_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_checkbox_wrap.border_color)}},
-            get_background_visible(bool) {|| true}, {|c_ref| {c_ref.draw_checkbox_wrap.background_visible.to_bool()}},
-            get_border_width(f32) {|| 0.0}, {|c_ref| {c_ref.draw_checkbox_wrap.border_width}},
-            get_border_radius(f32) {|| 0.0}, {|c_ref| {c_ref.draw_checkbox_wrap.border_radius}},
-            get_spread_radius(f32) {|| 0.0}, {|c_ref| {c_ref.draw_checkbox_wrap.spread_radius}},
-            get_blur_radius(f32) {|| 4.8}, {|c_ref| {c_ref.draw_checkbox_wrap.blur_radius}},
-            get_shadow_offset(Vec2) {|| Vec2::default()}, {|c_ref| {c_ref.draw_checkbox_wrap.shadow_offset}},
-            get_cursor(MouseCursor) {|| MouseCursor::Hand}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_value(Option<String>) {|| None}, {|c_ref| {c_ref.value.clone()}},
-            get_checkbox_type(GChooseType) {|| GChooseType::default()}, {|c_ref| {c_ref.draw_checkbox.check_type.clone()}},
-            get_selected(bool) {|| false}, {|c_ref| {c_ref.selected}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_visible(bool) {||true}, {|c_ref| {c_ref.visible}},
-            get_animation_key(bool) {||true}, {|c_ref| {c_ref.animation_key}},
-            get_grab_key_focus(bool) {||true}, {|c_ref| {c_ref.grab_key_focus}},
-            get_event_key(bool) {||true}, {|c_ref| {c_ref.event_key}}
-        }
+    ref_getter_setter! {
+        get_theme, set_theme -> Themes,
+        get_color, set_color -> String,
+        get_text_hover_color, set_text_hover_color -> String,
+        get_text_focus_color, set_text_focus_color -> String,
+        get_font_size, set_font_size -> f64,
+        get_height_factor, set_height_factor -> f64,
+        get_wrap, set_wrap -> TextWrap,
+        // get_font_family, set_font_family -> LiveDependency,
+        get_text_visible, set_text_visible -> bool,
+        get_size, set_size -> f32,
+        get_checkbox_background_color, set_checkbox_background_color -> String,
+        get_checkbox_background_visible, set_checkbox_background_visible -> bool,
+        get_checkbox_hover_color, set_checkbox_hover_color -> String,
+        get_checkbox_selected_color, set_checkbox_selected_color -> String,
+        get_stroke_color, set_stroke_color -> String,
+        get_stroke_hover_color, set_stroke_hover_color -> String,
+        get_stroke_selected_color, set_stroke_selected_color -> String,
+        get_checkbox_border_color, set_checkbox_border_color -> String,
+        get_checkbox_border_width, set_checkbox_border_width -> f32,
+        get_scale, set_scale -> f32,
+        get_background_color, set_background_color -> String,
+        get_hover_color, set_hover_color -> String,
+        get_focus_color, set_focus_color -> String,
+        get_shadow_color, set_shadow_color -> String,
+        get_border_color, set_border_color -> String,
+        get_background_visible, set_background_visible -> bool,
+        get_border_width, set_border_width -> f32,
+        get_border_radius, set_border_radius -> f32,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_cursor, set_cursor -> MouseCursor,
+        get_value, set_value -> Option<String>,
+        get_checkbox_type, set_checkbox_type -> GChooseType,
+        get_selected, set_selected -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_visible, set_visible -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_event_key, set_event_key -> bool,
+        get_text, set_text -> String
     }
     ref_area!();
     ref_area_ext! {
@@ -692,9 +740,10 @@ impl GCheckboxRef {
     /// ## Get the value of the checkbox.
     /// If the checkbox has a value, it will return the Some(value).
     /// Otherwise, it will return None.(include can not find the checkbox)
+    #[deprecated(since = "0.2.1", note = "Please use get_value() instead")]
     pub fn value(&self) -> Option<String> {
         if let Some(c_ref) = self.borrow() {
-            c_ref.value()
+            c_ref.get_value()
         } else {
             None
         }
@@ -705,7 +754,7 @@ impl GCheckboxRef {
     #[deprecated(since = "0.1.0", note = "Please use get_selected() instead")]
     pub fn is_selected(&self) -> bool {
         if let Some(c_ref) = self.borrow() {
-            c_ref.is_selected()
+            c_ref.get_selected()
         } else {
             false
         }

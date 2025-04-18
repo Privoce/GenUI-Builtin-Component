@@ -133,17 +133,17 @@ pub struct GTabbarItem {
 
 impl Widget for GTabbarItem {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.is_visible() {
+        if !self.visible() {
             return DrawStep::done();
         }
         self.set_scope_path(&scope.path);
 
         let _ = self.draw_item.begin(cx, walk, self.layout);
-        if self.icon_slot.is_visible() {
+        if self.icon_slot.visible() {
             let icon_walk = self.icon_slot.walk(cx);
             let _ = self.icon_slot.draw_walk(cx, scope, icon_walk);
         }
-        if self.text_slot.is_visible() {
+        if self.text_slot.visible() {
             let text_walk = self.text_slot.walk(cx);
             let _ = self.text_slot.draw_walk(cx, scope, text_walk);
         }
@@ -151,7 +151,7 @@ impl Widget for GTabbarItem {
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         default_handle_animation!(self, cx, event);

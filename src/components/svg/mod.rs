@@ -6,14 +6,7 @@ pub use event::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animatie_fn, default_handle_animation, default_hit_finger_down,
-    default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option,
-    play_animation, prop_getter, prop_setter, ref_area, ref_event_option, ref_play_animation,
-    ref_redraw, ref_render, set_event, set_scope_path,
-    shader::draw_svg::DrawGSvg,
-    themes::Themes,
-    utils::{set_cursor, ThemeColor},
-    widget_area,
+    active_event, animatie_fn, default_handle_animation, default_hit_finger_down, default_hit_finger_up, default_hit_hover_in, default_hit_hover_out, event_option, getter, play_animation, pure_after_apply, ref_area, ref_event_option, ref_getter_setter, ref_play_animation, ref_redraw, ref_render, render_after_apply, set_event, set_scope_path, setter, shader::draw_svg::DrawGSvg, themes::Themes, utils::{set_cursor, ThemeColor}, widget_area
 };
 
 live_design! {
@@ -194,23 +187,28 @@ impl Widget for GSvg {
         let hit = event.hits(cx, self.area());
         self.handle_widget_event(cx, event, scope, hit, focus_area)
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
 
-impl LiveHook for GSvg {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GSvg render error: {:?}", e);
-        }
-    }
+// impl LiveHook for GSvg {
+//     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+//         if !self.visible {
+//             return;
+//         }
+//         if let Err(e) = self.render(cx) {
+//             error!("GSvg render error: {:?}", e);
+//         }
+//     }
+// }
+
+impl LiveHook for GSvg{
+    pure_after_apply!();
 }
 
 impl GSvg {
+    render_after_apply!("GSvg");
     set_scope_path!();
     play_animation!();
     widget_area! {
@@ -326,66 +324,93 @@ impl GSvg {
             _ => (),
         }
     }
+    setter! {
+        GSvg{
+            set_theme(theme: Themes){|c, cx| {c.theme = theme; c.render(cx)}},
+            set_brightness(brightness: f32){|c, _cx| {c.brightness = brightness; c.draw_svg.brightness = brightness; Ok(())}},
+            set_curve(curve: f32){|c, _cx| {c.curve = curve; c.draw_svg.curve = curve; Ok(())}},
+            set_linearize(linearize: f32){|c, _cx| {c.linearize = linearize; c.draw_svg.linearize = linearize; Ok(())}},
+            set_scale(scale: f64){|c, _cx| {c.scale = scale; c.draw_svg.scale = scale; Ok(())}},
+            set_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.color.replace(color); c.draw_svg.color = color; Ok(())}},
+            set_draw_depth(draw_depth: f32){|c, _cx| {c.draw_depth = draw_depth; c.draw_svg.draw_depth = draw_depth; Ok(())}},
+            set_stroke_hover_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.draw_svg.stroke_hover_color = color; c.stroke_hover_color.replace(color); Ok(())}},
+            set_stroke_focus_color(color: String){|c, _cx| {let color = crate::utils::hex_to_vec4(&color)?; c.draw_svg.stroke_focus_color = color; c.stroke_focus_color.replace(color); Ok(())}},
+            set_cursor(cursor: MouseCursor){|c, _cx| {c.cursor.replace(cursor); Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool){|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_visible(visible: bool){|c, _cx| {c.visible = visible; Ok(())}},
+            set_animation_key(animation_key: bool){|c, _cx| {c.animation_key = animation_key; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>){|c, _cx| {c.walk.abs_pos = abs_pos; Ok(())}},
+            set_margin(margin: Margin){|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size){|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size){|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2){|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip_x: bool){|c, _cx| {c.layout.clip_x = clip_x; Ok(())}},
+            set_clip_y(clip_y: bool){|c, _cx| {c.layout.clip_y = clip_y; Ok(())}},
+            set_padding(padding: Padding){|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align){|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow){|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64){|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_event_key(event_key: bool){|c, _cx| {c.event_key = event_key; Ok(())}}
+        }
+    }
+    getter! {
+        GSvg{
+            get_theme(Themes) {|c| {c.theme}},
+            get_brightness(f32) {|c| {c.brightness}},
+            get_curve(f32) {|c| {c.curve}},
+            get_linearize(f32) {|c| {c.linearize}},
+            get_scale(f64) {|c| {c.scale}},
+            get_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_svg.color)}},
+            get_draw_depth(f32) {|c| {c.draw_svg.draw_depth}},
+            get_stroke_hover_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_svg.stroke_hover_color)}},
+            get_stroke_focus_color(String) {|c| {crate::utils::vec4_to_hex(&c.draw_svg.stroke_focus_color)}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_visible(bool) {|c| {c.visible}},
+            get_animation_key(bool) {|c| {c.animation_key}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_event_key(bool) {|c| {c.event_key}}
+        }
+    }
 }
 
 impl GSvgRef {
-    prop_setter! {
-        GSvg{
-            set_theme(theme: Themes){|c_ref| {c_ref.theme = theme; Ok(())}},
-            set_brightness(brightness: f32){|c_ref| {c_ref.brightness = brightness; Ok(())}},
-            set_curve(curve: f32){|c_ref| {c_ref.curve = curve; Ok(())}},
-            set_linearize(linearize: f32){|c_ref| {c_ref.linearize = linearize; Ok(())}},
-            set_scale(scale: f64){|c_ref| {c_ref.scale = scale; Ok(())}},
-            set_color(color: String){|c_ref| {c_ref.draw_svg.color = crate::utils::hex_to_vec4(&color)?; Ok(())}},
-            set_draw_depth(draw_depth: f32){|c_ref| {c_ref.draw_svg.draw_depth = draw_depth; Ok(())}},
-            set_stroke_hover_color(color: String){|c_ref| {c_ref.draw_svg.stroke_hover_color = crate::utils::hex_to_vec4(&color)?; Ok(())}},
-            set_stroke_focus_color(color: String){|c_ref| {c_ref.draw_svg.stroke_focus_color = crate::utils::hex_to_vec4(&color)?; Ok(())}},
-            set_cursor(cursor: MouseCursor){|c_ref| {c_ref.cursor.replace(cursor); Ok(())}},
-            set_grab_key_focus(grab_key_focus: bool){|c_ref| {c_ref.grab_key_focus = grab_key_focus; Ok(())}},
-            set_visible(visible: bool){|c_ref| {c_ref.visible = visible; Ok(())}},
-            set_animation_key(animation_key: bool){|c_ref| {c_ref.animation_key = animation_key; Ok(())}},
-            set_abs_pos(abs_pos: Option<DVec2>){|c_ref| {c_ref.walk.abs_pos = abs_pos; Ok(())}},
-            set_margin(margin: Margin){|c_ref| {c_ref.walk.margin = margin; Ok(())}},
-            set_height(height: Size){|c_ref| {c_ref.walk.height = height; Ok(())}},
-            set_width(width: Size){|c_ref| {c_ref.walk.width = width; Ok(())}},
-            set_scroll(scroll: DVec2){|c_ref| {c_ref.layout.scroll = scroll; Ok(())}},
-            set_clip_x(clip_x: bool){|c_ref| {c_ref.layout.clip_x = clip_x; Ok(())}},
-            set_clip_y(clip_y: bool){|c_ref| {c_ref.layout.clip_y = clip_y; Ok(())}},
-            set_padding(padding: Padding){|c_ref| {c_ref.layout.padding = padding; Ok(())}},
-            set_align(align: Align){|c_ref| {c_ref.layout.align = align; Ok(())}},
-            set_flow(flow: Flow){|c_ref| {c_ref.layout.flow = flow; Ok(())}},
-            set_spacing(spacing: f64){|c_ref| {c_ref.layout.spacing = spacing; Ok(())}},
-            set_event_key(event_key: bool){|c_ref| {c_ref.event_key = event_key; Ok(())}}
-        }
-    }
-    prop_getter! {
-        GSvg{
-            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_brightness(f32) {|| 1.0}, {|c_ref| {c_ref.brightness}},
-            get_curve(f32) {|| 0.6}, {|c_ref| {c_ref.curve}},
-            get_linearize(f32) {|| 0.5}, {|c_ref| {c_ref.linearize}},
-            get_scale(f64) {|| 1.0}, {|c_ref| {c_ref.scale}},
-            get_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_svg.color)}},
-            get_draw_depth(f32) {|| 1.0}, {|c_ref| {c_ref.draw_svg.draw_depth}},
-            get_stroke_hover_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_svg.stroke_hover_color)}},
-            get_stroke_focus_color(String) {||Default::default()}, {|c_ref| {crate::utils::vec4_to_hex(&c_ref.draw_svg.stroke_focus_color)}},
-            get_cursor(MouseCursor) {||MouseCursor::default()}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_grab_key_focus(bool) {|| true}, {|c_ref| {c_ref.grab_key_focus}},
-            get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
-            get_animation_key(bool) {|| false}, {|c_ref| {c_ref.animation_key}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_event_key(bool) {|| true}, {|c_ref| {c_ref.event_key}}
-        }
+    ref_getter_setter!{
+        get_theme, set_theme -> Themes,
+        get_brightness, set_brightness -> f32,
+        get_curve, set_curve -> f32,
+        get_linearize, set_linearize -> f32,
+        get_scale, set_scale -> f64,
+        get_color, set_color -> String,
+        get_draw_depth, set_draw_depth -> f32,
+        get_stroke_hover_color, set_stroke_hover_color -> String,
+        get_stroke_focus_color, set_stroke_focus_color -> String,
+        get_cursor, set_cursor -> MouseCursor,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_visible, set_visible -> bool,
+        get_animation_key, set_animation_key -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_event_key, set_event_key -> bool
     }
     ref_redraw!();
     ref_render!();

@@ -109,20 +109,20 @@ pub struct GMenuItem {
 
 impl Widget for GMenuItem {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.is_visible() {
+        if !self.visible() {
             return DrawStep::done();
         }
 
         self.draw_menu_item.begin(cx, walk, self.layout);
-        if self.icon_slot.is_visible() {
+        if self.icon_slot.visible() {
             let icon_walk = self.icon_slot.walk(cx);
             let _ = self.icon_slot.draw_walk(cx, scope, icon_walk);
         }
-        if self.text_slot.is_visible() {
+        if self.text_slot.visible() {
             let text_walk = self.text_slot.walk(cx);
             let _ = self.text_slot.draw_walk(cx, scope, text_walk);
         }
-        if self.right.is_visible() {
+        if self.right.visible() {
             let right_walk = self.right.walk(cx);
             let _ = self.right.draw_walk(cx, scope, right_walk);
         }
@@ -132,7 +132,7 @@ impl Widget for GMenuItem {
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         if self.animator_handle_event(cx, event).must_redraw() {
@@ -179,14 +179,14 @@ impl Widget for GMenuItem {
             _ => (),
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
 
 impl LiveHook for GMenuItem {
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        if !self.is_visible() {
+        if !self.visible() {
             return;
         }
         self.render(cx);
@@ -216,13 +216,13 @@ impl GMenuItem {
     }
     pub fn redraw(&mut self, cx: &mut Cx) {
         self.draw_menu_item.redraw(cx);
-        if self.icon_slot.is_visible() {
+        if self.icon_slot.visible() {
             self.icon_slot.redraw(cx);
         }
-        if self.text_slot.is_visible() {
+        if self.text_slot.visible() {
             self.text_slot.redraw(cx);
         }
-        if self.right.is_visible() {
+        if self.right.visible() {
             self.right.redraw(cx);
         }
     }

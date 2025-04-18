@@ -6,7 +6,6 @@ mod prop;
 mod prop_default;
 mod tools;
 mod widget;
-mod macros;
 
 pub use abs::*;
 pub use event::*;

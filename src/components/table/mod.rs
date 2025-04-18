@@ -113,7 +113,7 @@ impl Widget for GTable {
         }   
     }
 
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }

@@ -5,7 +5,9 @@ pub use event::*;
 use makepad_widgets::*;
 use nav_control::NavControl;
 
-use crate::{prop_getter, themes::Themes, utils::ToBool};
+use crate::{
+    getter, ref_getter_setter, setter, themes::Themes, utils::{BoolToF32, ToBool}
+};
 
 use super::{
     image::GImageWidgetExt,
@@ -168,7 +170,7 @@ impl Widget for GWindow {
             }
             Event::WindowDragQuery(dq) => {
                 if dq.window_id == self.window.window_id() {
-                    if self.view(id!(caption_bar)).is_visible() {
+                    if self.view(id!(caption_bar)).visible() {
                         let size = self.window.get_inner_size(cx);
 
                         if dq.abs.y < 25. {
@@ -254,7 +256,7 @@ impl Widget for GWindow {
             }
         }
     }
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
@@ -435,39 +437,9 @@ impl GWindow {
         }
 
         self.overlay.end(cx);
-        // here template remove this -----------------------------------------------------------
-        // if we are running in stdin mode, write a tracking pixel with the pass size
-        // if cx.in_makepad_studio(){
-        //     let df = cx.current_dpi_factor();
-        //     let size = self.pass.size(cx).unwrap() * df;
-        //     self.stdin_size.color = encode_size(size.x);
-        //     self.stdin_size.draw_abs(cx, Rect{pos:dvec2(0.0,0.0),size:dvec2(1.0/df,1.0/df)});
-        //     self.stdin_size.color = encode_size(size.y);
-        //     self.stdin_size.draw_abs(cx, Rect{pos:dvec2(1.0/df,0.0),size:dvec2(1.0/df,1.0/df)});
-        // }
-        // here template remove this -----------------------------------------------------------
-
         cx.end_pass_sized_turtle();
         self.main_draw_list.end(cx);
         cx.end_pass(&self.pass);
-        // let _ = self.get_btns_width(cx);
-        // self.gview(id!(window_bar.window_title))
-        //     .borrow_mut()
-        //     .map(|mut view| {
-        //         dbg!(self.redraw_flag);
-        //         if self.redraw_flag {
-        //             view.layout.align = Align {
-        //                 // x: self.offset,
-        //                 x: if self.offset < 0.0 || self.offset > 1.0 {
-        //                     view.layout.align.x
-        //                 } else {
-        //                     self.offset
-        //                 },
-        //                 y: view.layout.align.y,
-        //             };
-        //             view.redraw(cx);
-        //         }
-        //     });
     }
     pub fn redraw(&mut self, cx: &mut Cx) -> () {
         self.deref_widget.redraw(cx);
@@ -514,92 +486,91 @@ impl GWindow {
     pub fn pos(&self, cx: &mut Cx) -> DVec2 {
         self.window.get_position(cx)
     }
+    setter! {
+        GWindow{
+            set_theme(theme: Themes) {|c, cx| {c.theme = theme; c.deref_widget.render(cx)}},
+            set_background_color(color: Vec4) {|c, _cx| {c.draw_view.background_color = color; Ok(())}},
+            set_shadow_color(color: Vec4) {|c, _cx| {c.draw_view.shadow_color = color; Ok(())}},
+            set_hover_color(color: Vec4) {|c, _cx| {c.draw_view.hover_color = color; Ok(())}},
+            set_focus_color(color: Vec4) {|c, _cx| {c.draw_view.focus_color = color; Ok(())}},
+            set_border_color(color: Vec4) {|c, _cx| {c.draw_view.border_color = color; Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.draw_view.border_width = width ; Ok(())}},
+            set_border_radius(radius: f32) {|c, _cx| {c.draw_view.border_radius = radius ; Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.draw_view.shadow_offset = offset; Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.draw_view.spread_radius = radius ; Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.draw_view.blur_radius = radius ; Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.draw_view.background_visible = visible.to_f32(); Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.cursor = Some(cursor); Ok(())}},
+            set_grab_key_focus(grab: bool) {|c, _cx| {c.grab_key_focus = grab; Ok(())}},
+            set_block_signal_event(block: bool) {|c, _cx| {c.block_signal_event = block; Ok(())}},
+            set_abs_pos(pos: Option<DVec2>) {|c, _cx| {c.walk.abs_pos = pos; Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.walk.margin = margin; Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.walk.height = height; Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.walk.width = width; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx| {c.layout.scroll = scroll; Ok(())}},
+            set_clip_x(clip: bool) {|c, _cx| {c.layout.clip_x = clip; Ok(())}},
+            set_clip_y(clip: bool) {|c, _cx| {c.layout.clip_y = clip; Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.layout.padding = padding; Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.layout.align = align; Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.layout.flow = flow; Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.layout.spacing = spacing; Ok(())}},
+            set_dpi_factor(factor: f64) {|c, _cx| {c.dpi_factor.replace(factor); Ok(())}},
+            set_optimize(optimize: ViewOptimize) {|c, _cx| {c.optimize = optimize; Ok(())}},
+            set_capture_overload(overload: bool) {|c, _cx| {c.capture_overload = overload; Ok(())}},
+            set_event_key(event_key: bool) {|c, _cx| {c.event_key = event_key; Ok(())}},
+            set_os_type(os_type: GOsType) {|c, _cx| {c.os_type.replace(os_type); Ok(())}},
+            set_show_title(show_title: bool) {|c, _cx| {c.show_title.replace(show_title); Ok(())}},
+            set_show_icon(show_icon: bool) {|c, _cx| {c.show_icon.replace(show_icon); Ok(())}},
+            set_btns_width(btns_width: f64) {|c, _cx| {c.btns_width = btns_width; Ok(())}},
+            set_pre_btns_width(pre_btns_width: f64) {|c, _cx| {c.pre_btns_width = pre_btns_width; Ok(())}},
+            set_offset(offset: f64) {|c, _cx| {c.offset = offset; Ok(())}}
+        }
+    }
+    getter! {
+        GWindow{
+            get_theme(Themes) {|c| {c.theme}},
+            get_background_color(Vec4) {|c| {c.draw_view.background_color}},
+            get_shadow_color(Vec4) {|c| {c.draw_view.shadow_color}},
+            get_hover_color(Vec4) {|c| {c.draw_view.hover_color}},
+            get_focus_color(Vec4) {|c| {c.draw_view.focus_color}},
+            get_border_color(Vec4) {|c| {c.draw_view.border_color}},
+            get_border_width(f32) {|c| {c.draw_view.border_width}},
+            get_border_radius(f32) {|c| {c.draw_view.border_radius}},
+            get_shadow_offset(Vec2) {|c| {c.draw_view.shadow_offset}},
+            get_spread_radius(f32) {|c| {c.draw_view.spread_radius}},
+            get_blur_radius(f32) {|c| {c.draw_view.blur_radius}},
+            get_background_visible(bool) {|c| {c.draw_view.background_visible.to_bool()}},
+            get_visible(bool) {|c| {c.visible}},
+            get_cursor(MouseCursor) {|c| {c.cursor.unwrap_or_default()}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_block_signal_event(bool) {|c| {c.block_signal_event}},
+            get_abs_pos(Option<DVec2>) {|c| {c.walk.abs_pos.clone()}},
+            get_margin(Margin) {|c| {c.walk.margin}},
+            get_height(Size) {|c| {c.walk.height}},
+            get_width(Size) {|c| {c.walk.width}},
+            get_scroll(DVec2) {|c| {c.layout.scroll}},
+            get_clip_x(bool) {|c| {c.layout.clip_x}},
+            get_clip_y(bool) {|c| {c.layout.clip_y}},
+            get_padding(Padding) {|c| {c.layout.padding}},
+            get_align(Align) {|c| {c.layout.align}},
+            get_flow(Flow) {|c| {c.layout.flow}},
+            get_spacing(f64) {|c| {c.layout.spacing}},
+            get_dpi_factor(f64) {|c| {c.dpi_factor.unwrap_or_default()}},
+            get_optimize(ViewOptimize) {|c| {c.optimize}},
+            get_capture_overload(bool) {|c| {c.capture_overload}},
+            get_os_type(GOsType) {|c| {c.os_type.unwrap_or_default()}},
+            get_show_title(bool) {|c| {c.show_title.unwrap_or(true)}},
+            get_show_icon(bool) {|c| {c.show_icon.unwrap_or(false)}},
+            get_pre_btns_width(f64) {|c| {c.pre_btns_width}},
+            get_offset(f64) {|c| {c.offset}},
+            get_current_os(OsType) {|c| {c.current_os.clone()}},
+            get_event_key(bool) {|c| {c.event_key}}
+        }
+    }
 }
 
 impl GWindowRef {
-    // prop_setter!{
-    //     GWindow{
-    //         set_theme(theme: Themes) {|c_ref| {c_ref.theme = theme;}},
-    //         set_background_color(color: Vec4) {|c_ref| {c_ref.draw_view.background_color = color;}},
-    //         set_shadow_color(color: Vec4) {|c_ref| {c_ref.draw_view.shadow_color = color;}},
-    //         set_hover_color(color: Vec4) {|c_ref| {c_ref.draw_view.hover_color = color;}},
-    //         set_focus_color(color: Vec4) {|c_ref| {c_ref.draw_view.focus_color = color;}},
-    //         set_border_color(color: Vec4) {|c_ref| {c_ref.draw_view.border_color = color;}},
-    //         set_border_width(width: f64) {|c_ref| {c_ref.draw_view.border_width = width as f32;}},
-    //         set_border_radius(radius: f64) {|c_ref| {c_ref.draw_view.border_radius = radius as f32;}},
-    //         set_shadow_offset(offset: Vec2) {|c_ref| {c_ref.draw_view.shadow_offset = offset;}},
-    //         set_spread_radius(radius: f64) {|c_ref| {c_ref.draw_view.spread_radius = radius as f32;}},
-    //         set_blur_radius(radius: f64) {|c_ref| {c_ref.draw_view.blur_radius = radius as f32;}},
-    //         set_background_visible(visible: bool) {|c_ref| {c_ref.draw_view.background_visible = visible.to_f32();}},
-    //         set_visible(visible: bool) {|c_ref| {c_ref.visible = visible;}},
-    //         set_cursor(cursor: MouseCursor) {|c_ref| {c_ref.cursor = Some(cursor);}},
-    //         set_grab_key_focus(grab: bool) {|c_ref| {c_ref.grab_key_focus = grab;}},
-    //         set_block_signal_event(block: bool) {|c_ref| {c_ref.block_signal_event = block;}},
-    //         set_abs_pos(pos: DVec2) {|c_ref| {c_ref.walk.abs_pos.replace(pos);}},
-    //         set_margin(margin: Margin) {|c_ref| {c_ref.walk.margin = margin;}},
-    //         set_height(height: Size) {|c_ref| {c_ref.walk.height = height;}},
-    //         set_width(width: Size) {|c_ref| {c_ref.walk.width = width;}},
-    //         set_scroll(scroll: DVec2) {|c_ref| {c_ref.layout.scroll = scroll;}},
-    //         set_clip_x(clip: bool) {|c_ref| {c_ref.layout.clip_x = clip;}},
-    //         set_clip_y(clip: bool) {|c_ref| {c_ref.layout.clip_y = clip;}},
-    //         set_padding(padding: Padding) {|c_ref| {c_ref.layout.padding = padding;}},
-    //         set_align(align: Align) {|c_ref| {c_ref.layout.align = align;}},
-    //         set_flow(flow: Flow) {|c_ref| {c_ref.layout.flow = flow;}},
-    //         set_spacing(spacing: f64) {|c_ref| {c_ref.layout.spacing = spacing;}},
-    //         set_dpi_factor(factor: f64) {|c_ref| {c_ref.dpi_factor.replace(factor);}},
-    //         set_optimize(optimize: ViewOptimize) {|c_ref| {c_ref.optimize = optimize;}},
-    //         set_capture_overload(overload: bool) {|c_ref| {c_ref.capture_overload = overload;}},
-    //         set_event_key(event_key: bool) {|c_ref| {c_ref.event_key = event_key;}},
-    //         set_os_type(os_type: GOsType) {|c_ref| {c_ref.os_type.replace(os_type);}},
-    //         set_show_title(show_title: bool) {|c_ref| {c_ref.show_title.replace(show_title);}},
-    //         set_show_icon(show_icon: bool) {|c_ref| {c_ref.show_icon.replace(show_icon);}},
-    //         set_btns_width(btns_width: f64) {|c_ref| {c_ref.btns_width = btns_width;}},
-    //         set_pre_btns_width(pre_btns_width: f64) {|c_ref| {c_ref.pre_btns_width = pre_btns_width;}},
-    //         set_offset(offset: f64) {|c_ref| {c_ref.offset = offset;}}
-    //     }
-    // }
-    prop_getter! {
-        GWindow{
-            get_theme(Themes) {|| Themes::default()}, {|c_ref| {c_ref.theme}},
-            get_background_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.background_color}},
-            get_shadow_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.shadow_color}},
-            get_hover_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.hover_color}},
-            get_focus_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.focus_color}},
-            get_border_color(Vec4) {|| Vec4::default()}, {|c_ref| {c_ref.draw_view.border_color}},
-            get_border_width(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.border_width as f64}},
-            get_border_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.border_radius as f64}},
-            get_shadow_offset(Vec2) {|| Vec2::default()}, {|c_ref| {c_ref.draw_view.shadow_offset}},
-            get_spread_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.spread_radius as f64}},
-            get_blur_radius(f64) {|| 0.0}, {|c_ref| {c_ref.draw_view.blur_radius as f64}},
-            get_background_visible(bool) {|| true}, {|c_ref| {c_ref.draw_view.background_visible.to_bool()}},
-            get_visible(bool) {|| true}, {|c_ref| {c_ref.visible}},
-            get_cursor(MouseCursor) {|| MouseCursor::Default}, {|c_ref| {c_ref.cursor.unwrap_or_default()}},
-            get_grab_key_focus(bool) {|| false}, {|c_ref| {c_ref.grab_key_focus}},
-            get_block_signal_event(bool) {|| false}, {|c_ref| {c_ref.block_signal_event}},
-            get_abs_pos(Option<DVec2>) {||None}, {|c_ref| {c_ref.walk.abs_pos}},
-            get_margin(Margin) {||Margin::default()}, {|c_ref| {c_ref.walk.margin}},
-            get_height(Size) {||Size::default()}, {|c_ref| {c_ref.walk.height}},
-            get_width(Size) {||Size::default()}, {|c_ref| {c_ref.walk.width}},
-            get_scroll(DVec2) {||DVec2::default()}, {|c_ref| {c_ref.layout.scroll}},
-            get_clip_x(bool) {||true}, {|c_ref| {c_ref.layout.clip_x}},
-            get_clip_y(bool) {||true}, {|c_ref| {c_ref.layout.clip_y}},
-            get_padding(Padding) {||Padding::default()}, {|c_ref| {c_ref.layout.padding}},
-            get_align(Align) {||Align::default()}, {|c_ref| {c_ref.layout.align}},
-            get_flow(Flow) {||Flow::default()}, {|c_ref| {c_ref.layout.flow}},
-            get_spacing(f64) {||0.0}, {|c_ref| {c_ref.layout.spacing}},
-            get_dpi_factor(Option<f64>) {||None}, {|c_ref| {c_ref.dpi_factor}},
-            get_optimize(ViewOptimize) {||ViewOptimize::None}, {|c_ref| {c_ref.optimize}},
-            get_capture_overload(bool) {||false}, {|c_ref| {c_ref.capture_overload}},
-            get_os_type(Option<GOsType>){|| None}, {|c_ref| {c_ref.os_type.clone()}},
-            get_show_title(bool){|| true}, {|c_ref| {c_ref.show_title.unwrap_or(true)}},
-            get_show_icon(bool){|| false}, {|c_ref| {c_ref.show_icon.unwrap_or(false)}},
-            get_btns_width(f64){|| 0.0}, {|c_ref| {c_ref.btns_width}},
-            get_pre_btns_width(f64){|| 0.0}, {|c_ref| {c_ref.pre_btns_width}},
-            get_offset(f64){|| 0.5}, {|c_ref| {c_ref.offset}},
-            get_current_os(OsType){|| OsType::Windows}, {|c_ref| {c_ref.current_os.clone()}},
-            get_event_key(bool){|| false}, {|c_ref| {c_ref.event_key}}
-        }
-    }
     pub fn handle_window_actions(&mut self, cx: &mut Cx, actions: &Actions) -> () {
         if let Some(mut w) = self.borrow_mut() {
             w.handle_window_actions(cx, actions);
@@ -619,5 +590,43 @@ impl GWindowRef {
         if let Some(mut w) = self.borrow_mut() {
             w.minimize(cx);
         }
+    }
+    ref_getter_setter!{
+        get_theme, set_theme -> Themes,
+        get_background_color, set_background_color -> Vec4,
+        get_shadow_color, set_shadow_color -> Vec4,
+        get_hover_color, set_hover_color -> Vec4,
+        get_focus_color, set_focus_color -> Vec4,
+        get_border_color, set_border_color -> Vec4,
+        get_border_width, set_border_width -> f32,
+        get_border_radius, set_border_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_background_visible, set_background_visible -> bool,
+        get_visible, set_visible -> bool,
+        get_cursor, set_cursor -> MouseCursor,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_block_signal_event, set_block_signal_event -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>,
+        get_margin, set_margin -> Margin,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_scroll, set_scroll -> DVec2,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_padding, set_padding -> Padding,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_dpi_factor, set_dpi_factor -> f64,
+        get_optimize, set_optimize -> ViewOptimize,
+        get_capture_overload, set_capture_overload -> bool,
+        get_os_type, set_os_type -> GOsType,
+        get_show_title, set_show_title -> bool,
+        get_show_icon, set_show_icon -> bool,
+        get_pre_btns_width, set_pre_btns_width -> f64,
+        get_offset, set_offset -> f64,
+        get_event_key, set_event_key -> bool
     }
 }

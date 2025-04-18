@@ -67,7 +67,7 @@ impl Widget for GTableBody {
                 if let Some(child) = self.children.get_mut(&id) {
                     // is the child visible?
                     // true -> draw the child walk
-                    if child.is_visible() {
+                    if child.visible() {
                         let walk = child.walk(cx);
                         // if resumed
                         if !resumed {
@@ -106,13 +106,13 @@ impl Widget for GTableBody {
     // }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         for (_index, (_id, row)) in self.children.iter().enumerate() {
-            if row.is_visible() {
+            if row.visible() {
                 row.handle_event(cx, event, scope);
             }
         }
     }
 
-    fn is_visible(&self) -> bool {
+    fn visible(&self) -> bool {
         self.visible
     }
 }
