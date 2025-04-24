@@ -1,10 +1,13 @@
 mod colors;
-pub mod style;
+pub mod handler;
 pub mod register;
-
+pub mod style;
 pub use colors::*;
 use makepad_widgets::*;
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
+use toml_edit::Item;
+
+use crate::error::GError;
 
 #[derive(Copy, Clone, Debug, Live, LiveHook)]
 #[live_ignore]
@@ -16,6 +19,37 @@ pub enum Themes {
     Warning,
     Success,
     Info,
+}
+
+impl TryFrom<&Item> for Themes {
+    type Error = GError;
+
+    fn try_from(value: &Item) -> Result<Self, <Self as TryFrom<&Item>>::Error> {
+        let theme = value.as_str().ok_or_else(|| {
+            GError::ThemeStyleParse("[global.theme] should be a string".to_string())
+        })?;
+
+        Themes::from_str(theme)
+    }
+}
+
+impl FromStr for Themes {
+    type Err = GError;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "Dark" => Ok(Themes::Dark),
+            "Primary" => Ok(Themes::Primary),
+            "Error" => Ok(Themes::Error),
+            "Warning" => Ok(Themes::Warning),
+            "Success" => Ok(Themes::Success),
+            "Info" => Ok(Themes::Info),
+            _ => Err(GError::ThemeStyleParse(format!(
+                "Themes should be one of [Dark, Primary, Error, Warning, Success, Info], but got {}",
+                value
+            ))),
+        }
+    }
 }
 
 impl Default for Themes {

@@ -1,16 +1,23 @@
+use std::sync::LazyLock;
+
 use makepad_widgets::{live_id, Cx, LiveId};
 
 mod components;
 pub mod error;
 pub mod event;
+mod macros;
 pub mod shader;
 pub mod themes;
 pub mod utils;
-mod macros;
 
 pub use components::*;
 
+use themes::handler::ThemeHandler;
+
+
+
 pub fn live_design(cx: &mut Cx, theme: Option<LiveId>) {
+    cx.set_global(ThemeHandler::load());
     // shader -------------------------------------------------
     crate::shader::register::register(cx);
     // style --------------------------------------------------

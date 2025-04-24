@@ -1,0 +1,28 @@
+[global]
+# theme color: Primary, Info, Warning, Success, Error, Dark
+theme = "Dark"
+# style: Flat, Future
+style = "Flat"
+font_size = 12
+
+# define theme color
+# hover => weak, focus => deep
+[theme]
+dark = { font = "#fff", weakest = "#", weaker = "", weak = "", normal = "", deep = "", deeper = "", deepest = "" }
+primary = {}
+info = {}
+warning = {}
+error = {}
+success = {}
+
+[flat]
+
+[flat.components]
+
+[flat.components.text]
+font_size = 12
+color = "#fff"
+
+[flat.components.button]
+background_color = ""
+# ...

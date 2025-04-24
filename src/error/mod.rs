@@ -1,6 +1,6 @@
 use std::{error::Error, fmt::Display};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum GError {
     /// called when icon type cannot be transformed to target type. (In GIcon)
     IconTypeTransfom,
@@ -8,6 +8,9 @@ pub enum GError {
     ConflictHeight,
     /// called when widget width is fixed and bigger than max width or smaller than min width.
     ConflictWidth,
+    /// can not load theme style file
+    ThemeStyleFileLoad(String),
+    ThemeStyleParse(String),
 }
 
 impl Error for GError {}
@@ -24,6 +27,12 @@ impl Display for GError {
             GError::ConflictWidth => f.write_str(
                 "Widget width is fixed and bigger than max width or smaller than min width.",
             ),
+            GError::ThemeStyleFileLoad(e) => {
+                f.write_fmt(format_args!("Cannot load theme style file: {}", e))
+            }
+            GError::ThemeStyleParse(e) => {
+                f.write_fmt(format_args!("Cannot parse theme style file: {}", e))
+            }
         }
     }
 }

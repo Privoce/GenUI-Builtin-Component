@@ -11,7 +11,7 @@ use crate::{
     ref_event_option, ref_getter_setter, ref_play_animation, ref_redraw, ref_render,
     render_after_apply, set_scope_path, setter,
     shader::draw_text::DrawGText,
-    themes::Themes,
+    themes::{handler::ThemeHandler, Themes},
     utils::{get_font_family, set_cursor, ThemeColor, ToBool},
 };
 use makepad_widgets::*;
@@ -262,8 +262,10 @@ impl GLabel {
     pub fn redraw(&self, cx: &mut Cx) -> () {
         self.draw_text.redraw(cx);
     }
-    pub fn render(&mut self, _cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
-        let color = self.color.get(self.theme, 50);
+    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
+       
+
+        // let color = self.color.get(self.theme, 50);
         let stroke_hover_color = self.stroke_hover_color.get(self.theme, 25);
         let stroke_focus_color = self.stroke_focus_color.get(self.theme, 100);
         // self.draw_text.apply_over(
@@ -282,7 +284,8 @@ impl GLabel {
         //         }
         //     },
         // );
-
+        let theme_style = cx.global::<ThemeHandler>();
+        let color = theme_style.global.basic.color;
         self.draw_text.color = color;
         self.draw_text.stroke_hover_color = stroke_hover_color;
         self.draw_text.stroke_focus_color = stroke_focus_color;
