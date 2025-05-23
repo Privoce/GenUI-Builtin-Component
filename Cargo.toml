@@ -2,5 +2,4 @@
 members = [
    "luna_ui",
    "tests",
-   "luna_conf"
 ]

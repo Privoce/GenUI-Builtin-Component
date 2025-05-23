@@ -4,3 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+makepad-widgets = {path="/Users/shengyifei/projects/makepad/makepad/widgets"}
+luna_ui = {path="../luna_ui"}
