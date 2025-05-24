@@ -1,4 +1,4 @@
-use toml_edit::DocumentMut;
+use toml_edit::{DocumentMut, Item};
 
 use crate::error::Error;
 
@@ -15,15 +15,32 @@ impl TryFrom<DocumentMut> for Conf {
     type Error = Error;
 
     fn try_from(value: DocumentMut) -> Result<Self, Self::Error> {
-        let get = |key: &str| {
-            value
-                .get(key)
-                .map_or_else(|| Ok(GlobalConf::default()), |item| item.try_into())
-        };
+        fn get<U, D, F>(doc: &DocumentMut, key: &str, default: D, f: F) -> U
+        where
+            D: FnOnce() -> U,
+            F: FnOnce(&Item) -> U,
+        {
+            doc.get(key).map_or_else(default, f)
+        }
 
-        let global = get("global")?;
-        let theme = get("theme")?;
-        let components = get("components")?;
+        let global = get(
+            &value,
+            "global",
+            || Ok(GlobalConf::default()),
+            |item| item.try_into(),
+        )?;
+        let theme = get(
+            &value,
+            "theme",
+            || Ok(ThemeConf::default()),
+            |item| item.try_into(),
+        )?;
+        let components = get(
+            &value,
+            "components",
+            || Ok(ComponentsConf::default()),
+            |item| item.try_into(),
+        )?;
 
         Ok(Conf {
             global,
