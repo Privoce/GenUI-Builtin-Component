@@ -45,6 +45,12 @@ impl Hex {
     }
 }
 
+impl From<Hex> for Vec4 {
+    fn from(hex: Hex) -> Self {
+        hex.to_vec4()
+    }
+}
+
 impl Display for Hex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let r = (self.0.x * 255.0) as u8;

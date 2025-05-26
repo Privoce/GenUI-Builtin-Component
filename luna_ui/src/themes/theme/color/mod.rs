@@ -5,6 +5,7 @@ mod rgba;
 
 pub use font::ColorFontConf;
 pub use hex::Hex;
+use makepad_widgets::Vec4;
 pub use rgb::Rgb;
 pub use rgba::Rgba;
 use toml_edit::Value;
@@ -16,6 +17,8 @@ pub enum Color {
     Hex(Hex),
     RGB(Rgb),
     RGBA(Rgba),
+    WHITE,
+    BLACK,
 }
 
 impl TryFrom<&Value> for Color {
@@ -34,6 +37,18 @@ impl TryFrom<&Value> for Color {
             color_str.parse::<Rgb>().map(Color::RGB)
         } else {
             Err(Error::ThemeStyleParse("Invalid color format".to_string()))
+        }
+    }
+}
+
+impl From<Color> for Vec4 {
+    fn from(value: Color) -> Self {
+        match value {
+            Color::Hex(hex) => hex.into(),
+            Color::RGB(rgb) => rgb.into(),
+            Color::RGBA(rgba) => rgba.into(),
+            Color::WHITE => "#FFFFFF".parse::<Hex>().unwrap().into(),
+            Color::BLACK => "#000000".parse::<Hex>().unwrap().into(),
         }
     }
 }

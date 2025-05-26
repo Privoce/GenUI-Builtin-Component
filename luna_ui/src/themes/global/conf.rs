@@ -15,7 +15,7 @@ impl TryFrom<&Item> for GlobalConf {
     type Error = Error;
 
     fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let mut table = value.as_table().ok_or(Error::ThemeStyleParse(
+        let table = value.as_table().ok_or(Error::ThemeStyleParse(
             "[global] configuration should be a table".to_string(),
         ))?;
 

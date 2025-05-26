@@ -48,3 +48,15 @@ impl FromStr for Rgba {
         }
     }
 }
+
+
+impl From<Rgba> for makepad_widgets::Vec4 {
+    fn from(value: Rgba) -> Self {
+        makepad_widgets::Vec4 {
+            x: value.r as f32 / 255.0,
+            y: value.g as f32 / 255.0,
+            z: value.b as f32 / 255.0,
+            w: value.a, // Alpha value is already in the range [0.0, 1.0]
+        }
+    }
+}

@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use makepad_widgets::Vec4;
+
 use crate::error::Error;
 
 /// # RGB Color
@@ -41,6 +43,17 @@ impl FromStr for Rgb {
             return Err(Error::ThemeStyleParse(
                 "Invalid RGB color format".to_string(),
             ));
+        }
+    }
+}
+
+impl From<Rgb> for Vec4 {
+    fn from(value: Rgb) -> Self {
+        Vec4 {
+            x: value.r as f32 / 255.0,
+            y: value.g as f32 / 255.0,
+            z: value.b as f32 / 255.0,
+            w: 1.0, // Default alpha value
         }
     }
 }

@@ -2,16 +2,20 @@ use makepad_widgets::*;
 
 pub mod label;
 
-live_design!{
+live_design! {
     link luna_ui;
 
-    use link::luna_theme::*;
+    // use link::luna_theme::*;
     use link::shaders::*;
     use link::luna_basic::*;
+    use link::theme::*;
 
-    pub LLabel = <LabelBase>{}
+    pub LLabel = <LLabelBase>{
+        draw_text: {
+            text_style: <THEME_FONT_REGULAR>{}
+        }
+    }
 }
-
 
 pub fn components_register(cx: &mut Cx) {
     label::live_design(cx);

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use toml_edit::{DocumentMut, Item};
 
 use crate::error::Error;
@@ -47,5 +49,17 @@ impl TryFrom<DocumentMut> for Conf {
             theme,
             components,
         })
+    }
+}
+
+impl Conf {
+    pub fn components(&self) -> &ComponentsConf {
+        &self.components
+    }
+}
+
+impl Display for Conf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
     }
 }

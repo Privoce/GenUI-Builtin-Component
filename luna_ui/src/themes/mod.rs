@@ -103,3 +103,16 @@ impl TomlValueTo for Value {
         }
     }
 }
+
+
+#[cfg(test)]
+mod tests{
+    use super::Conf;
+
+    #[test]
+    fn toml_conf() {
+        let conf = Conf::default();
+        
+        dbg!(conf);
+    }
+}

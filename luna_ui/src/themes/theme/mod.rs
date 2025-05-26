@@ -3,7 +3,7 @@ pub mod conf;
 
 use std::str::FromStr;
 
-use color::{Color, Hex};
+pub use color::*;
 use makepad_widgets::*;
 use toml_edit::Item;
 
