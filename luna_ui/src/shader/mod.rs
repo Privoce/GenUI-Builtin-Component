@@ -1,4 +1,3 @@
-mod draw_text;
+mod draw_view;
 
-
-pub use draw_text::*;
+pub use draw_view::DrawView;

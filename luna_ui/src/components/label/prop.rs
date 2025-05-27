@@ -17,7 +17,7 @@ impl Default for LabelProp {
     fn default() -> Self {
         Self {
             theme: Default::default(),
-            color: Color::Hex("#FF0000E6".parse().unwrap()).into(),
+            color: Color::Hex("#FFFFFFE6".parse().unwrap()).into(),
             font_size: 12.0,
             line_spacing: 1.2,
             margin: Margin {

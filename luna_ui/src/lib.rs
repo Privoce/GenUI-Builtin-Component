@@ -5,6 +5,7 @@ pub mod components;
 pub mod shader;
 pub mod themes;
 pub mod styles;
+pub mod macros;
 pub mod error;
 
 pub fn live_design(cx: &mut Cx) {

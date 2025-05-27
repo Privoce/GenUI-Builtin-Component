@@ -3,6 +3,12 @@ name = "luna_ui"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+dev = []
+release = []
+default = ["dev"]
+
+
 [dependencies]
 makepad-widgets = {path="/Users/shengyifei/projects/makepad/makepad/widgets"}
 toml_edit = "0.22.26"

@@ -1,10 +1,14 @@
 use makepad_widgets::*;
 
-use crate::themes::{Conf, Theme};
+use crate::{
+    error::Error, getter, pure_after_apply, set_scope_path, themes::{Conf, Theme}
+};
 
 mod prop;
 
 pub use prop::*;
+
+use super::traits::Component;
 
 live_design! {
     link luna_basic;
@@ -40,6 +44,8 @@ pub struct LLabel {
     #[redraw]
     #[live]
     pub draw_text: DrawText,
+    #[rust]
+    pub scope_path: Option<HeapLiveIdPath>,
 }
 
 impl Widget for LLabel {
@@ -68,7 +74,13 @@ impl Widget for LLabel {
 }
 
 impl LiveHook for LLabel {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    pure_after_apply!();
+}
+
+impl Component for LLabel {
+    type Error = Error;
+
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         let label_prop = &cx.global::<Conf>().components.label;
         // [sync from conf prop] -----------------------------------------------------
         self.theme = label_prop.theme;
@@ -81,5 +93,20 @@ impl LiveHook for LLabel {
         self.draw_text.color = self.color;
         self.draw_text.text_style.font_size = self.font_size;
         self.draw_text.text_style.line_spacing = self.line_spacing;
+        Ok(())
+    }
+
+    fn area(&self) -> Area {
+        self.area
+    }
+
+    set_scope_path!();
+}
+
+impl LLabel {
+    getter!{
+        LLabel{
+            get_theme(Theme) {|c| {c.theme}}
+        }
     }
 }

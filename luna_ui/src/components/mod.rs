@@ -1,6 +1,9 @@
 use makepad_widgets::*;
 
 pub mod label;
+pub mod view;
+pub mod button;
+pub mod traits;
 
 live_design! {
     link luna_ui;
