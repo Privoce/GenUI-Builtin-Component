@@ -2,9 +2,9 @@ use std::fmt::Display;
 
 use toml_edit::{DocumentMut, Item};
 
-use crate::error::Error;
-
 use super::{components::conf::ComponentsConf, global::conf::GlobalConf, theme::conf::ThemeConf};
+use crate::error::Error;
+use crate::utils::get_from_doc as get;
 
 #[derive(Debug, Clone, Default)]
 pub struct Conf {
@@ -17,14 +17,6 @@ impl TryFrom<DocumentMut> for Conf {
     type Error = Error;
 
     fn try_from(value: DocumentMut) -> Result<Self, Self::Error> {
-        fn get<U, D, F>(doc: &DocumentMut, key: &str, default: D, f: F) -> U
-        where
-            D: FnOnce() -> U,
-            F: FnOnce(&Item) -> U,
-        {
-            doc.get(key).map_or_else(default, f)
-        }
-
         let global = get(
             &value,
             "global",

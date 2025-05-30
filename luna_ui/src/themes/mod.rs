@@ -6,46 +6,47 @@ mod theme;
 pub use components::*;
 pub use conf::*;
 pub use global::*;
-use makepad_widgets::{Margin, Padding, Vec2};
+use makepad_widgets::{Flow, Margin, Padding, Vec2};
 pub use theme::*;
 use toml_edit::Value;
 
 use crate::error::Error;
 
 pub trait TomlValueTo {
-    fn to_f32(&self, default: f32) -> f32;
-    fn to_f64(&self, default: f64) -> f64;
-    fn to_vec2(&self, default: Vec2) -> Vec2;
-    fn to_margin(&self, default: Margin) -> Margin;
-    fn to_padding(&self, default: Padding) -> Padding;
+    fn to_f32(&self) -> Result<f32, Error>;
+    fn to_f64(&self) -> Result<f64, Error>;
+    fn to_vec2(&self, default: Vec2) -> Result<Vec2, Error>;
+    fn to_margin(&self, default: Margin) -> Result<Margin, Error>;
+    fn to_padding(&self, default: Padding) -> Result<Padding, Error>;
+    fn to_flow(&self) -> Result<Flow, Error>;
 }
 
 impl TomlValueTo for Value {
-    fn to_f32(&self, default: f32) -> f32 {
-        self.as_float().map_or_else(|| default, |v| v as f32)
+    fn to_f32(&self) -> Result<f32, Error> {
+        self.as_float()
+            .ok_or(Error::ThemeStyleParse("Expected a float value".to_string()))
+            .map(|v| v as f32)
     }
-    fn to_f64(&self, default: f64) -> f64 {
-        self.as_float().map_or_else(|| default, |v| v as f64)
+    fn to_f64(&self) -> Result<f64, Error> {
+        self.as_float()
+            .ok_or(Error::ThemeStyleParse("Expected a float value".to_string()))
     }
-    fn to_vec2(&self, default: Vec2) -> Vec2 {
-        let inline_table = self
-            .as_inline_table()
-            .ok_or(Error::ThemeStyleParse(
-                "Vec2 should be a inline table".to_string(),
-            ))
-            .unwrap();
+    fn to_vec2(&self, default: Vec2) -> Result<Vec2, Error> {
+        let inline_table = self.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "Vec2 should be a inline table".to_string(),
+        ))?;
 
         let x = inline_table
             .get("x")
-            .map_or(default.x, |item| item.to_f32(default.x));
+            .map_or_else(|| Ok(default.x), |item| item.to_f32())?;
         let y = inline_table
             .get("y")
-            .map_or(default.y, |item| item.to_f32(default.y));
+            .map_or_else(|| Ok(default.y), |item| item.to_f32())?;
 
-        Vec2 { x, y }
+        Ok(Vec2 { x, y })
     }
 
-    fn to_margin(&self, default: Margin) -> Margin {
+    fn to_margin(&self, default: Margin) -> Result<Margin, Error> {
         let inline_table = self
             .as_inline_table()
             .ok_or(Error::ThemeStyleParse(
@@ -55,26 +56,26 @@ impl TomlValueTo for Value {
 
         let top = inline_table
             .get("top")
-            .map_or(default.top, |item| item.to_f64(default.top));
+            .map_or_else(|| Ok(default.top), |item| item.to_f64())?;
         let right = inline_table
             .get("right")
-            .map_or(default.right, |item| item.to_f64(default.right));
+            .map_or_else(|| Ok(default.right), |item| item.to_f64())?;
         let bottom = inline_table
             .get("bottom")
-            .map_or(default.bottom, |item| item.to_f64(default.bottom));
+            .map_or_else(|| Ok(default.bottom), |item| item.to_f64())?;
         let left = inline_table
             .get("left")
-            .map_or(default.left, |item| item.to_f64(default.left));
+            .map_or_else(|| Ok(default.left), |item| item.to_f64())?;
 
-        Margin {
+        Ok(Margin {
             top,
             right,
             bottom,
             left,
-        }
+        })
     }
 
-    fn to_padding(&self, default: Padding) -> Padding {
+    fn to_padding(&self, default: Padding) -> Result<Padding, Error> {
         let inline_table = self
             .as_inline_table()
             .ok_or(Error::ThemeStyleParse(
@@ -84,35 +85,48 @@ impl TomlValueTo for Value {
 
         let top = inline_table
             .get("top")
-            .map_or(default.top, |item| item.to_f64(default.top));
+            .map_or_else(|| Ok(default.top), |item| item.to_f64())?;
         let right = inline_table
             .get("right")
-            .map_or(default.right, |item| item.to_f64(default.right));
+            .map_or_else(|| Ok(default.right), |item| item.to_f64())?;
         let bottom = inline_table
             .get("bottom")
-            .map_or(default.bottom, |item| item.to_f64(default.bottom));
+            .map_or_else(|| Ok(default.bottom), |item| item.to_f64())?;
         let left = inline_table
             .get("left")
-            .map_or(default.left, |item| item.to_f64(default.left));
+            .map_or_else(|| Ok(default.left), |item| item.to_f64())?;
 
-        Padding {
+        Ok(Padding {
             top,
             right,
             bottom,
             left,
-        }
+        })
+    }
+
+    fn to_flow(&self) -> Result<Flow, Error> {
+        let flow_str = self.as_str().ok_or(Error::ThemeStyleParse(
+            "Expected a string value for Flow".to_string(),
+        ))?;
+
+        Ok(match flow_str {
+            "Right" => Flow::Right,
+            "Down" => Flow::Down,
+            "Overlay" => Flow::Overlay,
+            "RightWrap" => Flow::RightWrap,
+            _ => return Err(Error::ThemeStyleParse("Invalid Flow value".to_string())),
+        })
     }
 }
 
-
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::Conf;
 
     #[test]
     fn toml_conf() {
         let conf = Conf::default();
-        
+
         dbg!(conf);
     }
 }

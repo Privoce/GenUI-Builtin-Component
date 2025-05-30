@@ -1,11 +1,22 @@
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::{Value};
 
 use crate::{error::Error, themes::TomlValueTo};
 
+/// ## Radius
+/// Radius always use in:
+/// - `blur_radius`
+/// - `spread_radius`
+/// - `border_radius`
+/// ### Transform
+/// Radius can be transformed into a `Vec4` where:
+/// - `top` becomes `x`
+/// - `right` becomes `y`
+/// - `bottom` becomes `z`
+/// - `left` becomes `w`
 #[derive(Clone, Copy, Debug, Live, LiveRegister, LiveHook)]
 #[live_ignore]
-pub struct BorderRadius {
+pub struct Radius {
     #[live]
     pub top: f32,
     #[live]
@@ -16,13 +27,13 @@ pub struct BorderRadius {
     pub left: f32,
 }
 
-impl Default for BorderRadius {
+impl Default for Radius {
     fn default() -> Self {
         Self::new(8.0)
     }
 }
 
-impl BorderRadius {
+impl Radius {
     pub fn new(radius: f32) -> Self {
         Self {
             top: radius,
@@ -33,31 +44,46 @@ impl BorderRadius {
     }
 }
 
-impl TryFrom<&Value> for BorderRadius {
+impl TryFrom<&Value> for Radius {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "Border radius should be a inline table".to_string(),
+            "radius should be a inline table".to_string(),
         ))?;
 
-        let top = inline_table.get("top").map_or(8.0, |item| item.to_f32(8.0));
+        let top = inline_table
+            .get("top")
+            .map_or(Ok(8.0), |item| item.to_f32())?;
 
         let right = inline_table
             .get("right")
-            .map_or(8.0, |item| item.to_f32(8.0));
+            .map_or(Ok(8.0), |item| item.to_f32())?;
 
         let bottom = inline_table
             .get("bottom")
-            .map_or(8.0, |item| item.to_f32(8.0));
+            .map_or(Ok(8.0), |item| item.to_f32())?;
+        
         let left = inline_table
             .get("left")
-            .map_or(8.0, |item| item.to_f32(8.0));
-        Ok(BorderRadius {
+            .map_or(Ok(8.0), |item| item.to_f32())?;
+
+        Ok(Radius {
             top,
             right,
             bottom,
             left,
         })
+    }
+}
+
+impl From<Radius> for Vec4 {
+    fn from(value: Radius) -> Self {
+        Vec4 {
+            x: value.top,
+            y: value.right,
+            z: value.bottom,
+            w: value.left,
+        }
     }
 }

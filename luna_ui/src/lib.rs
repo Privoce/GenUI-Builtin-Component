@@ -7,6 +7,7 @@ pub mod themes;
 pub mod styles;
 pub mod macros;
 pub mod error;
+pub mod utils;
 
 pub fn live_design(cx: &mut Cx) {
     cx.link(live_id!(basic_luna_theme), live_id!(luna_theme));

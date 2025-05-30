@@ -1,11 +1,13 @@
 use makepad_widgets::{Margin, Padding, Vec2};
-use toml_edit::{InlineTable, Item, Value};
+use toml_edit::Item;
 
-use crate::{error::Error, styles::BorderRadius, themes::TomlValueTo};
+use crate::{
+    error::Error, styles::Radius, themes::TomlValueTo, utils::get_from_itable as get,
+};
 
 #[derive(Clone, Debug)]
 pub struct ContainerConf {
-    pub border_radius: BorderRadius,
+    pub border_radius: Radius,
     pub border_width: f32,
     pub spread_radius: f32,
     pub blur_radius: f32,
@@ -18,14 +20,6 @@ impl TryFrom<&Item> for ContainerConf {
     type Error = Error;
 
     fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        fn get<U, D, F>(v: &InlineTable, key: &str, default: D, f: F) -> U
-        where
-            D: FnOnce() -> U,
-            F: FnOnce(&Value) -> U,
-        {
-            v.get(key).map_or_else(default, f)
-        }
-
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[global.controller] configuration should be a table".to_string(),
         ))?;
@@ -33,32 +27,37 @@ impl TryFrom<&Item> for ContainerConf {
         let border_radius = get(
             inline_table,
             "border_radius",
-            || Ok(BorderRadius::new(8.0)),
+            || Ok(Radius::new(8.0)),
             |item| item.try_into(),
         )?;
 
         let border_width = get(
             inline_table,
             "border_width",
-            || 0.0,
-            |item| item.to_f32(0.0),
-        );
+            || Ok(0.0),
+            |item| item.to_f32(),
+        )?;
 
         let spread_radius = get(
             inline_table,
             "spread_radius",
-            || 0.0,
-            |item| item.to_f32(0.0),
-        );
+            || Ok(0.0),
+            |item| item.to_f32(),
+        )?;
 
-        let blur_radius = get(inline_table, "blur_radius", || 0.0, |item| item.to_f32(0.0));
+        let blur_radius = get(
+            inline_table,
+            "blur_radius",
+            || Ok(0.0),
+            |item| item.to_f32(),
+        )?;
 
         let shadow_offset = get(
             inline_table,
             "shadow_offset",
-            || Vec2 { x: 0.0, y: 0.0 },
+            || Ok(Vec2 { x: 0.0, y: 0.0 }),
             |item| item.to_vec2(Vec2 { x: 0.0, y: 0.0 }),
-        );
+        )?;
 
         let default_margin = Margin {
             left: 12.0,
@@ -70,9 +69,9 @@ impl TryFrom<&Item> for ContainerConf {
         let margin = get(
             inline_table,
             "margin",
-            || default_margin,
+            || Ok(default_margin),
             |item| item.to_margin(default_margin),
-        );
+        )?;
 
         let default_padding = Padding {
             left: 12.0,
@@ -84,9 +83,9 @@ impl TryFrom<&Item> for ContainerConf {
         let padding = get(
             inline_table,
             "padding",
-            || default_padding,
+            || Ok(default_padding),
             |item| item.to_padding(default_padding),
-        );
+        )?;
 
         Ok(ContainerConf {
             border_radius,
@@ -103,7 +102,7 @@ impl TryFrom<&Item> for ContainerConf {
 impl Default for ContainerConf {
     fn default() -> Self {
         Self {
-            border_radius: BorderRadius::new(8.0),
+            border_radius: Radius::new(8.0),
             border_width: 0.0,
             spread_radius: 0.0,
             blur_radius: 0.0,

@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 pub use color::*;
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{Item, Value};
 
 use crate::error::Error;
 
@@ -242,8 +242,23 @@ impl TryFrom<&Item> for Theme {
     type Error = Error;
 
     fn try_from(value: &Item) -> Result<Self, <Theme as TryFrom<&Item>>::Error> {
+        value.as_str().try_into()
+    }
+}
+
+impl TryFrom<&Value> for Theme {
+    type Error = Error;
+
+    fn try_from(value: &Value) -> Result<Self, <Theme as TryFrom<&Value>>::Error> {
+        value.as_str().try_into()
+    }
+}
+
+impl TryFrom<Option<&str>> for Theme {
+    type Error = Error;
+
+    fn try_from(value: Option<&str>) -> Result<Self, <Theme as TryFrom<&Value>>::Error> {
         value
-            .as_str()
             .ok_or(Error::ThemeStyleParse(
                 "[global.theme] should be a string".to_string(),
             ))?

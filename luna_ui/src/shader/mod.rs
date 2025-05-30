@@ -1,3 +1,3 @@
-mod draw_view;
+mod view;
 
-pub use draw_view::DrawView;
+pub use view::*;

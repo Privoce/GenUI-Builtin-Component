@@ -1,4 +1,3 @@
-mod border_radius;
+mod radius;
 
-
-pub use border_radius::BorderRadius;
+pub use radius::Radius;
