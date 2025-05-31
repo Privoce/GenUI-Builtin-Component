@@ -1,13 +1,12 @@
-
 use makepad_widgets::*;
 
-live_design!{
+live_design! {
     use link::theme::*;
     use link::luna_ui::*;
     use link::shaders::*;
     use link::widgets::*;
-    
-        
+
+
     App = {{App}} {
         ui: <Root>{
             main_window = <Window>{
@@ -21,7 +20,7 @@ live_design!{
                     show_bg: true,
                     // draw_bg:{
                     //     fn pixel(self) -> vec4 {
-                                                        
+
                     //         let center = vec2(0.5, 0.5);
                     //         let uv = self.pos - center;
                     //         let radius = length(uv);
@@ -39,36 +38,54 @@ live_design!{
                     //     text: "Click 福 me 😊"
                     //     draw_text:{text_style:{font_size:18}}
                     // }
-                    <LLabel>{
-                        text: "Hello World"
-                        draw_text:{text_style:{font_size:18}}
+                    <LView> {
+                        height: 100.0,
+                        width: 200.0,
+                        prop: {
+                            basic: {
+                                background_visible: true,
+                                background_color: #000,
+                                align: {
+                                    x: 0.5,
+                                    y: 0.5
+                                },
+                            }
+                        }
+                        <LLabel>{
+                            text: "Hello World",
+                            prop: {
+                                color: #ff0,
+                                font_size: 24.0,
+                            }
+                        }
                     }
                 }
             }
         }
     }
-}  
+}
 
-app_main!(App); 
- 
+app_main!(App);
+
 #[derive(Live, LiveHook)]
 pub struct App {
-    #[live] ui: WidgetRef,
-    #[rust] counter: usize,
+    #[live]
+    ui: WidgetRef,
+    #[rust]
+    counter: usize,
 }
- 
+
 impl LiveRegister for App {
-    fn live_register(cx: &mut Cx) { 
+    fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
         crate::luna_ui::live_design(cx);
     }
 }
 
-impl MatchEvent for App{
-    fn handle_startup(&mut self, _cx:&mut Cx){
-    }
-        
-    fn handle_actions(&mut self, cx: &mut Cx, actions:&Actions){
+impl MatchEvent for App {
+    fn handle_startup(&mut self, _cx: &mut Cx) {}
+
+    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
         if self.ui.button(id!(button_1)).clicked(&actions) {
             self.ui.button(id!(button_1)).set_text(cx, "Clicked 😀");
             log!("hi");
@@ -79,7 +96,7 @@ impl MatchEvent for App{
 
 impl AppMain for App {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event) {
-        if let Event::XrUpdate(_e) = event{
+        if let Event::XrUpdate(_e) = event {
             //log!("{:?}", e.now.left.trigger.analog);
         }
         self.match_event(cx, event);

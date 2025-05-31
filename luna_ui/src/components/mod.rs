@@ -18,8 +18,11 @@ live_design! {
             text_style: <THEME_FONT_REGULAR>{}
         }
     }
+
+    pub LView = <LViewBase>{}
 }
 
 pub fn components_register(cx: &mut Cx) {
     label::live_design(cx);
+    view::live_design(cx);
 }

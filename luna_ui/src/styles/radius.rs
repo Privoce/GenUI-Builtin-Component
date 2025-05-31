@@ -5,8 +5,6 @@ use crate::{error::Error, themes::TomlValueTo};
 
 /// ## Radius
 /// Radius always use in:
-/// - `blur_radius`
-/// - `spread_radius`
 /// - `border_radius`
 /// ### Transform
 /// Radius can be transformed into a `Vec4` where:

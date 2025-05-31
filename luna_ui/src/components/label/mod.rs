@@ -1,7 +1,9 @@
 use makepad_widgets::*;
 
 use crate::{
-    error::Error, getter, pure_after_apply, set_scope_path, themes::{Conf, Theme}
+    error::Error,
+    getter, pure_after_apply, set_scope_path,
+    themes::{Conf, Theme},
 };
 
 mod prop;
@@ -20,7 +22,7 @@ live_design! {
 pub struct LLabel {
     #[live]
     pub prop: LabelProp,
-    #[live]
+    #[live(true)]
     pub visible: bool,
     #[rust]
     area: Area,
@@ -36,6 +38,10 @@ pub struct LLabel {
 
 impl Widget for LLabel {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        if !self.visible {
+            return DrawStep::done();
+        }
+
         let walk = walk.with_add_padding(self.prop.padding);
         cx.begin_turtle(
             walk,
@@ -61,20 +67,21 @@ impl Widget for LLabel {
 
 impl LiveHook for LLabel {
     pure_after_apply!();
+    
+    fn after_new_before_apply(&mut self, cx: &mut Cx) {
+        self.merge_conf_prop(cx);
+    }
 }
 
 impl Component for LLabel {
     type Error = Error;
-
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+    fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let label_prop = &cx.global::<Conf>().components.label;
         // [sync from conf prop] -----------------------------------------------------
-        self.prop.theme = label_prop.theme;
-        self.prop.color = label_prop.color;
-        self.prop.font_size = label_prop.font_size;
-        self.prop.line_spacing = label_prop.line_spacing;
-        self.prop.margin = label_prop.margin;
-        self.prop.padding = label_prop.padding;
+        self.prop = label_prop.clone();
+    }
+
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         // [sync to draw_text] -------------------------------------------------------
         self.draw_text.color = self.prop.color;
         self.draw_text.text_style.font_size = self.prop.font_size;
@@ -82,17 +89,17 @@ impl Component for LLabel {
         Ok(())
     }
 
-    fn area(&self) -> Area {
-        self.area
-    }
-
     set_scope_path!();
 }
 
 impl LLabel {
-    getter!{
+    getter! {
         LLabel{
             get_theme(Theme) {|c| {c.prop.theme}}
         }
+    }
+
+    pub fn area(&self) -> Area {
+        self.area
     }
 }
