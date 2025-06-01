@@ -19,23 +19,57 @@ live_design! {
         fn vertex(self) -> vec4 {
             // - [get minimum shadow offset] ------------------------------------------------------
             let min_offset = min(self.shadow_offset, vec2(0));
-            // - [shadow spread radius] -----------------------------------------------------------
-            let spread_radius = self.spread_radius;
-            self.rect_size2 = self.rect_size + 2.0 * vec2(spread_radius);
-            self.rect_size3 = self.rect_size2 + abs(self.shadow_offset);
-            self.rect_pos2 = self.rect_pos - vec2(spread_radius) + min_offset;
-            let border_width = self.border_width;
-            self.sdf_rect_size = self.rect_size2 - vec2(spread_radius * 2.0 + border_width * 2.0)
-            self.sdf_rect_pos = -min_offset + vec2(border_width + spread_radius);
-            self.rect_shift = -min_offset;
+            // - [shadow spread and blur calculation] ---------------------------------------------
 
+            let total_shadow_size = self.spread_radius + self.blur_radius;
+            
+            self.rect_size2 = self.rect_size + 2.0 * vec2(total_shadow_size);
+            self.rect_size3 = self.rect_size2 + abs(self.shadow_offset);
+            self.rect_pos2 = self.rect_pos - vec2(total_shadow_size) + min_offset;
+            self.rect_shift = -min_offset;
+            
+            let border_width = self.border_width;
+            self.sdf_rect_size = self.rect_size2 - vec2(total_shadow_size * 2.0 + border_width * 2.0);
+            self.sdf_rect_pos = -min_offset + vec2(border_width + total_shadow_size);
+            
             return self.clip_and_transform_vertex(self.rect_pos2, self.rect_size3)
         }
         // ----------------------------------------------------------------------------------------
 
         // [pixel shader] -------------------------------------------------------------------------
         fn pixel(self) -> vec4 {
-            let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+            let sdf = Sdf2d::viewport(self.pos * self.rect_size3);
+            
+            // - [draw shadow and blur] -----------------------------------------------------------
+            if self.spread_radius > 0.0 || self.blur_radius > 0.0 {
+                let shadow_offset = self.shadow_offset + self.rect_shift;
+                let total_shadow_size = self.spread_radius + self.blur_radius;
+                
+                if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
+                    self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
+                    let max_border_radius = max(
+                        max(self.border_radius.x, self.border_radius.y), 
+                        max(self.border_radius.z, self.border_radius.w)
+                    );
+                    let v = GaussShadow::rounded_box_shadow(
+                        vec2(total_shadow_size) + shadow_offset,
+                        self.rect_size + vec2(self.spread_radius * 2.0) + shadow_offset,
+                        self.pos * self.rect_size3,
+                        self.blur_radius,
+                        max_border_radius
+                    );
+                    sdf.clear(self.shadow_color * v);
+                } else {
+                    let v = GaussShadow::box_shadow(
+                        vec2(total_shadow_size) + shadow_offset,
+                        self.rect_size + vec2(self.spread_radius * 2.0) + shadow_offset,
+                        self.pos * self.rect_size3,
+                        self.blur_radius
+                    );
+                    sdf.clear(self.shadow_color * v);
+                }
+            }
+            
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
             sdf.box_all(
@@ -48,49 +82,17 @@ live_design! {
                 self.border_radius.z,
                 self.border_radius.w
             );
-            // - [blur radius and shadow for view] ------------------------------------------------
-            let spread_radius = self.spread_radius;
-            if spread_radius != 0.0 {
-                if sdf.shape > -1.0 {
-                    let blur_radius = self.blur_radius;
-                    let shadow_color = self.shadow_color;
-                    let m = blur_radius;
-                    let o = self.shadow_offset + self.rect_shift;
-                    if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
-                        self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
-                        let max_border_radius = max(
-                            max(self.border_radius.x, self.border_radius.y), 
-                            max(self.border_radius.z, self.border_radius.w)
-                        );
-                        let v = GaussShadow::rounded_box_shadow(
-                            vec2(m) + o,
-                            self.rect_size2 + o,
-                            self.pos * (self.rect_size3 + vec2(m)),
-                            spread_radius * 0.5,
-                            max_border_radius * 2.0
-                        );
-                        sdf.clear(shadow_color * v);
-                    }else{
-                        // if not rounded
-                        let v = GaussShadow::box_shadow(
-                            vec2(m) + o,
-                            self.rect_size2 + o,
-                            self.pos * (self.rect_size3 + vec2(m)),
-                            spread_radius * 0.5
-                        );
-                        sdf.clear(shadow_color * v);
-                    }
-                }
-            }
+            
             // - [background color if visible] ----------------------------------------------------
-            let background_visible = self.background_visible;
-            if background_visible == 1.0 {
+            if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);
             }
+            
             // - [border with and color if width bigger than 0] -----------------------------------
             if border_width > 0.0 {
-                sdf.stroke(self.border_color, border_width)
+                sdf.stroke(self.border_color, border_width);
             }
+            
             return sdf.result;
         }
     }

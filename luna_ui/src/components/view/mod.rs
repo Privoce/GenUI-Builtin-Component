@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use makepad_widgets::*;
 pub use prop::*;
 
-use crate::{error::Error, shader::draw_view::DrawView};
+use crate::{error::Error, pure_after_apply, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32};
 pub use rely::*;
 
 use super::traits::Component;
@@ -26,7 +26,7 @@ live_design! {
                     apply: {draw_view: {hover: 1.0, pressed: 0.0}}
                 },
                 off = {
-                    from: {all: Backward {duration: (0.25)}},
+                    from: {all: Forward {duration: (0.25)}},
                     apply: {draw_view: {hover: 0.0, pressed: 0.0}}
                 },
                 pressed = {
@@ -112,6 +112,10 @@ impl LiveHook for LView {
         }
     }
 
+    fn after_new_before_apply(&mut self, cx: &mut Cx) {
+        self.merge_conf_prop(cx);
+    }
+
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if apply.from.is_update_from_doc() {
             //livecoding
@@ -125,6 +129,7 @@ impl LiveHook for LView {
             }
             // if we had more truncate
             self.children.truncate(self.live_update_order.len());
+            
         }
         if needs_draw_list(self.optimize) && self.draw_list.is_none() {
             self.draw_list = Some(DrawList2d::new(cx));
@@ -135,6 +140,11 @@ impl LiveHook for LView {
                     Some(Box::new(ScrollBars::new_from_ptr(cx, self.scroll_bars)));
             }
         }
+
+        if apply.from.is_new_from_doc() {
+            self.render(cx);
+        }
+        
     }
 
     fn apply_value_instance(
@@ -551,12 +561,25 @@ impl Component for LView {
     type Error = Error;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = cx.get_global::<ViewProp>();
+        let prop = &cx.global::<Conf>().components.view;
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        todo!()
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
+        let state = self.current_state();
+        self.draw_view.background_color = self.prop.get(state).background_color;
+        self.draw_view.border_color = self.prop.get(state).border_color;
+        self.draw_view.border_width = self.prop.get(state).border_width;
+        self.draw_view.border_radius = self.prop.get(state).border_radius.into();
+        self.draw_view.shadow_color = self.prop.get(state).shadow_color;
+        self.draw_view.spread_radius = self.prop.get(state).spread_radius;
+        self.draw_view.blur_radius = self.prop.get(state).blur_radius;
+        self.draw_view.shadow_offset = self.prop.get(state).shadow_offset;
+        self.draw_view.background_visible = self.prop.get(state).background_visible.to_f32();
+        self.draw_view.rotation = self.prop.get(state).rotation;
+        self.draw_view.scale = self.prop.get(state).scale;
+
+        Ok(())
     }
 
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> () {

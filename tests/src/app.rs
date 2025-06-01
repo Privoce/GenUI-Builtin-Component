@@ -39,12 +39,14 @@ live_design! {
                     //     draw_text:{text_style:{font_size:18}}
                     // }
                     <LView> {
-                        height: 100.0,
+                        height: 200.0,
                         width: 200.0,
                         prop: {
                             basic: {
-                                background_visible: true,
-                                background_color: #000,
+                                spread_radius: 2.0,
+                                blur_radius: 12.0,
+                                shadow_offset: vec2(6.0, 6.0),
+                                shadow_color: #ff0000,
                                 align: {
                                     x: 0.5,
                                     y: 0.5
