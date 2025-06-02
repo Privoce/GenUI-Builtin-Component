@@ -1,12 +1,12 @@
 use toml_edit::Item;
 
-use crate::{error::Error, themes::Theme};
+use crate::error::Error;
 
 use super::{controller::ControllerConf, ContainerConf};
 
 #[derive(Clone, Debug, Default)]
 pub struct GlobalConf {
-    pub theme: Theme,
+    // pub theme: Theme,
     pub controller: ControllerConf,
     pub container: ContainerConf,
 }
@@ -19,9 +19,9 @@ impl TryFrom<&Item> for GlobalConf {
             "[global] configuration should be a table".to_string(),
         ))?;
 
-        let theme = table
-            .get("theme")
-            .map_or_else(|| Ok(Theme::default()), |item| item.try_into())?;
+        // let theme = table
+        //     .get("theme")
+        //     .map_or_else(|| Ok(Theme::default()), |item| item.try_into())?;
 
         let container = table
             .get("container")
@@ -32,7 +32,7 @@ impl TryFrom<&Item> for GlobalConf {
             .map_or_else(|| Ok(ControllerConf::default()), |item| item.try_into())?;
 
         Ok(GlobalConf {
-            theme,
+            // theme,
             controller,
             container,
         })

@@ -39,34 +39,38 @@ live_design! {
         // [pixel shader] -------------------------------------------------------------------------
         fn pixel(self) -> vec4 {
             let sdf = Sdf2d::viewport(self.pos * self.rect_size3);
-            
             // - [draw shadow and blur] -----------------------------------------------------------
-            if self.spread_radius > 0.0 || self.blur_radius > 0.0 {
-                let shadow_offset = self.shadow_offset + self.rect_shift;
-                let total_shadow_size = self.spread_radius + self.blur_radius;
-                
-                if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
-                    self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
-                    let max_border_radius = max(
-                        max(self.border_radius.x, self.border_radius.y), 
-                        max(self.border_radius.z, self.border_radius.w)
-                    );
-                    let v = GaussShadow::rounded_box_shadow(
-                        vec2(total_shadow_size) + shadow_offset,
-                        self.rect_size + vec2(self.spread_radius * 2.0) + shadow_offset,
-                        self.pos * self.rect_size3,
-                        self.blur_radius,
-                        max_border_radius
-                    );
-                    sdf.clear(self.shadow_color * v);
-                } else {
-                    let v = GaussShadow::box_shadow(
-                        vec2(total_shadow_size) + shadow_offset,
-                        self.rect_size + vec2(self.spread_radius * 2.0) + shadow_offset,
-                        self.pos * self.rect_size3,
-                        self.blur_radius
-                    );
-                    sdf.clear(self.shadow_color * v);
+            if sdf.shape > -1.0 {
+                if self.spread_radius > 0.0 || self.blur_radius > 0.0 {
+                    let shadow_offset = self.shadow_offset + self.rect_shift;
+                    let total_shadow_size = self.spread_radius + self.blur_radius;
+                    let shadow_lower = vec2(total_shadow_size) + shadow_offset;
+                    let shadow_upper = self.rect_size + vec2(self.spread_radius * 2.0) + shadow_offset;
+                    if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
+                        self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
+                        let max_border_radius = max(
+                            max(self.border_radius.x, self.border_radius.y), 
+                            max(self.border_radius.z, self.border_radius.w)
+                        );
+                        let v = GaussShadow::rounded_box_shadow(
+                            shadow_lower,
+                            shadow_upper,
+                            self.pos * self.rect_size3,
+                            self.blur_radius,
+                            max_border_radius
+                        );
+                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v); 
+                        sdf.clear(shadow_color);
+                    } else {
+                        let v = GaussShadow::box_shadow(
+                            shadow_lower,
+                            shadow_upper,
+                            self.pos * self.rect_size3,
+                            self.blur_radius
+                        );
+                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v); 
+                        sdf.clear(shadow_color);
+                    }
                 }
             }
             

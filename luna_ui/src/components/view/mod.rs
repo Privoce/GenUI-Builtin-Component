@@ -6,7 +6,9 @@ use std::cell::RefCell;
 use makepad_widgets::*;
 pub use prop::*;
 
-use crate::{error::Error, pure_after_apply, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32};
+use crate::{
+    error::Error, set_scope_path, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32,
+};
 pub use rely::*;
 
 use super::traits::Component;
@@ -44,10 +46,6 @@ pub struct LView {
     #[live]
     pub prop: ViewProp,
     // --- other props ------------
-    #[live]
-    pub height: Size,
-    #[live]
-    pub width: Size,
     #[live(true)]
     pub visible: bool,
     #[live]
@@ -69,6 +67,8 @@ pub struct LView {
     #[live]
     pub event_order: EventOrder,
     // --- texture and cache ------
+    #[rust]
+    pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
     find_cache: RefCell<SmallVec<[(u64, WidgetSet); 3]>>,
     #[rust]
@@ -92,6 +92,8 @@ pub struct LView {
     // --- animation --------------
     #[animator]
     animator: Animator,
+    #[live(false)]
+    pub animation_open: bool,
     // --- draw -------------------
     #[live]
     pub draw_view: DrawView,
@@ -129,7 +131,6 @@ impl LiveHook for LView {
             }
             // if we had more truncate
             self.children.truncate(self.live_update_order.len());
-            
         }
         if needs_draw_list(self.optimize) && self.draw_list.is_none() {
             self.draw_list = Some(DrawList2d::new(cx));
@@ -142,9 +143,8 @@ impl LiveHook for LView {
         }
 
         if apply.from.is_new_from_doc() {
-            self.render(cx);
+            self.render_after_apply(cx);
         }
-        
     }
 
     fn apply_value_instance(
@@ -199,8 +199,8 @@ impl WidgetNode for LView {
         Walk {
             abs_pos: self.abs_pos.clone(),
             margin: prop.margin,
-            width: self.width,
-            height: self.height,
+            width: prop.width,
+            height: prop.height,
         }
     }
 
@@ -455,8 +455,10 @@ impl Widget for LView {
         }
 
         let uid = self.widget_uid();
-        if self.animator_handle_event(cx, event).must_redraw() {
-            self.redraw(cx);
+        if self.animation_open {
+            if self.animator_handle_event(cx, event).must_redraw() {
+                self.redraw(cx);
+            }
         }
         let prop = self.prop.get(self.current_state());
         if self.block_signal_event {
@@ -519,7 +521,8 @@ impl Widget for LView {
                     }
                     cx.widget_action(uid, &scope.path, ViewAction::FingerDown(e));
                     if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(down.on));
+                        self.animator_play(cx, id!(hover.pressed));
+                        self.switch_state_and_redraw(cx, ViewState::Pressed);
                     }
                 }
                 Hit::FingerMove(e) => cx.widget_action(uid, &scope.path, ViewAction::FingerMove(e)),
@@ -529,7 +532,8 @@ impl Widget for LView {
                 Hit::FingerUp(e) => {
                     cx.widget_action(uid, &scope.path, ViewAction::FingerUp(e));
                     if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(down.off));
+                        self.animator_play(cx, id!(hover.off));
+                        self.switch_state_and_redraw(cx, ViewState::None);
                     }
                 }
                 Hit::FingerHoverIn(e) => {
@@ -537,12 +541,14 @@ impl Widget for LView {
                     cx.set_cursor(prop.cursor);
                     if self.animator.live_ptr.is_some() {
                         self.animator_play(cx, id!(hover.on));
+                        self.switch_state_and_redraw(cx, ViewState::Hover);
                     }
                 }
                 Hit::FingerHoverOut(e) => {
                     cx.widget_action(uid, &scope.path, ViewAction::FingerHoverOut(e));
                     if self.animator.live_ptr.is_some() {
                         self.animator_play(cx, id!(hover.off));
+                        self.switch_state_and_redraw(cx, ViewState::None);
                     }
                 }
                 Hit::KeyDown(e) => cx.widget_action(uid, &scope.path, ViewAction::KeyDown(e)),
@@ -582,9 +588,7 @@ impl Component for LView {
         Ok(())
     }
 
-    fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> () {
-        todo!()
-    }
+    set_scope_path!();
 }
 
 impl LView {
@@ -609,5 +613,35 @@ impl LView {
             },
             margin: walk.margin,
         }
+    }
+
+    pub fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
+        if !self.animation_open {
+            return;
+        }
+
+        match state {
+            ViewState::None => {
+                // switch to normal state
+                if self.draw_view.hover != 0.0 || self.draw_view.pressed != 0.0 {
+                    self.draw_view.hover = 0.0;
+                    self.draw_view.pressed = 0.0;
+                }
+            }
+            ViewState::Hover => {
+                if self.draw_view.hover != 1.0 {
+                    self.draw_view.hover = 1.0;
+                    self.draw_view.pressed = 0.0;
+                }
+            }
+            ViewState::Pressed => {
+                if self.draw_view.pressed != 1.0 {
+                    self.draw_view.hover = 0.0;
+                    self.draw_view.pressed = 1.0;
+                }
+            }
+        }
+        let _ = self.render(cx);
+        self.draw_view.redraw(cx);
     }
 }

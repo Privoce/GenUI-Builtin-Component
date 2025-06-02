@@ -26,3 +26,12 @@ color = "#fff"
 [flat.components.button]
 background_color = ""
 # ...
+
+
+[components]
+
+[components.label]
+
+[components.button]
+
+basic = {}

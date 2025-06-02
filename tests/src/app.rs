@@ -43,10 +43,7 @@ live_design! {
                         width: 200.0,
                         prop: {
                             basic: {
-                                spread_radius: 2.0,
-                                blur_radius: 12.0,
-                                shadow_offset: vec2(6.0, 6.0),
-                                shadow_color: #ff0000,
+                                shadow_offset: vec2(0.0, 0.0),
                                 align: {
                                     x: 0.5,
                                     y: 0.5

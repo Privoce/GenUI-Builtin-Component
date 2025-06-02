@@ -1,61 +1,32 @@
 use makepad_widgets::*;
-use toml_edit::Value;
+use toml_edit::{Item, Value};
 
 use crate::{
-    error::Error,
-    themes::{Color, Theme, TomlValueTo},
-    utils::get_from_itable as get,
+    components::traits::Prop, error::Error, themes::{Color, Theme, TomlValueTo}, utils::get_from_itable as get
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct LabelProp {
     #[live]
-    pub theme: Theme,
+    pub basic: LabelBasicProp,
     #[live]
-    pub color: Vec4,
-    #[live]
-    pub font_size: f32,
-    #[live]
-    pub line_spacing: f32,
-    #[live]
-    pub margin: Margin,
-    #[live]
-    pub padding: Padding,
-    // #[live]
-    // pub align: Align,
-    #[live(Flow::RightWrap)]
-    pub flow: Flow,
+    pub disabled: LabelBasicProp,
 }
 
 impl Default for LabelProp {
     fn default() -> Self {
         Self {
-            theme: Default::default(),
-            color: Color::Hex("#FFFFFFE6".parse().unwrap()).into(),
-            font_size: 10.0,
-            line_spacing: 1.2,
-            margin: Margin {
-                top: 0.0,
-                right: 0.0,
-                bottom: 0.0,
-                left: 0.0,
-            },
-            padding: Padding {
-                top: 0.0,
-                right: 0.0,
-                bottom: 0.0,
-                left: 0.0,
-            },
-            flow: Flow::RightWrap,
+            basic: LabelBasicProp::default(),
+            disabled: LabelBasicProp::default(),
         }
     }
 }
 
-impl TryFrom<&Value> for LabelProp {
+impl TryFrom<&Item> for LabelProp {
     type Error = Error;
 
-    fn try_from(value: &Value) -> Result<Self, Self::Error> {
+    fn try_from(value: &Item) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "LabelProp should be a inline table".to_string(),
         ))?;
@@ -128,4 +99,63 @@ impl TryFrom<&Value> for LabelProp {
             flow,
         })
     }
+}
+
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[live_ignore]
+pub struct LabelBasicProp {
+    #[live]
+    pub theme: Theme,
+    #[live]
+    pub color: Vec4,
+    #[live]
+    pub font_size: f32,
+    #[live]
+    pub line_spacing: f32,
+    #[live]
+    pub margin: Margin,
+    #[live]
+    pub padding: Padding,
+    // #[live]
+    // pub align: Align,
+    #[live(Flow::RightWrap)]
+    pub flow: Flow,
+}
+
+impl Default for LabelBasicProp {
+    fn default() -> Self {
+        Self {
+            theme: Default::default(),
+            color: Color::Hex("#FFFFFFE6".parse().unwrap()).into(),
+            font_size: 10.0,
+            line_spacing: 1.2,
+            margin: Margin {
+                top: 0.0,
+                right: 0.0,
+                bottom: 0.0,
+                left: 0.0,
+            },
+            padding: Padding {
+                top: 0.0,
+                right: 0.0,
+                bottom: 0.0,
+                left: 0.0,
+            },
+            flow: Flow::RightWrap,
+        }
+    }
+}
+
+impl Prop for LabelBasicProp {
+    type State = LabelState;
+
+    fn from_state(theme: Theme, state: &Self::State) -> Self {
+        
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum LabelState {
+    None,
+    Disabled,
 }

@@ -1,5 +1,7 @@
 use makepad_widgets::{error, Area, Cx, HeapLiveIdPath, Widget};
 
+use crate::themes::Theme;
+
 pub trait Component: Widget
 where
     Self::Error: std::fmt::Debug,
@@ -21,4 +23,10 @@ where
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error>;
     // fn area(&self) -> Area;
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
+}
+
+pub trait Prop {
+    type State;
+
+    fn from_state(theme: Theme, state: &Self::State) -> Self;
 }
