@@ -565,7 +565,7 @@ impl Widget for LView {
 
 impl Component for LView {
     type Error = Error;
-
+    type State = ViewState;
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let prop = &cx.global::<Conf>().components.view;
         self.prop = prop.clone();
@@ -587,16 +587,15 @@ impl Component for LView {
 
         Ok(())
     }
+    
+    fn current_state(&self) -> Self::State {
+        self.draw_view.current_state()
+    }
 
     set_scope_path!();
 }
 
 impl LView {
-    /// ## get current view state
-    pub fn current_state(&self) -> ViewState {
-        self.draw_view.current_state()
-    }
-
     pub fn walk_from_previous_size(&self, walk: Walk) -> Walk {
         let view_size = self.view_size.unwrap_or(DVec2::default());
         Walk {

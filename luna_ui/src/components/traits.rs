@@ -1,4 +1,4 @@
-use makepad_widgets::{error, Area, Cx, HeapLiveIdPath, Widget};
+use makepad_widgets::{error, Cx, HeapLiveIdPath, Widget};
 
 use crate::themes::Theme;
 
@@ -7,6 +7,7 @@ where
     Self::Error: std::fmt::Debug,
 {
     type Error;
+    type State;
     /// ## render component after prop apply
     /// this function should use in LiveHook trait : `fn after_apply_from_doc`
     fn render_after_apply(&mut self, cx: &mut Cx) -> () {
@@ -23,10 +24,19 @@ where
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error>;
     // fn area(&self) -> Area;
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
+    fn current_state(&self) -> Self::State;
 }
 
-pub trait Prop {
+pub trait Prop: Default {
     type State;
+    type Basic;
+    fn get(&self, state: Self::State) -> &Self::Basic;
+}
 
-    fn from_state(theme: Theme, state: &Self::State) -> Self;
+pub trait BasicProp: Default {
+    type State;
+    type Colors;
+
+    fn from_state(theme: Theme, state: Self::State) -> Self;
+    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors;
 }
