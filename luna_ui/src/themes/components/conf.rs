@@ -1,5 +1,6 @@
 use toml_edit::Item;
 
+use crate::components::button::ButtonProp;
 use crate::components::label::LabelProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
@@ -9,6 +10,7 @@ use crate::utils::{get_from_itable, get_from_table};
 pub struct ComponentsConf {
     pub label: LabelProp,
     pub view: ViewProp,
+    pub button: ButtonProp
 }
 
 impl TryFrom<&Item> for ComponentsConf {
@@ -33,6 +35,13 @@ impl TryFrom<&Item> for ComponentsConf {
             |item| item.try_into(),
         )?;
 
-        Ok(ComponentsConf { label, view })
+        let button = get_from_table(
+            table,
+            "button",
+            || Ok(ButtonProp::default()),
+            |item| item.try_into(),
+        )?;
+
+        Ok(ComponentsConf { label, view, button })
     }
 }

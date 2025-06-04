@@ -7,7 +7,7 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    error::Error, set_scope_path, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32,
+    components::traits::Prop, error::Error, set_scope_path, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32
 };
 pub use rely::*;
 
@@ -587,7 +587,7 @@ impl Component for LView {
 
         Ok(())
     }
-    
+
     fn current_state(&self) -> Self::State {
         self.draw_view.current_state()
     }

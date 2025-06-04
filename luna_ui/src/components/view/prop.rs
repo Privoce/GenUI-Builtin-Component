@@ -1,9 +1,17 @@
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::Item;
 
 use crate::{
+    components::traits::{BasicProp, Prop},
     error::Error,
-    styles::Radius,
+    styles::{
+        manuel::{
+            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
+            BORDER_RADIUS, CLIP_X, CLIP_Y, CURSOR, FLOW, HEIGHT, HOVER, MARGIN, PADDING, PRESSED,
+            ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
+        },
+        Radius,
+    },
     themes::{Color, Theme, TomlValueTo},
     utils::{get_from_itable, get_from_table},
 };
@@ -24,15 +32,18 @@ pub struct ViewProp {
 impl Default for ViewProp {
     fn default() -> Self {
         Self {
-            basic: ViewBasicProp::new(Theme::Dark, ViewState::None),
-            hover: ViewBasicProp::new(Theme::Dark, ViewState::Hover),
-            pressed: ViewBasicProp::new(Theme::Dark, ViewState::Pressed),
+            basic: ViewBasicProp::from_state(Theme::Dark, ViewState::None),
+            hover: ViewBasicProp::from_state(Theme::Dark, ViewState::Hover),
+            pressed: ViewBasicProp::from_state(Theme::Dark, ViewState::Pressed),
         }
     }
 }
 
-impl ViewProp {
-    pub fn get(&self, state: ViewState) -> &ViewBasicProp {
+impl Prop for ViewProp {
+    type State = ViewState;
+    type Basic = ViewBasicProp;
+
+    fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
             ViewState::None => &self.basic,
             ViewState::Hover => &self.hover,
@@ -90,15 +101,19 @@ pub struct ViewBasicProp {
     pub width: Size,
 }
 
-impl ViewBasicProp {
-    pub fn new(theme: Theme, state: ViewState) -> Self {
-        let (background_color, border_color, shadow_color) = Self::state_color(theme, state);
+impl BasicProp for ViewBasicProp {
+    type State = ViewState;
+
+    type Colors = (Color, Color, Color);
+
+    fn from_state(theme: Theme, state: Self::State) -> Self {
+        let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);
 
         Self {
             theme,
             background_color: background_color.into(),
             border_color: border_color.into(),
-            border_width: 1.0,
+            border_width: 0.0,
             border_radius: Radius::new(6.0),
             shadow_color: shadow_color.into(),
             spread_radius: 0.0,
@@ -130,7 +145,7 @@ impl ViewBasicProp {
         }
     }
 
-    pub fn state_color(theme: Theme, state: ViewState) -> (Color, Color, Color) {
+    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, border_level, shadow_level) = match state {
             ViewState::None => (400, 400, 300),
             ViewState::Hover => (300, 300, 200),
@@ -174,7 +189,7 @@ impl ViewBasicProp {
 
 impl Default for ViewBasicProp {
     fn default() -> Self {
-        ViewBasicProp::new(Theme::Dark, ViewState::None)
+        ViewBasicProp::from_state(Theme::Dark, ViewState::None)
     }
 }
 
@@ -188,22 +203,32 @@ impl TryFrom<&Item> for ViewProp {
 
         let basic = get_from_table(
             table,
-            "basic",
+            BASIC,
             || Ok(ViewBasicProp::default()),
             |item| (item, ViewState::None).try_into(),
         )?;
 
         let hover = get_from_table(
             table,
-            "hover",
-            || Ok(ViewBasicProp::new(Theme::Dark, ViewState::Hover)),
+            HOVER,
+            || {
+                Ok(ViewBasicProp::from_state(
+                    Theme::default(),
+                    ViewState::Hover,
+                ))
+            },
             |item| (item, ViewState::Hover).try_into(),
         )?;
 
         let pressed = get_from_table(
             table,
-            "pressed",
-            || Ok(ViewBasicProp::new(Theme::Dark, ViewState::Pressed)),
+            PRESSED,
+            || {
+                Ok(ViewBasicProp::from_state(
+                    Theme::default(),
+                    ViewState::Pressed,
+                ))
+            },
             |item| (item, ViewState::Pressed).try_into(),
         )?;
 
@@ -223,13 +248,13 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
             "[components.view.$state] should be an inline table".to_string(),
         ))?;
         let theme = Theme::default();
-        let (background_color, border_color, shadow_color) = Self::state_color(theme, state);
+        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
 
-        let theme = get_from_itable(inline_table, "theme", || Ok(theme), |v| v.try_into())?;
+        let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);
 
         let background_color = get_from_itable(
             inline_table,
-            "background_color",
+            BACKGROUND_COLOR,
             || Ok(background_color),
             |v| v.try_into(),
         )?
@@ -237,7 +262,7 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
 
         let border_color = get_from_itable(
             inline_table,
-            "border_color",
+            BORDER_COLOR,
             || Ok(border_color),
             |v| v.try_into(),
         )?
@@ -248,45 +273,45 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
 
         let border_radius = get_from_itable(
             inline_table,
-            "border_radius",
+            BORDER_RADIUS,
             || Ok(Radius::new(6.0)),
             |v| v.try_into(),
         )?;
 
         let shadow_color = get_from_itable(
             inline_table,
-            "shadow_color",
+            SHADOW_COLOR,
             || Ok(shadow_color),
             |v| v.try_into(),
         )?
         .into();
 
         let spread_radius =
-            get_from_itable(inline_table, "spread_radius", || Ok(0.0), |v| v.to_f32())?;
+            get_from_itable(inline_table, SPREAD_RADIUS, || Ok(0.0), |v| v.to_f32())?;
 
-        let blur_radius = get_from_itable(inline_table, "blur_radius", || Ok(0.0), |v| v.to_f32())?;
+        let blur_radius = get_from_itable(inline_table, BLUR_RADIUS, || Ok(0.0), |v| v.to_f32())?;
 
         let shadow_offset = get_from_itable(
             inline_table,
-            "shadow_offset",
+            SHADOW_OFFSET,
             || Ok(vec2(0.0, 0.0)),
             |v| v.to_vec2(vec2(0.0, 0.0)),
         )?;
 
         let background_visible = get_from_itable(
             inline_table,
-            "background_visible",
+            BACKGROUND_VISIBLE,
             || Ok(true),
             |v| v.to_bool(),
         )?;
 
-        let rotation = get_from_itable(inline_table, "rotation", || Ok(0.0), |v| v.to_f32())?;
+        let rotation = get_from_itable(inline_table, ROTATION, || Ok(0.0), |v| v.to_f32())?;
 
-        let scale = get_from_itable(inline_table, "scale", || Ok(1.0), |v| v.to_f32())?;
+        let scale = get_from_itable(inline_table, SCALE, || Ok(1.0), |v| v.to_f32())?;
 
         let padding = get_from_itable(
             inline_table,
-            "padding",
+            PADDING,
             || {
                 Ok(Padding {
                     left: 6.0,
@@ -307,7 +332,7 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
 
         let margin = get_from_itable(
             inline_table,
-            "margin",
+            MARGIN,
             || {
                 Ok(Margin {
                     left: 6.0,
@@ -325,35 +350,25 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
                 })
             },
         )?;
-        let clip_x = get_from_itable(inline_table, "clip_x", || Ok(false), |v| v.to_bool())?;
-        let clip_y = get_from_itable(inline_table, "clip_y", || Ok(false), |v| v.to_bool())?;
+        let clip_x = get_from_itable(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
+        let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;
 
         let align = get_from_itable(
             inline_table,
-            "align",
+            ALIGN,
             || Ok(Align::default()),
             |v| v.to_align(Align::default()),
         )?;
         let cursor = get_from_itable(
             inline_table,
-            "cursor",
+            CURSOR,
             || Ok(MouseCursor::default()),
             |v| v.to_cursor(),
         )?;
-        let flow = get_from_itable(inline_table, "flow", || Ok(Flow::Down), |v| v.to_flow())?;
-        let spacing = get_from_itable(inline_table, "spacing", || Ok(6.0), |v| v.to_f64())?;
-        let height = get_from_itable(
-            inline_table,
-            "height",
-            || Ok(Size::Fill),
-            |v| v.to_size(),
-        )?;
-        let width = get_from_itable(
-            inline_table,
-            "width",
-            || Ok(Size::Fill),
-            |v| v.to_size(),
-        )?;
+        let flow = get_from_itable(inline_table, FLOW, || Ok(Flow::Down), |v| v.to_flow())?;
+        let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
+        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fill), |v| v.to_size())?;
+        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fill), |v| v.to_size())?;
 
         Ok(Self {
             theme,
