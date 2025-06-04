@@ -1,2 +1,4 @@
 mod live_hook;
-mod component;
+mod prop;
+mod event;
+mod animation;

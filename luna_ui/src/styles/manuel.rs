@@ -29,7 +29,10 @@ pub const CURSOR: &str = "cursor";
 pub const SPACING: &str = "spacing";
 pub const CLIP_X: &str = "clip_x";
 pub const CLIP_Y: &str = "clip_y";
-
+// --- text ------------------------------------------------------
+pub const FONT_SIZE: &str = "font_size";
+pub const COLOR: &str = "color";
+pub const LINE_SPACING: &str = "line_spacing";
 // --- state -----------------------------------------------------
 pub const HOVER: &str = "hover";
 pub const PRESSED: &str = "pressed";

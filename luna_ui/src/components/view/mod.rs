@@ -102,7 +102,7 @@ pub struct LView {
 impl LiveHook for LView {
     fn before_apply(
         &mut self,
-        _cx: &mut Cx,
+        cx: &mut Cx,
         apply: &mut Apply,
         _index: usize,
         _nodes: &[LiveNode],
@@ -586,6 +586,10 @@ impl Component for LView {
         self.draw_view.scale = self.prop.get(state).scale;
 
         Ok(())
+    }
+
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+        ()
     }
 
     fn current_state(&self) -> Self::State {

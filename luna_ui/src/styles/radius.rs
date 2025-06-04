@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 use toml_edit::{Value};
 
-use crate::{error::Error, themes::TomlValueTo};
+use crate::{error::Error, styles::traits::NewFrom, themes::TomlValueTo};
 
 /// ## Radius
 /// Radius always use in:
@@ -28,6 +28,30 @@ pub struct Radius {
 impl Default for Radius {
     fn default() -> Self {
         Self::new(8.0)
+    }
+}
+
+impl NewFrom for Radius {
+    fn from_f64(uni: f64) -> Self {
+        Self::new(uni as f32)
+    }
+
+    fn from_xy(x: f64, y: f64) -> Self {
+        Self {
+            top: x as f32,
+            right: y as f32,
+            bottom: x as f32,
+            left: y as f32,
+        }
+    }
+
+    fn from_all(x: f64, y: f64, z: f64, w: f64) -> Self {
+        Self {
+            top: x as f32,
+            right: y as f32,
+            bottom: z as f32,
+            left: w as f32,
+        }
     }
 }
 

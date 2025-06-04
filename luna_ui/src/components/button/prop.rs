@@ -9,9 +9,9 @@ use crate::{
     error::Error,
     styles::{
         manuel::{
-            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BLUR_RADIUS, BORDER_COLOR, BORDER_RADIUS,
-            BORDER_WIDTH, CURSOR, FLOW, HEIGHT, MARGIN, PADDING, SHADOW_COLOR, SHADOW_OFFSET,
-            SPACING, SPREAD_RADIUS, THEME, WIDTH,
+            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
+            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
+            PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
         traits::NewFrom,
         Radius,
@@ -69,14 +69,14 @@ impl TryFrom<&Item> for ButtonProp {
 
         let basic = get_from_table(
             table,
-            "basic",
+            BASIC,
             || Ok(ButtonBasicProp::default()),
             |v| (v, ButtonState::Basic).try_into(),
         )?;
 
         let hover = get_from_table(
             table,
-            "hover",
+            HOVER,
             || {
                 Ok(ButtonBasicProp::from_state(
                     Theme::default(),
@@ -88,7 +88,7 @@ impl TryFrom<&Item> for ButtonProp {
 
         let pressed = get_from_table(
             table,
-            "pressed",
+            PRESSED,
             || {
                 Ok(ButtonBasicProp::from_state(
                     Theme::default(),
@@ -100,7 +100,7 @@ impl TryFrom<&Item> for ButtonProp {
 
         let disabled = get_from_table(
             table,
-            "disabled",
+            DISABLED,
             || {
                 Ok(ButtonBasicProp::from_state(
                     Theme::default(),
@@ -194,10 +194,10 @@ impl BasicProp for ButtonBasicProp {
             shadow_offset: vec2(0.0, 0.0),
             border_width: 0.0,
             border_color: border_color.into(),
-            border_radius: Radius::new(6.0),
+            border_radius: Radius::new(4.0),
             cursor,
             margin: Margin::from_f64(6.0),
-            padding: Padding::from_f64(6.0),
+            padding: Padding::from_xy(10.0, 16.0),
             flow: Flow::Right,
             align: Align::from_f64(0.5),
             height: Size::Fit,
@@ -317,7 +317,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
         let margin = Margin::from_f64(6.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let padding = Padding::from_f64(6.0);
+        let padding = Padding::from_xy(10.0, 16.0);
         let padding = get_from_itable(
             inline_table,
             PADDING,
@@ -330,7 +330,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
         let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
-        
+
         Ok(Self {
             theme,
             background_color,

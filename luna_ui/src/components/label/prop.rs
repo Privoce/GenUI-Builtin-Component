@@ -4,6 +4,9 @@ use toml_edit::Item;
 use crate::{
     components::traits::{BasicProp, Prop},
     error::Error,
+    styles::manuel::{
+        BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME,
+    },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
     utils::{get_from_itable as get, get_from_table},
 };
@@ -36,21 +39,21 @@ impl TryFrom<&Item> for LabelProp {
 
         let basic = get_from_table(
             table,
-            "basic",
+            BASIC,
             || Ok(LabelBasicProp::default()),
-            |v| v.try_into(),
+            |v| (v, LabelState::None).try_into(),
         )?;
 
         let disabled = get_from_table(
             table,
-            "disabled",
+            DISABLED,
             || {
                 Ok(LabelBasicProp::from_state(
                     Theme::default(),
                     LabelState::Disabled,
                 ))
             },
-            |v| v.try_into(),
+            |v| (v, LabelState::Disabled).try_into(),
         )?;
 
         Ok(Self { basic, disabled })
@@ -106,7 +109,7 @@ impl BasicProp for LabelBasicProp {
         Self {
             theme,
             color: color.into(),
-            font_size: 10.0,
+            font_size: 12.0,
             line_spacing: 1.2,
             margin: Margin {
                 top: 0.0,
@@ -132,36 +135,19 @@ impl BasicProp for LabelBasicProp {
     }
 }
 
-impl TryFrom<&Item> for LabelBasicProp {
+impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
     type Error = Error;
 
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Item, LabelState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "LabelProp should be a inline table".to_string(),
         ))?;
-
-        let theme = get(
-            inline_table,
-            "theme",
-            || Ok(Theme::default()),
-            |value| value.try_into(),
-        )?;
-
-        let color = get(
-            inline_table,
-            "color",
-            || Ok(Color::Hex("#FFFFFFE6".parse()?)),
-            |value| value.try_into(),
-        )?
-        .into();
-
-        let font_size = get(inline_table, "font_size", || Ok(10.0), |item| item.to_f32())?;
-        let line_spacing = get(
-            inline_table,
-            "line_spacing",
-            || Ok(1.2),
-            |item| item.to_f32(),
-        )?;
+        let theme = Theme::default();
+        let theme = get(inline_table, THEME, || Ok(theme), |value| value.try_into())?;
+        let color = Self::state_colors(theme, state);
+        let color = get(inline_table, COLOR, || Ok(color), |value| value.try_into())?.into();
+        let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
+        let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.2), |item| item.to_f32())?;
 
         let default_margin = Margin {
             top: 0.0,
@@ -172,7 +158,7 @@ impl TryFrom<&Item> for LabelBasicProp {
 
         let margin = get(
             inline_table,
-            "margin",
+            MARGIN,
             || Ok(default_margin),
             |item| item.to_margin(default_margin),
         )?;
@@ -186,14 +172,14 @@ impl TryFrom<&Item> for LabelBasicProp {
 
         let padding = get(
             inline_table,
-            "padding",
+            PADDING,
             || Ok(default_padding),
             |item| item.to_padding(default_padding),
         )?;
 
         let flow = get(
             inline_table,
-            "flow",
+            FLOW,
             || Ok(Flow::RightWrap),
             |item| item.to_flow(),
         )?;

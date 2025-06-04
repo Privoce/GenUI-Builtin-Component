@@ -20,9 +20,16 @@ live_design! {
     }
 
     pub LView = <LViewBase>{}
+
+    pub LButton = <LButtonBase>{
+        slot: <LLabel> {
+            text: "Button",
+        },
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
     label::live_design(cx);
     view::live_design(cx);
+    button::live_design(cx);
 }

@@ -1,7 +1,10 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::traits::Prop, error::Error, getter, pure_after_apply, set_scope_path, themes::{Conf, Theme}
+    components::traits::Prop,
+    error::Error,
+    getter, pure_after_apply, set_scope_path,
+    themes::{Conf, Theme},
 };
 
 mod prop;
@@ -16,7 +19,7 @@ live_design! {
     pub LLabelBase = {{LLabel}} {}
 }
 
-#[derive(Live, Widget)]
+#[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
 pub struct LLabel {
     #[live]
     pub prop: LabelProp,
@@ -29,11 +32,39 @@ pub struct LLabel {
     #[live]
     text: ArcStringMut,
     // --- draw ------------------
-    #[redraw]
     #[live]
     pub draw_text: DrawText,
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
+}
+
+impl WidgetNode for LLabel {
+    fn uid_to_widget(&self, _uid: WidgetUid) -> WidgetRef {
+        WidgetRef::empty()
+    }
+
+    fn find_widgets(&self, _path: &[LiveId], _cached: WidgetCache, _results: &mut WidgetSet) {
+        ()
+    }
+
+    fn walk(&mut self, _cx: &mut Cx) -> Walk {
+        let state = self.current_state();
+        let prop = self.prop.get(state);
+        Walk {
+            abs_pos: Default::default(),
+            margin: prop.margin,
+            width: Size::Fit,
+            height: Size::Fit,
+        }
+    }
+
+    fn area(&self) -> Area {
+        self.area
+    }
+
+    fn redraw(&mut self, cx: &mut Cx) {
+        self.draw_text.redraw(cx);
+    }
 }
 
 impl Widget for LLabel {
@@ -67,7 +98,7 @@ impl Widget for LLabel {
 
 impl LiveHook for LLabel {
     pure_after_apply!();
-    
+
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
     }
@@ -99,6 +130,10 @@ impl Component for LLabel {
         }
     }
 
+    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
+        ()
+    }
+
     set_scope_path!();
 }
 
@@ -109,7 +144,7 @@ impl LLabel {
         }
     }
 
-    pub fn area(&self) -> Area {
-        self.area
-    }
+    // pub fn area(&self) -> Area {
+    //     self.area
+    // }
 }

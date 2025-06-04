@@ -1,4 +1,4 @@
-use makepad_widgets::{error, Cx, HeapLiveIdPath, Widget};
+use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, Widget};
 
 use crate::themes::Theme;
 
@@ -25,6 +25,7 @@ where
     // fn area(&self) -> Area;
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
     fn current_state(&self) -> Self::State;
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area);
 }
 
 pub trait Prop: Default {
