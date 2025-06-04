@@ -38,11 +38,14 @@ live_design! {
                     //     text: "Click 福 me 😊"
                     //     draw_text:{text_style:{font_size:18}}
                     // }
+                    
                     <LView> {
-                        height: 200.0,
-                        width: 200.0,
                         prop: {
                             basic: {
+                                background_visible: false,
+                                theme: Primary,
+                                height: 200.0,
+                                width: 200.0,
                                 shadow_offset: vec2(0.0, 0.0),
                                 align: {
                                     x: 0.5,
@@ -53,9 +56,14 @@ live_design! {
                         <LLabel>{
                             text: "Hello World",
                             prop: {
-                                color: #ff0,
-                                font_size: 24.0,
+                                basic: {
+                                    color: #ff0,
+                                    font_size: 24.0,
+                                }
                             }
+                        }
+                        <LButton>{
+                            
                         }
                     }
                 }
