@@ -8,11 +8,15 @@ use crate::{
     },
     error::Error,
     styles::{
-        manuel::{BACKGROUND_COLOR, THEME},
+        manuel::{
+            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BLUR_RADIUS, BORDER_COLOR, BORDER_RADIUS,
+            BORDER_WIDTH, CURSOR, FLOW, HEIGHT, MARGIN, PADDING, SHADOW_COLOR, SHADOW_OFFSET,
+            SPACING, SPREAD_RADIUS, THEME, WIDTH,
+        },
         traits::NewFrom,
         Radius,
     },
-    themes::{Color, Theme},
+    themes::{Color, Theme, TomlValueTo},
     utils::{get_from_itable, get_from_table},
 };
 
@@ -262,27 +266,90 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
             BACKGROUND_COLOR,
             || Ok(background_color),
             |v| v.try_into(),
-        )?.into();
+        )?
+        .into();
 
+        let background_visible = get_from_itable(
+            inline_table,
+            BACKGROUND_VISIBLE,
+            || Ok(true),
+            |v| v.to_bool(),
+        )?;
+        let shadow_color = get_from_itable(
+            inline_table,
+            SHADOW_COLOR,
+            || Ok(shadow_color),
+            |v| v.try_into(),
+        )?
+        .into();
+
+        let spread_radius =
+            get_from_itable(inline_table, SPREAD_RADIUS, || Ok(0.0), |v| v.to_f32())?;
+        let blur_radius = get_from_itable(inline_table, BLUR_RADIUS, || Ok(0.0), |v| v.to_f32())?;
+        let shadow_offset = vec2(0.0, 0.0);
+        let shadow_offset = get_from_itable(
+            inline_table,
+            SHADOW_OFFSET,
+            || Ok(shadow_offset),
+            |v| v.to_vec2(shadow_offset),
+        )?;
+
+        let border_width = get_from_itable(inline_table, BORDER_WIDTH, || Ok(0.0), |v| v.to_f32())?;
+        let border_color = get_from_itable(
+            inline_table,
+            BORDER_COLOR,
+            || Ok(border_color),
+            |v| v.try_into(),
+        )?
+        .into();
+        let border_radius = get_from_itable(
+            inline_table,
+            BORDER_RADIUS,
+            || Ok(Radius::new(6.0)),
+            |v| v.try_into(),
+        )?;
+        let cursor = if state.is_disabled() {
+            MouseCursor::NotAllowed
+        } else {
+            MouseCursor::Hand
+        };
+
+        let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
+        let margin = Margin::from_f64(6.0);
+        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
+        let padding = Padding::from_f64(6.0);
+        let padding = get_from_itable(
+            inline_table,
+            PADDING,
+            || Ok(padding),
+            |v| v.to_padding(padding),
+        )?;
+        let flow = get_from_itable(inline_table, FLOW, || Ok(Flow::Right), |v| v.to_flow())?;
+        let align = Align::from_f64(0.5);
+        let align = get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
+        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
+        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
+        let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
+        
         Ok(Self {
             theme,
             background_color,
-            background_visible: (),
-            shadow_color: (),
-            spread_radius: (),
-            blur_radius: (),
-            shadow_offset: (),
-            border_width: (),
-            border_color: (),
-            border_radius: (),
-            cursor: (),
-            margin: (),
-            padding: (),
-            flow: (),
-            align: (),
-            height: (),
-            width: (),
-            spacing: (),
+            background_visible,
+            shadow_color,
+            spread_radius,
+            blur_radius,
+            shadow_offset,
+            border_width,
+            border_color,
+            border_radius,
+            cursor,
+            margin,
+            padding,
+            flow,
+            align,
+            height,
+            width,
+            spacing,
         })
     }
 }
