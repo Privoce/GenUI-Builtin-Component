@@ -135,6 +135,18 @@ impl Component for LLabel {
     }
 
     set_scope_path!();
+    
+    fn play_animation(&mut self, _cx: &mut Cx, _state: &[LiveId; 2]) -> () {
+        ()
+    }
+    
+    fn clear_animation(&mut self, _cx: &mut Cx) -> () {
+        ()
+    }
+
+    fn switch_state_and_redraw(&mut self, _cx: &mut Cx, _state: Self::State) -> () {
+        ()
+    }
 }
 
 impl LLabel {

@@ -1,4 +1,4 @@
-use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, Widget};
+use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, Widget};
 
 use crate::themes::Theme;
 
@@ -24,16 +24,31 @@ where
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error>;
     // fn area(&self) -> Area;
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
+    /// ## get current state of component
     fn current_state(&self) -> Self::State;
+    /// ## handle event for component 
+    /// from `fn handle_event()` in `impl Widget for $Component`
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area);
+    /// ## play animation if component has
+    /// depend on component struct `#[animator] animator: Animator`
+    fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();
+    /// ## clear animation if component has
+    fn clear_animation(&mut self, cx: &mut Cx) -> ();
+    /// ## switch state and redraw component
+    /// if component has animation or event which may change state, this function should be called
+    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: Self::State) -> ();
 }
 
+/// # Prop
+/// trait for component properties
 pub trait Prop: Default {
     type State;
     type Basic;
     fn get(&self, state: Self::State) -> &Self::Basic;
 }
 
+/// # BasicProp
+/// trait for basic properties of a component
 pub trait BasicProp: Default {
     type State;
     type Colors;

@@ -5,7 +5,7 @@ live_design! {
     use link::luna_ui::*;
     use link::shaders::*;
     use link::widgets::*;
-
+    use crate::an::*;
 
     App = {{App}} {
         ui: <Root>{
@@ -38,7 +38,10 @@ live_design! {
                     //     text: "Click 福 me 😊"
                     //     draw_text:{text_style:{font_size:18}}
                     // }
-                    
+                    // <TypingAnimation>{}
+                    // <AButton>{
+                    //     text: "asdsdasd"
+                    // }
                     <LView> {
                         prop: {
                             basic: {
@@ -59,12 +62,19 @@ live_design! {
                                 basic: {
                                     color: #ff0,
                                     font_size: 24.0,
+                                    
                                 }
                             }
                         }
                         <LButton>{
-                            
+                            prop: {
+                                basic: {
+                                    border_width: 2.0,
+                                    
+                                }
+                            }
                         }
+                        
                     }
                 }
             }
@@ -85,6 +95,7 @@ pub struct App {
 impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
+        crate::an::live_design(cx);
         crate::luna_ui::live_design(cx);
     }
 }

@@ -7,7 +7,8 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    components::traits::Prop, error::Error, set_scope_path, shader::draw_view::DrawView, themes::Conf, utils::BoolToF32
+    components::traits::Prop, error::Error, play_animation, set_scope_path,
+    shader::draw_view::DrawView, themes::Conf, utils::BoolToF32,
 };
 pub use rely::*;
 
@@ -100,13 +101,7 @@ pub struct LView {
 }
 
 impl LiveHook for LView {
-    fn before_apply(
-        &mut self,
-        cx: &mut Cx,
-        apply: &mut Apply,
-        _index: usize,
-        _nodes: &[LiveNode],
-    ) {
+    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if let ApplyFrom::UpdateFromDoc { .. } = apply.from {
             //self.draw_order.clear();
             self.live_update_order.clear();
@@ -588,7 +583,7 @@ impl Component for LView {
         Ok(())
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
         ()
     }
 
@@ -596,29 +591,17 @@ impl Component for LView {
         self.draw_view.current_state()
     }
 
-    set_scope_path!();
-}
-
-impl LView {
-    pub fn walk_from_previous_size(&self, walk: Walk) -> Walk {
-        let view_size = self.view_size.unwrap_or(DVec2::default());
-        Walk {
-            abs_pos: walk.abs_pos,
-            width: if walk.width.is_fill() {
-                walk.width
-            } else {
-                Size::Fixed(view_size.x)
+    fn clear_animation(&mut self, cx: &mut Cx) -> () {
+        self.draw_view.apply_over(
+            cx,
+            live! {
+                hover: 0.0,
+                pressed: 0.0
             },
-            height: if walk.height.is_fill() {
-                walk.height
-            } else {
-                Size::Fixed(view_size.y)
-            },
-            margin: walk.margin,
-        }
+        );
     }
 
-    pub fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
+    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
         if !self.animation_open {
             return;
         }
@@ -646,5 +629,28 @@ impl LView {
         }
         let _ = self.render(cx);
         self.draw_view.redraw(cx);
+    }
+
+    play_animation!();
+    set_scope_path!();
+}
+
+impl LView {
+    pub fn walk_from_previous_size(&self, walk: Walk) -> Walk {
+        let view_size = self.view_size.unwrap_or(DVec2::default());
+        Walk {
+            abs_pos: walk.abs_pos,
+            width: if walk.width.is_fill() {
+                walk.width
+            } else {
+                Size::Fixed(view_size.x)
+            },
+            height: if walk.height.is_fill() {
+                walk.height
+            } else {
+                Size::Fixed(view_size.y)
+            },
+            margin: walk.margin,
+        }
     }
 }

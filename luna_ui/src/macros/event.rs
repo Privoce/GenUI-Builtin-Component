@@ -13,7 +13,7 @@ macro_rules! active_event{
     ($($event_fn: ident : $event: path |$param: ident : $param_ty: ty| => $return_ty: expr),*) => {
         $(
             pub fn $event_fn (&mut self, cx: &mut Cx, $param: $param_ty){
-                if self.event_key {
+                if self.event_open {
                     self.scope_path.as_ref().map(|path| {
                         cx.widget_action(
                             self.widget_uid(),
@@ -34,14 +34,13 @@ macro_rules! hit_finger_down {
             $cx.set_key_focus($focus_area);
         }
         $self.play_animation($cx, id!(hover.pressed));
-        $self.active_focus($cx, $e);
+        $self.active_finger_down($cx, $e);
     };
 }
 
 #[macro_export]
 macro_rules! hit_hover_in {
     ($self:ident, $cx:ident, $e:expr) => {
-        let _ = set_cursor($cx, $self.cursor.as_ref());
         $self.play_animation($cx, id!(hover.on));
         $self.active_hover_in($cx, $e);
     };
@@ -58,16 +57,7 @@ macro_rules! hit_hover_out {
 #[macro_export]
 macro_rules! hit_finger_up {
     ($self:ident, $cx:ident, $e:expr) => {
-        if $e.is_over {
-            if $e.device.has_hovers() {
-                $self.play_animation($cx, id!(hover.on));
-            } else {
-                $self.play_animation($cx, id!(hover.off));
-            }
-            $self.active_clicked($cx, $e);
-        } else {
-            $self.play_animation($cx, id!(hover.off));
-            $self.active_focus_lost($cx, $e);
-        }
+        $self.play_animation($cx, id!(hover.off));
+        $self.active_finger_up($cx, $e);
     };
 }
