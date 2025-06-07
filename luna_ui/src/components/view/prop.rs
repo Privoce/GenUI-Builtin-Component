@@ -4,7 +4,7 @@ use toml_edit::Item;
 use crate::{
     components::traits::{BasicProp, Prop},
     error::Error,
-    styles::{
+    prop::{
         manuel::{
             ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, CLIP_X, CLIP_Y, CURSOR, FLOW, HEIGHT, HOVER, MARGIN, PADDING, PRESSED,

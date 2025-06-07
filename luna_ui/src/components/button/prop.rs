@@ -7,7 +7,7 @@ use crate::{
         view::ViewState,
     },
     error::Error,
-    styles::{
+    prop::{
         manuel::{
             ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,

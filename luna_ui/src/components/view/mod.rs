@@ -7,8 +7,8 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    components::traits::Prop, error::Error, play_animation, set_scope_path,
-    shader::draw_view::DrawView, themes::Conf, utils::BoolToF32,
+    components::traits::Prop, error::Error, play_animation, prop::traits::ToF32, set_scope_path,
+    shader::draw_view::DrawView, themes::Conf
 };
 pub use rely::*;
 
@@ -101,7 +101,7 @@ pub struct LView {
 }
 
 impl LiveHook for LView {
-    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn before_apply(&mut self, _cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
         if let ApplyFrom::UpdateFromDoc { .. } = apply.from {
             //self.draw_order.clear();
             self.live_update_order.clear();

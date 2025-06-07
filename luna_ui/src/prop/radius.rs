@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 use toml_edit::{Value};
 
-use crate::{error::Error, styles::traits::NewFrom, themes::TomlValueTo};
+use crate::{error::Error, prop::traits::NewFrom, themes::TomlValueTo};
 
 /// ## Radius
 /// Radius always use in:

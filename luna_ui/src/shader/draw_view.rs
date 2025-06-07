@@ -1,6 +1,6 @@
 use crate::{
     components::view::{ViewBasicProp, ViewState},
-    utils::BoolToF32,
+    prop::traits::ToF32,
 };
 use makepad_widgets::*;
 
@@ -22,16 +22,16 @@ live_design! {
             // - [shadow spread and blur calculation] ---------------------------------------------
 
             let total_shadow_size = self.spread_radius + self.blur_radius;
-            
+
             self.rect_size2 = self.rect_size + 2.0 * vec2(total_shadow_size);
             self.rect_size3 = self.rect_size2 + abs(self.shadow_offset);
             self.rect_pos2 = self.rect_pos - vec2(total_shadow_size) + min_offset;
             self.rect_shift = -min_offset;
-            
+
             let border_width = self.border_width;
             self.sdf_rect_size = self.rect_size2 - vec2(total_shadow_size * 2.0 + border_width * 2.0);
             self.sdf_rect_pos = -min_offset + vec2(border_width + total_shadow_size);
-            
+
             return self.clip_and_transform_vertex(self.rect_pos2, self.rect_size3)
         }
         // ----------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ live_design! {
                     if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
                         self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
                         let max_border_radius = max(
-                            max(self.border_radius.x, self.border_radius.y), 
+                            max(self.border_radius.x, self.border_radius.y),
                             max(self.border_radius.z, self.border_radius.w)
                         );
                         let v = GaussShadow::rounded_box_shadow(
@@ -59,7 +59,7 @@ live_design! {
                             self.blur_radius,
                             max_border_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v); 
+                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
                         sdf.clear(shadow_color);
                     } else {
                         let v = GaussShadow::box_shadow(
@@ -68,12 +68,12 @@ live_design! {
                             self.pos * self.rect_size3,
                             self.blur_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v); 
+                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
                         sdf.clear(shadow_color);
                     }
                 }
             }
-            
+
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
             sdf.box_all(
@@ -86,17 +86,17 @@ live_design! {
                 self.border_radius.z,
                 self.border_radius.w
             );
-            
+
             // - [background color if visible] ----------------------------------------------------
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);
             }
-            
+
             // - [border with and color if width bigger than 0] -----------------------------------
             if border_width > 0.0 {
                 sdf.stroke(self.border_color, border_width);
             }
-            
+
             return sdf.result;
         }
     }

@@ -5,7 +5,7 @@ pub mod components;
 pub mod error;
 pub mod macros;
 pub mod shader;
-pub mod styles;
+pub mod prop;
 pub mod themes;
 pub mod utils;
 

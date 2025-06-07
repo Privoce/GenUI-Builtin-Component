@@ -2,7 +2,7 @@ use makepad_widgets::{Margin, Padding, Vec2};
 use toml_edit::Item;
 
 use crate::{
-    error::Error, styles::Radius, themes::TomlValueTo, utils::get_from_itable as get,
+    error::Error, prop::Radius, themes::TomlValueTo, utils::get_from_itable as get,
 };
 
 #[derive(Clone, Debug)]

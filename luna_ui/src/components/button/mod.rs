@@ -12,7 +12,7 @@ use crate::{
     set_scope_path,
     shader::draw_view::DrawView,
     themes::{Conf, Theme},
-    utils::BoolToF32,
+    prop::traits::ToF32
 };
 
 live_design! {
@@ -465,70 +465,6 @@ impl LButton {
                 nodes[v_index].value = LiveValue::Color(vec4_to_u32(pressed_prop.background_color));
             }
         }
-
-        // 设置基础状态的动画配置
-        // if let Some(animator_state) = &mut self.animator.state {
-        // animator_state.push_live(live!{
-        //     state: {
-        //         draw_button: {background_color: #f00}
-        //     }
-        // });
-
-        // let mut basic_nodes = LiveNodeVec::new();
-        // basic_nodes.push_live(live_object! {
-        //     draw_button: {
-        //         background_color: (basic_prop.background_color),
-        //         border_color: (basic_prop.border_color),
-        //     }
-        // });
-
-        // let mut hover_nodes = LiveNodeVec::new();
-        // hover_nodes.push_live(live_object! {
-        //     draw_button: {
-        //         background_color: (hover_prop.background_color),
-        //         border_color: (hover_prop.border_color),
-        //     }
-        // });
-
-        // let mut pressed_nodes = LiveNodeVec::new();
-        // pressed_nodes.push_live(live_object! {
-        //     draw_button: {
-        //         background_color: (pressed_prop.background_color),
-        //         border_color: (pressed_prop.border_color),
-        //     }
-        // });
-
-        // // 将这些配置设置到动画器中
-        // animator_state.replace_or_insert_last_node_by_path(
-        //     0,
-        //     &[
-        //         live_id!(hover).as_field(),
-        //         live_id!(off).as_field(),
-        //         live_id!(apply).as_field(),
-        //     ],
-        //     &basic_nodes,
-        // );
-
-        // animator_state.replace_or_insert_last_node_by_path(
-        //     0,
-        //     &[
-        //         live_id!(hover).as_field(),
-        //         live_id!(on).as_field(),
-        //         live_id!(apply).as_field(),
-        //     ],
-        //     &hover_nodes,
-        // );
-
-        // animator_state.replace_or_insert_last_node_by_path(
-        //     0,
-        //     &[
-        //         live_id!(hover).as_field(),
-        //         live_id!(pressed).as_field(),
-        //         live_id!(apply).as_field(),
-        //     ],
-        //     &pressed_nodes,
-        // );
-        // }
     }
 }
 

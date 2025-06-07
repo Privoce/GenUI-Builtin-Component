@@ -4,7 +4,7 @@ use toml_edit::Item;
 use crate::{
     components::traits::{BasicProp, Prop},
     error::Error,
-    styles::manuel::{
+    prop::manuel::{
         BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME,
     },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
