@@ -601,11 +601,7 @@ impl Component for LView {
         );
     }
 
-    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
-        if !self.animation_open {
-            return;
-        }
-
+    fn switch_state(&mut self, state: Self::State) -> () {
         match state {
             ViewState::None => {
                 // switch to normal state
@@ -627,6 +623,17 @@ impl Component for LView {
                 }
             }
         }
+    }
+
+    fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
+        if !self.animation_open {
+            return;
+        }
+        self.switch_state(state);
+    }
+
+    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
+        self.switch_state(state);
         let _ = self.render(cx);
         self.draw_view.redraw(cx);
     }

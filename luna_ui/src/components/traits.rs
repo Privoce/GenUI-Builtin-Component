@@ -1,8 +1,8 @@
-use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, Widget};
+use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, Widget, WidgetNode};
 
 use crate::themes::Theme;
 
-pub trait Component: Widget
+pub trait Component: Widget + WidgetNode
 where
     Self::Error: std::fmt::Debug,
 {
@@ -34,9 +34,23 @@ where
     fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();
     /// ## clear animation if component has
     fn clear_animation(&mut self, cx: &mut Cx) -> ();
+    /// only switch state 
+    fn switch_state(&mut self, state: Self::State) -> ();
     /// ## switch state and redraw component
     /// if component has animation or event which may change state, this function should be called
-    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: Self::State) -> ();
+    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: Self::State) -> (){
+        self.switch_state(state);
+        let _ = self.render(cx);
+        self.redraw(cx);
+    }
+    /// ## switch state with animation
+    /// if you not define #[animator] in component struct, do not care about this function
+    /// this function should be called when you want to switch state with animation
+    /// ### steps:
+    /// 1. call animation_enabled or return
+    /// 2. call switch_state fn 
+    /// 3. call play animation
+    fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> ();
 }
 
 /// # Prop

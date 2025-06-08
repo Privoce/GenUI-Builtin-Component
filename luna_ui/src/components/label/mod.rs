@@ -147,6 +147,13 @@ impl Component for LLabel {
     fn switch_state_and_redraw(&mut self, _cx: &mut Cx, _state: Self::State) -> () {
         ()
     }
+
+    fn switch_state(&mut self, _state: Self::State) -> () {
+        ()
+    }
+    fn switch_state_with_animation(&mut self, _cx: &mut Cx, _state: Self::State) -> () {
+        ()
+    }
 }
 
 impl LLabel {

@@ -69,8 +69,9 @@ live_design! {
                         <LButton>{
                             prop: {
                                 basic: {
+                                    theme: Primary,
                                     border_width: 2.0,
-
+                                    border_color: #ff0,
                                 }
                             }
                         }

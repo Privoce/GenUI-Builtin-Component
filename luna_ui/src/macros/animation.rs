@@ -24,7 +24,7 @@ macro_rules! play_animation {
 /// ## This macro is used to set properties of nodes in an animation set.
 /// ### Usage
 /// ```rust
-// animation_set!{
+// set_animation!{
 ///     nodes: draw_button = {
 ///         basic_index => {
 ///             background_color => basic_prop.background_color
@@ -52,7 +52,7 @@ macro_rules! play_animation {
 /// }
 /// ```
 #[macro_export]
-macro_rules! animation_set {
+macro_rules! set_animation {
     ($nodes: ident : $draw: tt = {
         $(
             $basic_index: expr => {
