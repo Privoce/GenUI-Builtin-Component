@@ -7,7 +7,7 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    components::traits::Prop, error::Error, play_animation, prop::traits::ToF32, set_scope_path,
+    components::traits::Prop, error::Error, play_animation, prop::traits::ToFloat, set_scope_path,
     shader::draw_view::DrawView, themes::Conf
 };
 pub use rely::*;

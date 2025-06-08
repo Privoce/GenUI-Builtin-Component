@@ -18,9 +18,10 @@ pub trait ToBool {
 }
 
 
-pub trait ToF32 {
+pub trait ToFloat {
     /// Transform bool to f32/f64
     fn to_f32(&self) -> f32;
+    fn to_f64(&self) -> f64;
 }
 
 
@@ -28,4 +29,8 @@ pub trait ToVec {
     fn to_vec2(self) -> Vec2;
     fn to_vec3(self) -> Vec3;
     fn to_vec4(self) -> Vec4;
+}
+
+pub trait ToU32 {
+    fn to_u32(self) -> u32;
 }

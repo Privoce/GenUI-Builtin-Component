@@ -62,7 +62,7 @@ live_design! {
                                 basic: {
                                     color: #ff0,
                                     font_size: 24.0,
-                                    
+
                                 }
                             }
                         }
@@ -70,11 +70,10 @@ live_design! {
                             prop: {
                                 basic: {
                                     border_width: 2.0,
-                                    
+
                                 }
                             }
                         }
-                        
                     }
                 }
             }

@@ -1,6 +1,6 @@
 use crate::{
     components::view::{ViewBasicProp, ViewState},
-    prop::traits::ToF32,
+    prop::traits::ToFloat,
 };
 use makepad_widgets::*;
 

@@ -5,44 +5,49 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw,
+    active_event, animation_open_then_redraw, animation_set,
     components::traits::{Component, Prop},
     error::Error,
-    hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, pure_after_apply,
-    set_scope_path,
+    hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
+    prop::traits::{ToFloat, ToU32},
+    pure_after_apply, set_scope_path,
     shader::draw_view::DrawView,
     themes::{Conf, Theme},
-    prop::traits::ToF32
 };
 
 live_design! {
     link luna_basic;
+    use link::luna_animation_prop::*;
 
     pub LButtonBase = {{LButton}} {
         animator: {
             hover = {
                 default: off,
+
                 off = {
-                    from: {all: Forward {duration: (0.65)}}
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
                     apply: {
-                        draw_button: {background_color:#fff}
+                        draw_button: <AN_DRAW_VIEW> {}
                     }
                 }
 
                 on = {
                     from: {
-                        all: Forward {duration: (0.65)},
-                        pressed: Forward {duration: (0.65)}
-                    }
+                        all: Forward {duration: (AN_DURATION),},
+                        pressed: Forward {duration: (AN_DURATION)},
+                        ease: InOutQuad,
+                    },
                     apply: {
-                       draw_button: {background_color:#000}
+                       draw_button: <AN_DRAW_VIEW> {}
                     }
                 }
 
                 pressed = {
-                    from: {all: Forward {duration: (0.65)}}
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
                     apply: {
-                        draw_button: {background_color:#f00}
+                        draw_button: <AN_DRAW_VIEW> {}
                     }
                 }
             }
@@ -182,7 +187,6 @@ impl LiveHook for LButton {
     }
     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
         self.render_after_apply(cx);
-        
     }
 }
 
@@ -336,7 +340,7 @@ impl LButton {
                 spread_radius: (target_prop.spread_radius),
                 blur_radius: (target_prop.blur_radius),
                 shadow_offset: (target_prop.shadow_offset),
-                background_visible: (target_prop.background_visible.to_f32())
+                background_visible: (target_prop.background_visible.to_f64())
             }
         });
 
@@ -437,46 +441,54 @@ impl LButton {
         );
 
         if let Some(index) = basic_index {
-            if let Some(v_index) = nodes.child_by_path(index, &[
-                live_id!(apply).as_field(),
-                live_id!(draw_button).as_field(),
-                live_id!(background_color).as_field(),
-            ]) {
-                nodes[v_index].value = LiveValue::Color(vec4_to_u32(basic_prop.background_color));
+            if let Some(v_index) = nodes.child_by_path(
+                index,
+                &[
+                    live_id!(apply).as_field(),
+                    live_id!(draw_button).as_field(),
+                    live_id!(border_radius).as_field(),
+                ],
+            ) {
+                dbg!(&nodes[v_index].value);
             }
         }
 
-        if let Some(index) = hover_index {
-            if let Some(v_index) = nodes.child_by_path(index, &[
-                live_id!(apply).as_field(),
-                live_id!(draw_button).as_field(),
-                live_id!(background_color).as_field(),
-            ]) {
-                nodes[v_index].value = LiveValue::Color(vec4_to_u32(hover_prop.background_color));
-            }
-        }
-
-        if let Some(index) = pressed_index {
-            if let Some(v_index) = nodes.child_by_path(index, &[
-                live_id!(apply).as_field(),
-                live_id!(draw_button).as_field(),
-                live_id!(background_color).as_field(),
-            ]) {
-                nodes[v_index].value = LiveValue::Color(vec4_to_u32(pressed_prop.background_color));
+        animation_set! {
+            nodes: draw_button = {
+                basic_index => {
+                    background_color => basic_prop.background_color,
+                    border_color =>basic_prop.border_color,
+                    border_radius => basic_prop.border_radius,
+                    border_width =>(basic_prop.border_width as f64),
+                    shadow_color => basic_prop.shadow_color,
+                    spread_radius => (basic_prop.spread_radius as f64),
+                    blur_radius => (basic_prop.blur_radius as f64),
+                    shadow_offset => basic_prop.shadow_offset,
+                    background_visible => basic_prop.background_visible.to_f64()
+                },
+                hover_index => {
+                    background_color => hover_prop.background_color,
+                    border_color => hover_prop.border_color,
+                    border_radius => hover_prop.border_radius,
+                    border_width => (hover_prop.border_width as f64),
+                    shadow_color => hover_prop.shadow_color,
+                    spread_radius => (hover_prop.spread_radius as f64),
+                    blur_radius => (hover_prop.blur_radius as f64),
+                    shadow_offset => hover_prop.shadow_offset,
+                    background_visible => hover_prop.background_visible.to_f64()
+                },
+                pressed_index => {
+                    background_color => pressed_prop.background_color,
+                    border_color => pressed_prop.border_color,
+                    border_radius => pressed_prop.border_radius,
+                    border_width => (pressed_prop.border_width as f64),
+                    shadow_color => pressed_prop.shadow_color,
+                    spread_radius => (pressed_prop.spread_radius as f64),
+                    blur_radius => (pressed_prop.blur_radius as f64),
+                    shadow_offset => pressed_prop.shadow_offset,
+                    background_visible => pressed_prop.background_visible.to_f64()
+                }
             }
         }
     }
-}
-
-fn rgba_to_u32(r: u8, g: u8, b: u8, a: u8) -> u32 {
-    ((r as u32) << 24) | ((g as u32) << 16) | ((b as u32) << 8) | (a as u32)
-}
-
-fn vec4_to_u32(v: Vec4) -> u32 {
-    rgba_to_u32(
-        (v.x * 255.0) as u8,
-        (v.y * 255.0) as u8,
-        (v.z * 255.0) as u8,
-        (v.w * 255.0) as u8,
-    )
 }

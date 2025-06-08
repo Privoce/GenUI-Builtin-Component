@@ -114,7 +114,7 @@ impl BasicProp for ViewBasicProp {
             background_color: background_color.into(),
             border_color: border_color.into(),
             border_width: 0.0,
-            border_radius: Radius::new(6.0),
+            border_radius: Radius::new(4.0),
             shadow_color: shadow_color.into(),
             spread_radius: 0.0,
             blur_radius: 0.0,
@@ -274,7 +274,7 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
         let border_radius = get_from_itable(
             inline_table,
             BORDER_RADIUS,
-            || Ok(Radius::new(6.0)),
+            || Ok(Radius::new(4.0)),
             |v| v.try_into(),
         )?;
 
