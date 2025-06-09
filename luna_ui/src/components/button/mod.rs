@@ -9,10 +9,11 @@ use crate::{
     components::traits::{Component, Prop},
     error::Error,
     hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
-    prop::traits::{ToFloat, ToU32},
+    prop::{traits::ToFloat, ApplyMap},
     pure_after_apply, set_animation, set_scope_path,
     shader::draw_view::DrawView,
     themes::{Conf, Theme},
+    ComponentAnInit,
 };
 
 live_design! {
@@ -71,6 +72,8 @@ pub struct LButton {
     // --- others -------------------
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
+    #[rust]
+    apply_map: ApplyMap,
     // --- draw ----------------------
     // #[find]
     // #[redraw]
@@ -86,6 +89,8 @@ pub struct LButton {
     // --- init ----------------------
     #[rust]
     pub init: bool,
+    #[rust]
+    index: usize,
 }
 
 impl WidgetNode for LButton {
@@ -161,6 +166,7 @@ impl Widget for LButton {
         }
 
         self.set_animation(cx);
+        cx.global::<ComponentAnInit>().button = true;
         let area = self.area();
         let hit = event.hits(cx, area);
         self.handle_widget_event(cx, event, hit, area);
@@ -172,6 +178,38 @@ impl LiveHook for LButton {
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
+    }
+
+    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.index = index;
+        let live_props = [
+            live_id!(theme),
+            live_id!(background_color),
+            live_id!(border_color),
+            live_id!(border_radius),
+            live_id!(border_width),
+            live_id!(shadow_color),
+            live_id!(spread_radius),
+            live_id!(blur_radius),
+            live_id!(shadow_offset),
+            live_id!(background_visible),
+        ];
+        for prefix in [live_id!(basic), live_id!(hover), live_id!(pressed)] {
+            for path in live_props {
+                if let Some(i) = nodes.child_by_path(
+                    index,
+                    &[
+                        live_id!(prop).as_field(),
+                        prefix.as_field(),
+                        path.as_field(),
+                    ],
+                ) {
+                    let node = &nodes[i];
+                    self.apply_map
+                        .insert(node.id.to_string(), node.value.clone());
+                }
+            }
+        }
     }
 }
 
@@ -300,44 +338,61 @@ impl LButton {
     }
 
     pub fn set_animation(&mut self, cx: &mut Cx) {
+        let init_global = cx.global::<ComponentAnInit>().button;
+
         let live_ptr = match self.animator.live_ptr {
             Some(ptr) => ptr.file_id.0,
             None => return,
         };
-        let mut registry = cx.live_registry.borrow_mut();
 
+        let mut registry = cx.live_registry.borrow_mut();
         let live_file = match registry.live_files.get_mut(live_ptr as usize) {
             Some(lf) => lf,
             None => return,
         };
 
         let nodes = &mut live_file.expanded.nodes;
-        if !self.init {
+
+        if !self.init || !init_global || self.scope_path.is_none() {
             self.init = true;
             let basic_prop = self.prop.get(ButtonState::Basic);
             let hover_prop = self.prop.get(ButtonState::Hover);
             let pressed_prop = self.prop.get(ButtonState::Pressed);
 
-            let (basic_index, hover_index, pressed_index) = nodes.iter().enumerate().fold(
-                (None, None, None),
-                |(mut basic_index, mut hover_index, mut pressed_index), (index, node)| {
-                    if !matches!(node.value, LiveValue::Close) {
-                        match node.id {
-                            live_id!(off) => {
-                                basic_index = Some(index);
-                            }
-                            live_id!(on) => {
-                                hover_index = Some(index);
-                            }
-                            live_id!(pressed) => {
-                                pressed_index = Some(index);
-                            }
-                            _ => {}
-                        }
-                    }
-                    (basic_index, hover_index, pressed_index)
-                },
-            );
+            let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(off).as_instance(),
+                ],
+            ) {
+                basic_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(on).as_instance(),
+                ],
+            ) {
+                hover_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(pressed).as_instance(),
+                ],
+            ) {
+                pressed_index = Some(index);
+            }
+
             set_animation! {
                 nodes: draw_button = {
                     basic_index => {
@@ -378,24 +433,33 @@ impl LButton {
         } else {
             let state = self.current_state();
             let prop = self.prop.get(state);
-            let live_id = match state {
-                ButtonState::Basic => live_id!(off),
-                ButtonState::Hover => live_id!(on),
-                ButtonState::Pressed => live_id!(pressed),
-                ButtonState::Disabled => unreachable!("Disabled state should not be animated"),
+            let index = match state {
+                ButtonState::Basic => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(off).as_instance(),
+                    ],
+                ),
+                ButtonState::Hover => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(on).as_instance(),
+                    ],
+                ),
+                ButtonState::Pressed => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(pressed).as_instance(),
+                    ],
+                ),
+                ButtonState::Disabled => None,
             };
-            let index = nodes
-                .iter()
-                .enumerate()
-                .fold(None, |mut index_node, (index, node)| {
-                    if !matches!(node.value, LiveValue::Close) {
-                        if node.id == live_id {
-                            index_node = Some(index);
-                        }
-                    }
-                    index_node
-                });
-
             set_animation! {
                 nodes: draw_button = {
                     index => {
@@ -413,4 +477,11 @@ impl LButton {
             }
         }
     }
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct Indexs {
+    pub basic_index: Option<usize>,
+    pub hover_index: Option<usize>,
+    pub pressed_index: Option<usize>,
 }

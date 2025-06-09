@@ -70,6 +70,10 @@ impl Prop for LabelProp {
             LabelState::Disabled => &self.disabled,
         }
     }
+
+    fn len() -> usize {
+        2 * LabelBasicProp::len()
+    }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -102,6 +106,10 @@ impl Default for LabelBasicProp {
 impl BasicProp for LabelBasicProp {
     type State = LabelState;
     type Colors = Color;
+
+    fn len() -> usize {
+        7
+    }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
         let color = Self::state_colors(theme, state);

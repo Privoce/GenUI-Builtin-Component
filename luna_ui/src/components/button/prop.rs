@@ -38,6 +38,10 @@ impl Prop for ButtonProp {
 
     type Basic = ButtonBasicProp;
 
+    fn len() -> usize {
+        ButtonBasicProp::len() * 4 // basic, hover, pressed, disabled
+    }
+
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
             ButtonState::Basic => &self.basic,
@@ -174,6 +178,10 @@ impl BasicProp for ButtonBasicProp {
     type State = ButtonState;
 
     type Colors = (Color, Color, Color);
+
+    fn len() -> usize {
+        18
+    }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
         let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);

@@ -50,6 +50,10 @@ impl Prop for ViewProp {
             ViewState::Pressed => &self.pressed,
         }
     }
+
+    fn len() -> usize {
+        ViewBasicProp::len() * 3
+    }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -105,6 +109,10 @@ impl BasicProp for ViewBasicProp {
     type State = ViewState;
 
     type Colors = (Color, Color, Color);
+
+    fn len() -> usize {
+        21
+    }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
         let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);
