@@ -7,6 +7,19 @@ live_design! {
     use link::widgets::*;
     use crate::an::*;
 
+    Post = <View> {
+        width: Fill, height: Fit,
+        padding: { top: 10., bottom: 10.}
+
+        body = <RoundedView> {
+            width: Fill, height: Fit
+            content = <View> {
+                width: Fill, height: Fit
+                text = <P> { text: "" }
+            }
+        }
+    }
+
     App = {{App}} {
         ui: <Root>{
             main_window = <Window>{
@@ -42,50 +55,64 @@ live_design! {
                     // <AButton>{
                     //     text: "asdsdasd"
                     // }
-                    <LView> {
-                        prop: {
-                            basic: {
-                                background_visible: false,
-                                theme: Primary,
-                                height: 200.0,
-                                width: 200.0,
-                                shadow_offset: vec2(0.0, 0.0),
-                                align: {
-                                    x: 0.5,
-                                    y: 0.5
-                                },
-                            }
-                        }
-                        <LLabel>{
-                            text: "Hello World",
-                            prop: {
-                                basic: {
-                                    color: #ff0,
-                                    font_size: 24.0,
+                    // <LView> {
+                    //     // prop: {
+                    //     //     basic: {
+                    //     //         background_visible: true,
+                    //     //         background_color: #000,
+                    //     //         theme: Primary,
+                    //     //         height: 200.0,
+                    //     //         width: 200.0,
+                    //     //         shadow_offset: vec2(0.0, 0.0),
+                    //     //         align: {
+                    //     //             x: 0.5,
+                    //     //             y: 0.5
+                    //     //         },
+                    //     //     }
+                    //     // }
+                    //     <LLabel>{
+                    //         text: "Hello World",
+                    //         prop: {
+                    //             basic: {
+                    //                 color: #ff0,
+                    //                 font_size: 24.0,
 
-                                }
-                            }
-                        }
-                        <LButton>{
+                    //             }
+                    //         }
+                    //     }
+
+
+                    // }
+                    <LButton>{
                             prop: {
                                 basic: {
+                                    theme: Info,
+                                }
+                                hover: {
+                                    theme: Success,
+                                },
+                                pressed: {
                                     theme: Error,
                                 }
                             }
-                        }
-                        <LButton>{
-                            prop: {
-                                basic: {
-                                    border_width: 2.0,
-                                    border_color: #ff0,
-                                }
-                                hover: {
-                                    border_width: 4.0,
-                                }
+                            slot: <Label>{
+                                text: "Click me !"
                             }
                         }
-                        
-                    }
+                        // <LButton>{
+                        //     prop: {
+                        //         basic: {
+                        //             border_width: 2.0,
+                        //             border_color: #ff0,
+                        //         }
+                        //         hover: {
+                        //             border_width: 4.0,
+                        //         }
+                        //     }
+                        //     slot: <Label>{
+                        //         text: "Click me !"
+                        //     }
+                        // }
                 }
             }
         }

@@ -22,6 +22,22 @@ pub enum Theme {
     Info,
 }
 
+impl From<&LiveValue> for Theme {
+    fn from(value: &LiveValue) -> Self {
+        (value, Theme::default()).into()
+    }
+}
+
+impl From<(&LiveValue, Theme)> for Theme {
+    fn from((value, default): (&LiveValue, Theme)) -> Self {
+        if let LiveValue::BareEnum(theme) = value {
+            theme.to_string().parse().unwrap_or(default)
+        } else {
+            default
+        }
+    }
+}
+
 impl Theme {
     pub fn colors(&self) -> [Color; 10] {
         match self {

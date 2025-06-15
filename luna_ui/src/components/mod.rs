@@ -4,6 +4,7 @@ pub mod label;
 pub mod view;
 pub mod button;
 pub mod traits;
+pub mod lifecycle;
 
 live_design! {
     link luna_ui;

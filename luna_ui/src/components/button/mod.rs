@@ -1,15 +1,21 @@
 mod event;
 mod prop;
+use std::collections::HashMap;
+
 pub use event::*;
 use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
     active_event, animation_open_then_redraw,
-    components::traits::{Component, Prop},
+    components::{lifecycle::LifeCycle, traits::{BasicProp, Component, Prop}},
     error::Error,
     hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
-    prop::{traits::ToFloat, ApplyMap},
+    prop::{
+        manuel::{BACKGROUND_COLOR, BASIC, BORDER_COLOR, HOVER, PRESSED, SHADOW_COLOR, THEME},
+        traits::ToFloat,
+        ApplyStateMap,
+    },
     pure_after_apply, set_animation, set_scope_path,
     shader::draw_view::DrawView,
     themes::{Conf, Theme},
@@ -73,10 +79,8 @@ pub struct LButton {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    apply_map: ApplyMap,
+    apply_state_map: ApplyStateMap<ButtonState>,
     // --- draw ----------------------
-    // #[find]
-    // #[redraw]
     #[live]
     pub slot: WidgetRef,
     #[live]
@@ -88,7 +92,7 @@ pub struct LButton {
     pub animator: Animator,
     // --- init ----------------------
     #[rust]
-    pub init: bool,
+    pub lifecycle: LifeCycle,
     #[rust]
     index: usize,
 }
@@ -181,6 +185,10 @@ impl LiveHook for LButton {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        if !self.lifecycle.is_created() {
+            return;
+        }
+
         self.index = index;
         let live_props = [
             live_id!(theme),
@@ -195,6 +203,7 @@ impl LiveHook for LButton {
             live_id!(background_visible),
         ];
         for prefix in [live_id!(basic), live_id!(hover), live_id!(pressed)] {
+            let mut applys = HashMap::new();
             for path in live_props {
                 if let Some(i) = nodes.child_by_path(
                     index,
@@ -205,11 +214,23 @@ impl LiveHook for LButton {
                     ],
                 ) {
                     let node = &nodes[i];
-                    self.apply_map
-                        .insert(node.id.to_string(), node.value.clone());
+                    applys.insert(node.id.to_string(), node.value.clone());
                 }
             }
+            match prefix.to_string().as_str() {
+                BASIC => {
+                    self.apply_state_map.insert(ButtonState::Basic, applys);
+                }
+                HOVER => {
+                    self.apply_state_map.insert(ButtonState::Hover, applys);
+                }
+                PRESSED => {
+                    self.apply_state_map.insert(ButtonState::Pressed, applys);
+                }
+                _ => {}
+            }
         }
+        
     }
 }
 
@@ -225,11 +246,32 @@ impl Component for LButton {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
-        self.draw_button.background_color = self.prop.get(state).background_color;
-        self.draw_button.border_color = self.prop.get(state).border_color;
+
+        if let Some(props) = self.apply_state_map.get(&state) {
+            let theme = self.prop.get(state).theme;
+
+            let theme = props
+                .get(THEME)
+                .map_or_else(|| theme, |theme_value| (theme_value, theme).into());
+
+            let (background_color, border_color, shadow_color) =
+                ButtonBasicProp::state_colors(theme, state);
+
+            self.draw_button.background_color = props
+                .get(BACKGROUND_COLOR)
+                .map_or_else(|| background_color.into(), |color| color.as_vec4().unwrap());
+
+            self.draw_button.border_color = props
+                .get(BORDER_COLOR)
+                .map_or_else(|| border_color.into(), |color| color.as_vec4().unwrap());
+
+            self.draw_button.shadow_color = props
+                .get(SHADOW_COLOR)
+                .map_or_else(|| shadow_color.into(), |color| color.as_vec4().unwrap());
+        }
+
         self.draw_button.border_radius = self.prop.get(state).border_radius.into();
         self.draw_button.border_width = self.prop.get(state).border_width;
-        self.draw_button.shadow_color = self.prop.get(state).shadow_color.into();
         self.draw_button.spread_radius = self.prop.get(state).spread_radius;
         self.draw_button.blur_radius = self.prop.get(state).blur_radius;
         self.draw_button.shadow_offset = self.prop.get(state).shadow_offset;
@@ -329,6 +371,31 @@ impl Component for LButton {
 }
 
 impl LButton {
+    pub fn sync_theme(&mut self) {
+        let state = self.current_state();
+
+        if let Some(props) = self.apply_state_map.get(&state) {
+            let theme = self.prop.get(state).theme;
+            let theme = props
+                .get(THEME)
+                .map_or_else(|| theme, |theme_value| (theme_value, theme).into());
+
+            let (background_color, border_color, shadow_color) =
+                ButtonBasicProp::state_colors(theme, state);
+
+            self.prop.set.background_color = props
+                .get(BACKGROUND_COLOR)
+                .map_or_else(|| background_color.into(), |color| color.as_vec4().unwrap());
+
+            self.draw_button.border_color = props
+                .get(BORDER_COLOR)
+                .map_or_else(|| border_color.into(), |color| color.as_vec4().unwrap());
+
+            self.draw_button.shadow_color = props
+                .get(SHADOW_COLOR)
+                .map_or_else(|| shadow_color.into(), |color| color.as_vec4().unwrap());
+        }
+    }
     active_event! {
         active_hover_in: ButtonEvent::HoverIn |meta: FingerHoverEvent| => ButtonHoverIn { meta },
         active_hover_out: ButtonEvent::HoverOut |meta: FingerHoverEvent| => ButtonHoverOut { meta },
@@ -353,8 +420,8 @@ impl LButton {
 
         let nodes = &mut live_file.expanded.nodes;
 
-        if !self.init || !init_global || self.scope_path.is_none() {
-            self.init = true;
+        if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
+            self.lifecycle.next();
             let basic_prop = self.prop.get(ButtonState::Basic);
             let hover_prop = self.prop.get(ButtonState::Hover);
             let pressed_prop = self.prop.get(ButtonState::Pressed);
@@ -431,8 +498,13 @@ impl LButton {
                 }
             }
         } else {
+            self.sync_theme();
             let state = self.current_state();
             let prop = self.prop.get(state);
+            // if let ButtonState::Pressed = state {
+            //     dbg!(prop);
+            // }
+            
             let index = match state {
                 ButtonState::Basic => nodes.child_by_path(
                     self.index,
@@ -477,11 +549,4 @@ impl LButton {
             }
         }
     }
-}
-
-#[derive(Default, Debug, Clone)]
-pub struct Indexs {
-    pub basic_index: Option<usize>,
-    pub hover_index: Option<usize>,
-    pub pressed_index: Option<usize>,
 }

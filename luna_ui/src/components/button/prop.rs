@@ -23,13 +23,13 @@ use crate::{
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct ButtonProp {
-    #[live]
+    #[live(ButtonBasicProp::default())]
     pub basic: ButtonBasicProp,
-    #[live]
+    #[live(ButtonBasicProp::from_state(Theme::default(), ButtonState::Hover))]
     pub hover: ButtonBasicProp,
-    #[live]
+    #[live(ButtonBasicProp::from_state(Theme::default(), ButtonState::Pressed))]
     pub pressed: ButtonBasicProp,
-    #[live]
+    #[live(ButtonBasicProp::from_state(Theme::default(), ButtonState::Disabled))]
     pub disabled: ButtonBasicProp,
 }
 
@@ -131,40 +131,40 @@ pub struct ButtonBasicProp {
     // --- background ----------------
     #[live]
     pub background_color: Vec4,
-    #[live]
+    #[live(true)]
     pub background_visible: bool,
     // --- shadow -------------------
     #[live]
     pub shadow_color: Vec4,
-    #[live]
+    #[live(0.0)]
     pub spread_radius: f32,
-    #[live]
+    #[live(0.0)]
     pub blur_radius: f32,
-    #[live]
+    #[live(vec2(0.0, 0.0))]
     pub shadow_offset: Vec2,
     // --- border -------------------
-    #[live]
+    #[live(0.0)]
     pub border_width: f32,
     #[live]
     pub border_color: Vec4,
-    #[live]
+    #[live(Radius::new(4.0))]
     pub border_radius: Radius,
     // --- cursor -------------------
-    #[live]
+    #[live(MouseCursor::Hand)]
     pub cursor: MouseCursor,
-    #[live]
+    #[live(Margin::from_f64(6.0))]
     pub margin: Margin,
-    #[live]
+    #[live(Padding::from_xy(10.0, 16.0))]
     pub padding: Padding,
-    #[live]
+    #[live(Flow::Right)]
     pub flow: Flow,
-    #[live]
+    #[live(Align::from_f64(0.5))]
     pub align: Align,
-    #[live]
+     #[live(Size::Fit)]
     pub height: Size,
-    #[live]
+    #[live(Size::Fit)]
     pub width: Size,
-    #[live]
+    #[live(6.0)]
     pub spacing: f64,
 }
 
@@ -362,7 +362,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, Hash, PartialEq, Eq)]
 pub enum ButtonState {
     #[default]
     Basic,
