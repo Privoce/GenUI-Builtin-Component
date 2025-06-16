@@ -8,7 +8,10 @@ pub use prop::*;
 
 use crate::{
     active_event, animation_open_then_redraw,
-    components::{lifecycle::LifeCycle, traits::{BasicProp, Component, Prop}},
+    components::{
+        lifecycle::LifeCycle,
+        traits::{BasicProp, Component, Prop},
+    },
     error::Error,
     hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
     prop::{
@@ -230,7 +233,6 @@ impl LiveHook for LButton {
                 _ => {}
             }
         }
-        
     }
 }
 
@@ -383,17 +385,17 @@ impl LButton {
             let (background_color, border_color, shadow_color) =
                 ButtonBasicProp::state_colors(theme, state);
 
-            self.prop.set.background_color = props
-                .get(BACKGROUND_COLOR)
-                .map_or_else(|| background_color.into(), |color| color.as_vec4().unwrap());
+            if props.get(BACKGROUND_COLOR).is_none() {
+                self.prop.get_mut(state).background_color = background_color.into();
+            }
+           
+            if props.get(BORDER_COLOR).is_none() {
+                self.prop.get_mut(state).border_color = border_color.into();
+            }
 
-            self.draw_button.border_color = props
-                .get(BORDER_COLOR)
-                .map_or_else(|| border_color.into(), |color| color.as_vec4().unwrap());
-
-            self.draw_button.shadow_color = props
-                .get(SHADOW_COLOR)
-                .map_or_else(|| shadow_color.into(), |color| color.as_vec4().unwrap());
+            if props.get(SHADOW_COLOR).is_none() {
+                self.prop.get_mut(state).shadow_color = shadow_color.into();
+            }
         }
     }
     active_event! {
@@ -501,10 +503,6 @@ impl LButton {
             self.sync_theme();
             let state = self.current_state();
             let prop = self.prop.get(state);
-            // if let ButtonState::Pressed = state {
-            //     dbg!(prop);
-            // }
-            
             let index = match state {
                 ButtonState::Basic => nodes.child_by_path(
                     self.index,

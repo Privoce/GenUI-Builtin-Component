@@ -50,6 +50,15 @@ impl Prop for ButtonProp {
             ButtonState::Disabled => &self.disabled,
         }
     }
+
+    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
+        match state {
+            ButtonState::Basic => &mut self.basic,
+            ButtonState::Hover => &mut self.hover,
+            ButtonState::Pressed => &mut self.pressed,
+            ButtonState::Disabled => &mut self.disabled,
+        }
+    }
 }
 
 impl Default for ButtonProp {

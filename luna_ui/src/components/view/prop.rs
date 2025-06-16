@@ -51,6 +51,14 @@ impl Prop for ViewProp {
         }
     }
 
+    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
+        match state {
+            ViewState::None => &mut self.basic,
+            ViewState::Hover => &mut self.hover,
+            ViewState::Pressed => &mut self.pressed,
+        }
+    }
+
     fn len() -> usize {
         ViewBasicProp::len() * 3
     }

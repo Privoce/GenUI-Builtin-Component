@@ -74,6 +74,13 @@ impl Prop for LabelProp {
     fn len() -> usize {
         2 * LabelBasicProp::len()
     }
+
+    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
+        match state {
+            LabelState::None => &mut self.basic,
+            LabelState::Disabled => &mut self.disabled,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]

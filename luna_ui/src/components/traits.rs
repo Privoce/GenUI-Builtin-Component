@@ -59,6 +59,7 @@ pub trait Prop: Default {
     type State;
     type Basic;
     fn get(&self, state: Self::State) -> &Self::Basic;
+    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic;
     fn len() -> usize;
 }
 

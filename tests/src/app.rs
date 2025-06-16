@@ -87,9 +87,13 @@ live_design! {
                             prop: {
                                 basic: {
                                     theme: Info,
+                                    border_width: 2.0,
+                                    border_color: #ff0,
                                 }
                                 hover: {
                                     theme: Success,
+                                    border_color: #0f0,
+                                    border_width: 4.0,
                                 },
                                 pressed: {
                                     theme: Error,
