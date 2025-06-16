@@ -81,6 +81,10 @@ impl Prop for LabelProp {
             LabelState::Disabled => &mut self.disabled,
         }
     }
+
+    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
+        ()
+    }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -113,6 +117,10 @@ impl Default for LabelBasicProp {
 impl BasicProp for LabelBasicProp {
     type State = LabelState;
     type Colors = Color;
+
+    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> () {
+        ()
+    }
 
     fn len() -> usize {
         7

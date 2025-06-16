@@ -115,3 +115,14 @@ impl From<Radius> for Vec4 {
         }
     }
 }
+
+impl From<&Vec4> for Radius {
+    fn from(value: &Vec4) -> Self {
+        Radius {
+            top: value.x,
+            right: value.y,
+            bottom: value.z,
+            left: value.w,
+        }
+    }
+}

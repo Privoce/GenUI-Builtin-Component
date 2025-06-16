@@ -62,6 +62,10 @@ impl Prop for ViewProp {
     fn len() -> usize {
         ViewBasicProp::len() * 3
     }
+
+    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
+        ()
+    }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -120,6 +124,10 @@ impl BasicProp for ViewBasicProp {
 
     fn len() -> usize {
         21
+    }
+
+    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> () {
+        ()
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {

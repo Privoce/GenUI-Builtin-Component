@@ -17,7 +17,7 @@ use crate::{
     prop::{
         manuel::{BACKGROUND_COLOR, BASIC, BORDER_COLOR, HOVER, PRESSED, SHADOW_COLOR, THEME},
         traits::ToFloat,
-        ApplyStateMap,
+        ApplyStateMap, PropMapImpl,
     },
     pure_after_apply, set_animation, set_scope_path,
     shader::draw_view::DrawView,
@@ -98,6 +98,11 @@ pub struct LButton {
     pub lifecycle: LifeCycle,
     #[rust]
     index: usize,
+    /// sync other state props (except related to theme) from `basic` state]
+    /// means: if you set basic prop that `border_radius: 10.0`, then other state like `hover` or `pressed`
+    /// will have the same `border_radius: 10.0` if you set this to true. (default is true)
+    #[live(true)]
+    pub sync: bool,
 }
 
 impl WidgetNode for LButton {
@@ -181,7 +186,11 @@ impl Widget for LButton {
 }
 
 impl LiveHook for LButton {
-    pure_after_apply!();
+    // pure_after_apply!();
+    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
+        self.sync_prop_if();
+        self.render_after_apply(cx);
+    }
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
@@ -251,10 +260,7 @@ impl Component for LButton {
 
         if let Some(props) = self.apply_state_map.get(&state) {
             let theme = self.prop.get(state).theme;
-
-            let theme = props
-                .get(THEME)
-                .map_or_else(|| theme, |theme_value| (theme_value, theme).into());
+            let theme = props.get_theme_then(theme);
 
             let (background_color, border_color, shadow_color) =
                 ButtonBasicProp::state_colors(theme, state);
@@ -373,6 +379,14 @@ impl Component for LButton {
 }
 
 impl LButton {
+    // sync props if not set in DSL, depend on `self.sync` is true
+    pub fn sync_prop_if(&mut self) {
+        if !self.sync {
+            return;
+        }
+        // sync state if is not Basic
+        self.prop.sync(&self.apply_state_map);
+    }
     pub fn sync_theme(&mut self) {
         let state = self.current_state();
 

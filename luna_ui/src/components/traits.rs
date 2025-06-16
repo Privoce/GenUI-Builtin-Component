@@ -1,6 +1,6 @@
-use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, Widget, WidgetNode};
+use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveValue, Widget, WidgetNode};
 
-use crate::themes::Theme;
+use crate::{prop::{ApplyStateMap, PropMap}, themes::Theme};
 
 pub trait Component: Widget + WidgetNode
 where
@@ -60,7 +60,26 @@ pub trait Prop: Default {
     type Basic;
     fn get(&self, state: Self::State) -> &Self::Basic;
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic;
+    /// ## get length of the properties
+    /// ### example:
+    /// ```rust
+    /// ABasicProp{
+    ///     background_color: Color,
+    ///     border_color: Color,
+    ///     border_width: f32,
+    /// }
+    /// AProp {
+    ///     basic: ABasicProp,
+    ///     hover: ABasicProp,
+    /// }
+    /// ```
+    /// **`len()` will return 2 * 3**
     fn len() -> usize;
+    /// ## sync from Basic State what apply from map if not set in DSL
+    /// this function should be called when you want to sync properties from Basic State
+    /// in crate, this function is used in Component `sync` function, if Component live prop `sync` is true.
+    /// this function can let other state properties sync from Basic State.
+    fn sync(&mut self, map: &ApplyStateMap<Self::State>) -> ();
 }
 
 /// # BasicProp
@@ -70,7 +89,10 @@ pub trait BasicProp: Default {
     type Colors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self;
+    /// ## return state colors 
+    /// which depend on theme and Component Self
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors;
     /// ## get length of the basic properties
     fn len() -> usize;
+    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> ();
 }

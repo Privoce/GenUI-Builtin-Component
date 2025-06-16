@@ -89,6 +89,7 @@ live_design! {
                                     theme: Info,
                                     border_width: 2.0,
                                     border_color: #ff0,
+                                    background_color: #22CCEE
                                 }
                                 hover: {
                                     theme: Success,
