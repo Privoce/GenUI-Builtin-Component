@@ -1,10 +1,12 @@
 mod align;
 mod bool;
 mod cursor;
+mod flow;
 mod margin;
 mod padding;
 mod vec;
-mod flow;
+mod number;
+mod size;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 
@@ -46,5 +48,13 @@ pub trait ToCursor {
 }
 
 pub trait FromLiveValue {
-    fn from_live_value(v: &LiveValue) -> Self;
-} 
+    fn from_live_value(v: &LiveValue) -> Option<Self>
+    where
+        Self: Sized;
+}
+
+pub trait FromLiveColor {
+    fn from_live_color(v: &LiveValue) -> Option<Vec4>
+    where
+        Self: Sized;
+}

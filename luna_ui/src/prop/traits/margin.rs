@@ -1,3 +1,5 @@
+use crate::prop::traits::FromLiveValue;
+
 use super::NewFrom;
 use makepad_widgets::Margin;
 
@@ -26,6 +28,19 @@ impl NewFrom for Margin {
             right: y,
             bottom: z,
             left: w,
+        }
+    }
+}
+
+impl FromLiveValue for Margin {
+    fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if let makepad_widgets::LiveValue::Vec4(vec4) = v {
+            Some(Margin::from_vec4(vec4))
+        } else {
+            None
         }
     }
 }

@@ -7,7 +7,7 @@ pub use color::*;
 use makepad_widgets::*;
 use toml_edit::{Item, Value};
 
-use crate::error::Error;
+use crate::{error::Error, prop::traits::FromLiveValue};
 
 #[derive(Copy, Clone, Debug, Live, LiveHook, Default)]
 #[live_ignore]
@@ -20,6 +20,24 @@ pub enum Theme {
     Warning,
     Success,
     Info,
+}
+
+impl FromLiveValue for Theme {
+    fn from_live_value(value: &LiveValue) -> Option<Self> {
+        if let LiveValue::BareEnum(theme) = value {
+            match theme.to_string().as_str() {
+                "Dark" => Some(Theme::Dark),
+                "Primary" => Some(Theme::Primary),
+                "Error" => Some(Theme::Error),
+                "Warning" => Some(Theme::Warning),
+                "Success" => Some(Theme::Success),
+                "Info" => Some(Theme::Info),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
 }
 
 impl From<&LiveValue> for Theme {

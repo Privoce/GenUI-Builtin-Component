@@ -118,7 +118,11 @@ impl BasicProp for LabelBasicProp {
     type State = LabelState;
     type Colors = Color;
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
+        ()
+    }
+
+    fn sync(&mut self,  state: Self::State) -> () {
         ()
     }
 

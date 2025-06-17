@@ -126,7 +126,11 @@ impl BasicProp for ViewBasicProp {
         21
     }
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
+        ()
+    }
+
+    fn sync(&mut self, state: Self::State) -> () {
         ()
     }
 

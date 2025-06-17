@@ -1,4 +1,4 @@
-use crate::prop::traits::ToU32;
+use crate::prop::traits::{FromLiveColor, FromLiveValue, ToU32};
 
 use super::{ToBool, ToFloat, ToVec};
 use makepad_widgets::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
@@ -52,5 +52,41 @@ impl ToU32 for Vec4 {
             | (((self.y * 255.0) as u32) << 16)
             | (((self.z * 255.0) as u32) << 8)
             | ((self.w * 255.0) as u32)
+    }
+}
+
+impl FromLiveValue for Vec4 {
+    fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
+    where
+        Self: Sized {
+        if let makepad_widgets::LiveValue::Vec4(vec4) = v {
+            Some(*vec4)
+        } else {
+            None
+        }
+    }
+}
+
+impl FromLiveColor for Vec4 {
+    fn from_live_color(v: &makepad_widgets::LiveValue) -> Option<Vec4>
+    where
+        Self: Sized {
+        if let makepad_widgets::LiveValue::Color(color) = v {
+            Some(Vec4::from_u32(*color))
+        } else {
+            None
+        }
+    }
+}
+
+impl FromLiveValue for Vec2 {
+    fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
+    where
+        Self: Sized {
+        if let makepad_widgets::LiveValue::Vec2(vec2) = v {
+            Some(*vec2)
+        } else {
+            None
+        }
     }
 }

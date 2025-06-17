@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use makepad_widgets::*;
 use toml_edit::Item;
 
@@ -15,8 +13,8 @@ use crate::{
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
             PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
-        traits::{FromLiveValue, NewFrom, ToCursor},
-        PropMap, Radius,
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        PropMapImpl, Radius,
     },
     themes::{Color, Theme, TomlValueTo},
     utils::{get_from_itable, get_from_table},
@@ -64,35 +62,39 @@ impl Prop for ButtonProp {
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
         if let Some(basic_props) = map.get(&ButtonState::Basic) {
-            // hover
-            let retain_hover = map.get(&ButtonState::Hover).map_or_else(
-                || basic_props.clone(),
-                |hover_props| {
-                    // 这里说明hover_props是有值的，需要做差运算
-                    basic_props
-                        .clone()
-                        .into_iter()
-                        .filter(|(k, _)| !hover_props.contains_key(k))
-                        .collect()
-                },
-            );
-            for (k, v) in retain_hover {
-                self.hover.set_from_str(&k, &v);
+            // 在set_from_str前需要处理同步theme颜色，其他状态也一样
+            // 步骤是：作差运算 -> remove theme -> set_from_str
+            let mut props = basic_props.clone();
+            // [basic] --------------------------------------------------------------------------------
+            // 处理theme
+            if let Some(value) = props.remove_theme() {
+                self.basic.set_from_str(THEME, &value, ButtonState::Basic);
             }
-            // pressed
-            let retain_pressed = map.get(&ButtonState::Pressed).map_or_else(
-                || basic_props.clone(),
-                |pressed_props| {
-                    // 这里说明pressed_props是有值的，需要做差运算
-                    basic_props
-                        .clone()
-                        .into_iter()
-                        .filter(|(k, _)| !pressed_props.contains_key(k))
-                        .collect()
-                },
-            );
-            for (k, v) in retain_pressed {
-                self.pressed.set_from_str(&k, &v);
+            // 处理其他
+            for (k, v) in props {
+                self.basic.set_from_str(&k, &v, ButtonState::Basic);
+            }
+            // [other states] -----------------------------------------------------------------------
+            let states = [
+                (ButtonState::Hover, &mut self.hover),
+                (ButtonState::Pressed, &mut self.pressed),
+                (ButtonState::Disabled, &mut self.disabled),
+            ];
+
+            for (state, props) in states {
+                // diff
+                let mut diff_props = map.get(&state).map_or_else(
+                    || basic_props.clone(),
+                    |apply_props| apply_props.diff(basic_props),
+                );
+                // remove theme
+                if let Some(value) = diff_props.remove_theme() {
+                    props.set_from_str(THEME, &value, state);
+                }
+                // set from str
+                for (k, v) in diff_props {
+                    props.set_from_str(&k, &v, state);
+                }
             }
         }
     }
@@ -229,98 +231,78 @@ impl BasicProp for ButtonBasicProp {
         18
     }
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
             THEME => {
-                if let LiveValue::BareEnum(e) = value {
-                    self.theme = e.to_string().parse().unwrap_or_default();
-                }
-            },
+                self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
+                self.sync(state);
+            }
             BACKGROUND_COLOR => {
-                if let LiveValue::Color(color) = value {
-                    self.background_color = Vec4::from_u32(*color);
-                }
-            },
+                self.background_color =
+                    Vec4::from_live_value(value).unwrap_or(Theme::Dark.color(400).into());
+            }
             BACKGROUND_VISIBLE => {
-                if let LiveValue::Bool(visible) = value {
-                    self.background_visible = *visible;
-                }
-            },
+                self.background_visible = bool::from_live_value(value).unwrap_or(true);
+            }
             SHADOW_COLOR => {
-                if let LiveValue::Color(color) = value {
-                    self.shadow_color = Vec4::from_u32(*color);
-                }
-            },
+                self.shadow_color =
+                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(300).into());
+            }
             SPREAD_RADIUS => {
-                if let LiveValue::Float64(radius) = value {
-                    self.spread_radius = *radius as f32;
-                }
-            },
+                self.spread_radius = f32::from_live_value(value).unwrap_or(0.0);
+            }
             BLUR_RADIUS => {
-                if let LiveValue::Float64(radius) = value {
-                    self.blur_radius = *radius as f32;
-                }
-            },
+                self.blur_radius = f32::from_live_value(value).unwrap_or(0.0);
+            }
             SHADOW_OFFSET => {
-                if let LiveValue::Vec2(vec) = value {
-                    self.shadow_offset = *vec;
-                }
-            },
+                self.shadow_offset = Vec2::from_live_value(value).unwrap_or(vec2(0.0, 0.0));
+            }
             BORDER_WIDTH => {
-                if let LiveValue::Float64(width) = value {
-                    self.border_width = *width as f32;
-                }
-            },
+                self.border_width = f32::from_live_value(value).unwrap_or(0.0);
+            }
             BORDER_COLOR => {
-                if let LiveValue::Color(color) = value {
-                    self.border_color = Vec4::from_u32(*color);
-                }
-            },
+                self.border_color =
+                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(400).into());
+            }
             BORDER_RADIUS => {
-                if let LiveValue::Vec4(vec4) = value {
-                    self.border_radius = Radius::from(vec4);
-                }
-            },
+                self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(4.0));
+            }
             CURSOR => {
-                if let LiveValue::BareEnum(cursor) = value {
-                    self.cursor = MouseCursor::from_str(&cursor.to_string());
-                }
-            },
+                self.cursor = MouseCursor::from_live_value(value).unwrap_or(MouseCursor::Hand);
+            }
             MARGIN => {
-                if let LiveValue::Vec4(vec4) = value {
-                    self.margin = Margin::from_vec4(vec4);
-                }
-            },
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+            }
             PADDING => {
-                if let LiveValue::Vec4(vec4) = value {
-                    self.padding = Padding::from_vec4(vec4);
-                }
-            },
+                self.padding =
+                    Padding::from_live_value(value).unwrap_or(Padding::from_xy(10.0, 16.0));
+            }
             FLOW => {
-                self.flow = Flow::from_live_value(value);
-            },
+                self.flow = Flow::from_live_value(value).unwrap_or(Flow::Right);
+            }
             ALIGN => {
                 if let LiveValue::Float64(align) = value {
                     self.align = Align::from_f64(*align);
                 }
-            },
+            }
             HEIGHT => {
-                if let LiveValue::BareEnum(size) = value {
-                    self.height = size.to_string().parse().unwrap_or(Size::Fit);
-                }
-            },
+                self.height = Size::from_live_value(value).unwrap_or(Size::Fit);
+            }
             WIDTH => {
-                if let LiveValue::BareEnum(size) = value {
-                    self.width = size.to_string().parse().unwrap_or(Size::Fit);
-                }
-            },
+                self.width = Size::from_live_value(value).unwrap_or(Size::Fit);
+            }
             SPACING => {
-                if let LiveValue::Float64(spacing) = value {
-                    self.spacing = *spacing;
-                }
-            },
+                self.spacing = f64::from_live_value(value).unwrap_or(6.0);
+            }
             _ => {}
         }
+    }
+
+    fn sync(&mut self, state: Self::State) -> () {
+        let (background_color, border_color, shadow_color) = Self::state_colors(self.theme, state);
+        self.background_color = background_color.into();
+        self.border_color = border_color.into();
+        self.shadow_color = shadow_color.into();
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {

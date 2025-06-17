@@ -187,8 +187,8 @@ impl Widget for LButton {
 
 impl LiveHook for LButton {
     // pure_after_apply!();
-    fn after_apply_from_doc(&mut self, cx:&mut Cx) {
-        self.sync_prop_if();
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+        self.sync();
         self.render_after_apply(cx);
     }
 
@@ -374,53 +374,16 @@ impl Component for LButton {
         self.set_animation(cx);
     }
 
-    play_animation!();
-    set_scope_path!();
-}
-
-impl LButton {
     // sync props if not set in DSL, depend on `self.sync` is true
-    pub fn sync_prop_if(&mut self) {
+    fn sync(&mut self) {
         if !self.sync {
             return;
         }
         // sync state if is not Basic
         self.prop.sync(&self.apply_state_map);
     }
-    pub fn sync_theme(&mut self) {
-        let state = self.current_state();
 
-        if let Some(props) = self.apply_state_map.get(&state) {
-            let theme = self.prop.get(state).theme;
-            let theme = props
-                .get(THEME)
-                .map_or_else(|| theme, |theme_value| (theme_value, theme).into());
-
-            let (background_color, border_color, shadow_color) =
-                ButtonBasicProp::state_colors(theme, state);
-
-            if props.get(BACKGROUND_COLOR).is_none() {
-                self.prop.get_mut(state).background_color = background_color.into();
-            }
-           
-            if props.get(BORDER_COLOR).is_none() {
-                self.prop.get_mut(state).border_color = border_color.into();
-            }
-
-            if props.get(SHADOW_COLOR).is_none() {
-                self.prop.get_mut(state).shadow_color = shadow_color.into();
-            }
-        }
-    }
-    active_event! {
-        active_hover_in: ButtonEvent::HoverIn |meta: FingerHoverEvent| => ButtonHoverIn { meta },
-        active_hover_out: ButtonEvent::HoverOut |meta: FingerHoverEvent| => ButtonHoverOut { meta },
-        active_finger_up: ButtonEvent::FingerUp |meta: FingerUpEvent| => ButtonFingerUp { meta },
-        active_finger_down: ButtonEvent::FingerDown |meta: FingerDownEvent| => ButtonFingerDown { meta },
-        active_clicked: ButtonEvent::Clicked |meta: FingerUpEvent| => ButtonClicked { meta }
-    }
-
-    pub fn set_animation(&mut self, cx: &mut Cx) {
+    fn set_animation(&mut self, cx: &mut Cx) -> () {
         let init_global = cx.global::<ComponentAnInit>().button;
 
         let live_ptr = match self.animator.live_ptr {
@@ -514,7 +477,6 @@ impl LButton {
                 }
             }
         } else {
-            self.sync_theme();
             let state = self.current_state();
             let prop = self.prop.get(state);
             let index = match state {
@@ -560,5 +522,18 @@ impl LButton {
                 }
             }
         }
+    }
+
+    play_animation!();
+    set_scope_path!();
+}
+
+impl LButton {
+    active_event! {
+        active_hover_in: ButtonEvent::HoverIn |meta: FingerHoverEvent| => ButtonHoverIn { meta },
+        active_hover_out: ButtonEvent::HoverOut |meta: FingerHoverEvent| => ButtonHoverOut { meta },
+        active_finger_up: ButtonEvent::FingerUp |meta: FingerUpEvent| => ButtonFingerUp { meta },
+        active_finger_down: ButtonEvent::FingerDown |meta: FingerDownEvent| => ButtonFingerDown { meta },
+        active_clicked: ButtonEvent::Clicked |meta: FingerUpEvent| => ButtonClicked { meta }
     }
 }

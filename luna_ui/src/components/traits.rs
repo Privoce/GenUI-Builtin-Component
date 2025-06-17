@@ -1,6 +1,11 @@
-use makepad_widgets::{error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveValue, Widget, WidgetNode};
+use makepad_widgets::{
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveValue, Widget, WidgetNode,
+};
 
-use crate::{prop::{ApplyStateMap, PropMap}, themes::Theme};
+use crate::{
+    prop::{ApplyStateMap, PropMap},
+    themes::Theme,
+};
 
 pub trait Component: Widget + WidgetNode
 where
@@ -51,6 +56,10 @@ where
     /// 2. call switch_state fn
     /// 3. call play animation
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> ();
+    /// ## sync component properties
+    /// do before render component
+    fn sync(&mut self) -> ();
+    fn set_animation(&mut self, cx: &mut Cx) -> ();
 }
 
 /// # Prop
@@ -89,10 +98,13 @@ pub trait BasicProp: Default {
     type Colors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self;
-    /// ## return state colors 
+    /// ## return state colors
     /// which depend on theme and Component Self
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors;
     /// ## get length of the basic properties
     fn len() -> usize;
-    fn set_from_str(&mut self, key: &str, value: &LiveValue) -> ();
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> ();
+    /// ## sync from Basic State what apply from map if not set in DSL from (super Prop trait)
+    /// unlike Prop trait, this function only sync theme colors, and use in `set_from_str()`
+    fn sync(&mut self, state: Self::State) -> ();
 }

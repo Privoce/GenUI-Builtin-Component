@@ -1,5 +1,5 @@
 use makepad_widgets::Padding;
-use crate::prop::traits::NewFrom;
+use crate::prop::traits::{FromLiveValue, NewFrom};
 
 impl NewFrom for Padding {
     fn from_f64(uni: f64) -> Self {
@@ -26,6 +26,18 @@ impl NewFrom for Padding {
             right: y,
             bottom: z,
             left: w,
+        }
+    }
+}
+
+impl FromLiveValue for Padding {
+    fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
+    where
+        Self: Sized {
+        if let makepad_widgets::LiveValue::Vec4(vec4) = v {
+            Some(Padding::from_vec4(vec4))
+        } else {
+            None
         }
     }
 }

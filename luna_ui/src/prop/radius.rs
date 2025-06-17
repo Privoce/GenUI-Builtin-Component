@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 use toml_edit::Value;
 
-use crate::{error::Error, prop::traits::NewFrom, themes::TomlValueTo};
+use crate::{error::Error, prop::traits::{FromLiveValue, NewFrom}, themes::TomlValueTo};
 
 /// ## Radius
 /// Radius always use in:
@@ -123,6 +123,18 @@ impl From<&Vec4> for Radius {
             right: value.y,
             bottom: value.z,
             left: value.w,
+        }
+    }
+}
+
+impl FromLiveValue for Radius {
+    fn from_live_value(v: &LiveValue) -> Option<Self>
+    where
+        Self: Sized {
+        if let LiveValue::Vec4(vec4) = v {
+            Some(Radius::from(vec4))
+        } else {
+            None
         }
     }
 }
