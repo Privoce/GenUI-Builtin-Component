@@ -638,6 +638,13 @@ impl Component for LView {
         self.draw_view.redraw(cx);
     }
 
+    fn sync(&mut self) -> () {
+        
+    }
+    fn set_animation(&mut self, cx: &mut Cx) -> () {
+        
+    }
+
     play_animation!();
     set_scope_path!();
 }

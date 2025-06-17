@@ -8,7 +8,7 @@ use std::str::FromStr;
 /// - `0.0-1.0` for `a`
 /// 
 /// example: `rgba(255, 0, 0, 0.2)`
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Rgba {
     pub r: u8,
     pub g: u8,

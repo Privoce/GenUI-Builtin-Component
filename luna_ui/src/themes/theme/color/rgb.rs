@@ -10,7 +10,7 @@ use crate::error::Error;
 /// range: `0-255`
 /// 
 /// example: `rgb(255, 0, 0)`
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Rgb {
     pub r: u8,
     pub g: u8,

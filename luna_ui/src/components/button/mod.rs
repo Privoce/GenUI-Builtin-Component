@@ -10,18 +10,18 @@ use crate::{
     active_event, animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop},
+        traits::{Component, Prop},
     },
     error::Error,
     hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
     prop::{
-        manuel::{BACKGROUND_COLOR, BASIC, BORDER_COLOR, HOVER, PRESSED, SHADOW_COLOR, THEME},
+        manuel::{BASIC, HOVER, PRESSED},
         traits::ToFloat,
-        ApplyStateMap, PropMapImpl,
+        ApplyStateMap,
     },
     pure_after_apply, set_animation, set_scope_path,
     shader::draw_view::DrawView,
-    themes::{Conf, Theme},
+    themes::Conf,
     ComponentAnInit,
 };
 
@@ -258,26 +258,9 @@ impl Component for LButton {
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
 
-        if let Some(props) = self.apply_state_map.get(&state) {
-            let theme = self.prop.get(state).theme;
-            let theme = props.get_theme_then(theme);
-
-            let (background_color, border_color, shadow_color) =
-                ButtonBasicProp::state_colors(theme, state);
-
-            self.draw_button.background_color = props
-                .get(BACKGROUND_COLOR)
-                .map_or_else(|| background_color.into(), |color| color.as_vec4().unwrap());
-
-            self.draw_button.border_color = props
-                .get(BORDER_COLOR)
-                .map_or_else(|| border_color.into(), |color| color.as_vec4().unwrap());
-
-            self.draw_button.shadow_color = props
-                .get(SHADOW_COLOR)
-                .map_or_else(|| shadow_color.into(), |color| color.as_vec4().unwrap());
-        }
-
+        self.draw_button.background_color = self.prop.get(state).background_color.into();
+        self.draw_button.border_color = self.prop.get(state).border_color.into();
+        self.draw_button.shadow_color = self.prop.get(state).shadow_color.into();
         self.draw_button.border_radius = self.prop.get(state).border_radius.into();
         self.draw_button.border_width = self.prop.get(state).border_width;
         self.draw_button.spread_radius = self.prop.get(state).spread_radius;
@@ -404,7 +387,6 @@ impl Component for LButton {
             let basic_prop = self.prop.get(ButtonState::Basic);
             let hover_prop = self.prop.get(ButtonState::Hover);
             let pressed_prop = self.prop.get(ButtonState::Pressed);
-
             let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,

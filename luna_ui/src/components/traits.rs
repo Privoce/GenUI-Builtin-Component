@@ -3,7 +3,7 @@ use makepad_widgets::{
 };
 
 use crate::{
-    prop::{ApplyStateMap, PropMap},
+    prop::{ApplyStateMap},
     themes::Theme,
 };
 

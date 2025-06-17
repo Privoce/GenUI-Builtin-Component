@@ -67,7 +67,7 @@ impl Prop for ButtonProp {
             let mut props = basic_props.clone();
             // [basic] --------------------------------------------------------------------------------
             // 处理theme
-            if let Some(value) = props.remove_theme() {
+            if let Some(value) = props.remove(THEME) {
                 self.basic.set_from_str(THEME, &value, ButtonState::Basic);
             }
             // 处理其他
@@ -88,7 +88,7 @@ impl Prop for ButtonProp {
                     |apply_props| apply_props.diff(basic_props),
                 );
                 // remove theme
-                if let Some(value) = diff_props.remove_theme() {
+                if let Some(value) = diff_props.remove(THEME) {
                     props.set_from_str(THEME, &value, state);
                 }
                 // set from str
@@ -239,7 +239,7 @@ impl BasicProp for ButtonBasicProp {
             }
             BACKGROUND_COLOR => {
                 self.background_color =
-                    Vec4::from_live_value(value).unwrap_or(Theme::Dark.color(400).into());
+                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(400).into());
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);

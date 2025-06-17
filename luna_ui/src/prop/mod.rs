@@ -18,8 +18,6 @@ pub trait PropMapImpl {
     fn get_theme_then(&self, default: Theme) -> Theme;
     /// ## diff returns a new ApplyStateMap with only the keys that are in `other` but not in `self`
     fn diff(&self, other: &Self) -> Self;
-    /// ## find theme in ApplyStateMap and filter out the rest
-    fn remove_theme(&mut self) -> Option<LiveValue>;
 }
 
 impl PropMapImpl for PropMap {
@@ -28,13 +26,9 @@ impl PropMapImpl for PropMap {
             .map_or_else(|| default, |v| (v, default).into())
     }
     fn diff(&self, other: &Self) -> Self {
-        other
-            .clone()
+        self.clone()
             .into_iter()
-            .filter(|(k, _)| !self.contains_key(k))
+            .filter(|(k, v)| !other.contains_key(k) || other.get(k) != Some(v))
             .collect()
-    }
-    fn remove_theme(&mut self) -> Option<LiveValue> {
-        self.remove(THEME)
     }
 }

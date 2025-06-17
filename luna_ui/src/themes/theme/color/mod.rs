@@ -3,6 +3,8 @@ mod hex;
 mod rgb;
 mod rgba;
 
+use std::fmt::Display;
+
 pub use font::ColorFontConf;
 pub use hex::Hex;
 use makepad_widgets::Vec4;
@@ -49,6 +51,18 @@ impl From<Color> for Vec4 {
             Color::RGBA(rgba) => rgba.into(),
             Color::WHITE => "#FFFFFF".parse::<Hex>().unwrap().into(),
             Color::BLACK => "#000000".parse::<Hex>().unwrap().into(),
+        }
+    }
+}
+
+impl Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Color::Hex(hex) => write!(f, "{}", hex),
+            Color::RGB(rgb) => write!(f, "{}", Hex((*rgb).into())),
+            Color::RGBA(rgba) => write!(f, "{}", Hex((*rgba).into())),
+            Color::WHITE => write!(f, "#FFFFFF"),
+            Color::BLACK => write!(f, "#000000"),
         }
     }
 }

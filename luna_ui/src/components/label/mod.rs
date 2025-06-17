@@ -154,6 +154,12 @@ impl Component for LLabel {
     fn switch_state_with_animation(&mut self, _cx: &mut Cx, _state: Self::State) -> () {
         ()
     }
+    fn set_animation(&mut self, cx: &mut Cx) -> () {
+        ()
+    }
+    fn sync(&mut self) -> () {
+        ()
+    }
 }
 
 impl LLabel {
