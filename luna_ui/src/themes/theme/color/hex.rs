@@ -58,6 +58,12 @@ impl Display for Hex {
         let b = (self.0.z * 255.0) as u8;
         let a = (self.0.w * 255.0) as u8;
 
-        f.write_str(&format!("{:02X}{:02X}{:02X}{:02X}", r, g, b, a))
+        f.write_str(&format!("#{:02X}{:02X}{:02X}{:02X}", r, g, b, a))
+    }
+}
+
+impl From<Vec4> for Hex {
+    fn from(vec: Vec4) -> Self {
+        Hex(vec)
     }
 }

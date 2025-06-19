@@ -1,4 +1,7 @@
-use crate::prop::traits::{FromLiveColor, FromLiveValue, ToU32};
+use crate::{
+    prop::traits::{FromLiveColor, FromLiveValue, ToColor, ToU32},
+    themes::Color,
+};
 
 use super::{ToBool, ToFloat, ToVec};
 use makepad_widgets::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
@@ -58,7 +61,8 @@ impl ToU32 for Vec4 {
 impl FromLiveValue for Vec4 {
     fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
     where
-        Self: Sized {
+        Self: Sized,
+    {
         if let makepad_widgets::LiveValue::Vec4(vec4) = v {
             Some(*vec4)
         } else {
@@ -70,7 +74,8 @@ impl FromLiveValue for Vec4 {
 impl FromLiveColor for Vec4 {
     fn from_live_color(v: &makepad_widgets::LiveValue) -> Option<Vec4>
     where
-        Self: Sized {
+        Self: Sized,
+    {
         if let makepad_widgets::LiveValue::Color(color) = v {
             Some(Vec4::from_u32(*color))
         } else {
@@ -82,11 +87,22 @@ impl FromLiveColor for Vec4 {
 impl FromLiveValue for Vec2 {
     fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
     where
-        Self: Sized {
+        Self: Sized,
+    {
         if let makepad_widgets::LiveValue::Vec2(vec2) = v {
             Some(*vec2)
         } else {
             None
         }
+    }
+}
+
+impl ToColor for Vec4 {
+    fn to_color(self) -> crate::themes::Color {
+        Color::Hex(self.into())
+    }
+
+    fn to_hex_string(self) -> String {
+        self.to_color().to_string()
     }
 }

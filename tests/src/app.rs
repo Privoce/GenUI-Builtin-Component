@@ -1,3 +1,4 @@
+use luna_ui::components::button::LButtonWidgetRefExt;
 use makepad_widgets::*;
 
 live_design! {
@@ -84,7 +85,7 @@ live_design! {
 
                     // }
                     
-                        <LButton>{
+                        btn1 = <LButton>{
                             prop: {
                                 basic: {
                                     theme: Info,
@@ -99,6 +100,9 @@ live_design! {
                                 pressed: {
                                     theme: Error,
                                 }
+                            }
+                            slot: <Label>{
+                                text: "Click me !"
                             }
                         }
                         // <LButton>{
@@ -143,11 +147,16 @@ impl MatchEvent for App {
     fn handle_startup(&mut self, _cx: &mut Cx) {}
 
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        if self.ui.button(id!(button_1)).clicked(&actions) {
-            self.ui.button(id!(button_1)).set_text(cx, "Clicked 😀");
-            log!("hi");
-            self.counter += 1;
+        // if self.ui.button(id!(button_1)).clicked(&actions) {
+        //     self.ui.button(id!(button_1)).set_text(cx, "Clicked 😀");
+        //     log!("hi");
+        //     self.counter += 1;
+        // }
+        let btn1 = self.ui.lbutton(id!(btn1));
+        if let Some(e) = btn1.clicked(actions){
+            
         }
+        // if self.ui.lbutton(id!(btn1)).cli
     }
 }
 

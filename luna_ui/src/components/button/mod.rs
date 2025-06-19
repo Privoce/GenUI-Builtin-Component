@@ -7,22 +7,14 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw,
-    components::{
+    active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
         traits::{Component, Prop},
-    },
-    error::Error,
-    hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation,
-    prop::{
+    }, error::Error, event_option, event_option_ref, getter, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, prop::{
         manuel::{BASIC, HOVER, PRESSED},
-        traits::ToFloat,
+        traits::{ToColor, ToFloat},
         ApplyStateMap,
-    },
-    pure_after_apply, set_animation, set_scope_path,
-    shader::draw_view::DrawView,
-    themes::Conf,
-    ComponentAnInit,
+    }, pure_after_apply, set_animation, set_scope_path, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
 };
 
 live_design! {
@@ -517,5 +509,35 @@ impl LButton {
         active_finger_up: ButtonEvent::FingerUp |meta: FingerUpEvent| => ButtonFingerUp { meta },
         active_finger_down: ButtonEvent::FingerDown |meta: FingerDownEvent| => ButtonFingerDown { meta },
         active_clicked: ButtonEvent::Clicked |meta: FingerUpEvent| => ButtonClicked { meta }
+    }
+    event_option! {
+        hover_in: ButtonEvent::HoverIn => ButtonHoverIn,
+        hover_out: ButtonEvent::HoverOut => ButtonHoverOut,
+        finger_up: ButtonEvent::FingerUp => ButtonFingerUp,
+        finger_down: ButtonEvent::FingerDown => ButtonFingerDown,
+        clicked: ButtonEvent::Clicked => ButtonClicked
+    }
+    area! {
+        area_slot, slot
+    }
+    getter!{
+        LButton {
+            get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
+            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}}
+
+        }
+    }
+}
+
+impl LButtonRef {
+    event_option_ref!{
+        hover_in => ButtonHoverIn,
+        hover_out => ButtonHoverOut,
+        finger_up => ButtonFingerUp,
+        finger_down => ButtonFingerDown,
+        clicked => ButtonClicked
+    }
+    area_ref!{
+        area_slot
     }
 }

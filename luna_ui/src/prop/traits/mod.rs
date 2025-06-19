@@ -10,6 +10,8 @@ mod size;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 
+use crate::themes::Color;
+
 pub trait NewFrom {
     fn from_f64(uni: f64) -> Self;
     fn from_xy(x: f64, y: f64) -> Self;
@@ -57,4 +59,9 @@ pub trait FromLiveColor {
     fn from_live_color(v: &LiveValue) -> Option<Vec4>
     where
         Self: Sized;
+}
+
+pub trait ToColor {
+    fn to_color(self) -> Color;
+    fn to_hex_string(self) -> String;
 }

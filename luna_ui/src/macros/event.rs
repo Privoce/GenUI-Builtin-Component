@@ -27,6 +27,87 @@ macro_rules! active_event{
     };
 }
 
+/// impl GBreadCrumbItem {
+///     event_option!{
+///         clicked : GBreadCrumbItemEvent => GBreadCrumbEventItemParam,
+///         hover : GBreadCrumbItemEvent => GBreadCrumbEventItemParam
+///     }
+///     // pub fn clicked(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let GBreadCrumbItemEvent::Clicked(e) =
+///     //         actions.find_widget_action(self.widget_uid()).cast()
+///     //     {
+///     //         Some(e)
+///     //     } else {
+///     //         None
+///     //     }
+///     // }
+///     // pub fn hover(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let GBreadCrumbItemEvent::Hover(e) = actions.find_widget_action(self.widget_uid()).cast()
+///     //     {
+///     //         Some(e)
+///     //     } else {
+///     //         None
+///     //     }
+///     // }
+/// }
+/// ```
+#[macro_export]
+macro_rules! event_option {
+    ($($event_fn: ident : $event: path => $return: ty),*) => {
+        $(
+            pub fn $event_fn(&self, actions: &Actions) -> Option<$return> {
+                if !self.event_open{
+                    return None;
+                }
+
+                if let $event(e) =
+                    actions.find_widget_action(self.widget_uid()).cast()
+                {
+                    Some(e)
+                } else {
+                    None
+                }
+            }
+        )*
+    };
+}
+
+/// # Generate Ref Event Function
+///```rust
+/// impl GBreadCrumbItemRef {
+///
+///     ref_event_option!{
+///         clicked => GBreadCrumbEventItemParam,
+///         hover => GBreadCrumbEventItemParam
+///     }
+///     // pub fn clicked(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let Some(c_ref) = self.borrow() {
+///     //         return c_ref.clicked(actions);
+///     //     }
+///     //     None
+///     // }
+///     // pub fn hover(&self, actions: &Actions) -> Option<GBreadCrumbEventItemParam> {
+///     //     if let Some(c_ref) = self.borrow() {
+///     //         return c_ref.hover(actions);
+///     //     }
+///     //     None
+///     // }
+/// }
+/// ```
+#[macro_export]
+macro_rules! event_option_ref {
+    ($($event_fn: ident => $return: ty),*) => {
+        $(
+            pub fn $event_fn(&self, actions: &Actions) -> Option<$return> {
+                if let Some(c_ref) = self.borrow() {
+                    return c_ref.$event_fn(actions);
+                }
+                None
+            }
+        )*
+    };
+}
+
 #[macro_export]
 macro_rules! hit_finger_down {
     ($self:ident, $cx:ident, $focus_area:expr, $e:expr) => {
