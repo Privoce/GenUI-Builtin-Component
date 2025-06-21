@@ -1,7 +1,7 @@
 pub mod manuel;
 mod radius;
 pub mod traits;
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap};
 
 use makepad_widgets::LiveValue;
 pub use radius::Radius;
@@ -26,9 +26,17 @@ impl PropMapImpl for PropMap {
             .map_or_else(|| default, |v| (v, default).into())
     }
     fn diff(&self, other: &Self) -> Self {
-        self.clone()
-            .into_iter()
-            .filter(|(k, v)| !other.contains_key(k) || other.get(k) != Some(v))
-            .collect()
+        if self.len() < other.len() {
+            other
+                .clone()
+                .into_iter()
+                .filter(|(k, v)| !self.contains_key(k) || self.get(k) != Some(v))
+                .collect()
+        } else {
+            self.clone()
+                .into_iter()
+                .filter(|(k, v)| !other.contains_key(k) || other.get(k) != Some(v))
+                .collect()
+        }
     }
 }

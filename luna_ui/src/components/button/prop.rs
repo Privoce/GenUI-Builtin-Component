@@ -88,9 +88,13 @@ impl Prop for ButtonProp {
                     || basic_props.clone(),
                     |apply_props| apply_props.diff(basic_props),
                 );
+                dbg!(state, &diff_props);
                 // remove theme
                 if let Some(value) = diff_props.remove(THEME) {
                     props.set_from_str(THEME, &value, state);
+                }else{
+                    // if no theme, use self.theme
+                    props.sync(state);
                 }
                 // set from str
                 for (k, v) in diff_props {
@@ -339,9 +343,9 @@ impl BasicProp for ButtonBasicProp {
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, border_level, shadow_level) = match state {
-            ButtonState::Basic => (400, 400, 300),
-            ButtonState::Hover => (300, 300, 200),
-            ButtonState::Pressed => (500, 500, 400),
+            ButtonState::Basic => (500, 500, 400),
+            ButtonState::Hover => (400, 400, 300),
+            ButtonState::Pressed => (600, 600, 500),
             ButtonState::Disabled => (600, 600, 500),
         };
 

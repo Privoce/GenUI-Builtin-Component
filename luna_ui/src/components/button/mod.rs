@@ -550,7 +550,28 @@ impl LButton {
     setter!{
         LButton {
             set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ButtonState::Basic); Ok(())}},
-            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}}
+            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.prop.basic.set_background_visible(visible); Ok(())}},
+            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_shadow_color(color); Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_border_color(color); Ok(())}},
+            set_border_radius(radius: Radius) {|c, _cx| {c.prop.basic.set_border_radius(radius); Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.prop.basic.set_border_width(width); Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.prop.basic.set_spread_radius(radius); Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.prop.basic.set_blur_radius(radius); Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.prop.basic.set_shadow_offset(offset); Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.prop.basic.set_margin(margin); Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.prop.basic.set_padding(padding); Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.prop.basic.set_width(width); Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.prop.basic.set_height(height); Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.prop.basic.set_cursor(cursor); Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.prop.basic.set_flow(flow); Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.prop.basic.set_align(align); Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.prop.basic.set_spacing(spacing); Ok(())}},
+            set_disabled(disabled: bool) {|c, _cx| {c.disabled = disabled; Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; c.redraw(_cx); Ok(())}},
+            set_grab_key_focus(grab: bool) {|c, _cx| {c.grab_key_focus = grab; Ok(())}},
+            set_sync(sync: bool) {|c, _cx| {c.sync = sync; c.prop.basic.sync(ButtonState::Basic); Ok(())}},
+            set_event_open(open: bool) {|c, _cx| {c.event_open = open; Ok(())}}
         }
     }
 }

@@ -92,40 +92,53 @@ live_design! {
 
                     // }
 
-                        btn1 = <LButton>{
-                            prop: {
-                                basic: {
-                                    theme: Info,
-                                    border_width: 2.0,
-                                    border_color: #ff0,
-                                }
-                                hover: {
-                                    theme: Success,
-                                    border_color: #0f0,
-                                    border_width: 4.0,
-                                },
-                                pressed: {
-                                    theme: Error,
-                                }
-                            }
-                            slot: <Label>{
-                                text: "Click me !"
-                            }
-                        }
-                        // <LButton>{
+                        // btn1 = <LButton>{
                         //     prop: {
                         //         basic: {
+                        //             theme: Info,
                         //             border_width: 2.0,
                         //             border_color: #ff0,
                         //         }
                         //         hover: {
+                        //             theme: Success,
+                        //             border_color: #0f0,
                         //             border_width: 4.0,
+                        //         },
+                        //         pressed: {
+                        //             theme: Error,
                         //         }
                         //     }
                         //     slot: <Label>{
                         //         text: "Click me !"
                         //     }
                         // }
+                        <LButton>{
+                            prop: {
+                                basic: {
+                                    theme: Primary,
+                                }
+                                hover: {
+                                    theme: Primary,
+                                }
+                                pressed: {
+                                    // theme: Primary,
+                                }
+                            }
+                            slot: <Label>{
+                                text: "Click me !"
+                            }
+                        }
+                        <LButton>{
+                            prop: {
+                                basic: {
+                                    theme: Warning,
+                                }
+                                
+                            }
+                            slot: <Label>{
+                                text: "Click me !"
+                            }
+                        }
                 }
             }
         }
