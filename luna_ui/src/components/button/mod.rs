@@ -9,12 +9,12 @@ pub use prop::*;
 use crate::{
     active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
-        traits::{Component, Prop},
+        traits::{BasicProp, Component, Prop},
     }, error::Error, event_option, event_option_ref, getter, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
-        ApplyStateMap,
-    }, pure_after_apply, set_animation, set_scope_path, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
+        ApplyStateMap, Radius,
+    }, pure_after_apply, set_animation, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
 };
 
 live_design! {
@@ -523,8 +523,34 @@ impl LButton {
     getter!{
         LButton {
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
-            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}}
-
+            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
+            get_background_visible(bool) {|c| {c.prop.basic.get_background_visible()}},
+            get_shadow_color(String) {|c| {c.prop.basic.get_shadow_color().to_hex_string()}},
+            get_border_color(String) {|c| {c.prop.basic.get_border_color().to_hex_string()}},
+            get_border_radius(Radius) {|c| {c.prop.basic.get_border_radius()}},
+            get_border_width(f32) {|c| {c.prop.basic.get_border_width()}},
+            get_spread_radius(f32) {|c| {c.prop.basic.get_spread_radius()}},
+            get_blur_radius(f32) {|c| {c.prop.basic.get_blur_radius()}},
+            get_shadow_offset(Vec2) {|c| {c.prop.basic.get_shadow_offset()}},
+            get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
+            get_padding(Padding) {|c| {c.prop.basic.get_padding()}}, 
+            get_width(Size) {|c| {c.prop.basic.get_width()}},
+            get_height(Size) {|c| {c.prop.basic.get_height()}},
+            get_cursor(MouseCursor) {|c| {c.prop.basic.get_cursor()}},
+            get_flow(Flow) {|c| {c.prop.basic.get_flow()}},
+            get_align(Align) {|c| {c.prop.basic.get_align()}},
+            get_spacing(f64) {|c| {c.prop.basic.get_spacing()}},
+            get_disabled(bool) {|c| {c.disabled}},
+            get_visible(bool) {|c| {c.visible}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_sync(bool) {|c| {c.sync}},
+            get_event_open(bool) {|c| {c.event_open}}
+        }
+    }
+    setter!{
+        LButton {
+            set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ButtonState::Basic); Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}}
         }
     }
 }

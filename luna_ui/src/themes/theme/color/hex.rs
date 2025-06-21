@@ -15,7 +15,13 @@ impl FromStr for Hex {
         let hex = s.trim_start_matches('#');
 
         // 解析 RGB 值
-        let (r, g, b, a) = if hex.len() == 6 {
+        let (r, g, b, a) = if hex.len() == 3 {
+            // 如果是 3 位数的十六进制颜色，重复每个字符
+            let r = u8::from_str_radix(&hex[0..1].repeat(2), 16).unwrap();
+            let g = u8::from_str_radix(&hex[1..2].repeat(2), 16).unwrap();
+            let b = u8::from_str_radix(&hex[2..3].repeat(2), 16).unwrap();
+            (r, g, b, 255)
+        } else if hex.len() == 6 {
             let r = u8::from_str_radix(&hex[0..2], 16).unwrap();
             let g = u8::from_str_radix(&hex[2..4], 16).unwrap();
             let b = u8::from_str_radix(&hex[4..6], 16).unwrap();

@@ -3,14 +3,14 @@ mod bool;
 mod cursor;
 mod flow;
 mod margin;
-mod padding;
-mod vec;
 mod number;
+mod padding;
 mod size;
+mod vec;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 
-use crate::themes::Color;
+use crate::{error::Error, themes::Color};
 
 pub trait NewFrom {
     fn from_f64(uni: f64) -> Self;
@@ -64,4 +64,7 @@ pub trait FromLiveColor {
 pub trait ToColor {
     fn to_color(self) -> Color;
     fn to_hex_string(self) -> String;
+    fn from_hex(s: &str) -> Result<Self, Error>
+    where
+        Self: Sized;
 }

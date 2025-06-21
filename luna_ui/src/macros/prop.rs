@@ -17,20 +17,37 @@ macro_rules! setter {
     ),*}) => {
         // crate::setter!($T);
         #[allow(unused_variables)]
-        fn setter<F>(&mut self, cx: &mut Cx, f: F) -> Result<(), Box<dyn std::error::Error>>
+        fn setter<F>(&mut self, cx: &mut Cx, f: F) -> Result<(), crate::error::Error>
         where
-            F: FnOnce(&mut $T, &mut Cx) -> Result<(), Box<dyn std::error::Error>>
+            F: FnOnce(&mut $T, &mut Cx) -> Result<(), crate::error::Error>
         {
             f(self, cx)
         }
 
         $(
-            pub fn $fn_name(&mut self, cx: &mut Cx, $arg: $arg_ty) -> Result<(), Box<dyn std::error::Error>> {
+            pub fn $fn_name(&mut self, cx: &mut Cx, $arg: $arg_ty) -> Result<(), crate::error::Error> {
                 return self.setter(cx, $code);
             }
         )*
     };
 }
+
+#[macro_export]
+macro_rules! getter_setter_prop {
+    ($(
+        $fn_getter: ident, $fn_setter: ident : $prop: ident -> $v_ty: ty 
+    ),*) => {
+        $(
+            pub fn $fn_setter(&mut self, v: $v_ty) -> () {
+                self.$prop = v;
+            }
+            pub fn $fn_getter(&self) -> $v_ty {
+                self.$prop
+            }
+        )*
+    };
+}
+
 
 #[macro_export]
 macro_rules! getter {

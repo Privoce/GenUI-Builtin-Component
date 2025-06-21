@@ -5,7 +5,10 @@ use crate::{
     components::{
         traits::{BasicProp, Prop},
         view::ViewState,
-    }, error::Error, getter, prop::{
+    },
+    error::Error,
+    getter_setter_prop,
+    prop::{
         manuel::{
             ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
@@ -13,7 +16,9 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         PropMapImpl, Radius,
-    }, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
+    },
+    themes::{Color, Theme, TomlValueTo},
+    utils::{get_from_itable, get_from_table},
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -481,27 +486,25 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
 }
 
 impl ButtonBasicProp {
-    getter!{
-        ButtonBasicProp {
-            get_theme(Theme) {|c| {c.theme}},
-            get_background_color(Vec4) {|c| {c.background_color}},
-            get_background_visible(bool) {|c| {c.background_visible}},
-            get_shadow_color(Vec4) {|c| {c.shadow_color}},
-            get_spread_radius(f32) {|c| {c.spread_radius}},
-            get_blur_radius(f32) {|c| {c.blur_radius}},
-            get_shadow_offset(Vec2) {|c| {c.shadow_offset}},
-            get_border_width(f32) {|c| {c.border_width}},
-            get_border_color(Vec4) {|c| {c.border_color}},
-            get_border_radius(Radius) {|c| {c.border_radius}},
-            get_cursor(MouseCursor) {|c| {c.cursor}},
-            get_margin(Margin) {|c| {c.margin}},
-            get_padding(Padding) {|c| {c.padding}},
-            get_flow(Flow) {|c| {c.flow}},
-            get_align(Align) {|c| {c.align}},
-            get_height(Size) {|c| {c.height}},
-            get_width(Size) {|c| {c.width}},
-            get_spacing(f64) {|c| {c.spacing}}
-        }
+    getter_setter_prop! {
+        get_theme, set_theme: theme -> Theme,
+        get_background_color, set_background_color: background_color -> Vec4,
+        get_background_visible, set_background_visible: background_visible -> bool,
+        get_shadow_color, set_shadow_color: shadow_color -> Vec4,
+        get_spread_radius, set_spread_radius: spread_radius -> f32,
+        get_blur_radius, set_blur_radius: blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset: shadow_offset -> Vec2,
+        get_border_width, set_border_width: border_width -> f32,
+        get_border_color, set_border_color: border_color -> Vec4,
+        get_border_radius, set_border_radius: border_radius -> Radius,
+        get_cursor, set_cursor: cursor -> MouseCursor,
+        get_margin, set_margin: margin -> Margin,
+        get_padding, set_padding: padding -> Padding,
+        get_flow, set_flow: flow -> Flow,
+        get_align, set_align: align -> Align,
+        get_height, set_height: height -> Size,
+        get_width, set_width: width -> Size,
+        get_spacing, set_spacing: spacing -> f64
     }
 }
 

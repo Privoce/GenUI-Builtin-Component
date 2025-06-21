@@ -1,6 +1,6 @@
 use crate::{
     prop::traits::{FromLiveColor, FromLiveValue, ToColor, ToU32},
-    themes::Color,
+    themes::{Color, Hex},
 };
 
 use super::{ToBool, ToFloat, ToVec};
@@ -104,5 +104,13 @@ impl ToColor for Vec4 {
 
     fn to_hex_string(self) -> String {
         self.to_color().to_string()
+    }
+
+    fn from_hex(s: &str) -> Result<Self, crate::error::Error>
+    where
+        Self: Sized,
+    {
+        let hex: Hex = s.parse()?;
+        Ok(Color::Hex(hex).into())
     }
 }

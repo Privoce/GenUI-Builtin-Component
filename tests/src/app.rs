@@ -1,4 +1,11 @@
-use luna_ui::components::button::LButtonWidgetRefExt;
+use luna_ui::{
+    components::{
+        button::{ButtonState, LButtonWidgetRefExt},
+        traits::{BasicProp, Component},
+    },
+    prop::traits::ToColor,
+    themes::Theme,
+};
 use makepad_widgets::*;
 
 live_design! {
@@ -84,7 +91,7 @@ live_design! {
 
 
                     // }
-                    
+
                         btn1 = <LButton>{
                             prop: {
                                 basic: {
@@ -153,8 +160,14 @@ impl MatchEvent for App {
         //     self.counter += 1;
         // }
         let btn1 = self.ui.lbutton(id!(btn1));
-        if let Some(e) = btn1.clicked(actions){
-            
+        if let Some(_) = btn1.clicked(actions) {
+            if let Some(mut btn1) = btn1.borrow_mut() {
+                // btn1.prop.basic.theme = Theme::Success;
+                // btn1.prop.basic.sync(ButtonState::Basic);
+                // btn1.redraw(cx);
+                // btn1.prop.basic.background_color = Vec4::from_string("#f00").unwrap();
+                btn1.set_theme(cx, Theme::Warning).unwrap();
+            }
         }
         // if self.ui.lbutton(id!(btn1)).cli
     }
