@@ -2,14 +2,16 @@
 macro_rules! pure_after_apply {
     () => {
         #[allow(unused_variables)]
+        #[cfg(feature = "release")]
         fn after_new_from_doc(&mut self, cx: &mut Cx) {
-            #[cfg(feature = "release")]
+            self.sync();
             self.render_after_apply(cx);
         }
         
         #[allow(unused_variables)]
+        #[cfg(feature = "dev")]
         fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-            #[cfg(feature = "dev")]
+            self.sync();
             self.render_after_apply(cx);
         }
     };

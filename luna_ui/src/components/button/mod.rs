@@ -10,7 +10,7 @@ use crate::{
     active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    }, error::Error, event_option, event_option_ref, getter, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, prop::{
+    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
@@ -178,22 +178,17 @@ impl Widget for LButton {
 }
 
 impl LiveHook for LButton {
-    // pure_after_apply!();
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        self.sync();
-        self.render_after_apply(cx);
-    }
+    pure_after_apply!();
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        if !self.lifecycle.is_created() {
-            return;
+        if self.lifecycle.is_created() {
+            self.index = index;
         }
 
-        self.index = index;
         let live_props = [
             live_id!(theme),
             live_id!(background_color),
@@ -586,5 +581,30 @@ impl LButtonRef {
     }
     area_ref!{
         area_slot
+    }
+    getter_setter_ref!{
+        get_theme, set_theme -> Theme,
+        get_background_color, set_background_color -> String,
+        get_background_visible, set_background_visible -> bool,
+        get_shadow_color, set_shadow_color -> String,
+        get_border_color, set_border_color -> String,
+        get_border_radius, set_border_radius -> Radius,
+        get_border_width, set_border_width -> f32,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_margin, set_margin -> Margin,
+        get_padding, set_padding -> Padding,
+        get_width, set_width -> Size,
+        get_height, set_height -> Size,
+        get_cursor, set_cursor -> MouseCursor,
+        get_flow, set_flow -> Flow,
+        get_align, set_align -> Align,
+        get_spacing, set_spacing -> f64,
+        get_disabled, set_disabled -> bool,
+        get_visible, set_visible -> bool,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_sync, set_sync -> bool,
+        get_event_open, set_event_open -> bool
     }
 }

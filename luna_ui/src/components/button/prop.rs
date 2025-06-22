@@ -63,6 +63,7 @@ impl Prop for ButtonProp {
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
         if let Some(basic_props) = map.get(&ButtonState::Basic) {
+            dbg!("sync button prop", basic_props);
             // 在set_from_str前需要处理同步theme颜色，其他状态也一样
             // 步骤是：作差运算 -> remove theme -> set_from_str
             let mut props = basic_props.clone();
@@ -88,7 +89,6 @@ impl Prop for ButtonProp {
                     || basic_props.clone(),
                     |apply_props| apply_props.diff(basic_props),
                 );
-                dbg!(state, &diff_props);
                 // remove theme
                 if let Some(value) = diff_props.remove(THEME) {
                     props.set_from_str(THEME, &value, state);

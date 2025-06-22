@@ -115,7 +115,7 @@ live_design! {
                         <LButton>{
                             prop: {
                                 basic: {
-                                    theme: Primary,
+                                    theme: Error,
                                 }
                                 hover: {
                                     theme: Primary,
@@ -128,17 +128,17 @@ live_design! {
                                 text: "Click me !"
                             }
                         }
-                        <LButton>{
-                            prop: {
-                                basic: {
-                                    theme: Warning,
-                                }
+                        // <LButton>{
+                        //     prop: {
+                        //         basic: {
+                        //             theme: Warning,
+                        //         }
                                 
-                            }
-                            slot: <Label>{
-                                text: "Click me !"
-                            }
-                        }
+                        //     }
+                        //     slot: <Label>{
+                        //         text: "Click me !"
+                        //     }
+                        // }
                 }
             }
         }
