@@ -34,6 +34,7 @@ where
     /// ## handle event for component
     /// from `fn handle_event()` in `impl Widget for $Component`
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area);
+    fn handle_when_disabled(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit) -> (){()}
     /// ## play animation if component has
     /// depend on component struct `#[animator] animator: Animator`
     fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();

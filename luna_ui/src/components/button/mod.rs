@@ -7,14 +7,23 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, area_ref, components::{
+    active_event, animation_open_then_redraw, area, area_ref,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, play_animation, prop::{
+    },
+    error::Error,
+    event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
+    hit_hover_in, hit_hover_out, play_animation,
+    prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    }, pure_after_apply, set_animation, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    themes::{Conf, Theme},
+    ComponentAnInit,
 };
 
 live_design! {
@@ -173,7 +182,11 @@ impl Widget for LButton {
         cx.global::<ComponentAnInit>().button = true;
         let area = self.area();
         let hit = event.hits(cx, area);
-        self.handle_widget_event(cx, event, hit, area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, area);
+        }
     }
 }
 
@@ -266,6 +279,15 @@ impl Component for LButton {
         }
     }
 
+    fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
+        match hit {
+            Hit::FingerHoverIn(_) => {
+                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+            }
+            _ => {}
+        }
+    }
+
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
         animation_open_then_redraw!(self, cx, event);
 
@@ -337,7 +359,7 @@ impl Component for LButton {
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open {
+        if !self.animation_open || self.disabled {
             return;
         }
         self.switch_state(state);
@@ -515,7 +537,7 @@ impl LButton {
     area! {
         area_slot, slot
     }
-    getter!{
+    getter! {
         LButton {
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
             get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
@@ -528,7 +550,7 @@ impl LButton {
             get_blur_radius(f32) {|c| {c.prop.basic.get_blur_radius()}},
             get_shadow_offset(Vec2) {|c| {c.prop.basic.get_shadow_offset()}},
             get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
-            get_padding(Padding) {|c| {c.prop.basic.get_padding()}}, 
+            get_padding(Padding) {|c| {c.prop.basic.get_padding()}},
             get_width(Size) {|c| {c.prop.basic.get_width()}},
             get_height(Size) {|c| {c.prop.basic.get_height()}},
             get_cursor(MouseCursor) {|c| {c.prop.basic.get_cursor()}},
@@ -542,7 +564,7 @@ impl LButton {
             get_event_open(bool) {|c| {c.event_open}}
         }
     }
-    setter!{
+    setter! {
         LButton {
             set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ButtonState::Basic); Ok(())}},
             set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
@@ -572,17 +594,17 @@ impl LButton {
 }
 
 impl LButtonRef {
-    event_option_ref!{
+    event_option_ref! {
         hover_in => ButtonHoverIn,
         hover_out => ButtonHoverOut,
         finger_up => ButtonFingerUp,
         finger_down => ButtonFingerDown,
         clicked => ButtonClicked
     }
-    area_ref!{
+    area_ref! {
         area_slot
     }
-    getter_setter_ref!{
+    getter_setter_ref! {
         get_theme, set_theme -> Theme,
         get_background_color, set_background_color -> String,
         get_background_visible, set_background_visible -> bool,

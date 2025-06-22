@@ -124,6 +124,7 @@ live_design! {
                                     // theme: Primary,
                                 }
                             }
+                            disabled: true,
                             slot: <Label>{
                                 text: "Click me !"
                             }
