@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use makepad_widgets::*;
 use themes::Conf;
 

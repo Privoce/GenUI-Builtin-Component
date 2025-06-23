@@ -7,8 +7,7 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    components::traits::Prop, error::Error, play_animation, prop::traits::ToFloat, set_scope_path,
-    shader::draw_view::DrawView, themes::Conf
+    components::{lifecycle::LifeCycle, traits::Prop}, error::Error, lifecycle, play_animation, prop::traits::ToFloat, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf
 };
 pub use rely::*;
 
@@ -98,6 +97,11 @@ pub struct LView {
     // --- draw -------------------
     #[live]
     pub draw_view: DrawView,
+    // --- lifecycle --------------
+    #[rust]
+    pub lifecycle: LifeCycle,
+    #[rust]
+    index: usize,
 }
 
 impl LiveHook for LView {
@@ -647,6 +651,8 @@ impl Component for LView {
 
     play_animation!();
     set_scope_path!();
+    set_index!();
+    lifecycle!();
 }
 
 impl LView {

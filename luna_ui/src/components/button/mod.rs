@@ -1,6 +1,5 @@
 mod event;
 mod prop;
-use std::collections::HashMap;
 
 pub use event::*;
 use makepad_widgets::*;
@@ -14,13 +13,13 @@ use crate::{
     },
     error::Error,
     event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
-    hit_hover_in, hit_hover_out, play_animation,
+    hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
     },
-    pure_after_apply, set_animation, set_scope_path, setter,
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
     shader::draw_view::DrawView,
     themes::{Conf, Theme},
     ComponentAnInit,
@@ -202,46 +201,46 @@ impl LiveHook for LButton {
             self.index = index;
         }
 
-        let live_props = [
-            live_id!(theme),
-            live_id!(background_color),
-            live_id!(border_color),
-            live_id!(border_radius),
-            live_id!(border_width),
-            live_id!(shadow_color),
-            live_id!(spread_radius),
-            live_id!(blur_radius),
-            live_id!(shadow_offset),
-            live_id!(background_visible),
-        ];
-        for prefix in [live_id!(basic), live_id!(hover), live_id!(pressed)] {
-            let mut applys = HashMap::new();
-            for path in live_props {
-                if let Some(i) = nodes.child_by_path(
-                    index,
-                    &[
-                        live_id!(prop).as_field(),
-                        prefix.as_field(),
-                        path.as_field(),
-                    ],
-                ) {
-                    let node = &nodes[i];
-                    applys.insert(node.id.to_string(), node.value.clone());
-                }
-            }
-            match prefix.to_string().as_str() {
+        self.set_apply_state_map(
+            nodes,
+            index,
+            [
+                live_id!(theme),
+                live_id!(background_color),
+                live_id!(border_color),
+                live_id!(border_radius),
+                live_id!(border_width),
+                live_id!(shadow_color),
+                live_id!(spread_radius),
+                live_id!(blur_radius),
+                live_id!(shadow_offset),
+                live_id!(background_visible),
+                live_id!(cursor),
+                live_id!(width),
+                live_id!(height),
+                live_id!(margin),
+                live_id!(padding),
+                live_id!(align),
+                live_id!(flow),
+                live_id!(spacing),
+            ],
+            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
-                    self.apply_state_map.insert(ButtonState::Basic, applys);
+                    component.apply_state_map.insert(ButtonState::Basic, applys);
                 }
                 HOVER => {
-                    self.apply_state_map.insert(ButtonState::Hover, applys);
+                    component.apply_state_map.insert(ButtonState::Hover, applys);
                 }
                 PRESSED => {
-                    self.apply_state_map.insert(ButtonState::Pressed, applys);
+                    component
+                        .apply_state_map
+                        .insert(ButtonState::Pressed, applys);
                 }
                 _ => {}
-            }
-        }
+            },
+        );
     }
 }
 
@@ -517,6 +516,8 @@ impl Component for LButton {
 
     play_animation!();
     set_scope_path!();
+    set_index!();
+    lifecycle!();
 }
 
 impl LButton {

@@ -1,12 +1,17 @@
+use std::collections::HashMap;
+
 use makepad_widgets::{
-    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveValue, Widget, WidgetNode,
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Widget, WidgetNode,
 };
 
 use crate::{
-    prop::{ApplyStateMap},
+    components::lifecycle::LifeCycle,
+    prop::{ApplyStateMap, ApplyStateMapImpl},
     themes::Theme,
 };
 
+/// # Component Trait
+/// Each Component should implement this trait
 pub trait Component: Widget + WidgetNode
 where
     Self::Error: std::fmt::Debug,
@@ -34,7 +39,18 @@ where
     /// ## handle event for component
     /// from `fn handle_event()` in `impl Widget for $Component`
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area);
-    fn handle_when_disabled(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit) -> (){()}
+    /// ## handle event when component is disabled
+    /// this function should be called when component is disabled and event is not handled
+    /// ```rust
+    /// if self.disabled {
+    ///     self.handle_when_disabled(cx, event, hit);
+    /// } else {
+    ///     self.handle_widget_event(cx, event, hit, area);
+    /// }
+    /// ```
+    fn handle_when_disabled(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit) -> () {
+        ()
+    }
     /// ## play animation if component has
     /// depend on component struct `#[animator] animator: Animator`
     fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();
@@ -61,6 +77,29 @@ where
     /// do before render component
     fn sync(&mut self) -> ();
     fn set_animation(&mut self, cx: &mut Cx) -> ();
+    fn lifecycle(&self) -> LifeCycle;
+    fn set_index(&mut self, index: usize) -> ();
+    /// ## set apply state map
+    fn set_apply_state_map<LP, P, NF, IF>(
+        &mut self,
+        nodes: &[LiveNode],
+        index: usize,
+        live_props: LP,
+        prefixs: P,
+        next_or: NF,
+        insert: IF,
+    ) -> ()
+    where
+        LP: IntoIterator<Item = LiveId> + Copy,
+        P: IntoIterator<Item = LiveId>,
+        NF: FnOnce(&mut Self) -> (),
+        IF: FnOnce(LiveId, &mut Self, HashMap<String, LiveValue>) -> () + Copy,
+        Self: Sized,
+    {
+        ApplyStateMap::<Self::State>::set_map(
+            self, nodes, index, live_props, prefixs, next_or, insert,
+        );
+    }
 }
 
 /// # Prop

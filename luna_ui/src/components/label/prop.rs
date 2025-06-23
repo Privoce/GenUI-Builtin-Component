@@ -4,8 +4,10 @@ use toml_edit::Item;
 use crate::{
     components::traits::{BasicProp, Prop},
     error::Error,
-    prop::manuel::{
-        BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME,
+    prop::{
+        manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        PropMapImpl,
     },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
     utils::{get_from_itable as get, get_from_table},
@@ -41,7 +43,7 @@ impl TryFrom<&Item> for LabelProp {
             table,
             BASIC,
             || Ok(LabelBasicProp::default()),
-            |v| (v, LabelState::None).try_into(),
+            |v| (v, LabelState::Basic).try_into(),
         )?;
 
         let disabled = get_from_table(
@@ -66,7 +68,7 @@ impl Prop for LabelProp {
 
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
-            LabelState::None => &self.basic,
+            LabelState::Basic => &self.basic,
             LabelState::Disabled => &self.disabled,
         }
     }
@@ -77,13 +79,28 @@ impl Prop for LabelProp {
 
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
         match state {
-            LabelState::None => &mut self.basic,
+            LabelState::Basic => &mut self.basic,
             LabelState::Disabled => &mut self.disabled,
         }
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
-        ()
+        if let Some(basic_props) = map.get(&LabelState::Basic) {
+            let props = basic_props.clone();
+            // in label, do not need to handle theme
+            for (k, v) in &props {
+                self.basic.set_from_str(k, v, LabelState::Basic);
+            }
+            // disabled
+            let disabled_props = map
+                .get(&LabelState::Disabled)
+                .map_or_else(|| props, |apply_props| apply_props.diff(basic_props));
+
+            self.disabled.sync(LabelState::Disabled);
+            for (k, v) in &disabled_props {
+                self.disabled.set_from_str(k, v, LabelState::Disabled);
+            }
+        }
     }
 }
 
@@ -110,7 +127,7 @@ pub struct LabelBasicProp {
 
 impl Default for LabelBasicProp {
     fn default() -> Self {
-        Self::from_state(Theme::default(), LabelState::None)
+        Self::from_state(Theme::default(), LabelState::Basic)
     }
 }
 
@@ -119,11 +136,36 @@ impl BasicProp for LabelBasicProp {
     type Colors = Color;
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
-        ()
+        match key {
+            THEME => {
+                self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
+            }
+            COLOR => {
+                self.color = Vec4::from_live_color(value)
+                    .unwrap_or(ColorFontConf::from_key("primary").into());
+                self.sync(state);
+            }
+            FONT_SIZE => {
+                self.font_size = f32::from_live_value(value).unwrap_or(12.0);
+            }
+            LINE_SPACING => {
+                self.line_spacing = f32::from_live_value(value).unwrap_or(1.2);
+            }
+            MARGIN => {
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
+            }
+            PADDING => {
+                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(0.0));
+            }
+            FLOW => {
+                self.flow = Flow::from_live_value(value).unwrap_or(Flow::RightWrap);
+            }
+            _ => {}
+        }
     }
 
-    fn sync(&mut self,  state: Self::State) -> () {
-        ()
+    fn sync(&mut self, state: Self::State) -> () {
+        self.color = Self::state_colors(Theme::default(), state).into();
     }
 
     fn len() -> usize {
@@ -138,25 +180,15 @@ impl BasicProp for LabelBasicProp {
             color: color.into(),
             font_size: 12.0,
             line_spacing: 1.2,
-            margin: Margin {
-                top: 0.0,
-                right: 0.0,
-                bottom: 0.0,
-                left: 0.0,
-            },
-            padding: Padding {
-                top: 0.0,
-                right: 0.0,
-                bottom: 0.0,
-                left: 0.0,
-            },
+            margin: Margin::from_f64(0.0),
+            padding: Padding::from_f64(0.0),
             flow: Flow::RightWrap,
         }
     }
 
     fn state_colors(_theme: Theme, state: Self::State) -> Self::Colors {
         match state {
-            LabelState::None => ColorFontConf::from_key("primary"),
+            LabelState::Basic => ColorFontConf::from_key("primary"),
             LabelState::Disabled => ColorFontConf::from_key("disabled"),
         }
     }
@@ -176,12 +208,7 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
         let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
         let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.2), |item| item.to_f32())?;
 
-        let default_margin = Margin {
-            top: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            left: 0.0,
-        };
+        let default_margin = Margin::from_f64(0.0);
 
         let margin = get(
             inline_table,
@@ -190,12 +217,7 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
             |item| item.to_margin(default_margin),
         )?;
 
-        let default_padding = Padding {
-            top: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            left: 0.0,
-        };
+        let default_padding = Padding::from_f64(0.0);
 
         let padding = get(
             inline_table,
@@ -223,8 +245,20 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Hash, Eq)]
 pub enum LabelState {
-    None,
+    #[default]
+    Basic,
     Disabled,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Live, LiveHook, Default)]
+#[live_ignore]
+pub enum FontMode {
+    #[pick]
+    #[default]
+    Regular,
+    Bold,
+    Italic,
+    BoldItalic,
 }

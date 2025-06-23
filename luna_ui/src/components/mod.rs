@@ -14,11 +14,7 @@ live_design! {
     use link::luna_basic::*;
     use link::theme::*;
 
-    pub LLabel = <LLabelBase>{
-        draw_text: {
-            text_style: <THEME_FONT_REGULAR>{}
-        }
-    }
+    pub LLabel = <LLabelBase>{}
 
     pub LView = <LViewBase>{}
 

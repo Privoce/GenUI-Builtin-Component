@@ -1,10 +1,13 @@
-use makepad_widgets::*;
+use std::{collections::HashMap, sync::Arc};
+
+use makepad_widgets::{
+    makepad_live_compiler::LiveFont,
+    shader::draw_text::{FontFamily, TextStyle},
+    *,
+};
 
 use crate::{
-    components::traits::Prop,
-    error::Error,
-    getter, pure_after_apply, set_scope_path,
-    themes::{Conf, Theme},
+    components::{lifecycle::LifeCycle, traits::Prop}, error::Error, getter, lifecycle, prop::{manuel::{BASIC, DISABLED}, ApplyStateMap}, pure_after_apply, set_index, set_scope_path, themes::{Conf, Theme}, utils::makepad_resource_dir
 };
 
 mod prop;
@@ -15,27 +18,54 @@ use super::traits::Component;
 
 live_design! {
     link luna_basic;
+    use link::theme::*;
+    pub LLabelBase = {{LLabel}} {
+        font_regular: <THEME_FONT_REGULAR>{}
+        font_bold: <THEME_FONT_BOLD>{}
+        font_italic: <THEME_FONT_ITALIC>{}
+        font_bold_italic: <THEME_FONT_BOLD_ITALIC>{}
 
-    pub LLabelBase = {{LLabel}} {}
+    }
 }
 
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
 pub struct LLabel {
     #[live]
     pub prop: LabelProp,
-    #[live(false)]
-    pub disabled: bool,
     #[live(true)]
     pub visible: bool,
+    #[live]
+    pub disabled: bool,
+    #[live]
+    pub mode: FontMode,
+    // --- others ----------------
     #[rust]
     area: Area,
     #[live]
-    text: ArcStringMut,
+    pub text: ArcStringMut,
+    #[rust]
+    index: usize,
+    #[rust]
+    apply_state_map: ApplyStateMap<LabelState>,
+    // --- fonts ----------------
+    #[live]
+    font_regular: TextStyle,
+    #[live]
+    font_bold: TextStyle,
+    #[live]
+    font_italic: TextStyle,
+    #[live]
+    font_bold_italic: TextStyle,
     // --- draw ------------------
     #[live]
     pub draw_text: DrawText,
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
+    // --- init -----------------
+    #[live(true)]
+    pub sync: bool,
+    #[rust]
+    pub lifecycle: LifeCycle,
 }
 
 impl WidgetNode for LLabel {
@@ -99,8 +129,53 @@ impl Widget for LLabel {
 impl LiveHook for LLabel {
     pure_after_apply!();
 
+    // fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+    //     self.render_after_apply(cx);
+    // }
+
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
+    }
+
+    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        if self.lifecycle.is_created() {
+            self.index = index;
+            self.lifecycle.next();
+        }
+        let live_props = [
+            live_id!(theme),
+            live_id!(color),
+            live_id!(font_size),
+            live_id!(line_spacing),
+            live_id!(margin),
+            live_id!(padding),
+            live_id!(flow),
+        ];
+        for prefix in [live_id!(basic), live_id!(disabled)] {
+            let mut applys = HashMap::new();
+            for path in live_props {
+                if let Some(i) = nodes.child_by_path(
+                    index,
+                    &[
+                        live_id!(prop).as_field(),
+                        prefix.as_field(),
+                        path.as_field(),
+                    ],
+                ) {
+                    let node = &nodes[i];
+                    applys.insert(node.id.to_string(), node.value.clone());
+                }
+            }
+            match prefix.to_string().as_str() {
+                BASIC => {
+                    self.apply_state_map.insert(LabelState::Basic, applys);
+                }
+                DISABLED => {
+                    self.apply_state_map.insert(LabelState::Disabled, applys);
+                }
+                _ => {}
+            }
+        }
     }
 }
 
@@ -119,6 +194,12 @@ impl Component for LLabel {
         self.draw_text.color = self.prop.get(state).color;
         self.draw_text.text_style.font_size = self.prop.get(state).font_size;
         self.draw_text.text_style.line_spacing = self.prop.get(state).line_spacing;
+        self.draw_text.text_style.font_family = match self.mode {
+            FontMode::Regular => self.font_regular.font_family.clone(),
+            FontMode::Bold => self.font_bold.font_family.clone(),
+            FontMode::Italic => self.font_italic.font_family.clone(),
+            FontMode::BoldItalic => self.font_bold_italic.font_family.clone(),
+        };
         Ok(())
     }
 
@@ -126,7 +207,7 @@ impl Component for LLabel {
         if self.disabled {
             LabelState::Disabled
         } else {
-            LabelState::None
+            LabelState::Basic
         }
     }
 
@@ -134,12 +215,12 @@ impl Component for LLabel {
         ()
     }
 
-    set_scope_path!();
     
+
     fn play_animation(&mut self, _cx: &mut Cx, _state: &[LiveId; 2]) -> () {
         ()
     }
-    
+
     fn clear_animation(&mut self, _cx: &mut Cx) -> () {
         ()
     }
@@ -158,8 +239,14 @@ impl Component for LLabel {
         ()
     }
     fn sync(&mut self) -> () {
-        ()
+        if !self.sync {
+            return;
+        }
+        self.prop.sync(&self.apply_state_map);
     }
+    set_index!();
+    lifecycle!();
+    set_scope_path!();
 }
 
 impl LLabel {

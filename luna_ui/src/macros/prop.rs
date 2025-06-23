@@ -69,24 +69,20 @@ macro_rules! getter {
     };
 }
 
-// #[macro_export]
-// macro_rules! apply_map {
-//     ($nodes: ident : $map: expr => {
-        
-//     },*) => {
-//         $(
-//             if let Some(index) = $nodes.child_by_path(
-//                 index,
-//                 &[
-//                     live_id!(prop).as_field(),
-//                     live_id!($state).as_field(),
-//                     live_id!($field).as_field(),
-//                 ],
-//             ) {
-//                 let node = $nodes[index];
-//                 $map
-//                     .insert(node.id.to_string(), node.value.clone());
-//             }
-//         )*
-//     };
-// }
+#[macro_export]
+macro_rules! set_index {
+    () => {
+        fn set_index(&mut self, index: usize) {
+            self.index = index;
+        }   
+    };
+}
+
+#[macro_export]
+macro_rules! lifecycle {
+    () => {
+        fn lifecycle(&self) -> LifeCycle {
+            self.lifecycle
+        }
+    };
+}

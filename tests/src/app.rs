@@ -1,7 +1,6 @@
 use luna_ui::{
     components::{
-        button::{ButtonState, LButtonWidgetRefExt},
-        traits::{BasicProp, Component},
+        button::{ButtonState, LButtonWidgetRefExt}, label::LLabelWidgetRefExt, traits::{BasicProp, Component}
     },
     prop::traits::ToColor,
     themes::Theme,
@@ -92,26 +91,26 @@ live_design! {
 
                     // }
 
-                        // btn1 = <LButton>{
-                        //     prop: {
-                        //         basic: {
-                        //             theme: Info,
-                        //             border_width: 2.0,
-                        //             border_color: #ff0,
-                        //         }
-                        //         hover: {
-                        //             theme: Success,
-                        //             border_color: #0f0,
-                        //             border_width: 4.0,
-                        //         },
-                        //         pressed: {
-                        //             theme: Error,
-                        //         }
-                        //     }
-                        //     slot: <Label>{
-                        //         text: "Click me !"
-                        //     }
-                        // }
+                        btn1 = <LButton>{
+                            prop: {
+                                basic: {
+                                    theme: Info,
+                                    border_width: 2.0,
+                                    border_color: #ff0,
+                                }
+                                hover: {
+                                    theme: Success,
+                                    border_color: #0f0,
+                                    border_width: 4.0,
+                                },
+                                pressed: {
+                                    theme: Error,
+                                }
+                            }
+                            slot: <Label>{
+                                text: "Click me !"
+                            }
+                        }
                         <LButton>{
                             prop: {
                                 basic: {
@@ -125,21 +124,29 @@ live_design! {
                                 }
                             }
                             disabled: true,
+                        }
+                        <LButton>{
+                            prop: {
+                                basic: {
+                                    theme: Warning,
+                                }
+                                
+                            }
                             slot: <Label>{
                                 text: "Click me !"
                             }
                         }
-                        // <LButton>{
-                        //     prop: {
-                        //         basic: {
-                        //             theme: Warning,
-                        //         }
-                                
-                        //     }
-                        //     slot: <Label>{
-                        //         text: "Click me !"
-                        //     }
-                        // }
+
+                        lb = <LLabel>{
+                            text: "Hello World",
+                            mode: Bold
+                            // prop: {
+                            //     basic: {
+                            //         color: #ff0,
+                            //         font_size: 24.0,
+                            //     }
+                            // }
+                        }
                 }
             }
         }
@@ -183,6 +190,9 @@ impl MatchEvent for App {
                 btn1.set_theme(cx, Theme::Warning).unwrap();
             }
         }
+
+        // let lb = self.ui.llabel(id!(lb));
+        
         // if self.ui.lbutton(id!(btn1)).cli
     }
 }
