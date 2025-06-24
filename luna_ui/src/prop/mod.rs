@@ -1,7 +1,7 @@
 pub mod manuel;
 mod radius;
 pub mod traits;
-use std::{collections::HashMap, hash::Hash};
+use std::{borrow::Cow, collections::HashMap, hash::Hash};
 
 use makepad_widgets::{live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveValue};
 pub use radius::Radius;
@@ -60,14 +60,17 @@ where
         if let Some(basic_props) = self.get(&basic_state) {
             // 在set_from_str前需要处理同步theme颜色，其他状态也一样
             // 步骤是：作差运算 -> remove theme -> set_from_str
-            let mut props = basic_props.clone();
+            let mut props = Cow::Borrowed(basic_props);
             // [basic] --------------------------------------------------------------------------------
             // 处理theme
-            if let Some(value) = props.remove(THEME) {
-                prop.set_from_str(THEME, &value, basic_state);
+            if props.contains_key(THEME) {
+                let props = props.to_mut();
+                if let Some(value) = props.remove(THEME) {
+                    prop.set_from_str(THEME, &value, basic_state);
+                }
             }
             // 处理其他
-            for (k, v) in props {
+            for (k, v) in props.iter() {
                 prop.set_from_str(&k, &v, basic_state);
             }
             // [other states] -----------------------------------------------------------------------
@@ -75,17 +78,19 @@ where
                 // diff
                 let mut diff_props = self.get(&state).map_or_else(
                     || basic_props.clone(),
-                    |apply_props| apply_props.diff(basic_props),
+                    |apply_props| apply_props.diff(&basic_props),
                 );
                 // remove theme
-                if let Some(value) = diff_props.remove(THEME) {
-                    props.set_from_str(THEME, &value, state);
-                } else {
-                    // if no theme, use self.theme
-                    props.sync(state);
+                if diff_props.contains_key(THEME) {
+                    if let Some(value) = diff_props.remove(THEME) {
+                        props.set_from_str(THEME, &value, state);
+                    } else {
+                        // if no theme, use self.theme
+                        props.sync(state);
+                    }
                 }
                 // set from str
-                for (k, v) in diff_props {
+                for (k, v) in diff_props.iter() {
                     props.set_from_str(&k, &v, state);
                 }
             }
