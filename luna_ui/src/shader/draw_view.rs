@@ -143,7 +143,7 @@ impl DrawView {
             if self.hover == 1.0 {
                 ViewState::Hover
             } else {
-                ViewState::None
+                ViewState::Basic
             }
         }
     }

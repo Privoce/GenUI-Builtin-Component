@@ -119,11 +119,12 @@ live_design! {
                                 hover: {
                                     theme: Primary,
                                 }
-                                pressed: {
-                                    // theme: Primary,
-                                }
                             }
                             disabled: true,
+                            slot: <LLabel>{
+                                text: "Button",
+                                mode: Regular,
+                            }
                         }
                         btn1 = <LButton>{
                             prop: {
@@ -143,7 +144,16 @@ live_design! {
                             mode: Bold
                             prop: {
                                 basic: {
-                                    color: #ff0,
+                                    font_size: 24.0,
+                                }
+                            }
+                        }
+                        lb2 = <LLabel>{
+                            text: "Hello World! hello",
+                            mode: Bold
+                            disabled: true,
+                            prop: {
+                                basic: {
                                     font_size: 24.0,
                                 }
                             }

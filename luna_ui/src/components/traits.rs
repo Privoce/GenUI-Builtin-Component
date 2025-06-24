@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use makepad_widgets::{
     error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Widget, WidgetNode,
@@ -95,6 +95,7 @@ where
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, HashMap<String, LiveValue>) -> () + Copy,
         Self: Sized,
+        Self::State: Eq + Hash + Copy,
     {
         ApplyStateMap::<Self::State>::set_map(
             self, nodes, index, live_props, prefixs, next_or, insert,
@@ -128,7 +129,9 @@ pub trait Prop: Default {
     /// this function should be called when you want to sync properties from Basic State
     /// in crate, this function is used in Component `sync` function, if Component live prop `sync` is true.
     /// this function can let other state properties sync from Basic State.
-    fn sync(&mut self, map: &ApplyStateMap<Self::State>) -> ();
+    fn sync(&mut self, map: &ApplyStateMap<Self::State>) -> ()
+    where
+        Self::State: Eq + Hash + Copy;
 }
 
 /// # BasicProp

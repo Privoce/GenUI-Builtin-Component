@@ -2,11 +2,16 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    components::traits::{BasicProp, Prop}, error::Error, getter_setter_prop, prop::{
+    components::traits::{BasicProp, Prop},
+    error::Error,
+    getter_setter_prop,
+    prop::{
         manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         PropMapImpl,
-    }, themes::{Color, ColorFontConf, Theme, TomlValueTo}, utils::{get_from_itable as get, get_from_table}
+    },
+    themes::{Color, ColorFontConf, Theme, TomlValueTo},
+    utils::{get_from_itable as get, get_from_table},
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -80,10 +85,14 @@ impl Prop for LabelProp {
         }
     }
 
-    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
+    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
+    where
+        Self::State: Eq + std::hash::Hash + Copy,
+    {
         if let Some(basic_props) = map.get(&LabelState::Basic) {
             let props = basic_props.clone();
             // in label, do not need to handle theme
+            self.basic.sync(LabelState::Basic);
             for (k, v) in &props {
                 self.basic.set_from_str(k, v, LabelState::Basic);
             }
@@ -128,7 +137,7 @@ impl Default for LabelBasicProp {
 }
 
 impl LabelBasicProp {
-    getter_setter_prop!{
+    getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_color, set_color: color -> Vec4,
         get_font_size, set_font_size: font_size -> f32,

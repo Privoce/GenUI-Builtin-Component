@@ -15,7 +15,7 @@ use crate::{
             PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
-        PropMapImpl, Radius,
+        ApplyStateMapImpl, Radius,
     },
     themes::{Color, Theme, TomlValueTo},
     utils::{get_from_itable, get_from_table},
@@ -61,46 +61,19 @@ impl Prop for ButtonProp {
         }
     }
 
-    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> () {
-        if let Some(basic_props) = map.get(&ButtonState::Basic) {
-            // 在set_from_str前需要处理同步theme颜色，其他状态也一样
-            // 步骤是：作差运算 -> remove theme -> set_from_str
-            let mut props = basic_props.clone();
-            // [basic] --------------------------------------------------------------------------------
-            // 处理theme
-            if let Some(value) = props.remove(THEME) {
-                self.basic.set_from_str(THEME, &value, ButtonState::Basic);
-            }
-            // 处理其他
-            for (k, v) in props {
-                self.basic.set_from_str(&k, &v, ButtonState::Basic);
-            }
-            // [other states] -----------------------------------------------------------------------
-            let states = [
+    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
+    where
+        Self::State: Eq + std::hash::Hash + Copy,
+    {
+        map.sync(
+            &mut self.basic,
+            ButtonState::Basic,
+            [
                 (ButtonState::Hover, &mut self.hover),
                 (ButtonState::Pressed, &mut self.pressed),
                 (ButtonState::Disabled, &mut self.disabled),
-            ];
-
-            for (state, props) in states {
-                // diff
-                let mut diff_props = map.get(&state).map_or_else(
-                    || basic_props.clone(),
-                    |apply_props| apply_props.diff(basic_props),
-                );
-                // remove theme
-                if let Some(value) = diff_props.remove(THEME) {
-                    props.set_from_str(THEME, &value, state);
-                }else{
-                    // if no theme, use self.theme
-                    props.sync(state);
-                }
-                // set from str
-                for (k, v) in diff_props {
-                    props.set_from_str(&k, &v, state);
-                }
-            }
-        }
+            ],
+        );
     }
 }
 
@@ -242,15 +215,16 @@ impl BasicProp for ButtonBasicProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
+                let (background_color, _, _) = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(400).into());
+                    Vec4::from_live_color(value).unwrap_or(background_color.into());
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);
             }
             SHADOW_COLOR => {
-                self.shadow_color =
-                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(300).into());
+                let (_, _, shadow_color) = Self::state_colors(self.theme, state);
+                self.shadow_color = Vec4::from_live_color(value).unwrap_or(shadow_color.into());
             }
             SPREAD_RADIUS => {
                 self.spread_radius = f32::from_live_value(value).unwrap_or(0.0);
@@ -265,14 +239,19 @@ impl BasicProp for ButtonBasicProp {
                 self.border_width = f32::from_live_value(value).unwrap_or(0.0);
             }
             BORDER_COLOR => {
-                self.border_color =
-                    Vec4::from_live_color(value).unwrap_or(Theme::Dark.color(400).into());
+                let (_, border_color, _) = Self::state_colors(self.theme, state);
+                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
             }
             BORDER_RADIUS => {
                 self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(4.0));
             }
             CURSOR => {
-                self.cursor = MouseCursor::from_live_value(value).unwrap_or(MouseCursor::Hand);
+                let cursor = if state.is_disabled() {
+                    MouseCursor::NotAllowed
+                } else {
+                    MouseCursor::Hand
+                };
+                self.cursor = MouseCursor::from_live_value(value).unwrap_or(cursor);
             }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
@@ -285,9 +264,7 @@ impl BasicProp for ButtonBasicProp {
                 self.flow = Flow::from_live_value(value).unwrap_or(Flow::Right);
             }
             ALIGN => {
-                if let LiveValue::Float64(align) = value {
-                    self.align = Align::from_f64(*align);
-                }
+                self.align = Align::from_live_value(value).unwrap_or(Align::from_f64(0.5));
             }
             HEIGHT => {
                 self.height = Size::from_live_value(value).unwrap_or(Size::Fit);
@@ -529,9 +506,10 @@ impl ButtonState {
 impl From<ViewState> for ButtonState {
     fn from(value: ViewState) -> Self {
         match value {
-            ViewState::None => ButtonState::Basic,
+            ViewState::Basic => ButtonState::Basic,
             ViewState::Hover => ButtonState::Hover,
             ViewState::Pressed => ButtonState::Pressed,
+            ViewState::Disabled => ButtonState::Disabled,
         }
     }
 }

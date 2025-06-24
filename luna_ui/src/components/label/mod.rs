@@ -27,7 +27,6 @@ live_design! {
         font_bold: <THEME_FONT_BOLD>{}
         font_italic: <THEME_FONT_ITALIC>{}
         font_bold_italic: <THEME_FONT_BOLD_ITALIC>{}
-
     }
 }
 

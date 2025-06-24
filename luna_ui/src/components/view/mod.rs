@@ -15,25 +15,38 @@ use super::traits::Component;
 
 live_design! {
     link luna_basic;
-
+    use link::luna_animation_prop::*;
+    
     pub LViewBase = {{LView}} {
         animator: {
             hover = {
                 default: off,
+
+                off = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_view: <AN_DRAW_VIEW> {}
+                    }
+                }
+
                 on = {
                     from: {
-                        all: Forward {duration: (0.25)},
-                        pressed: Forward {duration: (0.25)},
+                        all: Forward {duration: (AN_DURATION),},
+                        pressed: Forward {duration: (AN_DURATION)},
+                        ease: InOutQuad,
                     },
-                    apply: {draw_view: {hover: 1.0, pressed: 0.0}}
-                },
-                off = {
-                    from: {all: Forward {duration: (0.25)}},
-                    apply: {draw_view: {hover: 0.0, pressed: 0.0}}
-                },
+                    apply: {
+                       draw_view: <AN_DRAW_VIEW> {}
+                    }
+                }
+
                 pressed = {
-                    from: {all: Forward {duration: (0.25)}},
-                    apply: {draw_view: {hover: 0.0, pressed: 1.0}}
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_view: <AN_DRAW_VIEW> {}
+                    }
                 }
             }
         }
@@ -532,7 +545,7 @@ impl Widget for LView {
                     cx.widget_action(uid, &scope.path, ViewAction::FingerUp(e));
                     if self.animator.live_ptr.is_some() {
                         self.animator_play(cx, id!(hover.off));
-                        self.switch_state_and_redraw(cx, ViewState::None);
+                        self.switch_state_and_redraw(cx, ViewState::Basic);
                     }
                 }
                 Hit::FingerHoverIn(e) => {
@@ -547,7 +560,7 @@ impl Widget for LView {
                     cx.widget_action(uid, &scope.path, ViewAction::FingerHoverOut(e));
                     if self.animator.live_ptr.is_some() {
                         self.animator_play(cx, id!(hover.off));
-                        self.switch_state_and_redraw(cx, ViewState::None);
+                        self.switch_state_and_redraw(cx, ViewState::Basic);
                     }
                 }
                 Hit::KeyDown(e) => cx.widget_action(uid, &scope.path, ViewAction::KeyDown(e)),
@@ -607,7 +620,7 @@ impl Component for LView {
 
     fn switch_state(&mut self, state: Self::State) -> () {
         match state {
-            ViewState::None => {
+            ViewState::Basic => {
                 // switch to normal state
                 if self.draw_view.hover != 0.0 || self.draw_view.pressed != 0.0 {
                     self.draw_view.hover = 0.0;
@@ -626,6 +639,7 @@ impl Component for LView {
                     self.draw_view.pressed = 1.0;
                 }
             }
+            ViewState::Disabled => {}
         }
     }
 

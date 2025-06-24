@@ -1,12 +1,16 @@
 pub mod manuel;
 mod radius;
 pub mod traits;
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use makepad_widgets::{live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveValue};
 pub use radius::Radius;
 
-use crate::{components::traits::Component, prop::manuel::THEME, themes::Theme};
+use crate::{
+    components::traits::{BasicProp, Component},
+    prop::manuel::THEME,
+    themes::Theme,
+};
 
 /// PropMap is a mapping from a property name to a LiveValue, used for storing properties in components
 pub type PropMap = HashMap<String, LiveValue>;
@@ -20,7 +24,7 @@ pub trait PropMapImpl {
     fn diff(&self, other: &Self) -> Self;
 }
 
-pub trait ApplyStateMapImpl {
+pub trait ApplyStateMapImpl<S> {
     fn set_map<C, LP, P, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
@@ -35,9 +39,59 @@ pub trait ApplyStateMapImpl {
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, HashMap<String, LiveValue>) -> () + Copy;
+
+    fn sync<'p, 'm, P, IS>(&'m self, prop: &mut P, basic_state: S, states: IS) -> ()
+    where
+        'p: 'm,
+        P: BasicProp<State = S> + 'p,
+        IS: IntoIterator<Item = (S, &'p mut P)>;
 }
 
-impl<S> ApplyStateMapImpl for ApplyStateMap<S> {
+impl<S> ApplyStateMapImpl<S> for ApplyStateMap<S>
+where
+    S: Hash + Eq + Copy,
+{
+    fn sync<'p, 'm, P, IS>(&'m self, prop: &mut P, basic_state: S, states: IS) -> ()
+    where
+        'p: 'm,
+        P: BasicProp<State = S> + 'p,
+        IS: IntoIterator<Item = (S, &'p mut P)>,
+    {
+        if let Some(basic_props) = self.get(&basic_state) {
+            // 在set_from_str前需要处理同步theme颜色，其他状态也一样
+            // 步骤是：作差运算 -> remove theme -> set_from_str
+            let mut props = basic_props.clone();
+            // [basic] --------------------------------------------------------------------------------
+            // 处理theme
+            if let Some(value) = props.remove(THEME) {
+                prop.set_from_str(THEME, &value, basic_state);
+            }
+            // 处理其他
+            for (k, v) in props {
+                prop.set_from_str(&k, &v, basic_state);
+            }
+            // [other states] -----------------------------------------------------------------------
+            for (state, props) in states {
+                // diff
+                let mut diff_props = self.get(&state).map_or_else(
+                    || basic_props.clone(),
+                    |apply_props| apply_props.diff(basic_props),
+                );
+                // remove theme
+                if let Some(value) = diff_props.remove(THEME) {
+                    props.set_from_str(THEME, &value, state);
+                } else {
+                    // if no theme, use self.theme
+                    props.sync(state);
+                }
+                // set from str
+                for (k, v) in diff_props {
+                    props.set_from_str(&k, &v, state);
+                }
+            }
+        }
+    }
+
     fn set_map<C, LP, P, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
