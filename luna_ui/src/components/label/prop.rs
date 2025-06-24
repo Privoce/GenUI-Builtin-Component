@@ -2,23 +2,19 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    components::traits::{BasicProp, Prop},
-    error::Error,
-    prop::{
+    components::traits::{BasicProp, Prop}, error::Error, getter_setter_prop, prop::{
         manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         PropMapImpl,
-    },
-    themes::{Color, ColorFontConf, Theme, TomlValueTo},
-    utils::{get_from_itable as get, get_from_table},
+    }, themes::{Color, ColorFontConf, Theme, TomlValueTo}, utils::{get_from_itable as get, get_from_table}
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct LabelProp {
-    #[live]
+    #[live(LabelBasicProp::default())]
     pub basic: LabelBasicProp,
-    #[live]
+    #[live(LabelBasicProp::from_state(Theme::default(), LabelState::Disabled))]
     pub disabled: LabelBasicProp,
 }
 
@@ -111,13 +107,13 @@ pub struct LabelBasicProp {
     pub theme: Theme,
     #[live]
     pub color: Vec4,
-    #[live]
+    #[live(12.0)]
     pub font_size: f32,
-    #[live]
+    #[live(1.2)]
     pub line_spacing: f32,
-    #[live]
+    #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
-    #[live]
+    #[live(Padding::from_f64(0.0))]
     pub padding: Padding,
     // #[live]
     // pub align: Align,
@@ -131,11 +127,23 @@ impl Default for LabelBasicProp {
     }
 }
 
+impl LabelBasicProp {
+    getter_setter_prop!{
+        get_theme, set_theme: theme -> Theme,
+        get_color, set_color: color -> Vec4,
+        get_font_size, set_font_size: font_size -> f32,
+        get_line_spacing, set_line_spacing: line_spacing -> f32,
+        get_margin, set_margin: margin -> Margin,
+        get_padding, set_padding: padding -> Padding,
+        get_flow, set_flow: flow -> Flow
+    }
+}
+
 impl BasicProp for LabelBasicProp {
     type State = LabelState;
     type Colors = Color;
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, _state: Self::State) -> () {
         match key {
             THEME => {
                 self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
@@ -143,7 +151,6 @@ impl BasicProp for LabelBasicProp {
             COLOR => {
                 self.color = Vec4::from_live_color(value)
                     .unwrap_or(ColorFontConf::from_key("primary").into());
-                self.sync(state);
             }
             FONT_SIZE => {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);

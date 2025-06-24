@@ -129,6 +129,7 @@ impl WidgetNode for LButton {
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
+        let _ = self.render(cx);
         self.draw_button.redraw(cx);
         if self.slot.visible() {
             self.slot.redraw(cx);
@@ -197,10 +198,6 @@ impl LiveHook for LButton {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        if self.lifecycle.is_created() {
-            self.index = index;
-        }
-
         self.set_apply_state_map(
             nodes,
             index,

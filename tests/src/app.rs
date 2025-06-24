@@ -91,26 +91,26 @@ live_design! {
 
                     // }
 
-                        btn1 = <LButton>{
-                            prop: {
-                                basic: {
-                                    theme: Info,
-                                    border_width: 2.0,
-                                    border_color: #ff0,
-                                }
-                                hover: {
-                                    theme: Success,
-                                    border_color: #0f0,
-                                    border_width: 4.0,
-                                },
-                                pressed: {
-                                    theme: Error,
-                                }
-                            }
-                            slot: <Label>{
-                                text: "Click me !"
-                            }
-                        }
+                        // btn1 = <LButton>{
+                        //     prop: {
+                        //         basic: {
+                        //             theme: Info,
+                        //             border_width: 2.0,
+                        //             border_color: #ff0,
+                        //         }
+                        //         hover: {
+                        //             theme: Success,
+                        //             border_color: #0f0,
+                        //             border_width: 4.0,
+                        //         },
+                        //         pressed: {
+                        //             theme: Error,
+                        //         }
+                        //     }
+                        //     slot: <Label>{
+                        //         text: "Click me !"
+                        //     }
+                        // }
                         <LButton>{
                             prop: {
                                 basic: {
@@ -125,27 +125,28 @@ live_design! {
                             }
                             disabled: true,
                         }
-                        <LButton>{
+                        btn1 = <LButton>{
                             prop: {
                                 basic: {
                                     theme: Warning,
                                 }
                                 
                             }
-                            slot: <Label>{
-                                text: "Click me !"
+                            slot: <LLabel>{
+                                text: "Click me !",
+                                mode: Bold,
                             }
                         }
 
                         lb = <LLabel>{
-                            text: "Hello World",
+                            text: "Hello World!",
                             mode: Bold
-                            // prop: {
-                            //     basic: {
-                            //         color: #ff0,
-                            //         font_size: 24.0,
-                            //     }
-                            // }
+                            prop: {
+                                basic: {
+                                    color: #ff0,
+                                    font_size: 24.0,
+                                }
+                            }
                         }
                 }
             }
@@ -180,15 +181,16 @@ impl MatchEvent for App {
         //     log!("hi");
         //     self.counter += 1;
         // }
+        let lb = self.ui.llabel(id!(lb));
         let btn1 = self.ui.lbutton(id!(btn1));
         if let Some(_) = btn1.clicked(actions) {
-            if let Some(mut btn1) = btn1.borrow_mut() {
-                // btn1.prop.basic.theme = Theme::Success;
-                // btn1.prop.basic.sync(ButtonState::Basic);
-                // btn1.redraw(cx);
-                // btn1.prop.basic.background_color = Vec4::from_string("#f00").unwrap();
-                btn1.set_theme(cx, Theme::Warning).unwrap();
-            }
+            self.counter += 1;
+            // lb.set_text(cx, format!("Clicked {} times", self.counter));
+            let _ = lb.set_color(cx, "#f00".to_string());
+            let _ = lb.set_font_size(cx, 18.0);
+            
+            let _ = btn1.set_background_color(cx, "#0f0".to_string());
+            lb.redraw(cx);
         }
 
         // let lb = self.ui.llabel(id!(lb));
