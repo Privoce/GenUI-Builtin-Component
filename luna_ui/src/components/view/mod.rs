@@ -3,11 +3,28 @@ mod prop;
 mod rely;
 use std::cell::RefCell;
 
-use makepad_widgets::*;
+pub use event::*;
+use makepad_widgets::{event::FingerLongPressEvent, *};
 pub use prop::*;
 
 use crate::{
-    components::{lifecycle::LifeCycle, traits::Prop}, error::Error, lifecycle, play_animation, prop::traits::ToFloat, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf
+    active_event, animation_open_then_redraw,
+    components::{
+        lifecycle::LifeCycle,
+        traits::{BasicProp, Prop},
+    },
+    error::Error,
+    event_option, event_option_ref, getter, hit_finger_down, hit_finger_up, hit_hover_in,
+    hit_hover_out, lifecycle, play_animation,
+    prop::{
+        manuel::{BASIC, HOVER, PRESSED},
+        traits::{ToColor, ToFloat},
+        ApplyStateMap, Radius,
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    themes::{Conf, Theme},
+    ComponentAnInit,
 };
 pub use rely::*;
 
@@ -16,7 +33,7 @@ use super::traits::Component;
 live_design! {
     link luna_basic;
     use link::luna_animation_prop::*;
-    
+
     pub LViewBase = {{LView}} {
         animator: {
             hover = {
@@ -79,6 +96,10 @@ pub struct LView {
     pub capture_overload: bool,
     #[live]
     pub event_order: EventOrder,
+    #[live(false)]
+    pub event_open: bool,
+    #[live]
+    pub disabled: bool,
     // --- texture and cache ------
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
@@ -115,10 +136,22 @@ pub struct LView {
     pub lifecycle: LifeCycle,
     #[rust]
     index: usize,
+    #[live(true)]
+    pub sync: bool,
+    #[rust]
+    apply_state_map: ApplyStateMap<ViewState>,
 }
 
 impl LiveHook for LView {
-    fn before_apply(&mut self, _cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    pure_after_apply!();
+
+    fn before_apply(
+        &mut self,
+        _cx: &mut Cx,
+        apply: &mut Apply,
+        _index: usize,
+        _nodes: &[LiveNode],
+    ) {
         if let ApplyFrom::UpdateFromDoc { .. } = apply.from {
             //self.draw_order.clear();
             self.live_update_order.clear();
@@ -130,7 +163,7 @@ impl LiveHook for LView {
         self.merge_conf_prop(cx);
     }
 
-    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
+    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         if apply.from.is_update_from_doc() {
             //livecoding
             // update/delete children list
@@ -157,6 +190,49 @@ impl LiveHook for LView {
         if apply.from.is_new_from_doc() {
             self.render_after_apply(cx);
         }
+
+        self.set_apply_state_map(
+            nodes,
+            index,
+            [
+                live_id!(theme),
+                live_id!(background_color),
+                live_id!(border_color),
+                live_id!(border_width),
+                live_id!(border_radius),
+                live_id!(shadow_color),
+                live_id!(spread_radius),
+                live_id!(blur_radius),
+                live_id!(shadow_offset),
+                live_id!(background_visible),
+                live_id!(rotation),
+                live_id!(scale),
+                live_id!(padding),
+                live_id!(margin),
+                live_id!(clip_x),
+                live_id!(clip_y),
+                live_id!(align),
+                live_id!(cursor),
+                live_id!(flow),
+                live_id!(spacing),
+                live_id!(height),
+                live_id!(width),
+            ],
+            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
+                BASIC => {
+                    component.apply_state_map.insert(ViewState::Basic, applys);
+                }
+                HOVER => {
+                    component.apply_state_map.insert(ViewState::Hover, applys);
+                }
+                PRESSED => {
+                    component.apply_state_map.insert(ViewState::Pressed, applys);
+                }
+                _ => {}
+            },
+        );
     }
 
     fn apply_value_instance(
@@ -231,6 +307,7 @@ impl WidgetNode for LView {
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
+        let _ = self.render(cx);
         self.area.redraw(cx);
         for (_, child) in &mut self.children {
             child.redraw(cx);
@@ -295,6 +372,7 @@ impl Widget for LView {
         if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
             if !self.visible {
                 self.draw_state.end();
+                self.set_scope_path(&scope.path);
                 return DrawStep::done();
             }
 
@@ -318,6 +396,7 @@ impl Widget for LView {
                             self.area = self.draw_view.area();
                             cx.set_pass_area(&texture_cache.pass, self.area);
                         }
+                        self.set_scope_path(&scope.path);
                         return DrawStep::done();
                     }
                     // lets start a pass
@@ -357,6 +436,7 @@ impl Widget for LView {
                         .is_not_redrawing()
                     {
                         cx.walk_turtle_with_area(&mut self.area, walk);
+                        self.set_scope_path(&scope.path);
                         return DrawStep::done();
                     }
                 }
@@ -457,7 +537,7 @@ impl Widget for LView {
                 self.draw_state.end();
             }
         }
-
+        self.set_scope_path(&scope.path);
         DrawStep::done()
     }
 
@@ -466,13 +546,11 @@ impl Widget for LView {
             return;
         }
 
-        let uid = self.widget_uid();
-        if self.animation_open {
-            if self.animator_handle_event(cx, event).must_redraw() {
-                self.redraw(cx);
-            }
-        }
-        let prop = self.prop.get(self.current_state());
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().view = true;
+
+        animation_open_then_redraw!(self, cx, event);
+
         if self.block_signal_event {
             if let Event::Signal = event {
                 return;
@@ -526,46 +604,11 @@ impl Widget for LView {
         // }
 
         if self.visible || self.animator.live_ptr.is_some() {
-            match event.hits_with_capture_overload(cx, self.area(), self.capture_overload) {
-                Hit::FingerDown(e) => {
-                    if self.grab_key_focus {
-                        cx.set_key_focus(self.area());
-                    }
-                    cx.widget_action(uid, &scope.path, ViewAction::FingerDown(e));
-                    if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(hover.pressed));
-                        self.switch_state_and_redraw(cx, ViewState::Pressed);
-                    }
-                }
-                Hit::FingerMove(e) => cx.widget_action(uid, &scope.path, ViewAction::FingerMove(e)),
-                Hit::FingerLongPress(e) => {
-                    cx.widget_action(uid, &scope.path, ViewAction::FingerLongPress(e))
-                }
-                Hit::FingerUp(e) => {
-                    cx.widget_action(uid, &scope.path, ViewAction::FingerUp(e));
-                    if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(hover.off));
-                        self.switch_state_and_redraw(cx, ViewState::Basic);
-                    }
-                }
-                Hit::FingerHoverIn(e) => {
-                    cx.widget_action(uid, &scope.path, ViewAction::FingerHoverIn(e));
-                    cx.set_cursor(prop.cursor);
-                    if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(hover.on));
-                        self.switch_state_and_redraw(cx, ViewState::Hover);
-                    }
-                }
-                Hit::FingerHoverOut(e) => {
-                    cx.widget_action(uid, &scope.path, ViewAction::FingerHoverOut(e));
-                    if self.animator.live_ptr.is_some() {
-                        self.animator_play(cx, id!(hover.off));
-                        self.switch_state_and_redraw(cx, ViewState::Basic);
-                    }
-                }
-                Hit::KeyDown(e) => cx.widget_action(uid, &scope.path, ViewAction::KeyDown(e)),
-                Hit::KeyUp(e) => cx.widget_action(uid, &scope.path, ViewAction::KeyUp(e)),
-                _ => (),
+            let hit = event.hits_with_capture_overload(cx, self.area(), self.capture_overload);
+            if self.disabled {
+                self.handle_when_disabled(cx, event, hit);
+            } else {
+                self.handle_widget_event(cx, event, hit, self.area());
             }
         }
 
@@ -578,6 +621,7 @@ impl Widget for LView {
 impl Component for LView {
     type Error = Error;
     type State = ViewState;
+
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let prop = &cx.global::<Conf>().components.view;
         self.prop = prop.clone();
@@ -585,6 +629,7 @@ impl Component for LView {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
+
         self.draw_view.background_color = self.prop.get(state).background_color;
         self.draw_view.border_color = self.prop.get(state).border_color;
         self.draw_view.border_width = self.prop.get(state).border_width;
@@ -600,12 +645,72 @@ impl Component for LView {
         Ok(())
     }
 
-    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
-        ()
+    fn handle_widget_event(&mut self, cx: &mut Cx, _event: &Event, hit: Hit, area: Area) {
+        match hit {
+            Hit::FingerDown(e) => {
+                dbg!(self.prop.basic.border_radius);
+                self.switch_state_with_animation(cx, ViewState::Pressed);
+                hit_finger_down!(self, cx, area, e);
+            }
+            Hit::FingerMove(e) => {
+                self.switch_state_with_animation(cx, ViewState::Pressed);
+                self.active_move(cx, e);
+            }
+            Hit::FingerLongPress(e) => {
+                self.switch_state_with_animation(cx, ViewState::Pressed);
+                self.active_long_press(cx, e);
+            }
+            Hit::FingerUp(e) => {
+                if e.is_over {
+                    if e.has_hovers() {
+                        self.switch_state_with_animation(cx, ViewState::Hover);
+                        self.play_animation(cx, id!(hover.on));
+                    } else {
+                        self.switch_state_with_animation(cx, ViewState::Basic);
+                        self.play_animation(cx, id!(hover.off));
+                    }
+                    self.active_clicked(cx, e);
+                } else {
+                    self.switch_state_with_animation(cx, ViewState::Basic);
+                    hit_finger_up!(self, cx, e);
+                }
+            }
+            Hit::FingerHoverIn(e) => {
+                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                self.switch_state_with_animation(cx, ViewState::Hover);
+                hit_hover_in!(self, cx, e);
+            }
+            Hit::FingerHoverOut(e) => {
+                self.switch_state_with_animation(cx, ViewState::Basic);
+                hit_hover_out!(self, cx, e);
+            }
+            Hit::KeyDown(e) => {
+                self.switch_state_with_animation(cx, ViewState::Pressed);
+                self.active_key_down(cx, e);
+            }
+            Hit::KeyUp(e) => {
+                self.switch_state_with_animation(cx, ViewState::Basic);
+                self.active_key_up(cx, e);
+            }
+            _ => (),
+        }
+    }
+
+    fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
+        match hit {
+            Hit::FingerHoverIn(_) => {
+                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+            }
+            _ => {}
+        }
     }
 
     fn current_state(&self) -> Self::State {
-        self.draw_view.current_state()
+        if self.disabled {
+            ViewState::Disabled
+        } else {
+            self.draw_view.current_state()
+        }
     }
 
     fn clear_animation(&mut self, cx: &mut Cx) -> () {
@@ -644,23 +749,158 @@ impl Component for LView {
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open {
+        if !self.animation_open || self.disabled {
             return;
         }
         self.switch_state(state);
-    }
-
-    fn switch_state_and_redraw(&mut self, cx: &mut Cx, state: ViewState) -> () {
-        self.switch_state(state);
-        let _ = self.render(cx);
-        self.draw_view.redraw(cx);
+        self.set_animation(cx);
     }
 
     fn sync(&mut self) -> () {
-        
+        if !self.sync {
+            return;
+        }
+        // sync state if is not Basic
+        self.prop.sync(&self.apply_state_map);
     }
     fn set_animation(&mut self, cx: &mut Cx) -> () {
-        
+        let init_global = cx.global::<ComponentAnInit>().view;
+
+        let live_ptr = match self.animator.live_ptr {
+            Some(ptr) => ptr.file_id.0,
+            None => return,
+        };
+
+        let mut registry = cx.live_registry.borrow_mut();
+        let live_file = match registry.live_files.get_mut(live_ptr as usize) {
+            Some(lf) => lf,
+            None => return,
+        };
+
+        let nodes = &mut live_file.expanded.nodes;
+
+        if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
+            self.lifecycle.next();
+            let basic_prop = self.prop.get(ViewState::Basic);
+            let hover_prop = self.prop.get(ViewState::Hover);
+            let pressed_prop = self.prop.get(ViewState::Pressed);
+            let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(off).as_instance(),
+                ],
+            ) {
+                basic_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(on).as_instance(),
+                ],
+            ) {
+                hover_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(pressed).as_instance(),
+                ],
+            ) {
+                pressed_index = Some(index);
+            }
+
+            set_animation! {
+                nodes: draw_view = {
+                    basic_index => {
+                        background_color => basic_prop.background_color,
+                        border_color =>basic_prop.border_color,
+                        border_radius => basic_prop.border_radius,
+                        border_width =>(basic_prop.border_width as f64),
+                        shadow_color => basic_prop.shadow_color,
+                        spread_radius => (basic_prop.spread_radius as f64),
+                        blur_radius => (basic_prop.blur_radius as f64),
+                        shadow_offset => basic_prop.shadow_offset,
+                        background_visible => basic_prop.background_visible.to_f64()
+                    },
+                    hover_index => {
+                        background_color => hover_prop.background_color,
+                        border_color => hover_prop.border_color,
+                        border_radius => hover_prop.border_radius,
+                        border_width => (hover_prop.border_width as f64),
+                        shadow_color => hover_prop.shadow_color,
+                        spread_radius => (hover_prop.spread_radius as f64),
+                        blur_radius => (hover_prop.blur_radius as f64),
+                        shadow_offset => hover_prop.shadow_offset,
+                        background_visible => hover_prop.background_visible.to_f64()
+                    },
+                    pressed_index => {
+                        background_color => pressed_prop.background_color,
+                        border_color => pressed_prop.border_color,
+                        border_radius => pressed_prop.border_radius,
+                        border_width => (pressed_prop.border_width as f64),
+                        shadow_color => pressed_prop.shadow_color,
+                        spread_radius => (pressed_prop.spread_radius as f64),
+                        blur_radius => (pressed_prop.blur_radius as f64),
+                        shadow_offset => pressed_prop.shadow_offset,
+                        background_visible => pressed_prop.background_visible.to_f64()
+                    }
+                }
+            }
+        } else {
+            let state = self.current_state();
+            let prop = self.prop.get(state);
+            let index = match state {
+                ViewState::Basic => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(off).as_instance(),
+                    ],
+                ),
+                ViewState::Hover => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(on).as_instance(),
+                    ],
+                ),
+                ViewState::Pressed => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(pressed).as_instance(),
+                    ],
+                ),
+                ViewState::Disabled => None,
+            };
+            set_animation! {
+                nodes: draw_view = {
+                    index => {
+                        background_color => prop.background_color,
+                        border_color => prop.border_color,
+                        border_radius => prop.border_radius,
+                        border_width => (prop.border_width as f64),
+                        shadow_color => prop.shadow_color,
+                        spread_radius => (prop.spread_radius as f64),
+                        blur_radius => (prop.blur_radius as f64),
+                        shadow_offset => prop.shadow_offset,
+                        background_visible => prop.background_visible.to_f64()
+                    }
+                }
+            }
+        }
     }
 
     play_animation!();
@@ -670,6 +910,29 @@ impl Component for LView {
 }
 
 impl LView {
+    active_event! {
+        active_hover_in: ViewEvent::HoverIn |meta: FingerHoverEvent| => ViewHoverIn {meta},
+        active_hover_out: ViewEvent::HoverOut |meta: FingerHoverEvent| => ViewHoverOut {meta},
+        active_finger_down: ViewEvent::FingerDown |meta: FingerDownEvent| => ViewFingerDown {meta},
+        active_finger_up: ViewEvent::FingerUp |meta: FingerUpEvent| => ViewFingerUp {meta},
+        active_long_press: ViewEvent::LongPress |meta: FingerLongPressEvent| => ViewLongPress {meta},
+        active_move: ViewEvent::Move |meta: FingerMoveEvent| => ViewMove {meta},
+        active_key_down: ViewEvent::KeyDown |meta: KeyEvent| => ViewKeyDown {meta},
+        active_key_up: ViewEvent::KeyUp |meta: KeyEvent| => ViewKeyUp {meta},
+        active_clicked: ViewEvent::Clicked |meta: FingerUpEvent| => ViewClicked {meta}
+    }
+    event_option! {
+        hover_in: ViewEvent::HoverIn => ViewHoverIn,
+        hover_out: ViewEvent::HoverOut => ViewHoverOut,
+        finger_down: ViewEvent::FingerDown => ViewFingerDown,
+        finger_up: ViewEvent::FingerUp => ViewFingerUp,
+        long_press: ViewEvent::LongPress => ViewLongPress,
+        finger_move: ViewEvent::Move => ViewMove,
+        key_down: ViewEvent::KeyDown => ViewKeyDown,
+        key_up: ViewEvent::KeyUp => ViewKeyUp,
+        clicked: ViewEvent::Clicked => ViewClicked
+    }
+
     pub fn walk_from_previous_size(&self, walk: Walk) -> Walk {
         let view_size = self.view_size.unwrap_or(DVec2::default());
         Walk {
@@ -686,5 +949,86 @@ impl LView {
             },
             margin: walk.margin,
         }
+    }
+
+    getter! {
+        LView {
+            get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
+            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
+            get_border_color(String) {|c| {c.prop.basic.get_border_color().to_hex_string()}},
+            get_border_radius(Radius) {|c| {c.prop.basic.get_border_radius()}},
+            get_border_width(f32) {|c| {c.prop.basic.get_border_width()}},
+            get_shadow_color(String) {|c| {c.prop.basic.get_shadow_color().to_hex_string()}},
+            get_spread_radius(f32) {|c| {c.prop.basic.get_spread_radius()}},
+            get_blur_radius(f32) {|c| {c.prop.basic.get_blur_radius()}},
+            get_shadow_offset(Vec2) {|c| {c.prop.basic.get_shadow_offset()}},
+            get_background_visible(bool) {|c| {c.prop.basic.get_background_visible()}},
+            get_rotation(f32) {|c| {c.prop.basic.get_rotation()}},
+            get_scale(f32) {|c| {c.prop.basic.get_scale()}},
+            get_align(Align) {|c| {c.prop.basic.get_align()}},
+            get_flow(Flow) {|c| {c.prop.basic.get_flow()}},
+            get_spacing(f64) {|c| {c.prop.basic.get_spacing()}},
+            get_padding(Padding) {|c| {c.prop.basic.get_padding()}},
+            get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
+            get_clip_x(bool) {|c| {c.prop.basic.get_clip_x()}},
+            get_clip_y(bool) {|c| {c.prop.basic.get_clip_y()}},
+            get_cursor(MouseCursor) {|c| {c.prop.basic.get_cursor()}},
+            get_height(Size) {|c| {c.prop.basic.get_height()}},
+            get_width(Size) {|c| {c.prop.basic.get_width()}},
+            get_visible(bool) {|c| {c.visible}},
+            get_disabled(bool) {|c| {c.disabled}},
+            get_dpi_factor(Option<f64>) {|c| {c.dpi_factor}},
+            get_capture_overload(bool) {|c| {c.capture_overload}},
+            get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
+            get_optimize(ViewOptimize) {|c| {c.optimize}},
+            get_scroll(DVec2) {|c| {c.scroll}}
+        }
+    }
+    setter! {
+        LView {
+            set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ViewState::Basic); Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_border_color(color); Ok(())}},
+            set_border_radius(radius: Radius) {|c, _cx| {c.prop.basic.set_border_radius(radius); Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.prop.basic.set_border_width(width); Ok(())}},
+            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_shadow_color(color); Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.prop.basic.set_spread_radius(radius); Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.prop.basic.set_blur_radius(radius); Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.prop.basic.set_shadow_offset(offset); Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.prop.basic.set_background_visible(visible); Ok(())}},
+            set_rotation(rotation: f32) {|c, _cx| {c.prop.basic.set_rotation(rotation); Ok(())}},
+            set_scale(scale: f32) {|c, _cx| {c.prop.basic.set_scale(scale); Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.prop.basic.set_align(align); Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.prop.basic.set_flow(flow); Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.prop.basic.set_spacing(spacing); Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.prop.basic.set_padding(padding); Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.prop.basic.set_margin(margin); Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx| {c.prop.basic.set_clip_x(clip_x); Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx| {c.prop.basic.set_clip_y(clip_y); Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.prop.basic.set_cursor(cursor); Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.prop.basic.set_height(height); Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.prop.basic.set_width(width); Ok(())}},
+            set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
+            set_disabled(disabled: bool) {|c, _cx| {c.disabled = disabled; c.clear_animation(_cx); Ok(())}},
+            set_dpi_factor(dpi_factor: Option<f64>) {|c, _cx| {c.dpi_factor = dpi_factor;  Ok(())}},
+            set_capture_overload(capture_overload: bool) {|c, _cx| { c.capture_overload = capture_overload; Ok(())}},
+            set_grab_key_focus(grab_key_focus: bool) {|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
+            set_optimize(optimize: ViewOptimize) {|c, _cx| {c.optimize = optimize; Ok(())}},
+            set_scroll(scroll: DVec2) {|c, _cx| {c.scroll = scroll; Ok(())}}
+        }
+    }
+}
+
+impl LViewRef {
+    event_option_ref! {
+        hover_in => ViewHoverIn,
+        hover_out => ViewHoverOut,
+        finger_down => ViewFingerDown,
+        finger_up => ViewFingerUp,
+        long_press => ViewLongPress,
+        finger_move => ViewMove,
+        key_down => ViewKeyDown,
+        key_up => ViewKeyUp,
+        clicked => ViewClicked
     }
 }

@@ -23,7 +23,10 @@ pub fn live_design(cx: &mut Cx) {
     components::live_design(cx);
 }
 
+/// # Component Animation init
+/// define what components should be animated on init
 #[derive(Default, Debug, Clone)]
 pub struct ComponentAnInit{
-    button: bool
+    button: bool,
+    view: bool
 }

@@ -111,7 +111,8 @@ live_design! {
                         //         text: "Click me !"
                         //     }
                         // }
-                        <LButton>{
+
+                    <LButton>{
                             prop: {
                                 basic: {
                                     theme: Error,
@@ -158,6 +159,31 @@ live_design! {
                                 }
                             }
                         }
+                    <LView>{
+                        prop: {
+                            basic: {
+                                height: 100.0,
+                                width: 100.0,
+                                background_visible: true,
+                            }
+                        }
+                    }  
+                    <LView>{
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                                height: 100.0,
+                                width: 100.0,
+                                background_visible: true,
+                                // border_radius: {left: 3.0, right: 30.0, top: 30.0, bottom: 30.0},
+                                border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
+                                border_width: 2.0,
+                                border_color: #f00,
+                                padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                            }
+                        }
+                        animation_open: true
+                    }  
                 }
             }
         }

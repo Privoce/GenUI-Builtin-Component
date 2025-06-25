@@ -254,9 +254,9 @@ impl Component for LButton {
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
 
-        self.draw_button.background_color = self.prop.get(state).background_color.into();
-        self.draw_button.border_color = self.prop.get(state).border_color.into();
-        self.draw_button.shadow_color = self.prop.get(state).shadow_color.into();
+        self.draw_button.background_color = self.prop.get(state).background_color;
+        self.draw_button.border_color = self.prop.get(state).border_color;
+        self.draw_button.shadow_color = self.prop.get(state).shadow_color;
         self.draw_button.border_radius = self.prop.get(state).border_radius.into();
         self.draw_button.border_width = self.prop.get(state).border_width;
         self.draw_button.spread_radius = self.prop.get(state).spread_radius;

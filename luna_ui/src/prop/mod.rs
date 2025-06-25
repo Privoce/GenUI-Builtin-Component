@@ -40,9 +40,8 @@ pub trait ApplyStateMapImpl<S> {
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, HashMap<String, LiveValue>) -> () + Copy;
 
-    fn sync<'p, 'm, P, IS>(&'m self, prop: &mut P, basic_state: S, states: IS) -> ()
+    fn sync<'p, P, IS>(&'p self, prop: &mut P, basic_state: S, states: IS) -> ()
     where
-        'p: 'm,
         P: BasicProp<State = S> + 'p,
         IS: IntoIterator<Item = (S, &'p mut P)>;
 }
@@ -51,9 +50,8 @@ impl<S> ApplyStateMapImpl<S> for ApplyStateMap<S>
 where
     S: Hash + Eq + Copy,
 {
-    fn sync<'p, 'm, P, IS>(&'m self, prop: &mut P, basic_state: S, states: IS) -> ()
+    fn sync<'p, P, IS>(&'p self, prop: &mut P, basic_state: S, states: IS) -> ()
     where
-        'p: 'm,
         P: BasicProp<State = S> + 'p,
         IS: IntoIterator<Item = (S, &'p mut P)>,
     {

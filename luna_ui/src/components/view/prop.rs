@@ -2,21 +2,12 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    components::traits::{BasicProp, Prop},
-    error::Error,
-    prop::ApplyStateMapImpl,
-    prop::{
-        manuel::{
+    components::traits::{BasicProp, Prop}, error::Error, getter_setter_prop, prop::{manuel::{
             ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
             MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING,
             SPREAD_RADIUS, THEME, WIDTH,
-        },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
-        Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    utils::{get_from_itable, get_from_table},
+        }, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplyStateMapImpl, Radius}, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -490,6 +481,33 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
             height,
             width,
         })
+    }
+}
+
+impl ViewBasicProp {
+    getter_setter_prop! {
+        get_theme, set_theme: theme -> Theme,
+        get_background_color, set_background_color: background_color -> Vec4,
+        get_border_color, set_border_color: border_color -> Vec4,
+        get_border_width, set_border_width: border_width -> f32,
+        get_border_radius, set_border_radius: border_radius -> Radius,
+        get_shadow_color, set_shadow_color: shadow_color -> Vec4,
+        get_spread_radius, set_spread_radius: spread_radius -> f32,
+        get_blur_radius, set_blur_radius: blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset: shadow_offset -> Vec2,
+        get_background_visible, set_background_visible: background_visible -> bool,
+        get_rotation, set_rotation: rotation -> f32,
+        get_scale, set_scale: scale -> f32,
+        get_padding, set_padding: padding -> Padding,
+        get_margin, set_margin: margin -> Margin,
+        get_clip_x, set_clip_x: clip_x -> bool,
+        get_clip_y, set_clip_y: clip_y -> bool,
+        get_align, set_align: align -> Align,
+        get_cursor, set_cursor: cursor -> MouseCursor,
+        get_flow, set_flow: flow -> Flow,
+        get_spacing, set_spacing: spacing -> f64,
+        get_height, set_height: height -> Size,
+        get_width, set_width: width -> Size
     }
 }
 
