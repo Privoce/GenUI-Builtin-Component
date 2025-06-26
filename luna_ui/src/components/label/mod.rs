@@ -140,14 +140,30 @@ impl LiveHook for LLabel {
         self.set_apply_state_map(
             nodes,
             index,
-            [
-                live_id!(theme),
-                live_id!(color),
-                live_id!(font_size),
-                live_id!(line_spacing),
-                live_id!(margin),
-                live_id!(padding),
-                live_id!(flow),
+            &[
+                (live_id!(theme), None),
+                (live_id!(color), None),
+                (live_id!(font_size), None),
+                (live_id!(line_spacing), None),
+                (
+                    live_id!(margin),
+                    Some(vec![
+                        live_id!(top),
+                        live_id!(bottom),
+                        live_id!(left),
+                        live_id!(right),
+                    ]),
+                ),
+                (
+                    live_id!(padding),
+                    Some(vec![
+                        live_id!(top),
+                        live_id!(bottom),
+                        live_id!(left),
+                        live_id!(right),
+                    ]),
+                ),
+                (live_id!(flow), None),
             ],
             [live_id!(basic), live_id!(disabled)],
             |component| {

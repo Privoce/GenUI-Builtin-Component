@@ -191,32 +191,69 @@ impl LiveHook for LView {
             self.render_after_apply(cx);
         }
 
+        if let Some(i) = nodes.child_by_path(
+            index,
+            &[
+                live_id!(prop).as_field(),
+                live_id!(basic).as_field(),
+                live_id!(padding).as_field(),
+                live_id!(top).as_field(),
+            ],
+        ) {
+            let node = &nodes[i];
+            dbg!(&node.value);
+        }
+
         self.set_apply_state_map(
             nodes,
             index,
-            [
-                live_id!(theme),
-                live_id!(background_color),
-                live_id!(border_color),
-                live_id!(border_width),
-                live_id!(border_radius),
-                live_id!(shadow_color),
-                live_id!(spread_radius),
-                live_id!(blur_radius),
-                live_id!(shadow_offset),
-                live_id!(background_visible),
-                live_id!(rotation),
-                live_id!(scale),
-                live_id!(padding),
-                live_id!(margin),
-                live_id!(clip_x),
-                live_id!(clip_y),
-                live_id!(align),
-                live_id!(cursor),
-                live_id!(flow),
-                live_id!(spacing),
-                live_id!(height),
-                live_id!(width),
+            &[
+                (live_id!(theme), None),
+                (live_id!(background_color), None),
+                (live_id!(border_color), None),
+                (live_id!(border_width), None),
+                (
+                    live_id!(border_radius),
+                    Some(vec![
+                        live_id!(top),
+                        live_id!(bottom),
+                        live_id!(left),
+                        live_id!(right),
+                    ]),
+                ),
+                (live_id!(shadow_color), None),
+                (live_id!(spread_radius), None),
+                (live_id!(blur_radius), None),
+                (live_id!(shadow_offset), None),
+                (live_id!(background_visible), None),
+                (live_id!(rotation), None),
+                (live_id!(scale), None),
+                (
+                    live_id!(padding),
+                    Some(vec![
+                        live_id!(top),
+                        live_id!(bottom),
+                        live_id!(left),
+                        live_id!(right),
+                    ]),
+                ),
+                (
+                    live_id!(margin),
+                    Some(vec![
+                        live_id!(top),
+                        live_id!(bottom),
+                        live_id!(left),
+                        live_id!(right),
+                    ]),
+                ),
+                (live_id!(clip_x), None),
+                (live_id!(clip_y), None),
+                (live_id!(align), None),
+                (live_id!(cursor), None),
+                (live_id!(flow), None),
+                (live_id!(spacing), None),
+                (live_id!(height), None),
+                (live_id!(width), None),
             ],
             [live_id!(basic), live_id!(hover), live_id!(pressed)],
             |_| {},

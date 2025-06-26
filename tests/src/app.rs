@@ -1,6 +1,8 @@
 use luna_ui::{
     components::{
-        button::{ButtonState, LButtonWidgetRefExt}, label::LLabelWidgetRefExt, traits::{BasicProp, Component}
+        button::{ButtonState, LButtonWidgetRefExt},
+        label::LLabelWidgetRefExt,
+        traits::{BasicProp, Component},
     },
     prop::traits::ToColor,
     themes::Theme,
@@ -132,7 +134,7 @@ live_design! {
                                 basic: {
                                     theme: Warning,
                                 }
-                                
+
                             }
                             slot: <LLabel>{
                                 text: "Click me !",
@@ -162,12 +164,14 @@ live_design! {
                     <LView>{
                         prop: {
                             basic: {
+                                border_color: #f00,
+                                border_width: 2.0,
                                 height: 100.0,
                                 width: 100.0,
                                 background_visible: true,
                             }
                         }
-                    }  
+                    }
                     <LView>{
                         prop: {
                             basic: {
@@ -175,15 +179,15 @@ live_design! {
                                 height: 100.0,
                                 width: 100.0,
                                 background_visible: true,
-                                // border_radius: {left: 3.0, right: 30.0, top: 30.0, bottom: 30.0},
-                                border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
+                                border_radius: {left: 30.0, right: 30.0, top: 30.0, bottom: 30.0},
+                                // border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
                                 border_width: 2.0,
-                                border_color: #f00,
-                                padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                                // border_color: #f00,
+                                // padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
                             }
                         }
                         animation_open: true
-                    }  
+                    }
                 }
             }
         }
@@ -224,13 +228,13 @@ impl MatchEvent for App {
             // lb.set_text(cx, format!("Clicked {} times", self.counter));
             let _ = lb.set_color(cx, "#f00".to_string());
             let _ = lb.set_font_size(cx, 18.0);
-            
+
             let _ = btn1.set_background_color(cx, "#0f0".to_string());
             lb.redraw(cx);
         }
 
         // let lb = self.ui.llabel(id!(lb));
-        
+
         // if self.ui.lbutton(id!(btn1)).cli
     }
 }

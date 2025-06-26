@@ -3,7 +3,9 @@ mod radius;
 pub mod traits;
 use std::{borrow::Cow, collections::HashMap, hash::Hash};
 
-use makepad_widgets::{live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveValue};
+use makepad_widgets::{
+    live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp, LiveValue,
+};
 pub use radius::Radius;
 
 use crate::{
@@ -25,7 +27,7 @@ pub trait PropMapImpl {
 }
 
 pub trait ApplyStateMapImpl<S> {
-    fn set_map<C, LP, P, NF, IF>(
+    fn set_map<'m, C, LP, P, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
@@ -35,7 +37,7 @@ pub trait ApplyStateMapImpl<S> {
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = LiveId> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, HashMap<String, LiveValue>) -> () + Copy;
@@ -66,6 +68,9 @@ where
                 if let Some(value) = props.remove(THEME) {
                     prop.set_from_str(THEME, &value, basic_state);
                 }
+            } else {
+                // 如果没有theme，则使用组件的theme
+                prop.sync(basic_state);
             }
             // 处理其他
             for (k, v) in props.iter() {
@@ -95,7 +100,7 @@ where
         }
     }
 
-    fn set_map<C, LP, P, NF, IF>(
+    fn set_map<'m, C, LP, P, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
@@ -105,11 +110,23 @@ where
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = LiveId> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, HashMap<String, LiveValue>) -> () + Copy,
     {
+        fn insert_map(
+            nodes: &[LiveNode],
+            index: usize,
+            applys: &mut HashMap<String, LiveValue>,
+            paths: &Vec<LiveProp>,
+        ) {
+            if let Some(i) = nodes.child_by_path(index, paths) {
+                let node = &nodes[i];
+                applys.insert(node.id.to_string(), node.value.clone());
+            }
+        }
+
         if component.lifecycle().is_created() {
             component.set_index(index);
             next_or(component);
@@ -117,17 +134,20 @@ where
 
         for prefix in prefixs {
             let mut applys = HashMap::new();
-            for path in live_props {
-                if let Some(i) = nodes.child_by_path(
-                    index,
-                    &[
-                        live_id!(prop).as_field(),
-                        prefix.as_field(),
-                        path.as_field(),
-                    ],
-                ) {
-                    let node = &nodes[i];
-                    applys.insert(node.id.to_string(), node.value.clone());
+            for (path, fields) in live_props {
+                let mut paths = vec![
+                    live_id!(prop).as_field(),
+                    prefix.as_field(),
+                    path.as_field(),
+                ];
+                if let Some(fields) = fields {
+                    for field in fields {
+                        paths.push(field.as_field());
+                    }
+                    // do loop
+                    insert_map(nodes, index, &mut applys, &paths);
+                } else {
+                    insert_map(nodes, index, &mut applys, &paths);
                 }
             }
             insert(prefix, component, applys);

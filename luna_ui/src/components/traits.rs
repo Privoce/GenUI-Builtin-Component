@@ -80,7 +80,7 @@ where
     fn lifecycle(&self) -> LifeCycle;
     fn set_index(&mut self, index: usize) -> ();
     /// ## set apply state map
-    fn set_apply_state_map<LP, P, NF, IF>(
+    fn set_apply_state_map<'m, LP, P, NF, IF>(
         &mut self,
         nodes: &[LiveNode],
         index: usize,
@@ -90,7 +90,7 @@ where
         insert: IF,
     ) -> ()
     where
-        LP: IntoIterator<Item = LiveId> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, HashMap<String, LiveValue>) -> () + Copy,
