@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::hash::Hash;
 
 use makepad_widgets::{
     error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Widget, WidgetNode,
@@ -6,7 +6,7 @@ use makepad_widgets::{
 
 use crate::{
     components::lifecycle::LifeCycle,
-    prop::{ApplyStateMap, ApplyStateMapImpl},
+    prop::{ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, PropMap, SlotMap},
     themes::Theme,
 };
 
@@ -93,12 +93,52 @@ where
         LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut Self) -> (),
-        IF: FnOnce(LiveId, &mut Self, HashMap<String, LiveValue>) -> () + Copy,
+        IF: FnOnce(LiveId, &mut Self, PropMap) -> () + Copy,
         Self: Sized,
         Self::State: Eq + Hash + Copy,
     {
-        ApplyStateMap::<Self::State>::set_map(
+        // ApplyStateMap::<Self::State>::set_map(
+        //     self, nodes, index, live_props, prefixs, next_or, insert,
+        // );
+        <ApplyStateMap<Self::State> as ApplyStateMapImpl<Self::State>>::set_map(
             self, nodes, index, live_props, prefixs, next_or, insert,
+        );
+    }
+}
+
+pub trait Part: Hash + Eq + Copy {
+    type State;
+    fn to_live_id(&self) -> LiveId;
+}
+
+pub trait SlotComponent<IS>: Component {
+    type Part: Part<State = IS>;
+
+    fn set_apply_slot_map<'m, LP, P, P2, NF, IF>(
+        &mut self,
+        nodes: &[LiveNode],
+        index: usize,
+        live_props: LP,
+        prefixs: P,
+        parts: P2,
+        next_or: NF,
+        insert: IF,
+    ) -> ()
+    where
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        P: IntoIterator<Item = LiveId>,
+        P2: IntoIterator<Item = Self::Part> + Copy,
+        NF: FnOnce(&mut Self) -> (),
+        IF: FnOnce(LiveId, &mut Self, SlotMap<Self::Part>) -> () + Copy,
+        Self: Sized,
+        Self::State: Eq + Hash + Copy + Into<IS>,
+    {
+        <ApplySlotMap<Self::State, Self::Part> as ApplySlotMapImpl<
+            Self::State,
+            IS,
+            Self::Part,
+        >>::set_map(
+            self, nodes, index, live_props, prefixs, parts, next_or, insert,
         );
     }
 }
@@ -134,6 +174,11 @@ pub trait Prop: Default {
         Self::State: Eq + Hash + Copy;
 }
 
+pub trait SlotProp: Prop {
+    type Part: Part;
+    fn sync_slot(&mut self, map: &ApplySlotMap<Self::State, Self::Part>) -> ();
+}
+
 /// # BasicProp
 /// trait for basic properties of a component
 pub trait BasicProp: Default {
@@ -150,4 +195,17 @@ pub trait BasicProp: Default {
     /// ## sync from Basic State what apply from map if not set in DSL from (super Prop trait)
     /// unlike Prop trait, this function only sync theme colors, and use in `set_from_str()`
     fn sync(&mut self, state: Self::State) -> ();
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)>;
+}
+
+pub trait SlotBasicProp: BasicProp {
+    type Part: Part;
+
+    fn set_from_str_slot(
+        &mut self,
+        key: &str,
+        value: &LiveValue,
+        state: Self::State,
+        part: Self::Part,
+    ) -> ();
 }

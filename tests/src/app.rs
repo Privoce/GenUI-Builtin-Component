@@ -113,7 +113,7 @@ live_design! {
                         //         text: "Click me !"
                         //     }
                         // }
-
+                    
                     <LButton>{
                             prop: {
                                 basic: {
@@ -131,7 +131,7 @@ live_design! {
                         }
                         btn1 = <LButton>{
                             prop: {
-                                basic: {
+                                hover: {
                                     theme: Warning,
                                 }
 

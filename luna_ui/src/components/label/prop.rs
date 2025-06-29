@@ -208,6 +208,34 @@ impl BasicProp for LabelBasicProp {
             LabelState::Disabled => ColorFontConf::from_key("disabled"),
         }
     }
+
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+        vec![
+            (live_id!(theme), None),
+            (live_id!(color), None),
+            (live_id!(font_size), None),
+            (live_id!(line_spacing), None),
+            (
+                live_id!(margin),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (
+                live_id!(padding),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(flow), None),
+        ]
+    }
 }
 
 impl TryFrom<(&Item, LabelState)> for LabelBasicProp {

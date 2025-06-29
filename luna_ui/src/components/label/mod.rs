@@ -1,7 +1,10 @@
 use makepad_widgets::{shader::draw_text::TextStyle, *};
 
 use crate::{
-    components::{lifecycle::LifeCycle, traits::Prop},
+    components::{
+        lifecycle::LifeCycle,
+        traits::{BasicProp, Prop},
+    },
     error::Error,
     getter, getter_setter_ref, lifecycle,
     prop::{
@@ -140,31 +143,7 @@ impl LiveHook for LLabel {
         self.set_apply_state_map(
             nodes,
             index,
-            &[
-                (live_id!(theme), None),
-                (live_id!(color), None),
-                (live_id!(font_size), None),
-                (live_id!(line_spacing), None),
-                (
-                    live_id!(margin),
-                    Some(vec![
-                        live_id!(top),
-                        live_id!(bottom),
-                        live_id!(left),
-                        live_id!(right),
-                    ]),
-                ),
-                (
-                    live_id!(padding),
-                    Some(vec![
-                        live_id!(top),
-                        live_id!(bottom),
-                        live_id!(left),
-                        live_id!(right),
-                    ]),
-                ),
-                (live_id!(flow), None),
-            ],
+            &LabelBasicProp::live_props(),
             [live_id!(basic), live_id!(disabled)],
             |component| {
                 component.lifecycle.next();

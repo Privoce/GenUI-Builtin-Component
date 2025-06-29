@@ -201,51 +201,7 @@ impl LiveHook for LButton {
         self.set_apply_state_map(
             nodes,
             index,
-            &[
-                (live_id!(theme), None),
-                (live_id!(background_color), None),
-                (live_id!(border_color), None),
-                (
-                    live_id!(border_radius),
-                    Some(vec![
-                        live_id!(top),
-                        live_id!(bottom),
-                        live_id!(left),
-                        live_id!(right),
-                    ]),
-                ),
-                (live_id!(border_width), None),
-                (live_id!(shadow_color), None),
-                (live_id!(spread_radius), None),
-                (live_id!(blur_radius), None),
-                (live_id!(shadow_offset), None),
-                (live_id!(background_visible), None),
-                (live_id!(cursor), None),
-                (live_id!(width), None),
-                (live_id!(height), None),
-                (
-                    live_id!(margin),
-                    Some(vec![
-                        live_id!(top),
-                        live_id!(bottom),
-                        live_id!(left),
-                        live_id!(right),
-                    ]),
-                ),
-                (
-                    live_id!(padding),
-                    Some(vec![
-                        live_id!(top),
-                        live_id!(bottom),
-                        live_id!(left),
-                        live_id!(right),
-                    ]),
-                ),
-                (live_id!(align), None),
-                (live_id!(flow), None),
-                (live_id!(spacing), None),
-                (live_id!(abs_pos), None),
-            ],
+            &ButtonBasicProp::live_props(),
             [live_id!(basic), live_id!(hover), live_id!(pressed)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {

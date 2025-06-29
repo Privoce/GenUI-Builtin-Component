@@ -1,15 +1,17 @@
+use std::borrow::Cow;
+
 use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
     components::{
-        traits::{BasicProp, Prop},
+        traits::{BasicProp, Part, Prop, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     prop::{
-        manuel::{BASIC, HEADER},
-        ApplyStateMapImpl,
+        manuel::{BASIC, BODY, FOOTER, HEADER, OUTER, THEME},
+        ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme},
     utils::{get_from_itable, get_from_table},
@@ -59,6 +61,23 @@ impl Prop for CardProp {
     }
 }
 
+impl SlotProp for CardProp {
+    type Part = CardPart;
+
+    fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
+        map.sync(
+            CardState::Basic,
+            [CardState::Hover],
+            [
+                (CardPart::Outer, &mut self.basic.outer),
+                (CardPart::Header, &mut self.basic.header),
+                (CardPart::Body, &mut self.basic.body),
+                (CardPart::Footer, &mut self.basic.footer),
+            ],
+        );
+    }
+}
+
 impl TryFrom<&Item> for CardProp {
     type Error = Error;
 
@@ -100,11 +119,13 @@ impl Default for CardProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct CardBasicProp {
-    #[live]
+    #[live(CardBasicProp::default_outer(CardState::Basic))]
+    pub outer: ViewBasicProp,
+    #[live(CardBasicProp::default_header(CardState::Basic))]
     pub header: ViewBasicProp,
-    #[live]
+    #[live(CardBasicProp::default_body(CardState::Basic))]
     pub body: ViewBasicProp,
-    #[live]
+    #[live(CardBasicProp::default_footer(CardState::Basic))]
     pub footer: ViewBasicProp,
 }
 
@@ -119,6 +140,7 @@ impl BasicProp for CardBasicProp {
         header_footer.set_height(Size::Fixed(32.0));
 
         Self {
+            outer: basic.clone(),
             header: header_footer.clone(),
             body: basic,
             footer: header_footer,
@@ -145,6 +167,10 @@ impl BasicProp for CardBasicProp {
         self.body.sync(state.into());
         self.footer.sync(state.into());
     }
+
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+        ViewBasicProp::live_props()
+    }
 }
 
 impl Default for CardBasicProp {
@@ -160,6 +186,14 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[component.card.$slot] should be an inline table".to_string(),
         ))?;
+
+        let outer = get_from_itable(
+            inline_table,
+            OUTER,
+            || Ok(CardBasicProp::default_outer(state)),
+            |v| (v, ViewState::from(state)).try_into(),
+        )?;
+
         let header = get_from_itable(
             inline_table,
             HEADER,
@@ -169,19 +203,20 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
 
         let body = get_from_itable(
             inline_table,
-            "body",
+            BODY,
             || Ok(CardBasicProp::default_body(state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let footer = get_from_itable(
             inline_table,
-            "footer",
+            FOOTER,
             || Ok(CardBasicProp::default_footer(state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         Ok(Self {
+            outer,
             header,
             body,
             footer,
@@ -191,15 +226,20 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
 
 impl CardBasicProp {
     pub fn default_header(state: CardState) -> ViewBasicProp {
-        let mut header = Self::default_body(state);
+        let mut header = Self::default_outer(state);
         header.set_height(Size::Fixed(32.0));
         header
     }
     pub fn default_footer(state: CardState) -> ViewBasicProp {
         Self::default_header(state)
     }
-    pub fn default_body(state: CardState) -> ViewBasicProp {
+    pub fn default_outer(state: CardState) -> ViewBasicProp {
         ViewBasicProp::from_state(Theme::default(), state.into())
+    }
+    pub fn default_body(state: CardState) -> ViewBasicProp {
+        let mut body = Self::default_outer(state);
+        body.set_height(Size::Fit);
+        body
     }
 }
 
@@ -215,6 +255,27 @@ impl From<CardState> for ViewState {
         match value {
             CardState::Basic => ViewState::Basic,
             CardState::Hover => ViewState::Hover,
+        }
+    }
+}
+
+/// Represents the different parts of a card component.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CardPart {
+    Outer,
+    Header,
+    Body,
+    Footer,
+}
+
+impl Part for CardPart {
+    type State = ViewState;
+    fn to_live_id(&self) -> LiveId {
+        match self {
+            CardPart::Outer => live_id!(outer),
+            CardPart::Header => live_id!(header),
+            CardPart::Body => live_id!(body),
+            CardPart::Footer => live_id!(footer),
         }
     }
 }

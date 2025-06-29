@@ -1,5 +1,5 @@
 use makepad_widgets::*;
-use toml_edit::{Item};
+use toml_edit::Item;
 
 use crate::{
     components::{
@@ -10,7 +10,9 @@ use crate::{
     getter_setter_prop,
     prop::{
         manuel::{
-            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING, PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
+            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
+            PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
@@ -362,6 +364,54 @@ impl BasicProp for ButtonBasicProp {
             ),
         }
     }
+
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+        vec![
+            (live_id!(theme), None),
+            (live_id!(background_color), None),
+            (live_id!(border_color), None),
+            (
+                live_id!(border_radius),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(border_width), None),
+            (live_id!(shadow_color), None),
+            (live_id!(spread_radius), None),
+            (live_id!(blur_radius), None),
+            (live_id!(shadow_offset), None),
+            (live_id!(background_visible), None),
+            (live_id!(cursor), None),
+            (live_id!(width), None),
+            (live_id!(height), None),
+            (
+                live_id!(margin),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (
+                live_id!(padding),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(align), None),
+            (live_id!(flow), None),
+            (live_id!(spacing), None),
+            (live_id!(abs_pos), None),
+        ]
+    }
 }
 
 impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
@@ -445,7 +495,12 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
         let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
-        let abs_pos = get_from_itable(inline_table, ABS_POS, || Ok(None), |v| v.to_dvec2().map(Some))?;
+        let abs_pos = get_from_itable(
+            inline_table,
+            ABS_POS,
+            || Ok(None),
+            |v| v.to_dvec2().map(Some),
+        )?;
 
         Ok(Self {
             theme,
@@ -466,7 +521,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
             height,
             width,
             spacing,
-            abs_pos
+            abs_pos,
         })
     }
 }

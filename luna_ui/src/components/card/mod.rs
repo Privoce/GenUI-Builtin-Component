@@ -7,7 +7,14 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    components::{lifecycle::LifeCycle, traits::{Component, Prop}, view::LView}, error::Error, prop::ApplyStateMap, shader::draw_view::DrawView
+    components::{
+        lifecycle::LifeCycle,
+        traits::{BasicProp, Component, Prop, SlotComponent},
+        view::{LView, ViewState},
+    },
+    error::Error,
+    prop::{manuel::{BASIC, HOVER}, ApplySlotMap, ApplyStateMap},
+    shader::draw_view::DrawView,
 };
 
 live_design! {
@@ -35,7 +42,7 @@ pub struct LCard {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    apply_state_map: ApplyStateMap<CardState>,
+    apply_slot_map: ApplySlotMap<CardState, CardPart>,
     // --- animator ----------------
     #[live(true)]
     pub animation_open: bool,
@@ -81,27 +88,62 @@ impl WidgetNode for LCard {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-       let prop = self.prop.get(self.current_state());
-       Walk {
-        abs_pos: prop.abs_pos,
-        margin: prop.margin,
-        width: prop.width,
-        height: prop.height,
-    }
+        let prop = self.prop.get(self.current_state());
+        Walk {
+            abs_pos: prop.outer.abs_pos,
+            margin: prop.outer.margin,
+            width: prop.outer.width,
+            height: prop.outer.height,
+        }
     }
 
     fn area(&self) -> Area {
-        todo!()
+        self.draw_card.area()
     }
 
-    fn redraw(&mut self, _cx: &mut Cx) {
-        todo!()
+    fn redraw(&mut self, cx: &mut Cx) {
+        let _ = self.render(cx);
+
+        for (visible, slot) in [
+            (self.header.visible, &mut self.header),
+            (self.body.visible, &mut self.body),
+            (self.footer.visible, &mut self.footer),
+        ] {
+            if visible {
+                slot.redraw(cx);
+            }
+        }
     }
 }
 
 impl Widget for LCard {}
 
-impl LiveHook for LCard {}
+impl LiveHook for LCard {
+    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.set_apply_slot_map(
+            nodes,
+            index,
+            &CardBasicProp::live_props(),
+            [live_id!(basic), live_id!(hover)],
+            [
+                CardPart::Outer,
+                CardPart::Header,
+                CardPart::Body,
+                CardPart::Footer,
+            ],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
+                BASIC => {
+                    component.apply_slot_map.insert(CardState::Basic, applys);
+                }
+                HOVER => {
+                    component.apply_slot_map.insert(CardState::Hover, applys);
+                }
+                _ => {}
+            },
+        );
+    }
+}
 
 impl Component for LCard {
     type Error = Error;
@@ -159,4 +201,8 @@ impl Component for LCard {
     fn set_index(&mut self, index: usize) -> () {
         todo!()
     }
+}
+
+impl SlotComponent<ViewState> for LCard {
+    type Part = CardPart;
 }

@@ -44,3 +44,4 @@ pub const SLOT: &str = "slot";
 pub const HEADER: &str = "header";
 pub const BODY: &str = "body";
 pub const FOOTER: &str = "footer";
+pub const OUTER: &str = "outer";

@@ -145,7 +145,7 @@ impl TryFrom<&Item> for ViewProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct ViewBasicProp {
     #[live]
@@ -373,6 +373,57 @@ impl BasicProp for ViewBasicProp {
                 Theme::Info.color(shadow_level),
             ),
         }
+    }
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+        vec![
+            (live_id!(theme), None),
+            (live_id!(background_color), None),
+            (live_id!(border_color), None),
+            (live_id!(border_width), None),
+            (
+                live_id!(border_radius),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(shadow_color), None),
+            (live_id!(spread_radius), None),
+            (live_id!(blur_radius), None),
+            (live_id!(shadow_offset), None),
+            (live_id!(background_visible), None),
+            (live_id!(rotation), None),
+            (live_id!(scale), None),
+            (
+                live_id!(padding),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (
+                live_id!(margin),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(clip_x), None),
+            (live_id!(clip_y), None),
+            (live_id!(align), None),
+            (live_id!(cursor), None),
+            (live_id!(flow), None),
+            (live_id!(spacing), None),
+            (live_id!(height), None),
+            (live_id!(width), None),
+            (live_id!(abs_pos), None),
+        ]
     }
 }
 
