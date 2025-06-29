@@ -72,13 +72,13 @@ pub struct LButton {
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
+    // --- others -------------------
     #[live]
     pub disabled: bool,
     #[live]
     pub grab_key_focus: bool,
     #[live(true)]
     pub event_open: bool,
-    // --- others -------------------
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
@@ -120,7 +120,7 @@ impl WidgetNode for LButton {
             margin: prop.margin,
             width: prop.width,
             height: prop.height,
-            ..Default::default()
+            abs_pos: prop.abs_pos,
         }
     }
 
@@ -244,6 +244,7 @@ impl LiveHook for LButton {
                 (live_id!(align), None),
                 (live_id!(flow), None),
                 (live_id!(spacing), None),
+                (live_id!(abs_pos), None),
             ],
             [live_id!(basic), live_id!(hover), live_id!(pressed)],
             |_| {},
@@ -583,7 +584,8 @@ impl LButton {
             get_visible(bool) {|c| {c.visible}},
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
             get_sync(bool) {|c| {c.sync}},
-            get_event_open(bool) {|c| {c.event_open}}
+            get_event_open(bool) {|c| {c.event_open}},
+            get_abs_pos(Option<DVec2>) {|c| {c.prop.basic.get_abs_pos()}}
         }
     }
     setter! {
@@ -610,7 +612,8 @@ impl LButton {
             set_visible(visible: bool) {|c, _cx| {c.visible = visible; c.redraw(_cx); Ok(())}},
             set_grab_key_focus(grab: bool) {|c, _cx| {c.grab_key_focus = grab; Ok(())}},
             set_sync(sync: bool) {|c, _cx| {c.sync = sync; c.prop.basic.sync(ButtonState::Basic); Ok(())}},
-            set_event_open(open: bool) {|c, _cx| {c.event_open = open; Ok(())}}
+            set_event_open(open: bool) {|c, _cx| {c.event_open = open; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.prop.basic.set_abs_pos(abs_pos); Ok(())}}
         }
     }
 }
@@ -649,6 +652,7 @@ impl LButtonRef {
         get_visible, set_visible -> bool,
         get_grab_key_focus, set_grab_key_focus -> bool,
         get_sync, set_sync -> bool,
-        get_event_open, set_event_open -> bool
+        get_event_open, set_event_open -> bool,
+        get_abs_pos, set_abs_pos -> Option<DVec2>
     }
 }

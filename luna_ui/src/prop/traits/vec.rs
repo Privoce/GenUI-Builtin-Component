@@ -4,7 +4,7 @@ use crate::{
 };
 
 use super::{ToBool, ToFloat, ToVec};
-use makepad_widgets::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
+use makepad_widgets::{vec2, vec3, vec4, DVec2, Vec2, Vec3, Vec4};
 
 impl ToBool for f32 {
     fn to_bool(&self) -> bool {
@@ -112,5 +112,18 @@ impl ToColor for Vec4 {
     {
         let hex: Hex = s.parse()?;
         Ok(Color::Hex(hex).into())
+    }
+}
+
+impl FromLiveValue for DVec2 {
+    fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if let makepad_widgets::LiveValue::Vec2(vec2) = v {
+            Some((*vec2).into())
+        } else {
+            None
+        }
     }
 }

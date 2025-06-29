@@ -3,6 +3,13 @@ use makepad_widgets::*;
 pub mod label;
 pub mod view;
 pub mod button;
+pub mod tag;
+pub mod card;
+pub mod radio;
+pub mod checkbox;
+pub mod switch;
+
+
 pub mod traits;
 pub mod lifecycle;
 

@@ -29,6 +29,7 @@ pub const CURSOR: &str = "cursor";
 pub const SPACING: &str = "spacing";
 pub const CLIP_X: &str = "clip_x";
 pub const CLIP_Y: &str = "clip_y";
+pub const ABS_POS: &str = "abs_pos";
 // --- text ------------------------------------------------------
 pub const FONT_SIZE: &str = "font_size";
 pub const COLOR: &str = "color";
@@ -38,3 +39,8 @@ pub const HOVER: &str = "hover";
 pub const PRESSED: &str = "pressed";
 pub const DISABLED: &str = "disabled";
 pub const BASIC: &str = "basic";
+// --- slot ------------------------------------------------------
+pub const SLOT: &str = "slot";
+pub const HEADER: &str = "header";
+pub const BODY: &str = "body";
+pub const FOOTER: &str = "footer";

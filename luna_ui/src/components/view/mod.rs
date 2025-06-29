@@ -8,23 +8,14 @@ use makepad_widgets::{event::FingerLongPressEvent, *};
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw,
-    components::{
+    active_event, animation_open_then_redraw, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Prop},
-    },
-    error::Error,
-    event_option, event_option_ref, getter, hit_finger_down, hit_finger_up, hit_hover_in,
-    hit_hover_out, lifecycle, play_animation,
-    prop::{
+    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path, setter,
-    shader::draw_view::DrawView,
-    themes::{Conf, Theme},
-    ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
 };
 pub use rely::*;
 
@@ -79,8 +70,6 @@ pub struct LView {
     #[live(true)]
     pub visible: bool,
     #[live]
-    pub abs_pos: Option<DVec2>,
-    #[live]
     pub scroll: DVec2,
     #[live]
     pub scroll_bars: Option<LivePtr>,
@@ -108,9 +97,9 @@ pub struct LView {
     #[rust]
     scroll_bars_obj: Option<Box<ScrollBars>>,
     #[rust]
-    view_size: Option<DVec2>,
+    pub view_size: Option<DVec2>,
     #[rust]
-    area: Area,
+    pub area: Area,
     #[rust]
     draw_list: Option<DrawList2d>,
     #[rust]
@@ -120,7 +109,7 @@ pub struct LView {
     #[rust]
     draw_state: DrawStateWrap<DrawState>,
     #[rust]
-    children: SmallVec<[(LiveId, WidgetRef); 2]>,
+    pub children: SmallVec<[(LiveId, WidgetRef); 2]>,
     #[rust]
     live_update_order: SmallVec<[LiveId; 1]>,
     // --- animation --------------
@@ -254,6 +243,7 @@ impl LiveHook for LView {
                 (live_id!(spacing), None),
                 (live_id!(height), None),
                 (live_id!(width), None),
+                (live_id!(abs_pos), None),
             ],
             [live_id!(basic), live_id!(hover), live_id!(pressed)],
             |_| {},
@@ -322,7 +312,7 @@ impl WidgetNode for LView {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.current_state());
         Walk {
-            abs_pos: self.abs_pos.clone(),
+            abs_pos: prop.abs_pos,
             margin: prop.margin,
             width: prop.width,
             height: prop.height,
@@ -1018,7 +1008,8 @@ impl LView {
             get_capture_overload(bool) {|c| {c.capture_overload}},
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
             get_optimize(ViewOptimize) {|c| {c.optimize}},
-            get_scroll(DVec2) {|c| {c.scroll}}
+            get_scroll(DVec2) {|c| {c.scroll}},
+            get_abs_pos(Option<DVec2>) {|c| {c.prop.basic.get_abs_pos()}}
         }
     }
     setter! {
@@ -1051,7 +1042,8 @@ impl LView {
             set_capture_overload(capture_overload: bool) {|c, _cx| { c.capture_overload = capture_overload; Ok(())}},
             set_grab_key_focus(grab_key_focus: bool) {|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
             set_optimize(optimize: ViewOptimize) {|c, _cx| {c.optimize = optimize; Ok(())}},
-            set_scroll(scroll: DVec2) {|c, _cx| {c.scroll = scroll; Ok(())}}
+            set_scroll(scroll: DVec2) {|c, _cx| {c.scroll = scroll; Ok(())}},
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.prop.basic.set_abs_pos(abs_pos); Ok(())}}
         }
     }
 }
@@ -1067,5 +1059,37 @@ impl LViewRef {
         key_down => ViewKeyDown,
         key_up => ViewKeyUp,
         clicked => ViewClicked
+    }
+    getter_setter_ref!{
+        get_theme, set_theme -> Theme,
+        get_background_color, set_background_color -> String,
+        get_border_color, set_border_color -> String,
+        get_border_radius, set_border_radius -> Radius,
+        get_border_width, set_border_width -> f32,
+        get_shadow_color, set_shadow_color -> String,
+        get_spread_radius, set_spread_radius -> f32,
+        get_blur_radius, set_blur_radius -> f32,
+        get_shadow_offset, set_shadow_offset -> Vec2,
+        get_background_visible, set_background_visible -> bool,
+        get_rotation, set_rotation -> f32,
+        get_scale, set_scale -> f32,
+        get_align, set_align -> Align,
+        get_flow, set_flow -> Flow,
+        get_spacing, set_spacing -> f64,
+        get_padding, set_padding -> Padding,
+        get_margin, set_margin -> Margin,
+        get_clip_x, set_clip_x -> bool,
+        get_clip_y, set_clip_y -> bool,
+        get_cursor, set_cursor -> MouseCursor,
+        get_height, set_height -> Size,
+        get_width, set_width -> Size,
+        get_visible, set_visible -> bool,
+        get_disabled, set_disabled -> bool,
+        get_dpi_factor, set_dpi_factor -> Option<f64>,
+        get_capture_overload, set_capture_overload -> bool,
+        get_grab_key_focus, set_grab_key_focus -> bool,
+        get_optimize, set_optimize -> ViewOptimize,
+        get_scroll, set_scroll -> DVec2,
+        get_abs_pos, set_abs_pos -> Option<DVec2>
     }
 }

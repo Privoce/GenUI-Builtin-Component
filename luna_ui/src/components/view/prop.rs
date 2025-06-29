@@ -1,13 +1,22 @@
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    components::traits::{BasicProp, Prop}, error::Error, getter_setter_prop, prop::{manuel::{
-            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
+    components::traits::{BasicProp, Prop},
+    error::Error,
+    getter_setter_prop,
+    prop::{
+        manuel::{
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
             MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING,
             SPREAD_RADIUS, THEME, WIDTH,
-        }, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplyStateMapImpl, Radius}, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
+        },
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ApplyStateMapImpl, Radius,
+    },
+    themes::{Color, Theme, TomlValueTo},
+    utils::{get_from_itable, get_from_table},
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -183,6 +192,8 @@ pub struct ViewBasicProp {
     pub height: Size,
     #[live(Size::Fill)]
     pub width: Size,
+    #[live(None)]
+    pub abs_pos: Option<DVec2>,
 }
 
 impl BasicProp for ViewBasicProp {
@@ -191,7 +202,7 @@ impl BasicProp for ViewBasicProp {
     type Colors = (Color, Color, Color);
 
     fn len() -> usize {
-        21
+        22
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
@@ -272,6 +283,9 @@ impl BasicProp for ViewBasicProp {
             WIDTH => {
                 self.width = Size::from_live_value(value).unwrap_or(Size::Fill);
             }
+            ABS_POS => {
+                self.abs_pos = DVec2::from_live_value(value);
+            }
             _ => {}
         }
     }
@@ -315,6 +329,7 @@ impl BasicProp for ViewBasicProp {
             spacing: 6.0,
             height: Size::Fill,
             width: Size::Fill,
+            abs_pos: None,
         }
     }
 
@@ -367,6 +382,17 @@ impl Default for ViewBasicProp {
     }
 }
 
+impl TryFrom<(&Value, ViewState)> for ViewBasicProp {
+    type Error = Error;
+
+    fn try_from((value, state): (&Value, ViewState)) -> Result<Self, Self::Error> {
+        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "[components.view.$state] should be an inline table".to_string(),
+        ))?;
+        (inline_table, state).try_into()
+    }
+}
+
 impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
     type Error = Error;
 
@@ -374,6 +400,14 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[components.view.$state] should be an inline table".to_string(),
         ))?;
+        (inline_table, state).try_into()
+    }
+}
+
+impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
+    type Error = Error;
+
+    fn try_from((inline_table, state): (&InlineTable, ViewState)) -> Result<Self, Self::Error> {
         let theme = Theme::default();
         let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
 
@@ -456,6 +490,12 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
         let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fill), |v| v.to_size())?;
         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fill), |v| v.to_size())?;
+        let abs_pos = get_from_itable(
+            inline_table,
+            ABS_POS,
+            || Ok(None),
+            |v| v.to_dvec2().map(Some),
+        )?;
 
         Ok(Self {
             theme,
@@ -480,6 +520,7 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
             spacing,
             height,
             width,
+            abs_pos,
         })
     }
 }
@@ -507,7 +548,8 @@ impl ViewBasicProp {
         get_flow, set_flow: flow -> Flow,
         get_spacing, set_spacing: spacing -> f64,
         get_height, set_height: height -> Size,
-        get_width, set_width: width -> Size
+        get_width, set_width: width -> Size,
+        get_abs_pos, set_abs_pos: abs_pos -> Option<DVec2>
     }
 }
 

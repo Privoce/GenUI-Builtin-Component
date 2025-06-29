@@ -6,11 +6,11 @@ mod theme;
 pub use components::*;
 pub use conf::*;
 pub use global::*;
-use makepad_widgets::{Align, Flow, Margin, MouseCursor, Padding, Size, Vec2};
+use makepad_widgets::{Align, DVec2, Flow, Margin, MouseCursor, Padding, Size, Vec2};
 pub use theme::*;
 use toml_edit::Value;
 
-use crate::error::Error;
+use crate::{error::Error, prop::traits::ToCursor};
 
 pub trait TomlValueTo {
     fn to_f32(&self) -> Result<f32, Error>;
@@ -23,6 +23,7 @@ pub trait TomlValueTo {
     fn to_align(&self, default: Align) -> Result<Align, Error>;
     fn to_size(&self) -> Result<Size, Error>;
     fn to_cursor(&self) -> Result<MouseCursor, Error>;
+    fn to_dvec2(&self) -> Result<DVec2, Error>;
 }
 
 impl TomlValueTo for Value {
@@ -168,7 +169,28 @@ impl TomlValueTo for Value {
     }
 
     fn to_cursor(&self) -> Result<MouseCursor, Error> {
-        todo!()
+        return if let Some(cursor_str) = self.as_str() {
+            Ok(MouseCursor::from_str(cursor_str))
+        } else {
+            Err(Error::ThemeStyleParse(
+                "Expected a string value for MouseCursor".to_string(),
+            ))
+        };
+    }
+
+    fn to_dvec2(&self) -> Result<DVec2, Error> {
+        let inline_table = self.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "DVec2 should be a inline table".to_string(),
+        ))?;
+
+        let x = inline_table
+            .get("x")
+            .map_or_else(|| Ok(0.0), |item| item.to_f64())?;
+        let y = inline_table
+            .get("y")
+            .map_or_else(|| Ok(0.0), |item| item.to_f64())?;
+
+        Ok(DVec2 { x, y })
     }
 }
 

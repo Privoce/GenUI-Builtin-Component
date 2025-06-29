@@ -1,5 +1,5 @@
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{Item};
 
 use crate::{
     components::{
@@ -10,9 +10,7 @@ use crate::{
     getter_setter_prop,
     prop::{
         manuel::{
-            ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
-            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
-            PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING, PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
@@ -191,6 +189,8 @@ pub struct ButtonBasicProp {
     pub width: Size,
     #[live(6.0)]
     pub spacing: f64,
+    #[live(None)]
+    pub abs_pos: Option<DVec2>,
 }
 
 impl Default for ButtonBasicProp {
@@ -205,7 +205,7 @@ impl BasicProp for ButtonBasicProp {
     type Colors = (Color, Color, Color);
 
     fn len() -> usize {
-        18
+        19
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
@@ -275,6 +275,9 @@ impl BasicProp for ButtonBasicProp {
             SPACING => {
                 self.spacing = f64::from_live_value(value).unwrap_or(6.0);
             }
+            ABS_POS => {
+                self.abs_pos = DVec2::from_live_value(value);
+            }
             _ => {}
         }
     }
@@ -314,6 +317,7 @@ impl BasicProp for ButtonBasicProp {
             height: Size::Fit,
             width: Size::Fit,
             spacing: 6.0,
+            abs_pos: None,
         }
     }
 
@@ -441,6 +445,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
         let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
+        let abs_pos = get_from_itable(inline_table, ABS_POS, || Ok(None), |v| v.to_dvec2().map(Some))?;
 
         Ok(Self {
             theme,
@@ -461,6 +466,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
             height,
             width,
             spacing,
+            abs_pos
         })
     }
 }
@@ -484,7 +490,8 @@ impl ButtonBasicProp {
         get_align, set_align: align -> Align,
         get_height, set_height: height -> Size,
         get_width, set_width: width -> Size,
-        get_spacing, set_spacing: spacing -> f64
+        get_spacing, set_spacing: spacing -> f64,
+        get_abs_pos, set_abs_pos: abs_pos -> Option<DVec2>
     }
 }
 
