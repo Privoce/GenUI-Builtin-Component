@@ -236,6 +236,13 @@ impl BasicProp for LabelBasicProp {
             (live_id!(flow), None),
         ]
     }
+
+    fn walk(&self) -> Walk {
+        Walk {
+            margin: self.margin,
+            ..Default::default()
+        }.with_add_padding(self.padding)
+    }
 }
 
 impl TryFrom<(&Item, LabelState)> for LabelBasicProp {

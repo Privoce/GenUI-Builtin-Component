@@ -13,7 +13,7 @@ use crate::{
         ApplyStateMap,
     },
     pure_after_apply, set_index, set_scope_path, setter,
-    themes::{Conf, Theme},
+    themes::{Conf, Theme}, visible,
 };
 
 mod prop;
@@ -101,6 +101,8 @@ impl WidgetNode for LLabel {
         let _ = self.render(cx);
         self.draw_text.redraw(cx);
     }
+
+    visible!();
 }
 
 impl Widget for LLabel {

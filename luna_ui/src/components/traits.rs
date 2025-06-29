@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use makepad_widgets::{
-    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Widget, WidgetNode,
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget, WidgetNode
 };
 
 use crate::{
@@ -111,6 +111,11 @@ pub trait Part: Hash + Eq + Copy {
     fn to_live_id(&self) -> LiveId;
 }
 
+/// # SlotComponent
+/// trait for component which has slots, like: Card (header, body, footer), etc
+/// ## attention:
+/// - `IS`: `InnerState` is the state of the slot, which may different from the component state
+/// because the slot may have different state than the component itself (each container as slot always use ViewState)
 pub trait SlotComponent<IS>: Component {
     type Part: Part<State = IS>;
 
@@ -196,6 +201,7 @@ pub trait BasicProp: Default {
     /// unlike Prop trait, this function only sync theme colors, and use in `set_from_str()`
     fn sync(&mut self, state: Self::State) -> ();
     fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)>;
+    fn walk(&self) -> Walk;
 }
 
 pub trait SlotBasicProp: BasicProp {

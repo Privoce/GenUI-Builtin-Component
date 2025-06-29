@@ -30,9 +30,10 @@ pub trait PropMapImpl {
     fn diff(&self, other: &Self) -> Self;
 }
 
-pub trait SlotMapImpl {}
-
+/// # ApplyStateMapImpl
 pub trait ApplyStateMapImpl<S> {
+    /// ## set_map
+    /// use to set map when in `after_apply()`
     fn set_map<'m, C, LP, P, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
@@ -48,6 +49,9 @@ pub trait ApplyStateMapImpl<S> {
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, PropMap) -> () + Copy;
 
+    /// ## sync
+    /// sync the properties of the component with the given basic state and states
+    /// - `prop`: the main properties to sync (basic properties)
     fn sync<'p, P, IS>(&'p self, prop: &mut P, basic_state: S, states: IS) -> ()
     where
         P: BasicProp<State = S> + 'p,

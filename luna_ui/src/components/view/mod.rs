@@ -15,7 +15,7 @@ use crate::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, ComponentAnInit
+    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, visible, ComponentAnInit
 };
 pub use rely::*;
 
@@ -329,6 +329,7 @@ impl WidgetNode for LView {
             }
         }
     }
+    visible!();
 }
 
 impl Widget for LView {

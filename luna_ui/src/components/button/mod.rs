@@ -6,23 +6,14 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, area_ref,
-    components::{
+    active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    },
-    error::Error,
-    event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
-    hit_hover_in, hit_hover_out, lifecycle, play_animation,
-    prop::{
+    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path, setter,
-    shader::draw_view::DrawView,
-    themes::{Conf, Theme},
-    ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, visible, ComponentAnInit
 };
 
 live_design! {
@@ -135,6 +126,8 @@ impl WidgetNode for LButton {
             self.slot.redraw(cx);
         }
     }
+
+    visible!();
 }
 
 impl Widget for LButton {
@@ -142,15 +135,17 @@ impl Widget for LButton {
         if !self.visible {
             return DrawStep::done();
         }
+
         let state = self.current_state();
         let prop = self.prop.get(state);
+
         let _ = self.draw_button.begin(
             cx,
             Walk {
                 margin: prop.margin,
                 width: prop.width,
                 height: prop.height,
-                ..Default::default()
+                abs_pos: prop.abs_pos,
             },
             Layout {
                 clip_x: false,

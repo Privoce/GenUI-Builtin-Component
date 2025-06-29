@@ -28,5 +28,6 @@ pub fn live_design(cx: &mut Cx) {
 #[derive(Default, Debug, Clone)]
 pub struct ComponentAnInit{
     button: bool,
-    view: bool
+    view: bool,
+    card: bool,
 }

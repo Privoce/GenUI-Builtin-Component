@@ -30,10 +30,13 @@ live_design! {
             text: "Button",
         },
     }
+
+    pub LCard = <LCardBase>{}
 }
 
 pub fn components_register(cx: &mut Cx) {
     label::live_design(cx);
     view::live_design(cx);
     button::live_design(cx);
+    card::live_design(cx);
 }

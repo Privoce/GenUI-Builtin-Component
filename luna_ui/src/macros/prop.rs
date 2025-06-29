@@ -86,3 +86,12 @@ macro_rules! lifecycle {
         }
     };
 }
+
+#[macro_export]
+macro_rules! visible {
+    () => {
+        fn visible(&self) -> bool {
+            self.visible
+        }
+    };  
+}

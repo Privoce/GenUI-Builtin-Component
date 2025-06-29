@@ -174,7 +174,7 @@ pub struct ViewBasicProp {
     pub scale: f32,
     #[live(Padding::from_f64(6.0))]
     pub padding: Padding,
-    #[live(Margin::from_f64(6.0))]
+    #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(false)]
     pub clip_x: bool,
@@ -252,7 +252,7 @@ impl BasicProp for ViewBasicProp {
                 self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(6.0));
             }
             MARGIN => {
-                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             CLIP_X => {
                 self.clip_x = bool::from_live_value(value).unwrap_or(false);
@@ -320,7 +320,7 @@ impl BasicProp for ViewBasicProp {
             rotation: 0.0,
             scale: 1.0,
             padding: Padding::from_f64(6.0),
-            margin: Margin::from_f64(6.0),
+            margin: Margin::from_f64(0.0),
             clip_x: false,
             clip_y: false,
             align: Align::default(),
@@ -425,6 +425,15 @@ impl BasicProp for ViewBasicProp {
             (live_id!(abs_pos), None),
         ]
     }
+
+    fn walk(&self) -> Walk {
+        Walk {
+            abs_pos: self.abs_pos,
+            margin: self.margin,
+            width: self.width,
+            height: self.height,
+        }
+    }
 }
 
 impl Default for ViewBasicProp {
@@ -525,7 +534,7 @@ impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
             || Ok(padding),
             |v| v.to_padding(padding),
         )?;
-        let margin = Margin::from_f64(6.0);
+        let margin = Margin::from_f64(0.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let clip_x = get_from_itable(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
         let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;

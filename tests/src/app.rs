@@ -40,153 +40,165 @@ live_design! {
                         y: 0.5
                     },
                     show_bg: true,
-                    // draw_bg:{
-                    //     fn pixel(self) -> vec4 {
-
-                    //         let center = vec2(0.5, 0.5);
-                    //         let uv = self.pos - center;
-                    //         let radius = length(uv);
-                    //         let angle = atan(uv.y, uv.x);
-                    //         let color1 = mix(#f00, #00f, 0.5 + 10.5 * cos(angle + self.time));
-                    //         let color2 = mix(#0f0, #ff0, 0.5 + 0.5 * sin(angle + self.time));
-                    //         let color = mix(color1, color2, radius);
-                    //         return depth_clip(self.world, color, self.depth_clip);
-                    //     }
-                    // }
-                    // <Rotary>{
-                    //     text:"Slide"
-                    // }
-                    // button_1 = <Button> {
-                    //     text: "Click 福 me 😊"
-                    //     draw_text:{text_style:{font_size:18}}
-                    // }
-                    // <TypingAnimation>{}
-                    // <AButton>{
-                    //     text: "asdsdasd"
-                    // }
-                    // <LView> {
-                    //     // prop: {
-                    //     //     basic: {
-                    //     //         background_visible: true,
-                    //     //         background_color: #000,
-                    //     //         theme: Primary,
-                    //     //         height: 200.0,
-                    //     //         width: 200.0,
-                    //     //         shadow_offset: vec2(0.0, 0.0),
-                    //     //         align: {
-                    //     //             x: 0.5,
-                    //     //             y: 0.5
-                    //     //         },
-                    //     //     }
-                    //     // }
-                    //     <LLabel>{
-                    //         text: "Hello World",
+                    // <LButton>{
                     //         prop: {
                     //             basic: {
-                    //                 color: #ff0,
-                    //                 font_size: 24.0,
-
+                    //                 theme: Error,
                     //             }
+                    //             hover: {
+                    //                 theme: Primary,
+                    //             }
+                    //         }
+                    //         disabled: true,
+                    //         slot: <LLabel>{
+                    //             text: "Button",
+                    //             mode: Regular,
+                    //         }
+                    //     }
+                    //     btn1 = <LButton>{
+                    //         prop: {
+                    //             hover: {
+                    //                 theme: Warning,
+                    //             }
+
+                    //         }
+                    //         slot: <LLabel>{
+                    //             text: "Click me !",
+                    //             mode: Bold,
                     //         }
                     //     }
 
-
+                    //     lb = <LLabel>{
+                    //         text: "Hello World!",
+                    //         mode: Bold
+                    //         prop: {
+                    //             basic: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
+                    //     lb2 = <LLabel>{
+                    //         text: "Hello World! hello",
+                    //         mode: Bold
+                    //         disabled: true,
+                    //         prop: {
+                    //             basic: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
+                    // <LView>{
+                    //     prop: {
+                    //         basic: {
+                    //             border_color: #f00,
+                    //             border_width: 2.0,
+                    //             height: 100.0,
+                    //             width: 100.0,
+                    //             background_visible: true,
+                    //         }
+                    //     }
                     // }
-
-                        // btn1 = <LButton>{
-                        //     prop: {
-                        //         basic: {
-                        //             theme: Info,
-                        //             border_width: 2.0,
-                        //             border_color: #ff0,
-                        //         }
-                        //         hover: {
-                        //             theme: Success,
-                        //             border_color: #0f0,
-                        //             border_width: 4.0,
-                        //         },
-                        //         pressed: {
-                        //             theme: Error,
-                        //         }
-                        //     }
-                        //     slot: <Label>{
-                        //         text: "Click me !"
-                        //     }
-                        // }
-                    
-                    <LButton>{
-                            prop: {
-                                basic: {
-                                    theme: Error,
-                                }
-                                hover: {
-                                    theme: Primary,
-                                }
+                    // <LView>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Primary,
+                    //             height: 100.0,
+                    //             width: 100.0,
+                    //             background_visible: true,
+                    //             border_radius: {left: 30.0, right: 30.0, top: 30.0, bottom: 30.0},
+                    //             // border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
+                    //             border_width: 2.0,
+                    //             // border_color: #f00,
+                    //             // padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                    //         }
+                    //     }
+                    //     animation_open: true
+                    // }
+                    <View> {
+                        flow: Down,
+                        spacing: 10.0,
+                        height: 200.0,
+                        width: 200.0,
+                        show_bg: true,
+                        draw_bg: {
+                            color: #f0f
+                        }
+                        padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                        <View> {
+                            <LLabel>{
+                                text: "Card Header",
+                                mode: Bold
                             }
-                            disabled: true,
-                            slot: <LLabel>{
-                                text: "Button",
-                                mode: Regular,
+                            show_bg: true,
+                            draw_bg: {
+                                color: #f00
                             }
                         }
-                        btn1 = <LButton>{
-                            prop: {
-                                hover: {
-                                    theme: Warning,
-                                }
-
+                        <View> {
+                            <LLabel>{
+                                text: "Card Body",
+                                mode: Bold
                             }
-                            slot: <LLabel>{
-                                text: "Click me !",
-                                mode: Bold,
+                            show_bg: true,
+                            draw_bg: {
+                                color: #000
                             }
                         }
-
-                        lb = <LLabel>{
-                            text: "Hello World!",
-                            mode: Bold
-                            prop: {
-                                basic: {
-                                    font_size: 24.0,
-                                }
+                        <View> {
+                            <LLabel>{
+                                text: "Card Footer",
+                                mode: Bold
                             }
-                        }
-                        lb2 = <LLabel>{
-                            text: "Hello World! hello",
-                            mode: Bold
-                            disabled: true,
-                            prop: {
-                                basic: {
-                                    font_size: 24.0,
-                                }
-                            }
-                        }
-                    <LView>{
-                        prop: {
-                            basic: {
-                                border_color: #f00,
-                                border_width: 2.0,
-                                height: 100.0,
-                                width: 100.0,
-                                background_visible: true,
+                            show_bg: true,
+                            draw_bg: {
+                                color: #00f
                             }
                         }
                     }
-                    <LView>{
+                    <LCard>{
                         prop: {
                             basic: {
-                                theme: Primary,
-                                height: 100.0,
-                                width: 100.0,
-                                background_visible: true,
-                                border_radius: {left: 30.0, right: 30.0, top: 30.0, bottom: 30.0},
-                                // border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
-                                border_width: 2.0,
-                                // border_color: #f00,
-                                // padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                                outer: {
+                                    theme: Primary,
+                                    height: 200.0,
+                                    width: 200.0,
+                                }
                             }
                         }
-                        animation_open: true
+                        header: {
+                            <LLabel>{
+                                text: "Card Header",
+                                mode: Bold
+                            }
+                        }
+                        body: {
+                            <LLabel>{
+                                text: "Card Body",
+                                mode: Bold
+                            }
+                        }
+                        footer: {
+                            <LLabel>{
+                                text: "Card Footer",
+                                mode: Bold
+                            }
+                        }
+
+                        // body: <LView>{
+                        //     prop: {
+                        //         basic: {
+                        //             background_visible: true,
+                        //             background_color: #f0f,
+                        //             border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
+                        //             border_width: 2.0,
+                        //             border_color: #00f,
+                        //         }
+                        //     }
+                        //     <LLabel>{
+                        //         text: "Card Body",
+                        //         mode: Bold
+                        //     }
+                        // }
                     }
                 }
             }

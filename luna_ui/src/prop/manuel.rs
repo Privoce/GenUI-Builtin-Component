@@ -45,3 +45,12 @@ pub const HEADER: &str = "header";
 pub const BODY: &str = "body";
 pub const FOOTER: &str = "footer";
 pub const OUTER: &str = "outer";
+
+// --- component -------------------------------------------------
+pub const LABEL: &str = "label";
+pub const VIEW: &str = "view";
+pub const BUTTON: &str = "button";
+pub const CARD: &str = "card";
+pub const RADIO: &str = "radio";
+pub const CHECKBOX: &str = "checkbox";
+pub const SWITCH: &str = "switch";

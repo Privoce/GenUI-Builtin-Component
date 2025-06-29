@@ -138,11 +138,13 @@ impl BasicProp for CardBasicProp {
         let basic = ViewBasicProp::from_state(theme, state.into());
         let mut header_footer = basic.clone();
         header_footer.set_height(Size::Fixed(32.0));
+        let mut body = basic.clone();
+        body.set_height(Size::Fill);
 
         Self {
             outer: basic.clone(),
             header: header_footer.clone(),
-            body: basic,
+            body,
             footer: header_footer,
         }
     }
@@ -170,6 +172,10 @@ impl BasicProp for CardBasicProp {
 
     fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
         ViewBasicProp::live_props()
+    }
+
+    fn walk(&self) -> Walk {
+        self.outer.walk()
     }
 }
 
@@ -255,6 +261,16 @@ impl From<CardState> for ViewState {
         match value {
             CardState::Basic => ViewState::Basic,
             CardState::Hover => ViewState::Hover,
+        }
+    }
+}
+
+impl From<ViewState> for CardState {
+    fn from(value: ViewState) -> Self {
+        match value {
+            ViewState::Basic => CardState::Basic,
+            ViewState::Hover => CardState::Hover,
+            _ => panic!("CardState can only be Basic or Hover"),
         }
     }
 }

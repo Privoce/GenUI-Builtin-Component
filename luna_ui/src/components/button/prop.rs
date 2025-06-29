@@ -412,6 +412,15 @@ impl BasicProp for ButtonBasicProp {
             (live_id!(abs_pos), None),
         ]
     }
+
+    fn walk(&self) -> Walk {
+        Walk {
+            abs_pos: self.abs_pos,
+            margin: self.margin,
+            width: self.width,
+            height: self.height,
+        }
+    }
 }
 
 impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
