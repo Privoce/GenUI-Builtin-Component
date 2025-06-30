@@ -128,7 +128,7 @@ pub struct LView {
     #[live(true)]
     pub sync: bool,
     #[rust]
-    apply_state_map: ApplyStateMap<ViewState>,
+    pub apply_state_map: ApplyStateMap<ViewState>,
 }
 
 impl LiveHook for LView {

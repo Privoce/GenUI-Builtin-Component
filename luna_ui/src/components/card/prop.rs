@@ -244,7 +244,7 @@ impl CardBasicProp {
     }
     pub fn default_body(state: CardState) -> ViewBasicProp {
         let mut body = Self::default_outer(state);
-        body.set_height(Size::Fit);
+        body.set_height(Size::Fill);
         body
     }
 }

@@ -133,6 +133,8 @@ live_design! {
                             draw_bg: {
                                 color: #f00
                             }
+                            height: 40.0,
+                            width: Fill,
                         }
                         <View> {
                             <LLabel>{
@@ -143,6 +145,8 @@ live_design! {
                             draw_bg: {
                                 color: #000
                             }
+                            height: Fill,
+                            width: Fill,
                         }
                         <View> {
                             <LLabel>{
@@ -152,6 +156,53 @@ live_design! {
                             show_bg: true,
                             draw_bg: {
                                 color: #00f
+                            }
+                            height: 40.0,
+                            width: Fill,
+                        }
+                    }
+                    <LView> {
+                        prop: {
+                            basic: {
+                                height: 200.0,
+                                width: 200.0,
+                            }
+                        }
+                        <LView> {
+                            <LLabel>{
+                                text: "Card Header",
+                                mode: Bold
+                            }
+                            prop: {
+                                basic: {
+                                    theme: Primary,
+                                    height: 40.0,
+                                    width: Fill,
+                                }
+                            }
+                        }
+                        <LView> {
+                            <LLabel>{
+                                text: "Card Body",
+                                mode: Bold
+                            }
+                            prop: {
+                                basic: {
+                                    theme: Error,
+                                    height: Fill,
+                                }
+                            }
+                        }
+                        <LView> {
+                            <LLabel>{
+                                text: "Card Footer",
+                                mode: Bold
+                            }
+                            prop: {
+                                basic: {
+                                    theme: Warning,
+                                    height: 40.0,
+                                }
                             }
                         }
                     }
@@ -178,9 +229,15 @@ live_design! {
                             }
                         }
                         footer: {
+                            prop: {
+                                basic: {
+                                    theme: Warning,
+                                    height: Fit
+                                }
+                            }
                             <LLabel>{
                                 text: "Card Footer",
-                                mode: Bold
+                                mode: BoldItalic
                             }
                         }
 
