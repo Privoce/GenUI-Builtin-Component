@@ -196,8 +196,6 @@ impl Widget for LCard {
         ] {
             if slot.visible {
                 let walk = slot.walk(cx);
-                dbg!(&walk);
-
                 if let Some(fw) = cx.defer_walk(walk) {
                     // if is fill, defer the walk
                     self.defer_walks.push((id, fw));
@@ -260,7 +258,6 @@ impl LiveHook for LCard {
                 _ => {}
             },
         );
-        
     }
 }
 
@@ -272,6 +269,12 @@ impl Component for LCard {
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let prop = &cx.global::<Conf>().components.card;
         self.prop = prop.clone();
+        self.header.prop.basic = self.prop.basic.header;
+        self.header.prop.hover = self.prop.hover.header;
+        self.body.prop.basic = self.prop.basic.body;
+        self.body.prop.hover = self.prop.hover.body;
+        self.footer.prop.basic = self.prop.basic.footer;
+        self.footer.prop.hover = self.prop.hover.footer;
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
@@ -336,8 +339,6 @@ impl Component for LCard {
         if !self.sync {
             return;
         }
-        // self.header.prop.basic = self.prop.basic.header;
-        // self.header.prop.hover = self.prop.hover.header;
 
         // do merge to slot
         let mut crossed_map = self.apply_slot_map.cross();

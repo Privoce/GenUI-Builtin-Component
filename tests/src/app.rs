@@ -214,9 +214,15 @@ live_design! {
                                     height: 200.0,
                                     width: 200.0,
                                 },
+                                header: {
+                                    border_width: 2.0,
+                                    border_color: #00f,
+                                }
                                 footer: {
                                     theme: Error,
                                     height: 40.0,
+                                    border_width: 2.0,
+                                    border_color: #f00,
                                 }
                             }
                         }
@@ -241,8 +247,8 @@ live_design! {
                         footer: {
                             prop: {
                                 basic: {
-                                    // theme: Success,
-                                    // height: Fit
+                                    theme: Success,
+                                    height: Fit
                                 }
                             }
                             <LLabel>{

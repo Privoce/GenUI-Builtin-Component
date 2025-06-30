@@ -25,6 +25,8 @@ pub type ApplyStateMap<K> = HashMap<K, PropMap>;
 pub type ApplySlotMap<K, P> = HashMap<K, SlotMap<P>>;
 
 pub trait ApplyMapImpl {
+    /// ## merge
+    /// merge other with self, if the key exists in self, it will ignore
     fn merge(&mut self, other: Self) -> ();
 }
 
@@ -220,7 +222,7 @@ where
 {
     fn merge(&mut self, other: Self) -> () {
         for (state, props) in other {
-            self.entry(state).or_default().extend(props);
+            self.entry(state).or_default().merge(props);
         }
     }
 }
@@ -231,7 +233,7 @@ where
 {
     fn merge(&mut self, other: Self) -> () {
         for (state, slots) in other {
-            self.entry(state).or_default().extend(slots);
+            self.entry(state).or_default().merge(slots);
         }
     }
 }
@@ -369,5 +371,51 @@ fn insert_map(
     if let Some(i) = nodes.child_by_path(index, paths) {
         let node = &nodes[i];
         applys.insert(node.id.to_string(), node.value.clone());
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_merge() {
+        let mut a_map = super::ApplyStateMap::<i32>::from([
+            (
+                1,
+                super::PropMap::from([("a".to_string(), LiveValue::Float64(1.0))]),
+            ),
+            (
+                2,
+                super::PropMap::from([("b".to_string(), LiveValue::Float64(2.0))]),
+            ),
+        ]);
+        let b_map = super::ApplyStateMap::<i32>::from([
+            (
+                1,
+                super::PropMap::from([
+                    ("a".to_string(), LiveValue::Float64(10.0)),
+                    ("b".to_string(), LiveValue::Float64(20.0)),
+                    ("c".to_string(), LiveValue::Float64(3.0)),
+                ]),
+            ),
+            (
+                3,
+                super::PropMap::from([("d".to_string(), LiveValue::Float64(4.0))]),
+            ),
+        ]);
+        a_map.merge(b_map);
+        dbg!(a_map);
+    }
+
+    #[test]
+    fn test_prop_merge() {
+        let mut a_map = super::PropMap::from([("a".to_string(), LiveValue::Float64(10.0))]);
+        let b_map = super::PropMap::from([
+            ("a".to_string(), LiveValue::Float64(1.0)),
+            ("b".to_string(), LiveValue::Float64(2.0)),
+            ("c".to_string(), LiveValue::Float64(3.0)),
+        ]);
+        a_map.merge(b_map);
+        dbg!(a_map);
     }
 }

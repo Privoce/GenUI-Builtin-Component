@@ -727,7 +727,6 @@ impl Component for LView {
         if !self.sync {
             return;
         }
-        dbg!("sync LView");
         // sync state if is not Basic
         self.prop.sync(&self.apply_state_map);
     }
