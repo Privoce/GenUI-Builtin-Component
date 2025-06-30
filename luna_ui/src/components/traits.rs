@@ -1,7 +1,8 @@
 use std::hash::Hash;
 
 use makepad_widgets::{
-    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget, WidgetNode
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget,
+    WidgetNode,
 };
 
 use crate::{
@@ -116,7 +117,10 @@ pub trait Part: Hash + Eq + Copy {
 /// ## attention:
 /// - `IS`: `InnerState` is the state of the slot, which may different from the component state
 /// because the slot may have different state than the component itself (each container as slot always use ViewState)
-pub trait SlotComponent<IS>: Component {
+pub trait SlotComponent<IS>: Component
+where
+    IS: Eq + Hash + Copy,
+{
     type Part: Part<State = IS>;
 
     fn set_apply_slot_map<'m, LP, P, P2, NF, IF>(

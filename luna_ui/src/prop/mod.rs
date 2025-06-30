@@ -24,14 +24,18 @@ pub type ApplyStateMap<K> = HashMap<K, PropMap>;
 /// ApplySlotMap is a mapping from a key to a SlotMap, used for applying slots in components
 pub type ApplySlotMap<K, P> = HashMap<K, SlotMap<P>>;
 
-pub trait PropMapImpl {
+pub trait ApplyMapImpl {
+    fn merge(&mut self, other: Self) -> ();
+}
+
+pub trait PropMapImpl: ApplyMapImpl {
     fn get_theme_then(&self, default: Theme) -> Theme;
     /// ## diff returns a new ApplyStateMap with only the keys that are in `other` but not in `self`
     fn diff(&self, other: &Self) -> Self;
 }
 
 /// # ApplyStateMapImpl
-pub trait ApplyStateMapImpl<S> {
+pub trait ApplyStateMapImpl<S>: ApplyMapImpl {
     /// ## set_map
     /// use to set map when in `after_apply()`
     fn set_map<'m, C, LP, P, NF, IF>(
@@ -58,7 +62,7 @@ pub trait ApplyStateMapImpl<S> {
         IS: IntoIterator<Item = (S, &'p mut P)>;
 }
 
-pub trait ApplySlotMapImpl<S, IS, PT>
+pub trait ApplySlotMapImpl<S, IS, PT>: ApplyMapImpl
 where
     S: Hash + Eq + Copy + Into<IS>,
     PT: Part<State = IS>,
@@ -84,13 +88,33 @@ where
         P: BasicProp<State = IS> + 'p,
         SS: IntoIterator<Item = S> + Copy,
         PS: IntoIterator<Item = (PT, &'p mut P)>;
+    /// ## cross
+    /// Used to intersect the outermost state component properties with the composition properties
+    /// Meaning: convert `Map<State, Map<Part, Map<String, LiveValue>>>` to `Map<Part, Map<State, Map<String, LiveValue>>>`
+    fn cross(&self) -> ApplySlotMap<PT, IS>;
 }
 
 impl<S, IS, PT> ApplySlotMapImpl<S, IS, PT> for ApplySlotMap<S, PT>
 where
+    IS: Hash + Eq + Copy,
     S: Hash + Eq + Copy + Into<IS>,
     PT: Part<State = IS>,
 {
+    fn cross(&self) -> ApplySlotMap<PT, IS> {
+        let mut cross_map = ApplySlotMap::new();
+        for (state, slots) in self {
+            for (part, props) in slots {
+                cross_map
+                    .entry(*part)
+                    .or_default()
+                    .entry((*state).into())
+                    .or_default()
+                    .extend(props.clone());
+            }
+        }
+        cross_map
+    }
+
     fn set_map<'m, C, LP, P, P2, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
@@ -186,6 +210,28 @@ where
                     }
                 }
             }
+        }
+    }
+}
+
+impl<S> ApplyMapImpl for ApplyStateMap<S>
+where
+    S: Hash + Eq + Copy,
+{
+    fn merge(&mut self, other: Self) -> () {
+        for (state, props) in other {
+            self.entry(state).or_default().extend(props);
+        }
+    }
+}
+impl<S, IS, PT> ApplyMapImpl for ApplySlotMap<S, PT>
+where
+    S: Hash + Eq + Copy + Into<IS>,
+    PT: Part<State = IS>,
+{
+    fn merge(&mut self, other: Self) -> () {
+        for (state, slots) in other {
+            self.entry(state).or_default().extend(slots);
         }
     }
 }
@@ -302,6 +348,14 @@ impl PropMapImpl for PropMap {
                 .into_iter()
                 .filter(|(k, v)| !other.contains_key(k) || other.get(k) != Some(v))
                 .collect()
+        }
+    }
+}
+
+impl ApplyMapImpl for PropMap {
+    fn merge(&mut self, other: Self) -> () {
+        for (k, v) in other {
+            self.entry(k).or_insert(v);
         }
     }
 }

@@ -114,98 +114,98 @@ live_design! {
                     //     }
                     //     animation_open: true
                     // }
-                    <View> {
-                        flow: Down,
-                        spacing: 10.0,
-                        height: 200.0,
-                        width: 200.0,
-                        show_bg: true,
-                        draw_bg: {
-                            color: #f0f
-                        }
-                        padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
-                        <View> {
-                            <LLabel>{
-                                text: "Card Header",
-                                mode: Bold
-                            }
-                            show_bg: true,
-                            draw_bg: {
-                                color: #f00
-                            }
-                            height: 40.0,
-                            width: Fill,
-                        }
-                        <View> {
-                            <LLabel>{
-                                text: "Card Body",
-                                mode: Bold
-                            }
-                            show_bg: true,
-                            draw_bg: {
-                                color: #000
-                            }
-                            height: Fill,
-                            width: Fill,
-                        }
-                        <View> {
-                            <LLabel>{
-                                text: "Card Footer",
-                                mode: Bold
-                            }
-                            show_bg: true,
-                            draw_bg: {
-                                color: #00f
-                            }
-                            height: 40.0,
-                            width: Fill,
-                        }
-                    }
-                    <LView> {
-                        prop: {
-                            basic: {
-                                height: 200.0,
-                                width: 200.0,
-                            }
-                        }
-                        <LView> {
-                            <LLabel>{
-                                text: "Card Header",
-                                mode: Bold
-                            }
-                            prop: {
-                                basic: {
-                                    theme: Primary,
-                                    height: 40.0,
-                                    width: Fill,
-                                }
-                            }
-                        }
-                        <LView> {
-                            <LLabel>{
-                                text: "Card Body",
-                                mode: Bold
-                            }
-                            prop: {
-                                basic: {
-                                    theme: Error,
-                                    height: Fill,
-                                }
-                            }
-                        }
-                        <LView> {
-                            <LLabel>{
-                                text: "Card Footer",
-                                mode: Bold
-                            }
-                            prop: {
-                                basic: {
-                                    theme: Warning,
-                                    height: 40.0,
-                                }
-                            }
-                        }
-                    }
+                    // <View> {
+                    //     flow: Down,
+                    //     spacing: 10.0,
+                    //     height: 200.0,
+                    //     width: 200.0,
+                    //     show_bg: true,
+                    //     draw_bg: {
+                    //         color: #f0f
+                    //     }
+                    //     padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
+                    //     <View> {
+                    //         <LLabel>{
+                    //             text: "Card Header",
+                    //             mode: Bold
+                    //         }
+                    //         show_bg: true,
+                    //         draw_bg: {
+                    //             color: #f00
+                    //         }
+                    //         height: 40.0,
+                    //         width: Fill,
+                    //     }
+                    //     <View> {
+                    //         <LLabel>{
+                    //             text: "Card Body",
+                    //             mode: Bold
+                    //         }
+                    //         show_bg: true,
+                    //         draw_bg: {
+                    //             color: #000
+                    //         }
+                    //         height: Fill,
+                    //         width: Fill,
+                    //     }
+                    //     <View> {
+                    //         <LLabel>{
+                    //             text: "Card Footer",
+                    //             mode: Bold
+                    //         }
+                    //         show_bg: true,
+                    //         draw_bg: {
+                    //             color: #00f
+                    //         }
+                    //         height: 40.0,
+                    //         width: Fill,
+                    //     }
+                    // }
+                    // <LView> {
+                    //     prop: {
+                    //         basic: {
+                    //             height: 200.0,
+                    //             width: 200.0,
+                    //         }
+                    //     }
+                    //     <LView> {
+                    //         <LLabel>{
+                    //             text: "Card Header",
+                    //             mode: Bold
+                    //         }
+                    //         prop: {
+                    //             basic: {
+                    //                 theme: Primary,
+                    //                 height: 40.0,
+                    //                 width: Fill,
+                    //             }
+                    //         }
+                    //     }
+                    //     <LView> {
+                    //         <LLabel>{
+                    //             text: "Card Body",
+                    //             mode: Bold
+                    //         }
+                    //         prop: {
+                    //             basic: {
+                    //                 theme: Error,
+                    //                 height: Fill,
+                    //             }
+                    //         }
+                    //     }
+                    //     <LView> {
+                    //         <LLabel>{
+                    //             text: "Card Footer",
+                    //             mode: Bold
+                    //         }
+                    //         prop: {
+                    //             basic: {
+                    //                 theme: Warning,
+                    //                 height: 40.0,
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     <LCard>{
                         prop: {
                             basic: {
@@ -213,10 +213,20 @@ live_design! {
                                     theme: Primary,
                                     height: 200.0,
                                     width: 200.0,
+                                },
+                                footer: {
+                                    theme: Error,
+                                    height: 40.0,
                                 }
                             }
                         }
                         header: {
+                            prop: {
+                                basic: {
+                                    theme: Warning,
+                                    height: 98.0
+                                }
+                            }
                             <LLabel>{
                                 text: "Card Header",
                                 mode: Bold
@@ -231,8 +241,8 @@ live_design! {
                         footer: {
                             prop: {
                                 basic: {
-                                    theme: Warning,
-                                    height: Fit
+                                    // theme: Success,
+                                    // height: Fit
                                 }
                             }
                             <LLabel>{

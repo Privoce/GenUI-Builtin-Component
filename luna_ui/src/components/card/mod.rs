@@ -17,7 +17,7 @@ use crate::{
     prop::{
         manuel::{BASIC, HOVER},
         traits::ToFloat,
-        ApplySlotMap, ApplyStateMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -98,8 +98,6 @@ pub struct LCard {
     // --- draw  --------------------
     #[rust]
     defer_walks: SmallVec<[(LiveId, DeferWalk); 1]>,
-    #[rust]
-    draw_state: DrawStateWrap<DrawState>,
 }
 
 impl WidgetNode for LCard {
@@ -155,6 +153,16 @@ impl WidgetNode for LCard {
 
 impl Widget for LCard {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+        fn slot_draw_walk(
+            cx: &mut Cx2d,
+            scope: &mut Scope,
+            df_walk: &mut DeferWalk,
+            slot: &mut LView,
+        ) {
+            let res_walk = df_walk.resolve(cx);
+            let _ = slot.draw_walk(cx, scope, res_walk);
+        }
+
         if !self.visible {
             return DrawStep::done();
         }
@@ -181,47 +189,36 @@ impl Widget for LCard {
             },
         );
 
-        for (id, visible, slot, walk) in [
-            (
-                live_id!(header),
-                self.header.visible,
-                &mut self.header,
-                prop.header.walk(),
-            ),
-            (
-                live_id!(body),
-                self.body.visible,
-                &mut self.body,
-                prop.body.walk(),
-            ),
-            (
-                live_id!(footer),
-                self.footer.visible,
-                &mut self.footer,
-                prop.footer.walk(),
-            ),
+        for (id, slot) in [
+            (live_id!(header), &mut self.header),
+            (live_id!(body), &mut self.body),
+            (live_id!(footer), &mut self.footer),
         ] {
-            if visible {
+            if slot.visible {
+                let walk = slot.walk(cx);
+                dbg!(&walk);
+
                 if let Some(fw) = cx.defer_walk(walk) {
-                    // Fill 组件，延迟处理
+                    // if is fill, defer the walk
                     self.defer_walks.push((id, fw));
                 } else {
-                    // Fit/Fixed 组件，立即处理
                     let _ = slot.draw_walk(cx, scope, walk);
                 }
             }
         }
 
         for (id, df_walk) in self.defer_walks.iter_mut() {
-            if live_id!(header).eq(id) {
-                let res_walk = df_walk.resolve(cx);
-                let _ = self.header.draw_walk(cx, scope, res_walk);
-            }else if live_id!(body).eq(id) {
-                let res_walk = df_walk.resolve(cx);
-                let _ = self.body.draw_walk(cx, scope, res_walk);
-            } else if live_id!(footer).eq(id) {
-                let res_walk = df_walk.resolve(cx);
-                let _ = self.footer.draw_walk(cx, scope, res_walk);
+            match id {
+                live_id!(header) => {
+                    slot_draw_walk(cx, scope, df_walk, &mut self.header);
+                }
+                live_id!(body) => {
+                    slot_draw_walk(cx, scope, df_walk, &mut self.body);
+                }
+                live_id!(footer) => {
+                    slot_draw_walk(cx, scope, df_walk, &mut self.footer);
+                }
+                _ => {}
             }
         }
 
@@ -229,62 +226,7 @@ impl Widget for LCard {
         self.set_scope_path(&scope.path);
         DrawStep::done()
     }
-    // fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
-    //     if !self.visible {
-    //         return DrawStep::done();
-    //     }
 
-    //     let state = self.current_state();
-    //     let prop = self.prop.get(state);
-
-    //     let _ = self.draw_card.begin(
-    //         cx,
-    //         Walk {
-    //             margin: prop.outer.margin,
-    //             width: prop.outer.width,
-    //             height: prop.outer.height,
-    //             abs_pos: prop.outer.abs_pos,
-    //         },
-    //         Layout {
-    //             clip_x: false,
-    //             clip_y: false,
-    //             padding: prop.outer.padding,
-    //             align: prop.outer.align,
-    //             flow: prop.outer.flow,
-    //             spacing: prop.outer.spacing,
-    //             ..Default::default()
-    //         },
-    //     );
-
-    //     if self.header.visible {
-    //         let walk = prop.body.walk();
-    //         dbg!(prop.header.walk());
-    //         let _ = self.header.draw_walk(cx, scope, prop.header.walk());
-    //     }
-    //     // for (visible, slot, walk) in [
-    //     //     (self.header.visible, &mut self.header, prop.header.walk()),
-    //     //     (self.body.visible, &mut self.body, prop.body.walk()),
-    //     //     (self.footer.visible, &mut self.footer, prop.footer.walk()),
-    //     // ] {
-    //     //     if visible {
-    //     //         let _ = slot.draw_walk(cx, scope, walk);
-    //     //     }
-    //     // }
-
-    //     if self.body.visible {
-    //         let walk = prop.body.walk();
-    //         dbg!(walk);
-    //         let _ = self.body.draw_walk(cx, scope, walk);
-    //     }
-
-    //     if self.footer.visible {
-    //         let _ = self.footer.draw_walk(cx, scope, prop.footer.walk());
-    //     }
-
-    //     self.draw_card.end(cx);
-    //     self.set_scope_path(&scope.path);
-    //     DrawStep::done()
-    // }
     fn handle_event(&mut self, _cx: &mut Cx, _event: &Event, _scope: &mut Scope) {}
 }
 
@@ -318,6 +260,7 @@ impl LiveHook for LCard {
                 _ => {}
             },
         );
+        
     }
 }
 
@@ -393,6 +336,23 @@ impl Component for LCard {
         if !self.sync {
             return;
         }
+        // self.header.prop.basic = self.prop.basic.header;
+        // self.header.prop.hover = self.prop.hover.header;
+
+        // do merge to slot
+        let mut crossed_map = self.apply_slot_map.cross();
+        for (part, slot) in [
+            (CardPart::Header, &mut self.header),
+            (CardPart::Body, &mut self.body),
+            (CardPart::Footer, &mut self.footer),
+        ] {
+            crossed_map.remove(&part).map(|map| {
+                slot.apply_state_map.merge(map);
+            });
+
+            slot.prop.sync(&slot.apply_state_map);
+        }
+
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
     }
