@@ -5,7 +5,7 @@ use toml_edit::Item;
 
 use crate::{
     components::{
-        traits::{BasicProp, Part, Prop, SlotProp},
+        traits::{BasicProp, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
@@ -66,13 +66,14 @@ impl SlotProp for CardProp {
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
         map.sync(
+            &mut self.basic,
             CardState::Basic,
-            [CardState::Hover],
+            [(CardState::Hover, &mut self.hover)],
             [
-                (CardPart::Outer, &mut self.basic.outer),
-                (CardPart::Header, &mut self.basic.header),
-                (CardPart::Body, &mut self.basic.body),
-                (CardPart::Footer, &mut self.basic.footer),
+                CardPart::Outer,
+                CardPart::Header,
+                CardPart::Body,
+                CardPart::Footer,
             ],
         );
     }
@@ -116,7 +117,7 @@ impl Default for CardProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct CardBasicProp {
     #[live(CardBasicProp::default_outer(CardState::Basic))]
@@ -157,7 +158,7 @@ impl BasicProp for CardBasicProp {
         3 * ViewBasicProp::len()
     }
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
+    fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
         // self.header.set_from_str(key, value, state.into());
         // self.body.set_from_str(key, value, state.into());
         // self.footer.set_from_str(key, value, state.into());
@@ -176,6 +177,34 @@ impl BasicProp for CardBasicProp {
 
     fn walk(&self) -> Walk {
         self.outer.walk()
+    }
+}
+
+impl SlotBasicProp for CardBasicProp {
+    type Part = CardPart;
+
+    fn set_from_str_slot(
+        &mut self,
+        key: &str,
+        value: &LiveValue,
+        state: Self::State,
+        part: Self::Part,
+    ) -> () {
+        match part {
+            CardPart::Outer => self.outer.set_from_str(key, value, state.into()),
+            CardPart::Header => self.header.set_from_str(key, value, state.into()),
+            CardPart::Body => self.body.set_from_str(key, value, state.into()),
+            CardPart::Footer => self.footer.set_from_str(key, value, state.into()),
+        }
+    }
+
+    fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
+        match part {
+            CardPart::Outer => self.outer.sync(state.into()),
+            CardPart::Header => self.header.sync(state.into()),
+            CardPart::Body => self.body.sync(state.into()),
+            CardPart::Footer => self.footer.sync(state.into()),
+        }
     }
 }
 

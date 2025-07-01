@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use std::{fmt::Debug, hash::Hash};
 
 use makepad_widgets::{
     error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget,
@@ -190,7 +190,7 @@ pub trait SlotProp: Prop {
 
 /// # BasicProp
 /// trait for basic properties of a component
-pub trait BasicProp: Default {
+pub trait BasicProp: Default + Debug{
     type State;
     type Colors;
 
@@ -208,6 +208,7 @@ pub trait BasicProp: Default {
     fn walk(&self) -> Walk;
 }
 
+
 pub trait SlotBasicProp: BasicProp {
     type Part: Part;
 
@@ -218,4 +219,6 @@ pub trait SlotBasicProp: BasicProp {
         state: Self::State,
         part: Self::Part,
     ) -> ();
+
+    fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> ();
 }

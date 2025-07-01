@@ -9,7 +9,7 @@ use makepad_widgets::{
 pub use radius::Radius;
 
 use crate::{
-    components::traits::{BasicProp, Component, Part},
+    components::traits::{BasicProp, Component, Part, SlotBasicProp},
     prop::manuel::THEME,
     themes::Theme,
 };
@@ -85,11 +85,22 @@ where
         P2: IntoIterator<Item = PT> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy;
-    fn sync<'p, P, SS, PS>(&'p self, basic_state: S, states: SS, parts: PS) -> ()
+    // fn sync<'p, P, SS, PS>(&'p self, basic_state: S, states: SS, parts: PS) -> ()
+    // where
+    //     P: BasicProp<State = IS> + 'p,
+    //     SS: IntoIterator<Item = S> + Copy,
+    //     PS: IntoIterator<Item = (PT, &'p mut P)>;
+    fn sync<'p, P, SS, PS>(
+        &'p self,
+        basic_prop: &mut P,
+        basic_state: S,
+        states: SS,
+        parts: PS,
+    ) -> ()
     where
-        P: BasicProp<State = IS> + 'p,
-        SS: IntoIterator<Item = S> + Copy,
-        PS: IntoIterator<Item = (PT, &'p mut P)>;
+        P: SlotBasicProp<Part = PT, State = S> + 'p,
+        SS: IntoIterator<Item = (S, &'p mut P)>,
+        PS: IntoIterator<Item = PT>;
     /// ## cross
     /// Used to intersect the outermost state component properties with the composition properties
     /// Meaning: convert `Map<State, Map<Part, Map<String, LiveValue>>>` to `Map<Part, Map<State, Map<String, LiveValue>>>`
@@ -166,49 +177,58 @@ where
             insert(prefix, component, slots);
         }
     }
-    fn sync<'p, P, SS, PS>(&'p self, basic_state: S, states: SS, parts: PS) -> ()
+    fn sync<'p, P, SS, PS>(
+        &'p self,
+        basic_prop: &mut P,
+        basic_state: S,
+        states: SS,
+        parts: PS,
+    ) -> ()
     where
-        P: BasicProp<State = IS> + 'p,
-        SS: IntoIterator<Item = S> + Copy,
-        PS: IntoIterator<Item = (PT, &'p mut P)>,
+        P: SlotBasicProp<Part = PT, State = S> + 'p,
+        SS: IntoIterator<Item = (S, &'p mut P)> ,
+        PS: IntoIterator<Item = PT>,
     {
         if let Some(basic_props) = self.get(&basic_state) {
-            for (part, part_prop) in parts {
+            let mut states_vec: Vec<_> = states.into_iter().collect();
+            for part in parts {
                 if let Some(part_props) = basic_props.get(&part) {
                     let mut parts = Cow::Borrowed(part_props);
                     if parts.contains_key(THEME) {
                         let parts = parts.to_mut();
                         if let Some(value) = parts.remove(THEME) {
-                            part_prop.set_from_str(THEME, &value, basic_state.into());
+                            basic_prop.set_from_str_slot(THEME, &value, basic_state, part);
                         }
                     } else {
                         // 如果没有theme，则使用组件的theme
-                        part_prop.sync(basic_state.into());
+                        basic_prop.sync_slot(basic_state, part);
                     }
                     // 处理其他
                     for (k, v) in parts.iter() {
-                        part_prop.set_from_str(&k, &v, basic_state.into());
+                        basic_prop.set_from_str_slot(&k, &v, basic_state, part);
                     }
 
-                    for state in states {
-                        // diff
-                        let mut diff_props = basic_props.get(&part).map_or_else(
-                            || part_props.clone(),
-                            |apply_props| apply_props.diff(&part_props),
-                        );
-                        // remove theme
-                        if diff_props.contains_key(THEME) {
-                            if let Some(value) = diff_props.remove(THEME) {
-                                part_prop.set_from_str(THEME, &value, state.into());
-                            } else {
-                                // if no theme, use self.theme
-                                part_prop.sync(state.into());
+                    for (state, props) in states_vec.iter_mut() {
+                        self.get(&state).map(|state_map| {
+                            let mut diff_props = state_map.get(&part).map_or_else(
+                                || part_props.clone(),
+                                |apply_props| apply_props.diff(&part_props),
+                            );
+
+                            // remove theme
+                            if diff_props.contains_key(THEME) {
+                                if let Some(value) = diff_props.remove(THEME) {
+                                    props.set_from_str_slot(THEME, &value, *state, part);
+                                } else {
+                                    // if no theme, use self.theme
+                                    props.sync_slot(*state, part);
+                                }
                             }
-                        }
-                        // set from str
-                        for (k, v) in diff_props.iter() {
-                            part_prop.set_from_str(&k, &v, state.into());
-                        }
+                            // set from str
+                            for (k, v) in diff_props.iter() {
+                                props.set_from_str_slot(&k, &v, *state, part);
+                            }
+                        });
                     }
                 }
             }
