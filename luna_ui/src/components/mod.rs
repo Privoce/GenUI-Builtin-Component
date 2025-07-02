@@ -1,17 +1,20 @@
 use makepad_widgets::*;
 
-pub mod label;
-pub mod view;
+use crate::{
+    component, components::{button::LButton, card::LCard, label::LLabel, view::LView}
+};
+
 pub mod button;
-pub mod tag;
 pub mod card;
-pub mod radio;
 pub mod checkbox;
+pub mod label;
+pub mod radio;
 pub mod switch;
+pub mod tag;
+pub mod view;
 
-
-pub mod traits;
 pub mod lifecycle;
+pub mod traits;
 
 live_design! {
     link luna_ui;
@@ -39,4 +42,11 @@ pub fn components_register(cx: &mut Cx) {
     view::live_design(cx);
     button::live_design(cx);
     card::live_design(cx);
+}
+
+component! {
+    Label => LLabel,
+    View => LView,
+    Button => LButton,
+    Card => LCard
 }

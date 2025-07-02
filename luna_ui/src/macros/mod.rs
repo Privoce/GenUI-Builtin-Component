@@ -4,3 +4,4 @@ mod event;
 mod animation;
 mod impl_self;
 mod impl_ref;
+mod component;

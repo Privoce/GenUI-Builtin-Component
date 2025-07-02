@@ -7,15 +7,21 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, components::{
+    active_event, animation_open_then_redraw, area,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{LView, ViewState},
-    }, error::Error, event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
-        manuel::{BASIC, HOVER},
-        traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf, visible, ComponentAnInit
+    },
+    error::Error,
+    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
+        manuel::{BASIC, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::draw_view::DrawView,
+    themes::Conf,
+    visible, ComponentAnInit,
 };
 
 live_design! {
@@ -90,7 +96,7 @@ pub struct LCard {
     pub draw_card: DrawView,
     // --- draw  --------------------
     #[rust]
-    defer_walks: SmallVec<[(LiveId, DeferWalk); 1]>,
+    defer_walks: DeferWalks,
 }
 
 impl WidgetNode for LCard {
@@ -146,16 +152,6 @@ impl WidgetNode for LCard {
 
 impl Widget for LCard {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
-        fn slot_draw_walk(
-            cx: &mut Cx2d,
-            scope: &mut Scope,
-            df_walk: &mut DeferWalk,
-            slot: &mut LView,
-        ) {
-            let res_walk = df_walk.resolve(cx);
-            let _ = slot.draw_walk(cx, scope, res_walk);
-        }
-
         if !self.visible {
             return DrawStep::done();
         }
@@ -182,36 +178,15 @@ impl Widget for LCard {
             },
         );
 
-        for (id, slot) in [
-            (live_id!(header), &mut self.header),
-            (live_id!(body), &mut self.body),
-            (live_id!(footer), &mut self.footer),
-        ] {
-            if slot.visible {
-                let walk = slot.walk(cx);
-                if let Some(fw) = cx.defer_walk(walk) {
-                    // if is fill, defer the walk
-                    self.defer_walks.push((id, fw));
-                } else {
-                    let _ = slot.draw_walk(cx, scope, walk);
-                }
-            }
-        }
-
-        for (id, df_walk) in self.defer_walks.iter_mut() {
-            match id {
-                live_id!(header) => {
-                    slot_draw_walk(cx, scope, df_walk, &mut self.header);
-                }
-                live_id!(body) => {
-                    slot_draw_walk(cx, scope, df_walk, &mut self.body);
-                }
-                live_id!(footer) => {
-                    slot_draw_walk(cx, scope, df_walk, &mut self.footer);
-                }
-                _ => {}
-            }
-        }
+        let _ = SlotDrawer::new(
+            [
+                (live_id!(header), (&mut self.header).into()),
+                (live_id!(body), (&mut self.body).into()),
+                (live_id!(footer), (&mut self.footer).into()),
+            ],
+            &mut self.defer_walks,
+        )
+        .draw_walk(cx, scope);
 
         self.draw_card.end(cx);
         self.set_scope_path(&scope.path);
@@ -300,7 +275,7 @@ impl Component for LCard {
         self.draw_card.current_state().into()
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, _area: Area) {
         animation_open_then_redraw!(self, cx, event);
 
         match hit {

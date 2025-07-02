@@ -230,7 +230,7 @@ live_design! {
                             prop: {
                                 basic: {
                                     theme: Warning,
-                                    height: 98.0
+                                    height: 30.0
                                 }
                             }
                             <LLabel>{
@@ -248,7 +248,7 @@ live_design! {
                             prop: {
                                 basic: {
                                     theme: Success,
-                                    height: Fit
+                                    height: Fill
                                 }
                             }
                             <LLabel>{

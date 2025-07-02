@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use makepad_widgets::*;
 use toml_edit::Item;
 
@@ -10,7 +8,7 @@ use crate::{
     },
     error::Error,
     prop::{
-        manuel::{BASIC, BODY, FOOTER, HEADER, OUTER, THEME},
+        manuel::{BASIC, BODY, FOOTER, HEADER, OUTER},
         ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme},
