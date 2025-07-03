@@ -7,16 +7,19 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area,
+    active_event, animation_open_then_redraw, area, area_ref,
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{LView, ViewState},
     },
     error::Error,
-    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle,
+    play_animation,
     prop::{
-        manuel::{BASIC, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer
+        manuel::{BASIC, HOVER},
+        traits::ToFloat,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -193,13 +196,41 @@ impl Widget for LCard {
         DrawStep::done()
     }
 
-    fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
+    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         if !self.visible {
             return;
         }
 
         self.set_animation(cx);
         cx.global::<ComponentAnInit>().card = true;
+
+        // handle slot events
+        let mut is_slot_hover = false;
+        for slot in [&mut self.header, &mut self.body, &mut self.footer] {
+            let slot_state = slot.current_state();
+            
+            slot.handle_event(cx, event, scope);
+            match slot_state {
+                ViewState::Hover | ViewState::Pressed => {
+                    dbg!(slot_state);
+                    is_slot_hover = true;
+                }
+                _ => {
+                    is_slot_hover = false;
+                }
+            }
+        }
+
+        if is_slot_hover {
+            dbg!("hover");
+            self.switch_state_with_animation(cx, CardState::Hover);
+        } else {
+            self.switch_state_with_animation(cx, CardState::Basic);
+        }
+
+        // self.header.handle_event(cx, event, scope);
+        // self.body.handle_event(cx, event, scope);
+        // self.footer.handle_event(cx, event, scope);
         let area = self.area();
         let hit = event.hits(cx, area);
         self.handle_widget_event(cx, event, hit, area);
@@ -347,7 +378,6 @@ impl Component for LCard {
 
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
-        dbg!(self.prop.basic.outer.theme, self.prop.hover.outer.theme);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -482,4 +512,17 @@ impl LCard {
         area_body, body,
         area_footer, footer
     }
+}
+
+impl LCardRef {
+    event_option_ref! {
+        hover_in => CardHoverIn,
+        hover_out => CardHoverOut
+    }
+    area_ref! {
+        area_header,
+        area_body,
+        area_footer
+    }
+    getter_setter_ref! {}
 }

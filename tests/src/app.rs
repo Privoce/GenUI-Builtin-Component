@@ -55,18 +55,18 @@ live_design! {
                     //             mode: Regular,
                     //         }
                     //     }
-                    //     btn1 = <LButton>{
-                    //         prop: {
-                    //             hover: {
-                    //                 theme: Warning,
-                    //             }
+                        // btn1 = <LButton>{
+                        //     prop: {
+                        //         hover: {
+                        //             theme: Warning,
+                        //         }
 
-                    //         }
-                    //         slot: <LLabel>{
-                    //             text: "Click me !",
-                    //             mode: Bold,
-                    //         }
-                    //     }
+                        //     }
+                        //     slot: <LLabel>{
+                        //         text: "Click me !",
+                        //         mode: Bold,
+                        //     }
+                        // }
 
                     //     lb = <LLabel>{
                     //         text: "Hello World!",
@@ -206,6 +206,7 @@ live_design! {
                     //         }
                     //     }
                     // }
+                    
                     <LCard>{
                         prop: {
                             basic: {
@@ -243,6 +244,11 @@ live_design! {
                                 text: "Card Body",
                                 mode: Bold
                             }
+                            <LButton>{
+                                slot: {
+                                    text: "Click Me!",
+                                }
+                            }
                         }
                         footer: {
                             prop: {
@@ -251,12 +257,13 @@ live_design! {
                                     height: Fill
                                 }
                             }
-                            <LLabel>{
-                                text: "Card Footer",
-                                mode: BoldItalic
+                            <LButton>{
+                                slot: {
+                                    text: "Click Me!",
+                                }
                             }
                         }
-
+                        
                         // body: <LView>{
                         //     prop: {
                         //         basic: {
@@ -272,6 +279,18 @@ live_design! {
                         //         mode: Bold
                         //     }
                         // }
+                    }
+                    <LView>{
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                                height: 200.0,
+                                width: 200.0,
+                            }
+                            hover: {
+                                theme: Warning,
+                            }
+                        }
                     }
                 }
             }

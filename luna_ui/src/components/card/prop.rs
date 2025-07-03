@@ -134,7 +134,8 @@ impl BasicProp for CardBasicProp {
     type Colors = (Color, Color, Color);
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
-        let basic = ViewBasicProp::from_state(theme, state.into());
+        let mut basic = ViewBasicProp::from_state(theme, state.into());
+        basic.set_cursor(Default::default());
         let mut header_footer = basic.clone();
         header_footer.set_height(Size::Fixed(32.0));
         let mut body = basic.clone();
@@ -267,7 +268,9 @@ impl CardBasicProp {
         Self::default_header(state)
     }
     pub fn default_outer(state: CardState) -> ViewBasicProp {
-        ViewBasicProp::from_state(Theme::default(), state.into())
+        let mut outer = ViewBasicProp::from_state(Theme::default(), state.into());
+        outer.set_cursor(Default::default());
+        outer
     }
     pub fn default_body(state: CardState) -> ViewBasicProp {
         let mut body = Self::default_outer(state);

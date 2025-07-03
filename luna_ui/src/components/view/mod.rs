@@ -615,7 +615,6 @@ impl Component for LView {
     fn handle_widget_event(&mut self, cx: &mut Cx, _event: &Event, hit: Hit, area: Area) {
         match hit {
             Hit::FingerDown(e) => {
-                dbg!(self.prop.basic.border_radius);
                 self.switch_state_with_animation(cx, ViewState::Pressed);
                 hit_finger_down!(self, cx, area, e);
             }

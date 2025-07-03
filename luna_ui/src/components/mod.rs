@@ -34,7 +34,25 @@ live_design! {
         },
     }
 
-    pub LCard = <LCardBase>{}
+    pub LCard = <LCardBase>{
+        prop: {
+            basic: {
+                outer: {
+                    height: 300.0,
+                    width: 200.0,
+                }
+            }
+        }
+        header: <LView> {
+        
+        }
+        body: <LView> {
+
+        }
+        footer: <LView> {
+            
+        }
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
