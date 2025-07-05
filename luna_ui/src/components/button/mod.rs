@@ -6,14 +6,23 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, area_ref, components::{
+    active_event, animation_open_then_redraw, area, area_ref,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
+    },
+    error::Error,
+    event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
+    hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, visible, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    themes::{Conf, Theme},
+    visible, ComponentAnInit,
 };
 
 live_design! {

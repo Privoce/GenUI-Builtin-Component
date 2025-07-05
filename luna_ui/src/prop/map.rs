@@ -1,12 +1,12 @@
-use std::{borrow::Cow, collections::HashMap, hash::Hash};
-use makepad_widgets::{
-    live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp, LiveValue,
-};
 use crate::{
     components::traits::{BasicProp, Component, Part, SlotBasicProp},
     prop::manuel::THEME,
     themes::Theme,
 };
+use makepad_widgets::{
+    live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp, LiveValue,
+};
+use std::{borrow::Cow, collections::HashMap, hash::Hash};
 
 /// PropMap is a mapping from a property name to a LiveValue, used for storing properties in components
 pub type PropMap = HashMap<String, LiveValue>;
@@ -285,7 +285,9 @@ where
                 // diff
                 let mut diff_props = self.get(&state).map_or_else(
                     || basic_props.clone(),
-                    |apply_props| apply_props.diff(&basic_props),
+                    |apply_props| {
+                        apply_props.diff(&basic_props)
+                    },
                 );
                 // remove theme
                 if diff_props.contains_key(THEME) {
@@ -353,18 +355,20 @@ impl PropMapImpl for PropMap {
             .map_or_else(|| default, |v| (v, default).into())
     }
     fn diff(&self, other: &Self) -> Self {
-        if self.len() < other.len() {
-            other
-                .clone()
-                .into_iter()
-                .filter(|(k, v)| !self.contains_key(k) || self.get(k) != Some(v))
-                .collect()
-        } else {
-            self.clone()
-                .into_iter()
-                .filter(|(k, v)| !other.contains_key(k) || other.get(k) != Some(v))
-                .collect()
-        }
+        self.iter()
+            .filter_map(|(k, v)| {
+                match other.get(k) {
+                    Some(other_v) if other_v == v => None, // 值相等，跳过
+                    _ => Some((k.clone(), v.clone())),     // 不存在或值不同
+                }
+            })
+            .chain(
+                other
+                    .iter()
+                    .filter(|(k, _)| !self.contains_key(*k))
+                    .map(|(k, v)| (k.clone(), v.clone())),
+            )
+            .collect()
     }
 }
 

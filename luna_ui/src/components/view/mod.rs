@@ -176,9 +176,9 @@ impl LiveHook for LView {
             }
         }
 
-        if apply.from.is_new_from_doc() {
-            self.render_after_apply(cx);
-        }
+        // if apply.from.is_new_from_doc() {
+        //     self.render_after_apply(cx);
+        // }
 
         self.set_apply_state_map(
             nodes,

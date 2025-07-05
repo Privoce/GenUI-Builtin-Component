@@ -2,7 +2,7 @@ use luna_ui::{
     components::{
         button::{ButtonState, LButtonWidgetRefExt},
         label::LLabelWidgetRefExt,
-        traits::{BasicProp, Component},
+        traits::{BasicProp, Component}, view::LViewWidgetRefExt,
     },
     prop::traits::ToColor,
     themes::Theme,
@@ -207,89 +207,112 @@ live_design! {
                     //     }
                     // }
                     
-                    <LCard>{
-                        prop: {
-                            basic: {
-                                outer: {
-                                    theme: Primary,
-                                    height: 200.0,
-                                    width: 200.0,
-                                },
-                                header: {
-                                    border_width: 2.0,
-                                    border_color: #00f,
-                                }
-                                footer: {
-                                    theme: Error,
-                                    height: 40.0,
-                                    border_width: 2.0,
-                                    border_color: #f00,
-                                }
-                            }
-                        }
-                        header: {
-                            prop: {
-                                basic: {
-                                    theme: Warning,
-                                    height: 30.0
-                                }
-                            }
-                            <LLabel>{
-                                text: "Card Header",
-                                mode: Bold
-                            }
-                        }
-                        body: {
-                            <LLabel>{
-                                text: "Card Body",
-                                mode: Bold
-                            }
-                            <LButton>{
-                                slot: {
-                                    text: "Click Me!",
-                                }
-                            }
-                        }
-                        footer: {
-                            prop: {
-                                basic: {
-                                    theme: Success,
-                                    height: Fill
-                                }
-                            }
-                            <LButton>{
-                                slot: {
-                                    text: "Click Me!",
-                                }
-                            }
-                        }
+                    // <LCard>{
+                    //     prop: {
+                    //         basic: {
+                    //             outer: {
+                    //                 theme: Primary,
+                    //                 height: 200.0,
+                    //                 width: 200.0,
+                    //             },
+                    //             header: {
+                    //                 border_width: 2.0,
+                    //                 border_color: #00f,
+                    //             }
+                    //             footer: {
+                    //                 theme: Error,
+                    //                 height: 40.0,
+                    //                 border_width: 2.0,
+                    //                 border_color: #f00,
+                    //             }
+                    //         }
+                    //     }
+                    //     header: {
+                    //         prop: {
+                    //             basic: {
+                    //                 theme: Warning,
+                    //                 height: 30.0
+                    //             }
+                    //         }
+                    //         <LLabel>{
+                    //             text: "Card Header",
+                    //             mode: Bold
+                    //         }
+                    //     }
+                    //     body: {
+                    //         <LLabel>{
+                    //             text: "Card Body",
+                    //             mode: Bold
+                    //         }
+                    //         <LButton>{
+                    //             slot: {
+                    //                 text: "Click Me!",
+                    //             }
+                    //         }
+                    //     }
+                    //     footer: {
+                    //         prop: {
+                    //             basic: {
+                    //                 theme: Success,
+                    //                 height: Fill
+                    //             }
+                    //         }
+                    //         <LButton>{
+                    //             slot: {
+                    //                 text: "Click Me!",
+                    //             }
+                    //         }
+                    //     }
                         
-                        // body: <LView>{
-                        //     prop: {
-                        //         basic: {
-                        //             background_visible: true,
-                        //             background_color: #f0f,
-                        //             border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
-                        //             border_width: 2.0,
-                        //             border_color: #00f,
-                        //         }
-                        //     }
-                        //     <LLabel>{
-                        //         text: "Card Body",
-                        //         mode: Bold
-                        //     }
-                        // }
-                    }
-                    <LView>{
+                    //     // body: <LView>{
+                    //     //     prop: {
+                    //     //         basic: {
+                    //     //             background_visible: true,
+                    //     //             background_color: #f0f,
+                    //     //             border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
+                    //     //             border_width: 2.0,
+                    //     //             border_color: #00f,
+                    //     //         }
+                    //     //     }
+                    //     //     <LLabel>{
+                    //     //         text: "Card Body",
+                    //     //         mode: Bold
+                    //     //     }
+                    //     // }
+                    // }
+                    // v1 = <LView>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Primary,
+                    //             height: 200.0,
+                    //             width: 200.0,
+                    //         }
+                    //         hover: {
+                    //             theme: Warning,
+                    //         }
+                    //     }
+                    //     animation_open: true
+                    //     event_open: true,
+                    //     btn1 = <LButton>{
+                    //         slot: {
+                    //             text: "Click Me!",
+                    //         }
+                    //     }
+                    // }
+                    <LButton>{
                         prop: {
                             basic: {
                                 theme: Primary,
-                                height: 200.0,
+                                height: 50.0,
                                 width: 200.0,
                             }
                             hover: {
                                 theme: Warning,
                             }
+                        }
+                        slot: <LLabel>{
+                            text: "Click Me!",
+                            mode: Bold
                         }
                     }
                 }
@@ -320,26 +343,13 @@ impl MatchEvent for App {
     fn handle_startup(&mut self, _cx: &mut Cx) {}
 
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        // if self.ui.button(id!(button_1)).clicked(&actions) {
-        //     self.ui.button(id!(button_1)).set_text(cx, "Clicked 😀");
-        //     log!("hi");
-        //     self.counter += 1;
-        // }
-        let lb = self.ui.llabel(id!(lb));
-        let btn1 = self.ui.lbutton(id!(btn1));
-        if let Some(_) = btn1.clicked(actions) {
-            self.counter += 1;
-            // lb.set_text(cx, format!("Clicked {} times", self.counter));
-            let _ = lb.set_color(cx, "#f00".to_string());
-            let _ = lb.set_font_size(cx, 18.0);
-
-            let _ = btn1.set_background_color(cx, "#0f0".to_string());
-            lb.redraw(cx);
+        let v1 = self.ui.lview(id!(v1));
+        if let Some(_) = v1.lbutton(id!(btn1)).clicked(actions) {
+            if let Some(v1) = v1.borrow() {
+                dbg!(&v1.prop.hover.theme);
+                dbg!(&v1.apply_state_map);
+            }
         }
-
-        // let lb = self.ui.llabel(id!(lb));
-
-        // if self.ui.lbutton(id!(btn1)).cli
     }
 }
 
