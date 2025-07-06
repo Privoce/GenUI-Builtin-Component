@@ -2,13 +2,10 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    components::{
-        traits::{BasicProp, Prop},
+    component_state, components::{
+        traits::{BasicProp, ComponentState, Prop},
         view::ViewState,
-    },
-    error::Error,
-    getter_setter_prop,
-    prop::{
+    }, error::Error, getter_setter_prop, prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
@@ -16,9 +13,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    utils::{get_from_itable, get_from_table},
+    }, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -559,19 +554,14 @@ impl ButtonBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, Hash, PartialEq, Eq)]
-pub enum ButtonState {
-    #[default]
-    Basic,
-    Hover,
-    Pressed,
-    Disabled,
-}
-
-impl ButtonState {
-    pub fn is_disabled(&self) -> bool {
-        matches!(self, ButtonState::Disabled)
-    }
+component_state! {
+    ButtonState {
+        Basic => BASIC,
+        Hover => HOVER,
+        Pressed => PRESSED,
+        Disabled => DISABLED
+    },
+    _ => ButtonState::Basic
 }
 
 impl From<ViewState> for ButtonState {
@@ -582,5 +572,11 @@ impl From<ViewState> for ButtonState {
             ViewState::Pressed => ButtonState::Pressed,
             ViewState::Disabled => ButtonState::Disabled,
         }
+    }
+}
+
+impl ComponentState for ButtonState {
+    fn is_disabled(&self) -> bool {
+        matches!(self, ButtonState::Disabled)
     }
 }

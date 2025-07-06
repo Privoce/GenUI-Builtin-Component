@@ -207,114 +207,29 @@ live_design! {
                     //     }
                     // }
                     
-                    // <LCard>{
-                    //     prop: {
-                    //         basic: {
-                    //             outer: {
-                    //                 theme: Primary,
-                    //                 height: 200.0,
-                    //                 width: 200.0,
-                    //             },
-                    //             header: {
-                    //                 border_width: 2.0,
-                    //                 border_color: #00f,
-                    //             }
-                    //             footer: {
-                    //                 theme: Error,
-                    //                 height: 40.0,
-                    //                 border_width: 2.0,
-                    //                 border_color: #f00,
-                    //             }
-                    //         }
-                    //     }
-                    //     header: {
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Warning,
-                    //                 height: 30.0
-                    //             }
-                    //         }
-                    //         <LLabel>{
-                    //             text: "Card Header",
-                    //             mode: Bold
-                    //         }
-                    //     }
-                    //     body: {
-                    //         <LLabel>{
-                    //             text: "Card Body",
-                    //             mode: Bold
-                    //         }
-                    //         <LButton>{
-                    //             slot: {
-                    //                 text: "Click Me!",
-                    //             }
-                    //         }
-                    //     }
-                    //     footer: {
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Success,
-                    //                 height: Fill
-                    //             }
-                    //         }
-                    //         <LButton>{
-                    //             slot: {
-                    //                 text: "Click Me!",
-                    //             }
-                    //         }
-                    //     }
-                        
-                    //     // body: <LView>{
-                    //     //     prop: {
-                    //     //         basic: {
-                    //     //             background_visible: true,
-                    //     //             background_color: #f0f,
-                    //     //             border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
-                    //     //             border_width: 2.0,
-                    //     //             border_color: #00f,
-                    //     //         }
-                    //     //     }
-                    //     //     <LLabel>{
-                    //     //         text: "Card Body",
-                    //     //         mode: Bold
-                    //     //     }
-                    //     // }
-                    // }
-                    // v1 = <LView>{
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Primary,
-                    //             height: 200.0,
-                    //             width: 200.0,
-                    //         }
-                    //         hover: {
-                    //             theme: Warning,
-                    //         }
-                    //     }
-                    //     animation_open: true
-                    //     event_open: true,
-                    //     btn1 = <LButton>{
-                    //         slot: {
-                    //             text: "Click Me!",
-                    //         }
-                    //     }
-                    // }
-                    <LButton>{
+                    <LCard>{
                         prop: {
                             basic: {
-                                theme: Primary,
-                                height: 50.0,
-                                width: 200.0,
-                            }
-                            hover: {
-                                theme: Warning,
+                                outer: {
+                                    theme: Primary,
+                                    height: 200.0,
+                                    width: 200.0,
+                                },
+                                header: {
+                                    border_width: 2.0,
+                                    border_color: #00f,
+                                }
+                                footer: {
+                                    theme: Error,
+                                    height: 40.0,
+                                    border_width: 2.0,
+                                    border_color: #f00,
+                                }
                             }
                         }
-                        slot: <LLabel>{
-                            text: "Click Me!",
-                            mode: Bold
-                        }
+                        
                     }
+                   <LCard>{}
                 }
             }
         }
@@ -343,13 +258,13 @@ impl MatchEvent for App {
     fn handle_startup(&mut self, _cx: &mut Cx) {}
 
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        let v1 = self.ui.lview(id!(v1));
-        if let Some(_) = v1.lbutton(id!(btn1)).clicked(actions) {
-            if let Some(v1) = v1.borrow() {
-                dbg!(&v1.prop.hover.theme);
-                dbg!(&v1.apply_state_map);
-            }
-        }
+        // let v1 = self.ui.lview(id!(v1));
+        // if let Some(_) = v1.lbutton(id!(btn1)).clicked(actions) {
+        //     if let Some(v1) = v1.borrow() {
+        //         dbg!(&v1.prop.hover.theme);
+        //         dbg!(&v1.apply_state_map);
+        //     }
+        // }
     }
 }
 

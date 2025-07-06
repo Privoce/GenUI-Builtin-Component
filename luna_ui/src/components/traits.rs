@@ -1,8 +1,8 @@
-use std::{fmt::Debug, hash::Hash};
+use std::{fmt::{Debug, Display}, hash::Hash};
 
 use makepad_widgets::{
     error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget,
-    WidgetNode,
+    WidgetNode
 };
 
 use crate::{
@@ -221,4 +221,8 @@ pub trait SlotBasicProp: BasicProp {
     ) -> ();
 
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> ();
+}
+
+pub trait ComponentState: Display + Eq + Hash + Copy + From<String> {
+    fn is_disabled(&self) -> bool;
 }

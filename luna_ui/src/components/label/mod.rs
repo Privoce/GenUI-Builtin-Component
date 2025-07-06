@@ -102,6 +102,14 @@ impl WidgetNode for LLabel {
         self.draw_text.redraw(cx);
     }
 
+    fn state(&self) -> String {
+        self.current_state().to_string()
+    }
+    fn animation_spread(&self) -> bool {
+        // self.animation_spread
+        false
+    }
+
     visible!();
 }
 

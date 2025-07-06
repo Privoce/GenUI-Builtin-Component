@@ -2,10 +2,7 @@ use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    components::traits::{BasicProp, Prop},
-    error::Error,
-    getter_setter_prop,
-    prop::{
+    component_state, components::traits::{BasicProp, ComponentState, Prop}, error::Error, getter_setter_prop, prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
@@ -14,9 +11,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    utils::{get_from_itable, get_from_table},
+    }, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -613,17 +608,15 @@ impl ViewBasicProp {
     }
 }
 
-/// ## ViewState
-/// - `Basic`: No hover or pressed state
-/// - `Hover`: The view is hovered
-/// - `Pressed`: The view is pressed
-#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
-pub enum ViewState {
-    Basic,
-    Hover,
-    Pressed,
-    Disabled,
+component_state!{
+    ViewState {
+        Basic => BASIC,
+        Hover => HOVER,
+        Pressed => PRESSED,
+        Disabled => DISABLED
+    }, _ => ViewState::Basic
 }
+
 
 impl ViewState {
     pub fn id(&self) -> &[LiveId; 2] {
@@ -634,7 +627,10 @@ impl ViewState {
             ViewState::Disabled => id!(hover.off),
         }
     }
-    pub fn is_disabled(&self) -> bool {
+}
+
+impl ComponentState for ViewState {
+    fn is_disabled(&self) -> bool {
         matches!(self, ViewState::Disabled)
     }
 }

@@ -81,6 +81,8 @@ pub struct LCard {
     pub animation_open: bool,
     #[animator]
     pub animator: Animator,
+    #[live(true)]
+    pub animation_spread: bool,
     // --- slots -------------------
     #[live]
     pub header: LView,
@@ -150,6 +152,15 @@ impl WidgetNode for LCard {
             }
         }
     }
+
+    fn state(&self) -> String {
+        self.current_state().to_string()
+    }
+
+    fn animation_spread(&self) -> bool {
+        self.animation_spread
+    }
+    
     visible!();
 }
 

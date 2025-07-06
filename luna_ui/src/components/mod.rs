@@ -16,6 +16,8 @@ pub mod view;
 pub mod lifecycle;
 pub mod traits;
 
+use traits::Component;
+
 live_design! {
     link luna_ui;
 
@@ -26,7 +28,10 @@ live_design! {
 
     pub LLabel = <LLabelBase>{}
 
-    pub LView = <LViewBase>{}
+    pub LView = <LViewBase>{
+        animation_open: false,
+        event_open: false,
+    }
 
     pub LButton = <LButtonBase>{
         slot: <LLabel> {
@@ -42,15 +47,22 @@ live_design! {
                     width: 200.0,
                 }
             }
-        }
+        },
+        animation_open: false,
         header: <LView> {
-        
+            <LLabel> {
+                text: "Card Header"
+            }
         }
         body: <LView> {
-
+            <LLabel> {
+                text: "Card Body"
+            }
         }
         footer: <LView> {
-            
+            <LLabel> {
+                text: "Card Footer"
+            }
         }
     }
 }

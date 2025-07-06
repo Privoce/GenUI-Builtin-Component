@@ -50,6 +50,14 @@ macro_rules! component {
                     $(LComponent::$field(c) => c.draw_walk(cx, scope, walk)),*
                 }
             }
+
+            pub fn switch_state_with_animation(&mut self, cx: &mut Cx, state: String) {
+                match self {
+                    $(LComponent::$field(c) => {
+                        c.switch_state_with_animation(cx, state.into());
+                    }),*
+                }
+            }
         }
 
         $(

@@ -2,16 +2,11 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    components::traits::{BasicProp, Prop},
-    error::Error,
-    getter_setter_prop,
-    prop::{
+    component_state, components::traits::{BasicProp, ComponentState, Prop}, error::Error, getter_setter_prop, prop::{
         manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         PropMapImpl,
-    },
-    themes::{Color, ColorFontConf, Theme, TomlValueTo},
-    utils::{get_from_itable as get, get_from_table},
+    }, themes::{Color, ColorFontConf, Theme, TomlValueTo}, utils::{get_from_itable as get, get_from_table}
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -296,12 +291,27 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
     }
 }
 
-#[derive(Debug, Copy, Clone, Default, PartialEq, Hash, Eq)]
-pub enum LabelState {
-    #[default]
-    Basic,
-    Disabled,
+// #[derive(Debug, Copy, Clone, Default, PartialEq, Hash, Eq)]
+// pub enum LabelState {
+//     #[default]
+//     Basic,
+//     Disabled,
+// }
+
+component_state! {
+    LabelState {
+        Basic => BASIC,
+        Disabled => DISABLED
+    },
+    _ => LabelState::Basic
 }
+
+impl ComponentState for LabelState {
+    fn is_disabled(&self) -> bool {
+        matches!(self, LabelState::Disabled)
+    }
+}
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Live, LiveHook, Default)]
 #[live_ignore]

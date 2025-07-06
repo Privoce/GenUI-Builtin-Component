@@ -2,13 +2,14 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
+    component_state,
     components::{
-        traits::{BasicProp, Part, Prop, SlotBasicProp, SlotProp},
+        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     prop::{
-        manuel::{BASIC, BODY, FOOTER, HEADER, OUTER},
+        manuel::{BASIC, BODY, FOOTER, HEADER, HOVER, OUTER},
         ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme},
@@ -279,11 +280,17 @@ impl CardBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub enum CardState {
-    #[default]
-    Basic,
-    Hover,
+component_state! {
+    CardState {
+        Basic => BASIC,
+        Hover => HOVER
+    }, _ => CardState::Basic
+}
+
+impl ComponentState for CardState {
+    fn is_disabled(&self) -> bool {
+        false
+    }
 }
 
 impl From<CardState> for ViewState {

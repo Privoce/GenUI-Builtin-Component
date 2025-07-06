@@ -8,14 +8,23 @@ use makepad_widgets::{event::FingerLongPressEvent, *};
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, components::{
+    active_event, animation_open_then_redraw,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Prop},
-    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
+    },
+    error::Error,
+    event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
+    hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
         manuel::{BASIC, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, themes::{Conf, Theme}, visible, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    themes::{Conf, Theme},
+    visible, ComponentAnInit,
 };
 pub use rely::*;
 
@@ -117,6 +126,8 @@ pub struct LView {
     animator: Animator,
     #[live(false)]
     pub animation_open: bool,
+    #[live(true)]
+    pub animation_spread: bool,
     // --- draw -------------------
     #[live]
     pub draw_view: DrawView,
@@ -329,6 +340,15 @@ impl WidgetNode for LView {
             }
         }
     }
+
+    fn animation_spread(&self) -> bool {
+        self.animation_spread
+    }
+
+    fn state(&self) -> String {
+        self.current_state().to_string()
+    }
+
     visible!();
 }
 
@@ -549,7 +569,7 @@ impl Widget for LView {
                 for (id, child) in self.children.iter_mut() {
                     scope.with_id(*id, |scope| {
                         child.handle_event(cx, event, scope);
-                    })
+                    });
                 }
             }
             EventOrder::List(list) => {
@@ -557,7 +577,7 @@ impl Widget for LView {
                     if let Some((_, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
                         scope.with_id(*id, |scope| {
                             child.handle_event(cx, event, scope);
-                        })
+                        });
                     }
                 }
             }
@@ -999,7 +1019,7 @@ impl LViewRef {
         key_up => ViewKeyUp,
         clicked => ViewClicked
     }
-    getter_setter_ref!{
+    getter_setter_ref! {
         get_theme, set_theme -> Theme,
         get_background_color, set_background_color -> String,
         get_border_color, set_border_color -> String,

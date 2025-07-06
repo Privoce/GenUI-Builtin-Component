@@ -93,6 +93,8 @@ pub struct LButton {
     pub animation_open: bool,
     #[animator]
     pub animator: Animator,
+    #[live(true)]
+    pub animation_spread: bool,
     // --- init ----------------------
     #[rust]
     pub lifecycle: LifeCycle,
@@ -134,6 +136,15 @@ impl WidgetNode for LButton {
         if self.slot.visible() {
             self.slot.redraw(cx);
         }
+    }
+
+    fn state(&self) -> String {
+        dbg!(self.current_state());
+        self.current_state().to_string()
+    }
+
+    fn animation_spread(&self) -> bool {
+        self.animation_spread
     }
 
     visible!();
