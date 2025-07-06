@@ -1,8 +1,8 @@
 use luna_ui::{
     components::{
-        button::{ButtonState, LButtonWidgetRefExt},
-        label::LLabelWidgetRefExt,
-        traits::{BasicProp, Component}, view::LViewWidgetRefExt,
+        button::{ButtonState, GButtonWidgetRefExt},
+        label::GLabelWidgetRefExt,
+        traits::{BasicProp, Component}, view::GViewWidgetRefExt,
     },
     prop::traits::ToColor,
     themes::Theme,
@@ -40,7 +40,7 @@ live_design! {
                         y: 0.5
                     },
                     show_bg: true,
-                    // <LButton>{
+                    // <GButton>{
                     //         prop: {
                     //             basic: {
                     //                 theme: Error,
@@ -50,25 +50,25 @@ live_design! {
                     //             }
                     //         }
                     //         disabled: true,
-                    //         slot: <LLabel>{
+                    //         slot: <GLabel>{
                     //             text: "Button",
                     //             mode: Regular,
                     //         }
                     //     }
-                        // btn1 = <LButton>{
+                        // btn1 = <GButton>{
                         //     prop: {
                         //         hover: {
                         //             theme: Warning,
                         //         }
 
                         //     }
-                        //     slot: <LLabel>{
+                        //     slot: <GLabel>{
                         //         text: "Click me !",
                         //         mode: Bold,
                         //     }
                         // }
 
-                    //     lb = <LLabel>{
+                    //     lb = <GLabel>{
                     //         text: "Hello World!",
                     //         mode: Bold
                     //         prop: {
@@ -77,7 +77,7 @@ live_design! {
                     //             }
                     //         }
                     //     }
-                    //     lb2 = <LLabel>{
+                    //     lb2 = <GLabel>{
                     //         text: "Hello World! hello",
                     //         mode: Bold
                     //         disabled: true,
@@ -87,7 +87,7 @@ live_design! {
                     //             }
                     //         }
                     //     }
-                    // <LView>{
+                    // <GView>{
                     //     prop: {
                     //         basic: {
                     //             border_color: #f00,
@@ -98,7 +98,7 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    // <LView>{
+                    // <GView>{
                     //     prop: {
                     //         basic: {
                     //             theme: Primary,
@@ -125,7 +125,7 @@ live_design! {
                     //     }
                     //     padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
                     //     <View> {
-                    //         <LLabel>{
+                    //         <GLabel>{
                     //             text: "Card Header",
                     //             mode: Bold
                     //         }
@@ -137,7 +137,7 @@ live_design! {
                     //         width: Fill,
                     //     }
                     //     <View> {
-                    //         <LLabel>{
+                    //         <GLabel>{
                     //             text: "Card Body",
                     //             mode: Bold
                     //         }
@@ -149,7 +149,7 @@ live_design! {
                     //         width: Fill,
                     //     }
                     //     <View> {
-                    //         <LLabel>{
+                    //         <GLabel>{
                     //             text: "Card Footer",
                     //             mode: Bold
                     //         }
@@ -161,15 +161,15 @@ live_design! {
                     //         width: Fill,
                     //     }
                     // }
-                    // <LView> {
+                    // <GView> {
                     //     prop: {
                     //         basic: {
                     //             height: 200.0,
                     //             width: 200.0,
                     //         }
                     //     }
-                    //     <LView> {
-                    //         <LLabel>{
+                    //     <GView> {
+                    //         <GLabel>{
                     //             text: "Card Header",
                     //             mode: Bold
                     //         }
@@ -181,8 +181,8 @@ live_design! {
                     //             }
                     //         }
                     //     }
-                    //     <LView> {
-                    //         <LLabel>{
+                    //     <GView> {
+                    //         <GLabel>{
                     //             text: "Card Body",
                     //             mode: Bold
                     //         }
@@ -193,8 +193,8 @@ live_design! {
                     //             }
                     //         }
                     //     }
-                    //     <LView> {
-                    //         <LLabel>{
+                    //     <GView> {
+                    //         <GLabel>{
                     //             text: "Card Footer",
                     //             mode: Bold
                     //         }
@@ -207,7 +207,7 @@ live_design! {
                     //     }
                     // }
                     
-                    <LCard>{
+                    <GCard>{
                         prop: {
                             basic: {
                                 outer: {
@@ -229,7 +229,7 @@ live_design! {
                         }
                         
                     }
-                   <LCard>{}
+                   <GCard>{}
                 }
             }
         }
@@ -258,7 +258,7 @@ impl MatchEvent for App {
     fn handle_startup(&mut self, _cx: &mut Cx) {}
 
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        // let v1 = self.ui.lview(id!(v1));
+        // let v1 = self.ui.GView(id!(v1));
         // if let Some(_) = v1.lbutton(id!(btn1)).clicked(actions) {
         //     if let Some(v1) = v1.borrow() {
         //         dbg!(&v1.prop.hover.theme);

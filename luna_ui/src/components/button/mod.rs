@@ -29,7 +29,7 @@ live_design! {
     link luna_basic;
     use link::luna_animation_prop::*;
 
-    pub LButtonBase = {{LButton}} {
+    pub GButtonBase = {{GButton}} {
         animator: {
             hover = {
                 default: off,
@@ -66,7 +66,7 @@ live_design! {
 }
 
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
-pub struct LButton {
+pub struct GButton {
     #[live]
     pub prop: ButtonProp,
     // --- visible -------------------
@@ -107,7 +107,7 @@ pub struct LButton {
     pub sync: bool,
 }
 
-impl WidgetNode for LButton {
+impl WidgetNode for GButton {
     fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
         self.slot.uid_to_widget(uid)
     }
@@ -150,7 +150,7 @@ impl WidgetNode for LButton {
     visible!();
 }
 
-impl Widget for LButton {
+impl Widget for GButton {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
@@ -205,7 +205,7 @@ impl Widget for LButton {
     }
 }
 
-impl LiveHook for LButton {
+impl LiveHook for GButton {
     pure_after_apply!();
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
@@ -237,7 +237,7 @@ impl LiveHook for LButton {
     }
 }
 
-impl Component for LButton {
+impl Component for GButton {
     type Error = Error;
 
     type State = ButtonState;
@@ -513,7 +513,7 @@ impl Component for LButton {
     lifecycle!();
 }
 
-impl LButton {
+impl GButton {
     active_event! {
         active_hover_in: ButtonEvent::HoverIn |meta: FingerHoverEvent| => ButtonHoverIn { meta },
         active_hover_out: ButtonEvent::HoverOut |meta: FingerHoverEvent| => ButtonHoverOut { meta },
@@ -532,7 +532,7 @@ impl LButton {
         area_slot, slot
     }
     getter! {
-        LButton {
+        GButton {
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
             get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
             get_background_visible(bool) {|c| {c.prop.basic.get_background_visible()}},
@@ -560,7 +560,7 @@ impl LButton {
         }
     }
     setter! {
-        LButton {
+        GButton {
             set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ButtonState::Basic); Ok(())}},
             set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
             set_background_visible(visible: bool) {|c, _cx| {c.prop.basic.set_background_visible(visible); Ok(())}},
@@ -589,7 +589,7 @@ impl LButton {
     }
 }
 
-impl LButtonRef {
+impl GButtonRef {
     event_option_ref! {
         hover_in => ButtonHoverIn,
         hover_out => ButtonHoverOut,

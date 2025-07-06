@@ -34,7 +34,7 @@ live_design! {
     link luna_basic;
     use link::luna_animation_prop::*;
 
-    pub LViewBase = {{LView}} {
+    pub GViewBase = {{GView}} {
         animator: {
             hover = {
                 default: off,
@@ -71,7 +71,7 @@ live_design! {
 }
 
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
-pub struct LView {
+pub struct GView {
     // --- prop -------------------
     #[live]
     pub prop: ViewProp,
@@ -142,7 +142,7 @@ pub struct LView {
     pub apply_state_map: ApplyStateMap<ViewState>,
 }
 
-impl LiveHook for LView {
+impl LiveHook for GView {
     pure_after_apply!();
 
     fn before_apply(
@@ -258,7 +258,7 @@ impl LiveHook for LView {
     }
 }
 
-impl WidgetNode for LView {
+impl WidgetNode for GView {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.current_state());
         Walk {
@@ -352,7 +352,7 @@ impl WidgetNode for LView {
     visible!();
 }
 
-impl Widget for LView {
+impl Widget for GView {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         let prop = self.prop.get(self.current_state());
         // the beginning state
@@ -605,7 +605,7 @@ impl Widget for LView {
     }
 }
 
-impl Component for LView {
+impl Component for GView {
     type Error = Error;
     type State = ViewState;
 
@@ -895,7 +895,7 @@ impl Component for LView {
     lifecycle!();
 }
 
-impl LView {
+impl GView {
     active_event! {
         active_hover_in: ViewEvent::HoverIn |meta: FingerHoverEvent| => ViewHoverIn {meta},
         active_hover_out: ViewEvent::HoverOut |meta: FingerHoverEvent| => ViewHoverOut {meta},
@@ -938,7 +938,7 @@ impl LView {
     }
 
     getter! {
-        LView {
+        GView {
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
             get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
             get_border_color(String) {|c| {c.prop.basic.get_border_color().to_hex_string()}},
@@ -972,7 +972,7 @@ impl LView {
         }
     }
     setter! {
-        LView {
+        GView {
             set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ViewState::Basic); Ok(())}},
             set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
             set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_border_color(color); Ok(())}},
@@ -1007,7 +1007,7 @@ impl LView {
     }
 }
 
-impl LViewRef {
+impl GViewRef {
     event_option_ref! {
         hover_in => ViewHoverIn,
         hover_out => ViewHoverOut,

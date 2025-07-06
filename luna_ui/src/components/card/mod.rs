@@ -11,7 +11,7 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{LView, ViewState},
+        view::{GView, ViewState},
     },
     error::Error,
     event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle,
@@ -31,7 +31,7 @@ live_design! {
     link luna_basic;
     use link::luna_animation_prop::*;
 
-    pub LCardBase = {{LCard}} {
+    pub GCardBase = {{GCard}} {
         animator: {
             hover = {
                 default: off,
@@ -59,7 +59,7 @@ live_design! {
 }
 
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
-pub struct LCard {
+pub struct GCard {
     #[live]
     pub prop: CardProp,
     // --- others -------------------
@@ -85,11 +85,11 @@ pub struct LCard {
     pub animation_spread: bool,
     // --- slots -------------------
     #[live]
-    pub header: LView,
+    pub header: GView,
     #[live]
-    pub body: LView,
+    pub body: GView,
     #[live]
-    pub footer: LView,
+    pub footer: GView,
     // --- init ----------------------
     #[rust]
     pub lifecycle: LifeCycle,
@@ -104,7 +104,7 @@ pub struct LCard {
     defer_walks: DeferWalks,
 }
 
-impl WidgetNode for LCard {
+impl WidgetNode for GCard {
     fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
         for slot in [&self.header, &self.body, &self.footer] {
             for (_, child) in &slot.children {
@@ -160,11 +160,11 @@ impl WidgetNode for LCard {
     fn animation_spread(&self) -> bool {
         self.animation_spread
     }
-    
+
     visible!();
 }
 
-impl Widget for LCard {
+impl Widget for GCard {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
@@ -248,7 +248,7 @@ impl Widget for LCard {
     }
 }
 
-impl LiveHook for LCard {
+impl LiveHook for GCard {
     pure_after_apply!();
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
@@ -281,7 +281,7 @@ impl LiveHook for LCard {
     }
 }
 
-impl Component for LCard {
+impl Component for GCard {
     type Error = Error;
 
     type State = CardState;
@@ -505,11 +505,11 @@ impl Component for LCard {
     lifecycle!();
 }
 
-impl SlotComponent<ViewState> for LCard {
+impl SlotComponent<ViewState> for GCard {
     type Part = CardPart;
 }
 
-impl LCard {
+impl GCard {
     active_event! {
         active_hover_in: CardEvent::HoverIn |meta: FingerHoverEvent| => CardHoverIn { meta },
         active_hover_out: CardEvent::HoverOut |meta: FingerHoverEvent| => CardHoverOut { meta }
@@ -525,7 +525,7 @@ impl LCard {
     }
 }
 
-impl LCardRef {
+impl GCardRef {
     event_option_ref! {
         hover_in => CardHoverIn,
         hover_out => CardHoverOut

@@ -3,19 +3,19 @@
 /// ## Usage
 /// ```rust
 /// component! {
-///    Label => LLabel,
+///    Label => GLabel,
 /// }
 /// ```
 /// ## Code Generation
 /// ```
 /// enum LComponent<'c> {
-///     Label(&'c mut LLabel),
-///     View(&'c mut LView),
+///     Label(&'c mut GLabel),
+///     View(&'c mut GView),
 ///     ...
 /// }
 ///
-/// impl <'c> From<&'c mut LLabel> for LComponent<'c> {
-///     fn from(component: &'c mut LLabel) -> Self {
+/// impl <'c> From<&'c mut GLabel> for LComponent<'c> {
+///     fn from(component: &'c mut GLabel) -> Self {
 ///         LComponent::Label(component)
 ///     }
 /// }

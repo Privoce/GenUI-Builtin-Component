@@ -25,7 +25,7 @@ use super::traits::Component;
 live_design! {
     link luna_basic;
     use link::theme::*;
-    pub LLabelBase = {{LLabel}} {
+    pub GLabelBase = {{GLabel}} {
         font_regular: <THEME_FONT_REGULAR>{}
         font_bold: <THEME_FONT_BOLD>{}
         font_italic: <THEME_FONT_ITALIC>{}
@@ -34,7 +34,7 @@ live_design! {
 }
 
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
-pub struct LLabel {
+pub struct GLabel {
     #[live]
     pub prop: LabelProp,
     #[live(true)]
@@ -73,7 +73,7 @@ pub struct LLabel {
     pub lifecycle: LifeCycle,
 }
 
-impl WidgetNode for LLabel {
+impl WidgetNode for GLabel {
     fn uid_to_widget(&self, _uid: WidgetUid) -> WidgetRef {
         WidgetRef::empty()
     }
@@ -113,7 +113,7 @@ impl WidgetNode for LLabel {
     visible!();
 }
 
-impl Widget for LLabel {
+impl Widget for GLabel {
     fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
@@ -142,7 +142,7 @@ impl Widget for LLabel {
     }
 }
 
-impl LiveHook for LLabel {
+impl LiveHook for GLabel {
     pure_after_apply!();
 
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
@@ -173,7 +173,7 @@ impl LiveHook for LLabel {
     }
 }
 
-impl Component for LLabel {
+impl Component for GLabel {
     type Error = Error;
     type State = LabelState;
 
@@ -242,9 +242,9 @@ impl Component for LLabel {
     set_scope_path!();
 }
 
-impl LLabel {
+impl GLabel {
     getter! {
-        LLabel{
+        GLabel{
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
             get_color(String) {|c| {c.prop.basic.get_color().to_hex_string()}},
             get_font_size(f32) {|c| {c.prop.basic.get_font_size()}},
@@ -259,7 +259,7 @@ impl LLabel {
         }
     }
     setter! {
-        LLabel{
+        GLabel{
             set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); Ok(())}},
             set_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_color(color); Ok(())}},
             set_font_size(font_size: f32) {|c, _cx| {c.prop.basic.set_font_size(font_size); Ok(())}},
@@ -275,7 +275,7 @@ impl LLabel {
     }
 }
 
-impl LLabelRef {
+impl GLabelRef {
     getter_setter_ref! {
         get_theme, set_theme -> Theme,
         get_color, set_color -> String,

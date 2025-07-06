@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    component, components::{button::LButton, card::LCard, label::LLabel, view::LView}
+    component, components::{button::GButton, card::GCard, label::GLabel, view::GView}
 };
 
 pub mod button;
@@ -26,20 +26,20 @@ live_design! {
     use link::luna_basic::*;
     use link::theme::*;
 
-    pub LLabel = <LLabelBase>{}
+    pub GLabel = <GLabelBase>{}
 
-    pub LView = <LViewBase>{
+    pub GView = <GViewBase>{
         animation_open: false,
         event_open: false,
     }
 
-    pub LButton = <LButtonBase>{
-        slot: <LLabel> {
+    pub GButton = <GButtonBase>{
+        slot: <GLabel> {
             text: "Button",
         },
     }
 
-    pub LCard = <LCardBase>{
+    pub GCard = <GCardBase>{
         prop: {
             basic: {
                 outer: {
@@ -49,18 +49,18 @@ live_design! {
             }
         },
         animation_open: false,
-        header: <LView> {
-            <LLabel> {
+        header: <GView> {
+            <GLabel> {
                 text: "Card Header"
             }
         }
-        body: <LView> {
-            <LLabel> {
+        body: <GView> {
+            <GLabel> {
                 text: "Card Body"
             }
         }
-        footer: <LView> {
-            <LLabel> {
+        footer: <GView> {
+            <GLabel> {
                 text: "Card Footer"
             }
         }
@@ -75,8 +75,8 @@ pub fn components_register(cx: &mut Cx) {
 }
 
 component! {
-    Label => LLabel,
-    View => LView,
-    Button => LButton,
-    Card => LCard
+    Label => GLabel,
+    View => GView,
+    Button => GButton,
+    Card => GCard
 }
