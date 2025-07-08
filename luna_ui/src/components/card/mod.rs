@@ -128,10 +128,10 @@ impl WidgetNode for GCard {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.current_state());
         Walk {
-            abs_pos: prop.outer.abs_pos,
-            margin: prop.outer.margin,
-            width: prop.outer.width,
-            height: prop.outer.height,
+            abs_pos: prop.container.abs_pos,
+            margin: prop.container.margin,
+            width: prop.container.width,
+            height: prop.container.height,
         }
     }
 
@@ -176,18 +176,18 @@ impl Widget for GCard {
         let _ = self.draw_card.begin(
             cx,
             Walk {
-                margin: prop.outer.margin,
-                width: prop.outer.width,
-                height: prop.outer.height,
-                abs_pos: prop.outer.abs_pos,
+                margin: prop.container.margin,
+                width: prop.container.width,
+                height: prop.container.height,
+                abs_pos: prop.container.abs_pos,
             },
             Layout {
                 clip_x: false,
                 clip_y: false,
-                padding: prop.outer.padding,
-                align: prop.outer.align,
-                flow: prop.outer.flow,
-                spacing: prop.outer.spacing,
+                padding: prop.container.padding,
+                align: prop.container.align,
+                flow: prop.container.flow,
+                spacing: prop.container.spacing,
                 ..Default::default()
             },
         );
@@ -262,7 +262,7 @@ impl LiveHook for GCard {
             &CardBasicProp::live_props(),
             [live_id!(basic), live_id!(hover)],
             [
-                CardPart::Outer,
+                CardPart::Container,
                 CardPart::Header,
                 CardPart::Body,
                 CardPart::Footer,
@@ -299,17 +299,17 @@ impl Component for GCard {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
-        self.draw_card.background_color = self.prop.get(state).outer.background_color;
-        self.draw_card.border_color = self.prop.get(state).outer.border_color;
-        self.draw_card.border_width = self.prop.get(state).outer.border_width;
-        self.draw_card.border_radius = self.prop.get(state).outer.border_radius.into();
-        self.draw_card.shadow_color = self.prop.get(state).outer.shadow_color;
-        self.draw_card.spread_radius = self.prop.get(state).outer.spread_radius;
-        self.draw_card.blur_radius = self.prop.get(state).outer.blur_radius;
-        self.draw_card.shadow_offset = self.prop.get(state).outer.shadow_offset;
-        self.draw_card.background_visible = self.prop.get(state).outer.background_visible.to_f32();
-        self.draw_card.rotation = self.prop.get(state).outer.rotation;
-        self.draw_card.scale = self.prop.get(state).outer.scale;
+        self.draw_card.background_color = self.prop.get(state).container.background_color;
+        self.draw_card.border_color = self.prop.get(state).container.border_color;
+        self.draw_card.border_width = self.prop.get(state).container.border_width;
+        self.draw_card.border_radius = self.prop.get(state).container.border_radius.into();
+        self.draw_card.shadow_color = self.prop.get(state).container.shadow_color;
+        self.draw_card.spread_radius = self.prop.get(state).container.spread_radius;
+        self.draw_card.blur_radius = self.prop.get(state).container.blur_radius;
+        self.draw_card.shadow_offset = self.prop.get(state).container.shadow_offset;
+        self.draw_card.background_visible = self.prop.get(state).container.background_visible.to_f32();
+        self.draw_card.rotation = self.prop.get(state).container.rotation;
+        self.draw_card.scale = self.prop.get(state).container.scale;
         Ok(())
     }
 
@@ -322,7 +322,7 @@ impl Component for GCard {
 
         match hit {
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).outer.cursor);
+                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
                 self.switch_state_with_animation(cx, CardState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -437,26 +437,26 @@ impl Component for GCard {
             set_animation! {
                 nodes: draw_card = {
                     basic_index => {
-                        background_color => basic_prop.outer.background_color,
-                        border_color =>basic_prop.outer.border_color,
-                        border_radius => basic_prop.outer.border_radius,
-                        border_width =>(basic_prop.outer.border_width as f64),
-                        shadow_color => basic_prop.outer.shadow_color,
-                        spread_radius => (basic_prop.outer.spread_radius as f64),
-                        blur_radius => (basic_prop.outer.blur_radius as f64),
-                        shadow_offset => basic_prop.outer.shadow_offset,
-                        background_visible => basic_prop.outer.background_visible.to_f64()
+                        background_color => basic_prop.container.background_color,
+                        border_color =>basic_prop.container.border_color,
+                        border_radius => basic_prop.container.border_radius,
+                        border_width =>(basic_prop.container.border_width as f64),
+                        shadow_color => basic_prop.container.shadow_color,
+                        spread_radius => (basic_prop.container.spread_radius as f64),
+                        blur_radius => (basic_prop.container.blur_radius as f64),
+                        shadow_offset => basic_prop.container.shadow_offset,
+                        background_visible => basic_prop.container.background_visible.to_f64()
                     },
                     hover_index => {
-                        background_color => hover_prop.outer.background_color,
-                        border_color => hover_prop.outer.border_color,
-                        border_radius => hover_prop.outer.border_radius,
-                        border_width => (hover_prop.outer.border_width as f64),
-                        shadow_color => hover_prop.outer.shadow_color,
-                        spread_radius => (hover_prop.outer.spread_radius as f64),
-                        blur_radius => (hover_prop.outer.blur_radius as f64),
-                        shadow_offset => hover_prop.outer.shadow_offset,
-                        background_visible => hover_prop.outer.background_visible.to_f64()
+                        background_color => hover_prop.container.background_color,
+                        border_color => hover_prop.container.border_color,
+                        border_radius => hover_prop.container.border_radius,
+                        border_width => (hover_prop.container.border_width as f64),
+                        shadow_color => hover_prop.container.shadow_color,
+                        spread_radius => (hover_prop.container.spread_radius as f64),
+                        blur_radius => (hover_prop.container.blur_radius as f64),
+                        shadow_offset => hover_prop.container.shadow_offset,
+                        background_visible => hover_prop.container.background_visible.to_f64()
                     }
                 }
             }
@@ -484,15 +484,15 @@ impl Component for GCard {
             set_animation! {
                 nodes: draw_card = {
                     index => {
-                        background_color => prop.outer.background_color,
-                        border_color => prop.outer.border_color,
-                        border_radius => prop.outer.border_radius,
-                        border_width => (prop.outer.border_width as f64),
-                        shadow_color => prop.outer.shadow_color,
-                        spread_radius => (prop.outer.spread_radius as f64),
-                        blur_radius => (prop.outer.blur_radius as f64),
-                        shadow_offset => prop.outer.shadow_offset,
-                        background_visible => prop.outer.background_visible.to_f64()
+                        background_color => prop.container.background_color,
+                        border_color => prop.container.border_color,
+                        border_radius => prop.container.border_radius,
+                        border_width => (prop.container.border_width as f64),
+                        shadow_color => prop.container.shadow_color,
+                        spread_radius => (prop.container.spread_radius as f64),
+                        blur_radius => (prop.container.blur_radius as f64),
+                        shadow_offset => prop.container.shadow_offset,
+                        background_visible => prop.container.background_visible.to_f64()
                     }
                 }
             }

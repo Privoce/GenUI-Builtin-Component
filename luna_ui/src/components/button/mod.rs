@@ -82,7 +82,7 @@ pub struct GButton {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    apply_state_map: ApplyStateMap<ButtonState>,
+    pub apply_state_map: ApplyStateMap<ButtonState>,
     // --- draw ----------------------
     #[live]
     pub slot: WidgetRef,

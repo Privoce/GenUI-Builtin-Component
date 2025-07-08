@@ -9,7 +9,7 @@ use crate::{
     },
     error::Error,
     prop::{
-        manuel::{BASIC, BODY, FOOTER, HEADER, HOVER, OUTER},
+        manuel::{BASIC, BODY, FOOTER, HEADER, HOVER, CONTAINER},
         ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme},
@@ -69,7 +69,7 @@ impl SlotProp for CardProp {
             CardState::Basic,
             [(CardState::Hover, &mut self.hover)],
             [
-                CardPart::Outer,
+                CardPart::Container,
                 CardPart::Header,
                 CardPart::Body,
                 CardPart::Footer,
@@ -119,8 +119,8 @@ impl Default for CardProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct CardBasicProp {
-    #[live(CardBasicProp::default_outer(CardState::Basic))]
-    pub outer: ViewBasicProp,
+    #[live(CardBasicProp::default_container(CardState::Basic))]
+    pub container: ViewBasicProp,
     #[live(CardBasicProp::default_header(CardState::Basic))]
     pub header: ViewBasicProp,
     #[live(CardBasicProp::default_body(CardState::Basic))]
@@ -143,7 +143,7 @@ impl BasicProp for CardBasicProp {
         body.set_height(Size::Fill);
 
         Self {
-            outer: basic.clone(),
+            container: basic.clone(),
             header: header_footer.clone(),
             body,
             footer: header_footer,
@@ -176,7 +176,7 @@ impl BasicProp for CardBasicProp {
     }
 
     fn walk(&self) -> Walk {
-        self.outer.walk()
+        self.container.walk()
     }
 }
 
@@ -191,7 +191,7 @@ impl SlotBasicProp for CardBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            CardPart::Outer => self.outer.set_from_str(key, value, state.into()),
+            CardPart::Container => self.container.set_from_str(key, value, state.into()),
             CardPart::Header => self.header.set_from_str(key, value, state.into()),
             CardPart::Body => self.body.set_from_str(key, value, state.into()),
             CardPart::Footer => self.footer.set_from_str(key, value, state.into()),
@@ -200,7 +200,7 @@ impl SlotBasicProp for CardBasicProp {
 
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
         match part {
-            CardPart::Outer => self.outer.sync(state.into()),
+            CardPart::Container => self.container.sync(state.into()),
             CardPart::Header => self.header.sync(state.into()),
             CardPart::Body => self.body.sync(state.into()),
             CardPart::Footer => self.footer.sync(state.into()),
@@ -222,10 +222,10 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
             "[component.card.$slot] should be an inline table".to_string(),
         ))?;
 
-        let outer = get_from_itable(
+        let container = get_from_itable(
             inline_table,
-            OUTER,
-            || Ok(CardBasicProp::default_outer(state)),
+            CONTAINER,
+            || Ok(CardBasicProp::default_container(state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -251,7 +251,7 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
         )?;
 
         Ok(Self {
-            outer,
+            container,
             header,
             body,
             footer,
@@ -261,20 +261,20 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
 
 impl CardBasicProp {
     pub fn default_header(state: CardState) -> ViewBasicProp {
-        let mut header = Self::default_outer(state);
+        let mut header = Self::default_container(state);
         header.set_height(Size::Fixed(32.0));
         header
     }
     pub fn default_footer(state: CardState) -> ViewBasicProp {
         Self::default_header(state)
     }
-    pub fn default_outer(state: CardState) -> ViewBasicProp {
-        let mut outer = ViewBasicProp::from_state(Theme::default(), state.into());
-        outer.set_cursor(Default::default());
-        outer
+    pub fn default_container(state: CardState) -> ViewBasicProp {
+        let mut container = ViewBasicProp::from_state(Theme::default(), state.into());
+        container.set_cursor(Default::default());
+        container
     }
     pub fn default_body(state: CardState) -> ViewBasicProp {
-        let mut body = Self::default_outer(state);
+        let mut body = Self::default_container(state);
         body.set_height(Size::Fill);
         body
     }
@@ -315,7 +315,7 @@ impl From<ViewState> for CardState {
 /// Represents the different parts of a card component.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CardPart {
-    Outer,
+    Container,
     Header,
     Body,
     Footer,
@@ -325,7 +325,7 @@ impl Part for CardPart {
     type State = ViewState;
     fn to_live_id(&self) -> LiveId {
         match self {
-            CardPart::Outer => live_id!(outer),
+            CardPart::Container => live_id!(container),
             CardPart::Header => live_id!(header),
             CardPart::Body => live_id!(body),
             CardPart::Footer => live_id!(footer),

@@ -1,12 +1,18 @@
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state, components::traits::{BasicProp, ComponentState, Prop}, error::Error, getter_setter_prop, prop::{
+    component_state,
+    components::traits::{BasicProp, ComponentState, Prop},
+    error::Error,
+    getter_setter_prop,
+    prop::{
         manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         PropMapImpl,
-    }, themes::{Color, ColorFontConf, Theme, TomlValueTo}, utils::{get_from_itable as get, get_from_table}
+    },
+    themes::{Color, ColorFontConf, Theme, TomlValueTo},
+    utils::{get_from_itable as get, get_from_table},
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -236,7 +242,8 @@ impl BasicProp for LabelBasicProp {
         Walk {
             margin: self.margin,
             ..Default::default()
-        }.with_add_padding(self.padding)
+        }
+        .with_add_padding(self.padding)
     }
 }
 
@@ -247,6 +254,27 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "LabelProp should be a inline table".to_string(),
         ))?;
+
+        (inline_table, state).try_into()
+    }
+}
+
+impl TryFrom<(&Value, LabelState)> for LabelBasicProp {
+    type Error = Error;
+
+    fn try_from((value, state): (&Value, LabelState)) -> Result<Self, Self::Error> {
+        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "LabelProp should be a inline table".to_string(),
+        ))?;
+
+        (inline_table, state).try_into()
+    }
+}
+
+impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
+    type Error = Error;
+
+    fn try_from((inline_table, state): (&InlineTable, LabelState)) -> Result<Self, Self::Error> {
         let theme = Theme::default();
         let theme = get(inline_table, THEME, || Ok(theme), |value| value.try_into())?;
         let color = Self::state_colors(theme, state);
@@ -291,13 +319,6 @@ impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
     }
 }
 
-// #[derive(Debug, Copy, Clone, Default, PartialEq, Hash, Eq)]
-// pub enum LabelState {
-//     #[default]
-//     Basic,
-//     Disabled,
-// }
-
 component_state! {
     LabelState {
         Basic => BASIC,
@@ -311,7 +332,6 @@ impl ComponentState for LabelState {
         matches!(self, LabelState::Disabled)
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Live, LiveHook, Default)]
 #[live_ignore]

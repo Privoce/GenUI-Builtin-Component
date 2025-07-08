@@ -16,6 +16,9 @@ pub const SHADOW_COLOR: &str = "shadow_color";
 pub const SPREAD_RADIUS: &str = "spread_radius";
 pub const BLUR_RADIUS: &str = "blur_radius";
 pub const SHADOW_OFFSET: &str = "shadow_offset";
+// --- stroke ----------------------------------------------------
+pub const STROKE_COLOR: &str = "stroke_color";
+pub const STROKE_WIDTH: &str = "stroke_width";
 // --- shape -----------------------------------------------------
 pub const HEIGHT: &str = "height";
 pub const WIDTH: &str = "width";
@@ -30,6 +33,7 @@ pub const SPACING: &str = "spacing";
 pub const CLIP_X: &str = "clip_x";
 pub const CLIP_Y: &str = "clip_y";
 pub const ABS_POS: &str = "abs_pos";
+pub const SIZE: &str = "size";
 // --- text ------------------------------------------------------
 pub const FONT_SIZE: &str = "font_size";
 pub const COLOR: &str = "color";
@@ -39,12 +43,13 @@ pub const HOVER: &str = "hover";
 pub const PRESSED: &str = "pressed";
 pub const DISABLED: &str = "disabled";
 pub const BASIC: &str = "basic";
+pub const ACTIVE: &str = "active";
 // --- slot ------------------------------------------------------
 pub const SLOT: &str = "slot";
 pub const HEADER: &str = "header";
 pub const BODY: &str = "body";
 pub const FOOTER: &str = "footer";
-pub const OUTER: &str = "outer";
+pub const CONTAINER: &str = "container";
 
 // --- component -------------------------------------------------
 pub const LABEL: &str = "label";
@@ -54,3 +59,8 @@ pub const CARD: &str = "card";
 pub const RADIO: &str = "radio";
 pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
+// --- mode ------------------------------------------------------
+pub const MODE: &str = "mode";
+pub const ROUND: &str = "round";
+pub const TICK: &str = "tick";
+pub const CROSS: &str = "cross";
