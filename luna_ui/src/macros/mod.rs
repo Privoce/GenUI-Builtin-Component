@@ -6,3 +6,4 @@ mod impl_self;
 mod impl_ref;
 mod component;
 mod state;
+mod from;

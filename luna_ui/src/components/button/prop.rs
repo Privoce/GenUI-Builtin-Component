@@ -2,10 +2,14 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_state, components::{
+    component_state,
+    components::{
         traits::{BasicProp, ComponentState, Prop},
-        view::ViewState,
-    }, error::Error, getter_setter_prop, prop::{
+        view::{ViewBasicProp, ViewState},
+    },
+    error::Error,
+    getter_setter_prop,
+    prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
@@ -13,7 +17,10 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    }, themes::{Color, Theme, TomlValueTo}, utils::{get_from_itable, get_from_table}
+    },
+    themes::{Color, Theme, TomlValueTo},
+    try_from_toml_item,
+    utils::get_from_itable,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -83,64 +90,13 @@ impl Default for ButtonProp {
     }
 }
 
-impl TryFrom<&Item> for ButtonProp {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let table = value.as_table().ok_or(Error::ThemeStyleParse(
-            "[component.button] should be a table".to_string(),
-        ))?;
-
-        let basic = get_from_table(
-            table,
-            BASIC,
-            || Ok(ButtonBasicProp::default()),
-            |v| (v, ButtonState::Basic).try_into(),
-        )?;
-
-        let hover = get_from_table(
-            table,
-            HOVER,
-            || {
-                Ok(ButtonBasicProp::from_state(
-                    Theme::default(),
-                    ButtonState::Hover,
-                ))
-            },
-            |v| (v, ButtonState::Hover).try_into(),
-        )?;
-
-        let pressed = get_from_table(
-            table,
-            PRESSED,
-            || {
-                Ok(ButtonBasicProp::from_state(
-                    Theme::default(),
-                    ButtonState::Pressed,
-                ))
-            },
-            |v| (v, ButtonState::Pressed).try_into(),
-        )?;
-
-        let disabled = get_from_table(
-            table,
-            DISABLED,
-            || {
-                Ok(ButtonBasicProp::from_state(
-                    Theme::default(),
-                    ButtonState::Disabled,
-                ))
-            },
-            |v| (v, ButtonState::Disabled).try_into(),
-        )?;
-
-        Ok(Self {
-            basic,
-            hover,
-            pressed,
-            disabled,
-        })
-    }
+try_from_toml_item! {
+    ButtonProp {
+        basic => BASIC, ButtonBasicProp::default(),|v| (v, ButtonState::Basic).try_into(),
+        hover => HOVER, ButtonBasicProp::from_state(Theme::default(), ButtonState::Hover),|v| (v, ButtonState::Hover).try_into(),
+        pressed => PRESSED, ButtonBasicProp::from_state(Theme::default(), ButtonState::Pressed),|v| (v, ButtonState::Pressed).try_into(),
+        disabled => DISABLED, ButtonBasicProp::from_state(Theme::default(), ButtonState::Disabled),|v| (v, ButtonState::Disabled).try_into()
+    }, "[component.button] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -188,6 +144,58 @@ pub struct ButtonBasicProp {
     pub spacing: f64,
     #[live(None)]
     pub abs_pos: Option<DVec2>,
+}
+
+impl From<&ButtonBasicProp> for ViewBasicProp {
+    fn from(value: &ButtonBasicProp) -> Self {
+        let ButtonBasicProp {
+            theme,
+            background_color,
+            background_visible,
+            shadow_color,
+            spread_radius,
+            blur_radius,
+            shadow_offset,
+            border_width,
+            border_color,
+            border_radius,
+            cursor,
+            margin,
+            padding,
+            flow,
+            align,
+            height,
+            width,
+            spacing,
+            abs_pos,
+        } = *value;
+
+        ViewBasicProp {
+            theme,
+            background_color,
+            border_color,
+            border_width,
+            border_radius,
+            shadow_color,
+            spread_radius,
+            blur_radius,
+            shadow_offset,
+            background_visible,
+            rotation: 0.0,
+            scale: 1.0,
+            padding,
+            margin,
+            clip_x: false,
+            clip_y: false,
+            align,
+            cursor,
+            flow,
+            spacing,
+            height,
+            width,
+            abs_pos,
+        }
+    }
 }
 
 impl Default for ButtonBasicProp {

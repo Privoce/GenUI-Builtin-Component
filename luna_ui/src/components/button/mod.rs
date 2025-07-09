@@ -139,7 +139,6 @@ impl WidgetNode for GButton {
     }
 
     fn state(&self) -> String {
-        dbg!(self.current_state());
         self.current_state().to_string()
     }
 
@@ -249,17 +248,8 @@ impl Component for GButton {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
-
-        self.draw_button.background_color = self.prop.get(state).background_color;
-        self.draw_button.border_color = self.prop.get(state).border_color;
-        self.draw_button.shadow_color = self.prop.get(state).shadow_color;
-        self.draw_button.border_radius = self.prop.get(state).border_radius.into();
-        self.draw_button.border_width = self.prop.get(state).border_width;
-        self.draw_button.spread_radius = self.prop.get(state).spread_radius;
-        self.draw_button.blur_radius = self.prop.get(state).blur_radius;
-        self.draw_button.shadow_offset = self.prop.get(state).shadow_offset;
-        self.draw_button.background_visible = self.prop.get(state).background_visible.to_f32();
-
+        let prop = self.prop.get(state);
+        self.draw_button.merge(&prop.into());
         Ok(())
     }
 

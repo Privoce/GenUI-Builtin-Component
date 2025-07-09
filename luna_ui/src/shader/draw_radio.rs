@@ -1,6 +1,9 @@
 use makepad_widgets::*;
 
-use crate::prop::ActiveMode;
+use crate::{
+    components::radio::RadioPartProp,
+    prop::{traits::ToFloat, ActiveMode},
+};
 
 live_design! {
     use link::shaders::*;
@@ -84,5 +87,13 @@ impl DrawRadio {
     pub fn apply_type(&mut self, mode: ActiveMode) {
         self.mode = mode;
     }
+    pub fn merge(&mut self, other: &RadioPartProp) {
+        self.background_color = other.background_color;
+        self.background_visible = other.background_visible.to_f32();
+        self.stroke_color = other.stroke_color;
+        self.border_color = other.border_color;
+        self.size = other.size;
+        self.border_width = other.border_width;
+        self.mode = other.mode;
+    }
 }
-

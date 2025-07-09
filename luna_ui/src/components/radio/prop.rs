@@ -7,9 +7,15 @@ use crate::{
     },
     error::Error,
     prop::{
-        manuel::{ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR, BORDER_WIDTH, CONTAINER, DISABLED, HOVER, MARGIN, MODE, SIZE, STROKE_COLOR, THEME}, traits::NewFrom, ActiveMode
+        manuel::{
+            ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
+            BORDER_WIDTH, CONTAINER, DISABLED, HOVER, MARGIN, MODE, SIZE, STROKE_COLOR, THEME,
+        },
+        traits::NewFrom,
+        ActiveMode,
     },
     themes::{Color, Theme, TomlValueTo},
+    try_from_toml_item,
     utils::get_from_itable,
 };
 use makepad_widgets::*;
@@ -45,15 +51,25 @@ impl Prop for RadioProp {
     type Basic = RadioBasicProp;
 
     fn get(&self, state: Self::State) -> &Self::Basic {
-        todo!()
+        match state {
+            RadioState::Basic => &self.basic,
+            RadioState::Hover => &self.hover,
+            RadioState::Active => &self.active,
+            RadioState::Disabled => &self.disabled,
+        }
     }
 
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        todo!()
+        match state {
+            RadioState::Basic => &mut self.basic,
+            RadioState::Hover => &mut self.hover,
+            RadioState::Active => &mut self.active,
+            RadioState::Disabled => &mut self.disabled,
+        }
     }
 
     fn len() -> usize {
-        todo!()
+        4 * RadioBasicProp::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -64,12 +80,13 @@ impl Prop for RadioProp {
     }
 }
 
-impl TryFrom<&Item> for RadioProp {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        todo!()
-    }
+try_from_toml_item! {
+    RadioProp {
+        basic => BASIC, RadioBasicProp::default(),|v| (v, RadioState::Basic).try_into(),
+        hover => HOVER, RadioBasicProp::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),
+        active => ACTIVE, RadioBasicProp::from_state(Theme::default(), RadioState::Active),|v| (v, RadioState::Active).try_into(),
+        disabled => DISABLED, RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),|v| (v, RadioState::Disabled).try_into()
+    }, "[component.radio] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -99,42 +116,47 @@ impl BasicProp for RadioBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        todo!()
+        RadioPartProp::state_colors(theme, state)
     }
 
     fn len() -> usize {
-        todo!()
+        3 * (RadioPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len())
     }
 
     fn set_from_str(
         &mut self,
-        key: &str,
-        value: &makepad_widgets::LiveValue,
-        state: Self::State,
+        _key: &str,
+        _value: &makepad_widgets::LiveValue,
+        _state: Self::State,
     ) -> () {
-        todo!()
+        ()
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        todo!()
+        self.container.sync(state.into());
+        self.radio.sync(state);
+        self.label.sync(state.into());
     }
 
     fn live_props() -> Vec<(
         makepad_widgets::LiveId,
         Option<Vec<makepad_widgets::LiveId>>,
     )> {
+        // vec![
+        //     (live_id!(container), )
+        // ]
         todo!()
     }
 
     fn walk(&self) -> makepad_widgets::Walk {
-        todo!()
+        self.container.walk()
     }
 }
 
-impl TryFrom<(&Value, RadioState)> for RadioBasicProp {
+impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Value, RadioState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Item, RadioState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[component.radio.$part] should be an inline table".to_string(),
         ))?;
@@ -168,7 +190,7 @@ impl TryFrom<(&Value, RadioState)> for RadioBasicProp {
 impl RadioBasicProp {
     pub fn default_container(state: RadioState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(Theme::default(), state.into());
-        
+
         container
     }
     pub fn default_label(state: RadioState) -> LabelBasicProp {
@@ -179,9 +201,9 @@ impl RadioBasicProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct RadioPartProp {
-    #[live]
+    #[live(Theme::default())]
     pub theme: Theme,
-    #[live]
+    #[live(16.0)]
     pub size: f32,
     #[live]
     pub background_color: Vec4,
@@ -189,22 +211,24 @@ pub struct RadioPartProp {
     pub border_color: Vec4,
     #[live]
     pub stroke_color: Vec4,
-    #[live(1.0)]
-    pub background_visible: f32,
+    #[live(true)]
+    pub background_visible: bool,
     #[live(1.0)]
     pub border_width: f32,
     #[live(ActiveMode::Round)]
     pub mode: ActiveMode,
     #[live]
     pub margin: Margin,
-    #[live]
+    #[live(None)]
     pub abs_pos: Option<DVec2>,
+    #[live(MouseCursor::Hand)]
+    pub cursor: MouseCursor,
 }
 
 impl TryFrom<(&Value, RadioState)> for RadioPartProp {
     type Error = Error;
 
-    fn try_from((value,state): (&Value, RadioState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Value, RadioState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[component.radio.radio] should be an inline table".to_string(),
         ))?;
@@ -237,8 +261,8 @@ impl TryFrom<(&Value, RadioState)> for RadioPartProp {
         let background_visible = get_from_itable(
             inline_table,
             BACKGROUND_VISIBLE,
-            || Ok(1.0),
-            |item| item.to_f32(),
+            || Ok(true),
+            |item| item.to_bool(),
         )?;
         let border_width =
             get_from_itable(inline_table, BORDER_WIDTH, || Ok(1.0), |item| item.to_f32())?;
@@ -256,6 +280,12 @@ impl TryFrom<(&Value, RadioState)> for RadioPartProp {
             || Ok(None),
             |v| v.to_dvec2().map(Some),
         )?;
+        let cursor = if state.is_disabled() {
+            MouseCursor::NotAllowed
+        } else {
+            MouseCursor::Hand
+        };
+        let cursor = get_from_itable(inline_table, "cursor", || Ok(cursor), |v| v.to_cursor())?;
 
         Ok(Self {
             theme,
@@ -268,6 +298,7 @@ impl TryFrom<(&Value, RadioState)> for RadioPartProp {
             mode,
             margin,
             abs_pos,
+            cursor,
         })
     }
 }
@@ -278,7 +309,25 @@ impl BasicProp for RadioPartProp {
     type Colors = (Color, Color, Color);
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        todo!()
+        let (backgroud_color, stroke_color, border_color) = Self::state_colors(theme, state);
+        let cursor = if state.is_disabled() {
+            MouseCursor::NotAllowed
+        } else {
+            MouseCursor::Hand
+        };
+        Self {
+            theme,
+            size: 16.0,
+            background_color: backgroud_color.into(),
+            stroke_color: stroke_color.into(),
+            border_color: border_color.into(),
+            background_visible: true,
+            border_width: 1.0,
+            mode: ActiveMode::Round,
+            margin: Margin::from_f64(6.0),
+            abs_pos: None,
+            cursor,
+        }
     }
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
@@ -324,7 +373,7 @@ impl BasicProp for RadioPartProp {
     }
 
     fn len() -> usize {
-        8
+        9
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
@@ -336,7 +385,27 @@ impl BasicProp for RadioPartProp {
     }
 
     fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
-        todo!()
+        vec![
+            (live_id!(theme), None),
+            (live_id!(size), None),
+            (live_id!(background_color), None),
+            (live_id!(stroke_color), None),
+            (live_id!(border_color), None),
+            (live_id!(background_visible), None),
+            (live_id!(border_width), None),
+            (live_id!(mode), None),
+            (
+                live_id!(margin),
+                Some(vec![
+                    live_id!(top),
+                    live_id!(bottom),
+                    live_id!(left),
+                    live_id!(right),
+                ]),
+            ),
+            (live_id!(abs_pos), None),
+            (live_id!(cursor), None),
+        ]
     }
 
     fn walk(&self) -> Walk {
@@ -349,9 +418,9 @@ impl BasicProp for RadioPartProp {
     }
 }
 
-impl Default for  RadioPartProp {
+impl Default for RadioPartProp {
     fn default() -> Self {
-        Self { theme: Default::default(), size: Default::default(), background_color: Default::default(), border_color: Default::default(), stroke_color: Default::default(), background_visible: Default::default(), border_width: Default::default(), mode: Default::default(), margin: Default::default(), abs_pos: Default::default() }
+        Self::from_state(Theme::default(), RadioState::Basic)
     }
 }
 
@@ -388,6 +457,16 @@ impl From<RadioState> for ViewState {
             RadioState::Hover => ViewState::Hover,
             RadioState::Active => ViewState::Pressed,
             RadioState::Disabled => ViewState::Disabled,
+        }
+    }
+}
+impl From<ViewState> for RadioState {
+    fn from(value: ViewState) -> Self {
+        match value {
+            ViewState::Basic => RadioState::Basic,
+            ViewState::Hover => RadioState::Hover,
+            ViewState::Pressed => RadioState::Active,
+            ViewState::Disabled => RadioState::Disabled,
         }
     }
 }

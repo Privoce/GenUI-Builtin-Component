@@ -1,12 +1,11 @@
-use toml_edit::Item;
-
 use crate::components::button::ButtonProp;
 use crate::components::card::CardProp;
 use crate::components::label::LabelProp;
+use crate::components::radio::RadioProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
-use crate::prop::manuel::{BUTTON, CARD, LABEL, VIEW};
-use crate::utils::{get_from_itable, get_from_table};
+use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW};
+use crate::try_from_toml_item;
 
 #[derive(Debug, Clone, Default)]
 pub struct ComponentsConf {
@@ -14,49 +13,15 @@ pub struct ComponentsConf {
     pub view: ViewProp,
     pub button: ButtonProp,
     pub card: CardProp,
+    pub radio: RadioProp,
 }
 
-impl TryFrom<&Item> for ComponentsConf {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let table = value.as_table().ok_or(Error::ThemeStyleParse(
-            "[component] should be a table".to_string(),
-        ))?;
-
-        let label = get_from_table(
-            table,
-            LABEL,
-            || Ok(LabelProp::default()),
-            |item| item.try_into(),
-        )?;
-
-        let view = get_from_table(
-            table,
-            VIEW,
-            || Ok(ViewProp::default()),
-            |item| item.try_into(),
-        )?;
-
-        let button = get_from_table(
-            table,
-            BUTTON,
-            || Ok(ButtonProp::default()),
-            |item| item.try_into(),
-        )?;
-
-        let card = get_from_table(
-            table,
-            CARD,
-            || Ok(CardProp::default()),
-            |item| item.try_into(),
-        )?;
-
-        Ok(ComponentsConf {
-            label,
-            view,
-            button,
-            card,
-        })
-    }
+try_from_toml_item! {
+    ComponentsConf {
+        label => LABEL, LabelProp::default(), |item| item.try_into(),
+        view => VIEW, ViewProp::default(), |item| item.try_into(),
+        button => BUTTON, ButtonProp::default(), |item| item.try_into(),
+        card => CARD, CardProp::default(), |item| item.try_into(),
+        radio => RADIO, RadioProp::default(), |item| item.try_into()
+    }, "[components] should be a table"
 }
