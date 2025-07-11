@@ -256,16 +256,16 @@ impl LiveHook for GCard {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        let live_props = CardBasicProp::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
-            &CardBasicProp::live_props(),
             [live_id!(basic), live_id!(hover)],
             [
-                CardPart::Container,
-                CardPart::Header,
-                CardPart::Body,
-                CardPart::Footer,
+                (CardPart::Container, &live_props),
+                (CardPart::Header, &live_props),
+                (CardPart::Body, &live_props),
+                (CardPart::Footer, &live_props),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {

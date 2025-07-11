@@ -160,12 +160,7 @@ impl Widget for GButton {
 
         let _ = self.draw_button.begin(
             cx,
-            Walk {
-                margin: prop.margin,
-                width: prop.width,
-                height: prop.height,
-                abs_pos: prop.abs_pos,
-            },
+            prop.walk(),
             Layout {
                 clip_x: false,
                 clip_y: false,
@@ -319,22 +314,13 @@ impl Component for GButton {
     fn switch_state(&mut self, state: Self::State) -> () {
         match state {
             ButtonState::Basic => {
-                if self.draw_button.hover != 0.0 || self.draw_button.pressed != 0.0 {
-                    self.draw_button.hover = 0.0;
-                    self.draw_button.pressed = 0.0;
-                }
+                self.draw_button.state_basic();
             }
             ButtonState::Hover => {
-                if self.draw_button.hover != 1.0 {
-                    self.draw_button.hover = 1.0;
-                    self.draw_button.pressed = 0.0;
-                }
+                self.draw_button.state_hover();
             }
             ButtonState::Pressed => {
-                if self.draw_button.pressed != 1.0 {
-                    self.draw_button.hover = 0.0;
-                    self.draw_button.pressed = 1.0;
-                }
+                self.draw_button.state_pressed();
             }
             ButtonState::Disabled => {}
         }

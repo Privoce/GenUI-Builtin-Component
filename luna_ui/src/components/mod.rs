@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    component, components::{button::GButton, card::GCard, label::GLabel, view::GView}
+    component, components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, view::GView}
 };
 
 pub mod button;
@@ -42,7 +42,7 @@ live_design! {
     pub GCard = <GCardBase>{
         prop: {
             basic: {
-                outer: {
+                container: {
                     height: 300.0,
                     width: 200.0,
                 }
@@ -65,6 +65,8 @@ live_design! {
             }
         }
     }
+
+    pub GRadio = <GRadioBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -72,11 +74,13 @@ pub fn components_register(cx: &mut Cx) {
     view::live_design(cx);
     button::live_design(cx);
     card::live_design(cx);
+    radio::live_design(cx);
 }
 
 component! {
     Label => GLabel,
     View => GView,
     Button => GButton,
-    Card => GCard
+    Card => GCard,
+    Radio => GRadio
 }

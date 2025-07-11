@@ -438,15 +438,8 @@ impl Widget for GView {
                 self.scroll
             };
 
-            let layout = Layout {
-                scroll,
-                clip_x: prop.clip_x,
-                clip_y: prop.clip_y,
-                padding: prop.padding,
-                align: prop.align,
-                flow: prop.flow,
-                spacing: prop.spacing,
-            };
+            let layout = prop.layout().with_scroll(scroll);
+
             if prop.background_visible {
                 self.draw_view.begin(cx, walk, layout);
             } else {

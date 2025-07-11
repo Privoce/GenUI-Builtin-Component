@@ -424,6 +424,18 @@ impl BasicProp for ButtonBasicProp {
             height: self.height,
         }
     }
+
+    fn layout(&self) -> Layout {
+        Layout {
+            clip_x: false,
+            clip_y: false,
+            padding: self.padding,
+            align: self.align,
+            flow: self.flow,
+            spacing: self.spacing,
+            ..Default::default()
+        }
+    }
 }
 
 impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {

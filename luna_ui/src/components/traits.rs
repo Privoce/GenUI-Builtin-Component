@@ -1,8 +1,11 @@
-use std::{fmt::{Debug, Display}, hash::Hash};
+use std::{
+    fmt::{Debug, Display},
+    hash::Hash,
+};
 
 use makepad_widgets::{
-    error, Area, Cx, Event, HeapLiveIdPath, Hit, LiveId, LiveNode, LiveValue, Walk, Widget,
-    WidgetNode
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, Layout, LiveId, LiveNode, LiveValue, Walk, Widget,
+    WidgetNode,
 };
 
 use crate::{
@@ -123,20 +126,19 @@ where
 {
     type Part: Part<State = IS>;
 
-    fn set_apply_slot_map<'m, LP, P, P2, NF, IF>(
+    fn set_apply_slot_map<'m, P, LP, PP, NF, IF>(
         &mut self,
         nodes: &[LiveNode],
         index: usize,
-        live_props: LP,
         prefixs: P,
-        parts: P2,
+        part_props: PP,
         next_or: NF,
         insert: IF,
     ) -> ()
     where
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
-        P2: IntoIterator<Item = Self::Part> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
+        PP: IntoIterator<Item = (Self::Part, LP)> + Copy,
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, SlotMap<Self::Part>) -> () + Copy,
         Self: Sized,
@@ -147,7 +149,7 @@ where
             IS,
             Self::Part,
         >>::set_map(
-            self, nodes, index, live_props, prefixs, parts, next_or, insert,
+            self, nodes, index,  prefixs, part_props, next_or, insert,
         );
     }
 }
@@ -190,7 +192,7 @@ pub trait SlotProp: Prop {
 
 /// # BasicProp
 /// trait for basic properties of a component
-pub trait BasicProp: Default + Debug{
+pub trait BasicProp: Default + Debug {
     type State;
     type Colors;
 
@@ -206,8 +208,8 @@ pub trait BasicProp: Default + Debug{
     fn sync(&mut self, state: Self::State) -> ();
     fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)>;
     fn walk(&self) -> Walk;
+    fn layout(&self) -> Layout;
 }
-
 
 pub trait SlotBasicProp: BasicProp {
     type Part: Part;

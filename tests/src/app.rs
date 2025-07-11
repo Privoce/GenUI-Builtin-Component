@@ -2,7 +2,8 @@ use luna_ui::{
     components::{
         button::{ButtonState, GButtonWidgetRefExt},
         label::GLabelWidgetRefExt,
-        traits::{BasicProp, Component}, view::GViewWidgetRefExt,
+        traits::{BasicProp, Component},
+        view::GViewWidgetRefExt,
     },
     prop::traits::ToColor,
     themes::Theme,
@@ -206,30 +207,31 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    
-                    <GCard>{
-                        prop: {
-                            basic: {
-                                outer: {
-                                    theme: Primary,
-                                    height: 200.0,
-                                    width: 200.0,
-                                },
-                                header: {
-                                    border_width: 2.0,
-                                    border_color: #00f,
-                                }
-                                footer: {
-                                    theme: Error,
-                                    height: 40.0,
-                                    border_width: 2.0,
-                                    border_color: #f00,
-                                }
-                            }
-                        }
-                        
-                    }
-                   <GCard>{}
+
+                //     <GCard>{
+                //         prop: {
+                //             basic: {
+                //                 container: {
+                //                     theme: Primary,
+                //                     height: 200.0,
+                //                     width: 200.0,
+                //                 },
+                //                 header: {
+                //                     border_width: 2.0,
+                //                     border_color: #00f,
+                //                 }
+                //                 footer: {
+                //                     theme: Error,
+                //                     height: 40.0,
+                //                     border_width: 2.0,
+                //                     border_color: #f00,
+                //                 }
+                //             }
+                //         }
+
+                //     }
+                //    <GCard>{}
+                <GRadio>{}
                 }
             }
         }

@@ -178,6 +178,9 @@ impl BasicProp for CardBasicProp {
     fn walk(&self) -> Walk {
         self.container.walk()
     }
+    fn layout(&self) -> Layout {
+        self.container.layout()
+    }
 }
 
 impl SlotBasicProp for CardBasicProp {

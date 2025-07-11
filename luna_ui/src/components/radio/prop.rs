@@ -2,7 +2,7 @@ use crate::{
     component_state,
     components::{
         label::{LabelBasicProp, LabelState},
-        traits::{BasicProp, ComponentState, Prop},
+        traits::{BasicProp, ComponentState, Part, Prop},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
@@ -112,7 +112,11 @@ impl BasicProp for RadioBasicProp {
     type Colors = (Color, Color, Color);
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
-        todo!()
+        Self {
+            container: Self::default_container(state),
+            radio: Self::default_radio(state),
+            label: Self::default_label(state),
+        }
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
@@ -150,6 +154,9 @@ impl BasicProp for RadioBasicProp {
 
     fn walk(&self) -> makepad_widgets::Walk {
         self.container.walk()
+    }
+    fn layout(&self) -> Layout {
+        self.container.layout()
     }
 }
 
@@ -190,11 +197,17 @@ impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
 impl RadioBasicProp {
     pub fn default_container(state: RadioState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(Theme::default(), state.into());
-
+        container.set_height(Size::Fit);
+        container.set_width(Size::Fit);
+        container.set_flow(Flow::Right);
         container
     }
     pub fn default_label(state: RadioState) -> LabelBasicProp {
         LabelBasicProp::from_state(Theme::default(), state.into())
+    }
+
+    pub fn default_radio(state: RadioState) -> RadioPartProp {
+        RadioPartProp::from_state(Theme::default(), state)
     }
 }
 
@@ -332,9 +345,9 @@ impl BasicProp for RadioPartProp {
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, stroke_level, border_level) = match state {
-            RadioState::Basic => (500, 500, 400),
+            RadioState::Basic => (200, 200, 50),
             RadioState::Hover => (400, 400, 300),
-            RadioState::Active => (600, 600, 500),
+            RadioState::Active => (200, 500, 500),
             RadioState::Disabled => (300, 300, 200),
         };
 
@@ -416,6 +429,15 @@ impl BasicProp for RadioPartProp {
             height: Size::Fixed(self.size as f64),
         }
     }
+
+    fn layout(&self) -> Layout {
+        Layout {
+            clip_x: false,
+            clip_y: false,
+            padding: Padding::from_f64(0.0),
+            ..Default::default()
+        }
+    }
 }
 
 impl Default for RadioPartProp {
@@ -467,6 +489,24 @@ impl From<ViewState> for RadioState {
             ViewState::Hover => RadioState::Hover,
             ViewState::Pressed => RadioState::Active,
             ViewState::Disabled => RadioState::Disabled,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum RadioPart{
+    Container,
+    Radio,
+    Label,
+}
+
+impl Part for RadioPart {
+    type State = RadioState;
+    fn to_live_id(&self) -> LiveId {
+        match self {
+           RadioPart::Container => live_id!(container),
+           RadioPart::Radio => live_id!(radio),
+           RadioPart::Label => live_id!(label),
         }
     }
 }

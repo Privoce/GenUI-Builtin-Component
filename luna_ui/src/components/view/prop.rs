@@ -429,6 +429,18 @@ impl BasicProp for ViewBasicProp {
             height: self.height,
         }
     }
+
+    fn layout(&self) -> Layout {
+        Layout {
+            clip_x: self.clip_x,
+            clip_y: self.clip_y,
+            padding: self.padding,
+            align: self.align,
+            flow: self.flow,
+            spacing: self.spacing,
+            ..Default::default()
+        }
+    }
 }
 
 impl Default for ViewBasicProp {

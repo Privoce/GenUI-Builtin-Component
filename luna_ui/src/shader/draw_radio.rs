@@ -13,7 +13,8 @@ live_design! {
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);
             // draw background circle
             let center = vec2(self.rect_size.x * 0.5, self.rect_size.y * 0.5);
-            sdf.circle(center.x, center.y, self.rect_size.x * 0.5);
+            let r = self.rect_size.x * 0.5 - self.border_width * 0.5;
+            sdf.circle(center.x, center.y, r);
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);
             }
@@ -44,12 +45,12 @@ live_design! {
                         cross_x_y.y,
                         cross_height_width.x,
                         cross_height_width.y,
-                        border_radius,
+                        border_radius
                     );
                     sdf.fill(self.stroke_color);
                 }
             }
-            return sdf.result
+            return sdf.result;
         }
     }
 }
@@ -95,5 +96,23 @@ impl DrawRadio {
         self.size = other.size;
         self.border_width = other.border_width;
         self.mode = other.mode;
+    }
+    pub fn state_basic(&mut self) {
+        if self.hover != 0.0 || self.active != 0.0 {
+            self.hover = 0.0;
+            self.active = 0.0;
+        }
+    }
+    pub fn state_hover(&mut self) {
+        if self.hover != 1.0 {
+            self.hover = 1.0;
+            self.active = 0.0;
+        }
+    }
+    pub fn state_active(&mut self) {
+        if self.active != 1.0 {
+            self.hover = 0.0;
+            self.active = 1.0;
+        }
     }
 }

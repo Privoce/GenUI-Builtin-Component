@@ -63,20 +63,19 @@ where
     S: Hash + Eq + Copy + Into<IS>,
     PT: Part<State = IS>,
 {
-    fn set_map<'m, C, LP, P, P2, NF, IF>(
+    fn set_map<'m, C, P, LP, PP, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
-        live_props: LP,
         prefixs: P,
-        parts: P2,
+        part_props: PP,
         next_or: NF,
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
-        P2: IntoIterator<Item = PT> + Copy,
+        LP: IntoIterator<Item= &'m (LiveId, Option<Vec<LiveId>>)>,
+        PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy;
     // fn sync<'p, P, SS, PS>(&'p self, basic_state: S, states: SS, parts: PS) -> ()
@@ -122,20 +121,19 @@ where
         cross_map
     }
 
-    fn set_map<'m, C, LP, P, P2, NF, IF>(
+    fn set_map<'m, C, P, LP, PP, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
-        live_props: LP,
         prefixs: P,
-        parts: P2,
+        part_props: PP,
         next_or: NF,
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
         P: IntoIterator<Item = LiveId>,
-        P2: IntoIterator<Item = PT> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
+        PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy,
     {
@@ -146,7 +144,7 @@ where
 
         for prefix in prefixs {
             let mut slots = HashMap::new();
-            for part in parts {
+            for (part, live_props) in part_props {
                 let mut applys = HashMap::new();
                 let live_part = part.to_live_id();
                 for (state, fields) in live_props {
@@ -285,9 +283,7 @@ where
                 // diff
                 let mut diff_props = self.get(&state).map_or_else(
                     || basic_props.clone(),
-                    |apply_props| {
-                        apply_props.diff(&basic_props)
-                    },
+                    |apply_props| apply_props.diff(&basic_props),
                 );
                 // remove theme
                 if diff_props.contains_key(THEME) {

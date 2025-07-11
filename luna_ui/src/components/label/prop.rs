@@ -245,6 +245,14 @@ impl BasicProp for LabelBasicProp {
         }
         .with_add_padding(self.padding)
     }
+
+    fn layout(&self) -> Layout {
+        Layout {
+            padding: self.padding,
+            flow: self.flow,
+            ..Default::default()
+        }
+    }
 }
 
 impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
