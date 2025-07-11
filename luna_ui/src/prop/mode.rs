@@ -62,3 +62,14 @@ impl FromStr for ActiveMode {
         }
     }
 }
+
+
+impl ToLiveValue for ActiveMode {
+    fn to_live_value(&self) -> LiveValue {
+        match self {
+            ActiveMode::Round => LiveValue::BareEnum(live_id!(Round)),
+            ActiveMode::Tick => LiveValue::BareEnum(live_id!(Tick)),
+            ActiveMode::Cross => LiveValue::BareEnum(live_id!(Cross)),
+        }
+    }
+}

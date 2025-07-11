@@ -51,7 +51,7 @@ pub struct GLabel {
     #[rust]
     index: usize,
     #[rust]
-    apply_state_map: ApplyStateMap<LabelState>,
+    pub apply_state_map: ApplyStateMap<LabelState>,
     // --- fonts ----------------
     #[live]
     font_regular: TextStyle,

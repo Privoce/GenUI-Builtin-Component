@@ -2,17 +2,18 @@ use crate::{
     component_state,
     components::{
         label::{LabelBasicProp, LabelState},
-        traits::{BasicProp, ComponentState, Part, Prop},
+        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_WIDTH, CONTAINER, DISABLED, HOVER, MARGIN, MODE, SIZE, STROKE_COLOR, THEME,
+            BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, HOVER, MARGIN, MODE, SIZE, STROKE_COLOR,
+            THEME,
         },
-        traits::NewFrom,
-        ActiveMode,
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ActiveMode, ApplySlotMapImpl,
     },
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
@@ -42,6 +43,23 @@ impl Default for RadioProp {
             active: RadioBasicProp::from_state(Theme::default(), RadioState::Active),
             disabled: RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),
         }
+    }
+}
+
+impl SlotProp for RadioProp {
+    type Part = RadioPart;
+
+    fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
+        map.sync(
+            &mut self.basic,
+            RadioState::Basic,
+            [
+                (RadioState::Hover, &mut self.hover),
+                (RadioState::Active, &mut self.active),
+                (RadioState::Disabled, &mut self.disabled),
+            ],
+            [RadioPart::Container, RadioPart::Radio, RadioPart::Label],
+        );
     }
 }
 
@@ -76,7 +94,7 @@ impl Prop for RadioProp {
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        todo!()
+        ()
     }
 }
 
@@ -106,6 +124,32 @@ impl Default for RadioBasicProp {
     }
 }
 
+impl SlotBasicProp for RadioBasicProp {
+    type Part = RadioPart;
+
+    fn set_from_str_slot(
+        &mut self,
+        key: &str,
+        value: &LiveValue,
+        state: Self::State,
+        part: Self::Part,
+    ) -> () {
+        match part {
+            RadioPart::Container => self.container.set_from_str(key, value, state.into()),
+            RadioPart::Radio => self.radio.set_from_str(key, value, state),
+            RadioPart::Label => self.label.set_from_str(key, value, state.into()),
+        }
+    }
+
+    fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
+        match part {
+            RadioPart::Container => self.container.sync(state.into()),
+            RadioPart::Radio => self.radio.sync(state),
+            RadioPart::Label => self.label.sync(state.into()),
+        }
+    }
+}
+
 impl BasicProp for RadioBasicProp {
     type State = RadioState;
 
@@ -113,9 +157,9 @@ impl BasicProp for RadioBasicProp {
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
-            container: Self::default_container(state),
-            radio: Self::default_radio(state),
-            label: Self::default_label(state),
+            container: Self::default_container(theme, state),
+            radio: Self::default_radio(theme, state),
+            label: Self::default_label(theme, state),
         }
     }
 
@@ -195,19 +239,19 @@ impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
 }
 
 impl RadioBasicProp {
-    pub fn default_container(state: RadioState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(Theme::default(), state.into());
+    pub fn default_container(theme: Theme, state: RadioState) -> ViewBasicProp {
+        let mut container = ViewBasicProp::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fit);
         container.set_flow(Flow::Right);
         container
     }
-    pub fn default_label(state: RadioState) -> LabelBasicProp {
-        LabelBasicProp::from_state(Theme::default(), state.into())
+    pub fn default_label(theme: Theme, state: RadioState) -> LabelBasicProp {
+        LabelBasicProp::from_state(theme, state.into())
     }
 
-    pub fn default_radio(state: RadioState) -> RadioPartProp {
-        RadioPartProp::from_state(Theme::default(), state)
+    pub fn default_radio(theme: Theme, state: RadioState) -> RadioPartProp {
+        RadioPartProp::from_state(theme, state)
     }
 }
 
@@ -386,15 +430,63 @@ impl BasicProp for RadioPartProp {
     }
 
     fn len() -> usize {
-        9
+        11
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
-        todo!()
+        match key {
+            THEME => {
+                self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
+                self.sync(state);
+            }
+            BACKGROUND_COLOR => {
+                let (background_color, _, _) = Self::state_colors(self.theme, state);
+                self.background_color =
+                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+            }
+            STROKE_COLOR => {
+                let (_, stroke_color, _) = Self::state_colors(self.theme, state);
+                self.stroke_color = Vec4::from_live_color(value).unwrap_or(stroke_color.into());
+            }
+            BORDER_COLOR => {
+                let (_, _, border_color) = Self::state_colors(self.theme, state);
+                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+            }
+            SIZE => {
+                self.size = f32::from_live_value(value).unwrap_or(16.0);
+            }
+            BACKGROUND_VISIBLE => {
+                self.background_visible = bool::from_live_value(value).unwrap_or(true);
+            }
+            BORDER_WIDTH => {
+                self.border_width = f32::from_live_value(value).unwrap_or(1.0);
+            }
+            MODE => {
+                self.mode = ActiveMode::from_live_value(value).unwrap_or(ActiveMode::Round);
+            }
+            MARGIN => {
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+            }
+            ABS_POS => {
+                self.abs_pos = DVec2::from_live_value(value);
+            }
+            CURSOR => {
+                let cursor = if state.is_disabled() {
+                    MouseCursor::NotAllowed
+                } else {
+                    MouseCursor::Hand
+                };
+                self.cursor = MouseCursor::from_live_value(value).unwrap_or(cursor);
+            }
+            _ => {}
+        }
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        todo!()
+        let (background_color, stroke_color, border_color) = Self::state_colors(self.theme, state);
+        self.background_color = background_color.into();
+        self.stroke_color = stroke_color.into();
+        self.border_color = border_color.into();
     }
 
     fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
@@ -494,7 +586,7 @@ impl From<ViewState> for RadioState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum RadioPart{
+pub enum RadioPart {
     Container,
     Radio,
     Label,
@@ -504,9 +596,9 @@ impl Part for RadioPart {
     type State = RadioState;
     fn to_live_id(&self) -> LiveId {
         match self {
-           RadioPart::Container => live_id!(container),
-           RadioPart::Radio => live_id!(radio),
-           RadioPart::Label => live_id!(label),
+            RadioPart::Container => live_id!(container),
+            RadioPart::Radio => live_id!(radio),
+            RadioPart::Label => live_id!(label),
         }
     }
 }

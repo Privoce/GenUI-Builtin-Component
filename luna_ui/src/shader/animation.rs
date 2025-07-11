@@ -19,4 +19,14 @@ live_design!{
         scale: 1.0,
         shadow_offset: vec2(0.0, 0.0),
     }
+
+    pub AN_DRAW_RADIO = {
+        background_color: #535d6d,
+        background_visible: 1.0,
+        border_color: #535d6d,
+        border_width: 1.0,
+        size: 16.0,
+        // mode: ActiveMode::Round,
+        stroke_color: #ffffff,
+    }
 }
