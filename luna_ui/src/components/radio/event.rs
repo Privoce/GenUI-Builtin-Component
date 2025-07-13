@@ -21,5 +21,6 @@ pub struct RadioHoverOut {
 #[derive(Clone, Debug)]
 pub struct RadioClicked {
     pub meta: Option<FingerUpEvent>,
-    pub value: bool,
+    pub active: bool,
+    pub value: String
 }

@@ -9,8 +9,8 @@ use crate::{
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, HOVER, MARGIN, MODE, SIZE, STROKE_COLOR,
-            THEME,
+            BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, RADIO, SIZE,
+            STROKE_COLOR, THEME,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
@@ -58,7 +58,7 @@ impl SlotProp for RadioProp {
                 (RadioState::Active, &mut self.active),
                 (RadioState::Disabled, &mut self.disabled),
             ],
-            [RadioPart::Container, RadioPart::Radio, RadioPart::Label],
+            [RadioPart::Container, RadioPart::Radio, RadioPart::Extra],
         );
     }
 }
@@ -114,8 +114,8 @@ pub struct RadioBasicProp {
     pub container: ViewBasicProp,
     #[live(Self::default_radio(Theme::default(), RadioState::Basic))]
     pub radio: RadioPartProp,
-    #[live(Self::default_label(Theme::default(), RadioState::Basic))]
-    pub label: LabelBasicProp,
+    #[live(Self::default_extra(Theme::default(), RadioState::Basic))]
+    pub extra: ViewBasicProp,
 }
 
 impl Default for RadioBasicProp {
@@ -137,7 +137,7 @@ impl SlotBasicProp for RadioBasicProp {
         match part {
             RadioPart::Container => self.container.set_from_str(key, value, state.into()),
             RadioPart::Radio => self.radio.set_from_str(key, value, state),
-            RadioPart::Label => self.label.set_from_str(key, value, state.into()),
+            RadioPart::Extra => self.extra.set_from_str(key, value, state.into()),
         }
     }
 
@@ -145,7 +145,7 @@ impl SlotBasicProp for RadioBasicProp {
         match part {
             RadioPart::Container => self.container.sync(state.into()),
             RadioPart::Radio => self.radio.sync(state),
-            RadioPart::Label => self.label.sync(state.into()),
+            RadioPart::Extra => self.extra.sync(state.into()),
         }
     }
 }
@@ -159,7 +159,7 @@ impl BasicProp for RadioBasicProp {
         Self {
             container: Self::default_container(theme, state),
             radio: Self::default_radio(theme, state),
-            label: Self::default_label(theme, state),
+            extra: Self::default_extra(theme, state),
         }
     }
 
@@ -183,7 +183,7 @@ impl BasicProp for RadioBasicProp {
     fn sync(&mut self, state: Self::State) -> () {
         self.container.sync(state.into());
         self.radio.sync(state);
-        self.label.sync(state.into());
+        self.extra.sync(state.into());
     }
 
     fn live_props() -> Vec<(
@@ -216,21 +216,21 @@ impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
         )?;
         let radio = get_from_itable(
             inline_table,
-            ACTIVE,
+            RADIO,
             || Ok(Self::default_radio(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
-        let label = get_from_itable(
+        let extra = get_from_itable(
             inline_table,
-            BASIC,
-            || Ok(Self::default_label(Theme::default(), state)),
+            EXTRA,
+            || Ok(Self::default_extra(Theme::default(), state)),
             |v| (v, state.into()).try_into(),
         )?;
 
         Ok(Self {
             container,
             radio,
-            label,
+            extra,
         })
     }
 }
@@ -245,8 +245,8 @@ impl RadioBasicProp {
         container.set_align(Align::from_f64(0.5));
         container
     }
-    pub fn default_label(theme: Theme, state: RadioState) -> LabelBasicProp {
-        LabelBasicProp::from_state(theme, state.into())
+    pub fn default_extra(theme: Theme, state: RadioState) -> ViewBasicProp {
+        Self::default_container(theme, state)
     }
 
     pub fn default_radio(theme: Theme, state: RadioState) -> RadioPartProp {
@@ -588,7 +588,7 @@ impl From<ViewState> for RadioState {
 pub enum RadioPart {
     Container,
     Radio,
-    Label,
+    Extra,
 }
 
 impl Part for RadioPart {
@@ -597,7 +597,7 @@ impl Part for RadioPart {
         match self {
             RadioPart::Container => live_id!(container),
             RadioPart::Radio => live_id!(radio),
-            RadioPart::Label => live_id!(label),
+            RadioPart::Extra => live_id!(extra),
         }
     }
 }

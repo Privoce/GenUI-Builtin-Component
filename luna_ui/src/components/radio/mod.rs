@@ -1,5 +1,5 @@
 mod event;
-mod group;
+pub mod group;
 mod prop;
 
 pub use event::*;
@@ -10,10 +10,9 @@ use makepad_widgets::*;
 use crate::{
     active_event, animation_open_then_redraw,
     components::{
-        label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::ViewBasicProp,
+        view::{GView, ViewBasicProp},
     },
     error::Error,
     hit_hover_in, hit_hover_out, lifecycle, play_animation,
@@ -94,7 +93,7 @@ pub struct GRadio {
     #[live]
     pub draw_radio: DrawRadio,
     #[live]
-    pub label: GLabel,
+    pub extra: GView,
     #[live]
     pub draw_container: DrawView,
     #[rust]
@@ -116,7 +115,10 @@ pub struct GRadio {
     // --- value -------------------
     // is radio active? if is true, it can not be changed by user
     #[live]
-    pub value: bool,
+    pub active: bool,
+    // specific value of the radio, can be used to identify the radio
+    #[live]
+    pub value: String
 }
 
 impl WidgetNode for GRadio {
@@ -142,8 +144,8 @@ impl WidgetNode for GRadio {
             let _ = self.render(cx);
             self.draw_container.redraw(cx);
             self.draw_radio.redraw(cx);
-            if self.label.visible {
-                self.label.redraw(cx);
+            if self.extra.visible {
+                self.extra.redraw(cx);
             }
         }
     }
@@ -170,9 +172,9 @@ impl Widget for GRadio {
             self.draw_radio
                 .begin(cx, prop.radio.walk(), prop.radio.layout());
             self.draw_radio.end(cx);
-            if self.label.visible {
+            if self.extra.visible {
                 let _ = SlotDrawer::new(
-                    [(live_id!(label), (&mut self.label).into())],
+                    [(live_id!(extra), (&mut self.extra).into())],
                     &mut self.defer_walks,
                 )
                 .draw_walk(cx, scope);
@@ -217,7 +219,7 @@ impl LiveHook for GRadio {
             [
                 (RadioPart::Container, &ViewBasicProp::live_props()),
                 (RadioPart::Radio, &RadioPartProp::live_props()),
-                (RadioPart::Label, &LabelBasicProp::live_props()),
+                (RadioPart::Extra, &ViewBasicProp::live_props()),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -260,8 +262,8 @@ impl Component for GRadio {
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
         self.draw_radio.merge(&prop.radio);
-        let _ = self.label.render(cx)?;
-        if self.value {
+        let _ = self.extra.render(cx)?;
+        if self.active {
             self.switch_state(RadioState::Active);
         }
         Ok(())
@@ -286,7 +288,7 @@ impl Component for GRadio {
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
         animation_open_then_redraw!(self, cx, event);
-        if !self.value {
+        if !self.active {
             match hit {
                 Hit::FingerDown(_) => {
                     if self.grab_key_focus {
@@ -305,7 +307,7 @@ impl Component for GRadio {
                 Hit::FingerUp(e) => {
                     if e.is_over {
                         if e.has_hovers() {
-                            self.value = true;
+                            self.active = true;
                             self.switch_state_with_animation(cx, RadioState::Active);
                             self.play_animation(cx, id!(hover.active));
                         } else {
@@ -371,7 +373,7 @@ impl Component for GRadio {
             return;
         }
         let mut crossed_map = self.apply_slot_map.cross();
-        for (part, slot) in [(RadioPart::Label, &mut self.label)] {
+        for (part, slot) in [(RadioPart::Extra, &mut self.extra)] {
             crossed_map.remove(&part).map(|map| {
                 let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
                 slot.apply_state_map.merge(map);
@@ -382,7 +384,7 @@ impl Component for GRadio {
 
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
-        self.label.disabled = self.disabled;
+        self.extra.disabled = self.disabled;
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -586,15 +588,16 @@ impl GRadio {
                     self.widget_uid(),
                     path,
                     RadioEvent::Clicked(RadioClicked {
-                        value: self.value,
+                        active: self.active,
+                        value: self.value.to_string(),
                         meta,
                     }),
                 );
             });
         }
     }
-    pub fn toggle(&mut self, cx: &mut Cx, value: bool) -> () {
-        self.value = value;
+    pub fn toggle(&mut self, cx: &mut Cx, active: bool) -> () {
+        self.active = active;
         self.active_clicked(cx, None);
     }
 }

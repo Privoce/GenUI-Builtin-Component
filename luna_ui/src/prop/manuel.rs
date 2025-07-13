@@ -57,6 +57,7 @@ pub const VIEW: &str = "view";
 pub const BUTTON: &str = "button";
 pub const CARD: &str = "card";
 pub const RADIO: &str = "radio";
+pub const EXTRA: &str = "extra";
 pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
 // --- mode ------------------------------------------------------

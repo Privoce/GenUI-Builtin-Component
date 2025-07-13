@@ -66,7 +66,14 @@ live_design! {
         }
     }
 
-    pub GRadio = <GRadioBase> {}
+    pub GRadio = <GRadioBase> {
+        extra: <GView> {
+            <GLabel> {
+                text: "Extra",
+            }
+        }
+    }
+    pub GRadioGroup = <GRadioGroupBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -75,6 +82,7 @@ pub fn components_register(cx: &mut Cx) {
     button::live_design(cx);
     card::live_design(cx);
     radio::live_design(cx);
+    radio::group::live_design(cx);
 }
 
 component! {
