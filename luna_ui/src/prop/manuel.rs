@@ -61,6 +61,6 @@ pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
-pub const ROUND: &str = "round";
-pub const TICK: &str = "tick";
-pub const CROSS: &str = "cross";
+pub const ROUND: &str = "Round";
+pub const TICK: &str = "Tick";
+pub const CROSS: &str = "Cross";

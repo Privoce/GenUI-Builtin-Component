@@ -28,8 +28,8 @@ live_design! {
                     sdf.fill(self.stroke_color);
                 }
                 ActiveMode::Tick => {
-                    let stroke_width = self.size * 0.16;
-                    let szs = self.rect_size.x * 0.5;
+                    let stroke_width = self.size * 0.1;
+                    let szs = self.rect_size.x * 0.22;
                     sdf.move_to(center.x - szs, center.y);
                     sdf.line_to(center.x, center.y + szs);
                     sdf.line_to(center.x + szs, center.y - szs);
@@ -37,9 +37,9 @@ live_design! {
                 }
                 ActiveMode::Cross => {
                     // draw a easy round rectangle
-                    let cross_height_width = vec2(self.rect_size.x * 0.75, self.rect_size.y * 0.75);
+                    let cross_height_width = vec2(self.rect_size.x * 0.75, self.rect_size.y * 0.25);
                     let cross_x_y = vec2(center.x - cross_height_width.x * 0.5, center.y - cross_height_width.y * 0.5);
-                    let border_radius = cross_height_width.y * 0.5;
+                    let border_radius = cross_height_width.y * 0.25;
                     sdf.box(
                         cross_x_y.x,
                         cross_x_y.y,

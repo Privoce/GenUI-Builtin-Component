@@ -137,7 +137,7 @@ impl Widget for GLabel {
         self.draw_text
             .draw_walk(cx, walk, Align::default(), self.text.as_ref());
         cx.end_turtle_with_area(&mut self.area);
-
+        dbg!(self.area.rect(cx));
         DrawStep::done()
     }
 }

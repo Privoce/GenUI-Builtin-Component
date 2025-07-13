@@ -110,11 +110,11 @@ try_from_toml_item! {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct RadioBasicProp {
-    #[live]
+    #[live(Self::default_container(Theme::default(), RadioState::Basic))]
     pub container: ViewBasicProp,
-    #[live]
+    #[live(Self::default_radio(Theme::default(), RadioState::Basic))]
     pub radio: RadioPartProp,
-    #[live]
+    #[live(Self::default_label(Theme::default(), RadioState::Basic))]
     pub label: LabelBasicProp,
 }
 
@@ -190,10 +190,7 @@ impl BasicProp for RadioBasicProp {
         makepad_widgets::LiveId,
         Option<Vec<makepad_widgets::LiveId>>,
     )> {
-        // vec![
-        //     (live_id!(container), )
-        // ]
-        todo!()
+        vec![]
     }
 
     fn walk(&self) -> makepad_widgets::Walk {
@@ -214,19 +211,19 @@ impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || Ok(ViewBasicProp::default()),
+            || Ok(Self::default_container(Theme::default(), state)),
             |v| (v, state.into()).try_into(),
         )?;
         let radio = get_from_itable(
             inline_table,
             ACTIVE,
-            || Ok(RadioPartProp::default()),
+            || Ok(Self::default_radio(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
         let label = get_from_itable(
             inline_table,
             BASIC,
-            || Ok(LabelBasicProp::default()),
+            || Ok(Self::default_label(Theme::default(), state)),
             |v| (v, state.into()).try_into(),
         )?;
 
@@ -242,8 +239,9 @@ impl RadioBasicProp {
     pub fn default_container(theme: Theme, state: RadioState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
         container.set_height(Size::Fit);
-        container.set_width(Size::Fit);
+        container.set_width(Size::Fixed(200.0));
         container.set_flow(Flow::Right);
+        container.set_background_visible(false);
         container
     }
     pub fn default_label(theme: Theme, state: RadioState) -> LabelBasicProp {
@@ -389,9 +387,9 @@ impl BasicProp for RadioPartProp {
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, stroke_level, border_level) = match state {
-            RadioState::Basic => (200, 200, 50),
-            RadioState::Hover => (400, 400, 300),
-            RadioState::Active => (200, 500, 500),
+            RadioState::Basic => (200, 200, 400),
+            RadioState::Hover => (200, 200, 400),
+            RadioState::Active => (500, 200, 500),
             RadioState::Disabled => (300, 300, 200),
         };
 

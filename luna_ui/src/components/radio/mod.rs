@@ -7,14 +7,24 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    animation_open_then_redraw, components::{
+    animation_open_then_redraw,
+    components::{
         label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
-    }, error::Error, hit_finger_down, lifecycle, play_animation, prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::{draw_radio::DrawRadio, draw_view::DrawView}, themes::Conf, visible, ComponentAnInit
+    },
+    error::Error,
+    hit_finger_down, lifecycle, play_animation,
+    prop::{
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
+        traits::ToFloat,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap,
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::{draw_radio::DrawRadio, draw_view::DrawView},
+    themes::Conf,
+    visible, ComponentAnInit,
 };
 
 live_design! {
@@ -100,6 +110,10 @@ pub struct GRadio {
     index: usize,
     #[live(true)]
     pub sync: bool,
+    // --- value -------------------
+    // is radio active? if is true, it can not be changed by user
+    #[live]
+    pub value: bool,
 }
 
 impl WidgetNode for GRadio {
@@ -154,7 +168,11 @@ impl Widget for GRadio {
                 .begin(cx, prop.radio.walk(), prop.radio.layout());
             self.draw_radio.end(cx);
             if self.label.visible {
-                let _ = self.label.draw_walk(cx, scope, prop.label.walk());
+                let _ = self.label.draw_walk(
+                    cx,
+                    scope,
+                    prop.label.walk().with_add_padding(prop.label.padding),
+                );
             }
             self.draw_container.end(cx);
         }
@@ -253,22 +271,25 @@ impl Component for GRadio {
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
         animation_open_then_redraw!(self, cx, event);
-        match hit {
-            Hit::FingerDown(e) => {
-                self.switch_state_with_animation(cx, RadioState::Active);
-                self.play_animation(cx, id!(hover.active));
-                // hit_finger_down!();
+        if !self.value {
+            match hit {
+                Hit::FingerDown(e) => {
+                    self.value = true;
+                    self.switch_state_with_animation(cx, RadioState::Active);
+                    self.play_animation(cx, id!(hover.active));
+                    // hit_finger_down!();
+                }
+                Hit::FingerHoverIn(e) => {
+                    cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                    self.switch_state_with_animation(cx, RadioState::Hover);
+                    self.play_animation(cx, id!(hover.on));
+                }
+                Hit::FingerHoverOut(e) => {
+                    self.switch_state_with_animation(cx, RadioState::Basic);
+                    self.play_animation(cx, id!(hover.off));
+                }
+                _ => {}
             }
-            Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
-                self.switch_state_with_animation(cx, RadioState::Hover);
-                self.play_animation(cx, id!(hover.on));
-            }
-            Hit::FingerHoverOut(e) => {
-                self.switch_state_with_animation(cx, RadioState::Basic);
-                self.play_animation(cx, id!(hover.off));
-            }
-            _ => {}
         }
     }
 
@@ -312,6 +333,7 @@ impl Component for GRadio {
             return;
         }
         self.switch_state(state);
+        self.draw_radio.apply_type(self.prop.get(state).radio.mode);
         self.set_animation(cx);
     }
 
@@ -320,9 +342,7 @@ impl Component for GRadio {
             return;
         }
         let mut crossed_map = self.apply_slot_map.cross();
-        for (part, slot) in [
-            (RadioPart::Label, &mut self.label),
-        ] {
+        for (part, slot) in [(RadioPart::Label, &mut self.label)] {
             crossed_map.remove(&part).map(|map| {
                 let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
                 slot.apply_state_map.merge(map);
@@ -333,6 +353,7 @@ impl Component for GRadio {
 
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
+        // dbg!(self.prop.get(self.current_state()).radio.mode);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -347,7 +368,7 @@ impl Component for GRadio {
             Some(lf) => lf,
             None => return,
         };
-         let nodes = &mut live_file.expanded.nodes;
+        let nodes = &mut live_file.expanded.nodes;
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
@@ -381,8 +402,8 @@ impl Component for GRadio {
                 self.index,
                 &[
                     live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
                     live_id!(active).as_instance(),
-                    live_id!(on).as_instance(),
                 ],
             ) {
                 active_index = Some(index);
@@ -426,7 +447,7 @@ impl Component for GRadio {
                 }
             }
 
-            set_animation!{
+            set_animation! {
                 nodes: draw_radio = {
                     basic_index => {
                         background_color => basic_prop.radio.background_color,
@@ -481,11 +502,11 @@ impl Component for GRadio {
                     self.index,
                     &[
                         live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
                         live_id!(active).as_instance(),
-                        live_id!(on).as_instance(),
                     ],
                 ),
-                _ => None
+                _ => None,
             };
             set_animation! {
                 nodes: draw_container = {
@@ -502,7 +523,7 @@ impl Component for GRadio {
                     }
                 }
             }
-            set_animation!{
+            set_animation! {
                 nodes: draw_radio = {
                     index => {
                         background_color => prop.radio.background_color,

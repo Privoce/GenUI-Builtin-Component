@@ -56,18 +56,18 @@ live_design! {
                     //             mode: Regular,
                     //         }
                     //     }
-                        // btn1 = <GButton>{
-                        //     prop: {
-                        //         hover: {
-                        //             theme: Warning,
-                        //         }
+                    //     btn1 = <GButton>{
+                    //         prop: {
+                    //             hover: {
+                    //                 theme: Warning,
+                    //             }
 
-                        //     }
-                        //     slot: <GLabel>{
-                        //         text: "Click me !",
-                        //         mode: Bold,
-                        //     }
-                        // }
+                    //         }
+                    //         slot: <GLabel>{
+                    //             text: "Click me !",
+                    //             mode: Bold,
+                    //         }
+                    //     }
 
                     //     lb = <GLabel>{
                     //         text: "Hello World!",
@@ -88,125 +88,8 @@ live_design! {
                     //             }
                     //         }
                     //     }
-                    // <GView>{
-                    //     prop: {
-                    //         basic: {
-                    //             border_color: #f00,
-                    //             border_width: 2.0,
-                    //             height: 100.0,
-                    //             width: 100.0,
-                    //             background_visible: true,
-                    //         }
-                    //     }
-                    // }
-                    // <GView>{
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Primary,
-                    //             height: 100.0,
-                    //             width: 100.0,
-                    //             background_visible: true,
-                    //             border_radius: {left: 30.0, right: 30.0, top: 30.0, bottom: 30.0},
-                    //             // border_radius: {left: 1.0, right: 1.0, top: 1.0, bottom: 1.0},
-                    //             border_width: 2.0,
-                    //             // border_color: #f00,
-                    //             // padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
-                    //         }
-                    //     }
-                    //     animation_open: true
-                    // }
-                    // <View> {
-                    //     flow: Down,
-                    //     spacing: 10.0,
-                    //     height: 200.0,
-                    //     width: 200.0,
-                    //     show_bg: true,
-                    //     draw_bg: {
-                    //         color: #f0f
-                    //     }
-                    //     padding: { top: 10.0, bottom: 10.0, left: 10.0, right: 10.0 },
-                    //     <View> {
-                    //         <GLabel>{
-                    //             text: "Card Header",
-                    //             mode: Bold
-                    //         }
-                    //         show_bg: true,
-                    //         draw_bg: {
-                    //             color: #f00
-                    //         }
-                    //         height: 40.0,
-                    //         width: Fill,
-                    //     }
-                    //     <View> {
-                    //         <GLabel>{
-                    //             text: "Card Body",
-                    //             mode: Bold
-                    //         }
-                    //         show_bg: true,
-                    //         draw_bg: {
-                    //             color: #000
-                    //         }
-                    //         height: Fill,
-                    //         width: Fill,
-                    //     }
-                    //     <View> {
-                    //         <GLabel>{
-                    //             text: "Card Footer",
-                    //             mode: Bold
-                    //         }
-                    //         show_bg: true,
-                    //         draw_bg: {
-                    //             color: #00f
-                    //         }
-                    //         height: 40.0,
-                    //         width: Fill,
-                    //     }
-                    // }
-                    // <GView> {
-                    //     prop: {
-                    //         basic: {
-                    //             height: 200.0,
-                    //             width: 200.0,
-                    //         }
-                    //     }
-                    //     <GView> {
-                    //         <GLabel>{
-                    //             text: "Card Header",
-                    //             mode: Bold
-                    //         }
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Primary,
-                    //                 height: 40.0,
-                    //                 width: Fill,
-                    //             }
-                    //         }
-                    //     }
-                    //     <GView> {
-                    //         <GLabel>{
-                    //             text: "Card Body",
-                    //             mode: Bold
-                    //         }
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Error,
-                    //                 height: Fill,
-                    //             }
-                    //         }
-                    //     }
-                    //     <GView> {
-                    //         <GLabel>{
-                    //             text: "Card Footer",
-                    //             mode: Bold
-                    //         }
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Warning,
-                    //                 height: 40.0,
-                    //             }
-                    //         }
-                    //     }
-                    // }
+
+
 
                 //     <GCard>{
                 //         prop: {
@@ -231,7 +114,82 @@ live_design! {
 
                 //     }
                 //    <GCard>{}
-                <GRadio>{}
+                <GView>{
+                    prop: {
+                        basic: {
+                            background_visible: true,
+                            height: 200.0,
+                            width: 200.0,
+                            theme: Primary,
+                            flow: Right,
+                            align: {
+                               
+                                y: 0.5
+                            }
+                        }
+
+                    }
+                    <GRadio> {
+                        prop: {
+                            basic: {
+                                container: {
+                                    theme: Dark,
+                                    background_visible: true,
+                                    width: 100.0,
+                                    padding: {
+                                        left: 0.0,
+                                        right: 0.0,
+                                        top: 0.0,
+                                        bottom: 0.0
+                                    }
+                                },
+                                radio: {
+                                    theme: Warning,
+                                    mode: Cross,
+                                    margin: {
+                                        left: 0.0,
+                                        right: 0.0,
+                                        top: 0.0,
+                                        bottom: 0.0
+                                    },
+                                }
+                            }
+                        }
+                    }
+                    <GLabel>{
+                        text: "Radio Cross"
+                    }
+                }
+                    // <GRadio>{}
+                    // <GRadio> {
+                    //     prop: {
+                    //         basic: {
+                                
+                    //             radio: {
+                    //                 theme: Warning,
+                    //                 mode: Cross,
+
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    // <GRadio> {
+                    //     prop: {
+                    //         basic: {
+                    //             container: {
+                    //                 background_visible: true,
+                    //             },
+                    //             radio: {
+                    //                 theme: Primary,
+                    //                 mode: Tick,
+
+                    //             }
+                    //         }
+                    //     }
+                    //     label: <GLabel> {
+                    //         text: "Radio Tick"
+                    //     }
+                    // }
                 }
             }
         }
