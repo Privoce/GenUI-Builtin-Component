@@ -175,12 +175,7 @@ impl Widget for GCard {
 
         let _ = self.draw_card.begin(
             cx,
-            Walk {
-                margin: prop.container.margin,
-                width: prop.container.width,
-                height: prop.container.height,
-                abs_pos: prop.container.abs_pos,
-            },
+            prop.walk(),
             Layout {
                 clip_x: false,
                 clip_y: false,

@@ -114,82 +114,41 @@ live_design! {
 
                 //     }
                 //    <GCard>{}
-                <GView>{
-                    prop: {
-                        basic: {
-                            background_visible: true,
-                            height: 200.0,
-                            width: 200.0,
-                            theme: Primary,
-                            flow: Right,
-                            align: {
-                               
-                                y: 0.5
+                <GRadio> {
+                        prop: {
+                            basic: {
+                                radio: {
+                                    theme: Warning,
+                                    mode: Cross,
+                                }
                             }
                         }
-
+                        disabled: true,
+                        label: <GLabel>{
+                            text: "Radio Cross",
+                            mode: Bold,
+                        }
+                    }
+                    <GRadio>{
+                        value: true,
                     }
                     <GRadio> {
                         prop: {
                             basic: {
                                 container: {
-                                    theme: Dark,
                                     background_visible: true,
-                                    width: 100.0,
-                                    padding: {
-                                        left: 0.0,
-                                        right: 0.0,
-                                        top: 0.0,
-                                        bottom: 0.0
-                                    }
                                 },
                                 radio: {
-                                    theme: Warning,
-                                    mode: Cross,
-                                    margin: {
-                                        left: 0.0,
-                                        right: 0.0,
-                                        top: 0.0,
-                                        bottom: 0.0
-                                    },
+                                    theme: Primary,
+                                    mode: Tick,
+
                                 }
                             }
                         }
+                        label: <GLabel> {
+                            text: "Radio Tick"
+                        }
                     }
-                    <GLabel>{
-                        text: "Radio Cross"
-                    }
-                }
-                    // <GRadio>{}
-                    // <GRadio> {
-                    //     prop: {
-                    //         basic: {
-                                
-                    //             radio: {
-                    //                 theme: Warning,
-                    //                 mode: Cross,
-
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    // <GRadio> {
-                    //     prop: {
-                    //         basic: {
-                    //             container: {
-                    //                 background_visible: true,
-                    //             },
-                    //             radio: {
-                    //                 theme: Primary,
-                    //                 mode: Tick,
-
-                    //             }
-                    //         }
-                    //     }
-                    //     label: <GLabel> {
-                    //         text: "Radio Tick"
-                    //     }
-                    // }
                 }
             }
         }

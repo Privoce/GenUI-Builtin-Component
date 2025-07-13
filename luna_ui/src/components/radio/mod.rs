@@ -1,4 +1,5 @@
 mod event;
+mod group;
 mod prop;
 
 pub use event::*;
@@ -7,7 +8,7 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    animation_open_then_redraw,
+    active_event, animation_open_then_redraw,
     components::{
         label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
@@ -15,11 +16,11 @@ use crate::{
         view::ViewBasicProp,
     },
     error::Error,
-    hit_finger_down, lifecycle, play_animation,
+    hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::{draw_radio::DrawRadio, draw_view::DrawView},
@@ -79,9 +80,9 @@ pub struct GRadio {
     #[live(true)]
     pub visible: bool,
     // --- others -------------------
-    #[live]
+    #[live(false)]
     pub disabled: bool,
-    #[live]
+    #[live(false)]
     pub grab_key_focus: bool,
     #[live(true)]
     pub event_open: bool,
@@ -96,6 +97,8 @@ pub struct GRadio {
     pub label: GLabel,
     #[live]
     pub draw_container: DrawView,
+    #[rust]
+    defer_walks: DeferWalks,
     // --- animation ---------------
     #[live(true)]
     pub animation_open: bool,
@@ -168,11 +171,11 @@ impl Widget for GRadio {
                 .begin(cx, prop.radio.walk(), prop.radio.layout());
             self.draw_radio.end(cx);
             if self.label.visible {
-                let _ = self.label.draw_walk(
-                    cx,
-                    scope,
-                    prop.label.walk().with_add_padding(prop.label.padding),
-                );
+                let _ = SlotDrawer::new(
+                    [(live_id!(label), (&mut self.label).into())],
+                    &mut self.defer_walks,
+                )
+                .draw_walk(cx, scope);
             }
             self.draw_container.end(cx);
         }
@@ -258,6 +261,9 @@ impl Component for GRadio {
         self.draw_container.merge(&prop.container);
         self.draw_radio.merge(&prop.radio);
         let _ = self.label.render(cx)?;
+        if self.value {
+            self.switch_state(RadioState::Active);
+        }
         Ok(())
     }
 
@@ -269,24 +275,47 @@ impl Component for GRadio {
         }
     }
 
+    fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
+        match hit {
+            Hit::FingerHoverIn(_) => {
+                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+            }
+            _ => {}
+        }
+    }
+
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
         animation_open_then_redraw!(self, cx, event);
         if !self.value {
             match hit {
-                Hit::FingerDown(e) => {
-                    self.value = true;
-                    self.switch_state_with_animation(cx, RadioState::Active);
-                    self.play_animation(cx, id!(hover.active));
-                    // hit_finger_down!();
+                Hit::FingerDown(_) => {
+                    if self.grab_key_focus {
+                        cx.set_key_focus(area);
+                    }
                 }
                 Hit::FingerHoverIn(e) => {
                     cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
                     self.switch_state_with_animation(cx, RadioState::Hover);
-                    self.play_animation(cx, id!(hover.on));
+                    hit_hover_in!(self, cx, e);
                 }
                 Hit::FingerHoverOut(e) => {
                     self.switch_state_with_animation(cx, RadioState::Basic);
-                    self.play_animation(cx, id!(hover.off));
+                    hit_hover_out!(self, cx, e);
+                }
+                Hit::FingerUp(e) => {
+                    if e.is_over {
+                        if e.has_hovers() {
+                            self.value = true;
+                            self.switch_state_with_animation(cx, RadioState::Active);
+                            self.play_animation(cx, id!(hover.active));
+                        } else {
+                            self.switch_state_with_animation(cx, RadioState::Basic);
+                            self.play_animation(cx, id!(hover.off));
+                        }
+                        self.active_clicked(cx, Some(e));
+                    } else {
+                        self.switch_state_with_animation(cx, RadioState::Basic);
+                    }
                 }
                 _ => {}
             }
@@ -353,7 +382,7 @@ impl Component for GRadio {
 
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
-        // dbg!(self.prop.get(self.current_state()).radio.mode);
+        self.label.disabled = self.disabled;
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -543,4 +572,29 @@ impl Component for GRadio {
     set_scope_path!();
     set_index!();
     lifecycle!();
+}
+
+impl GRadio {
+    active_event! {
+        active_hover_in: RadioEvent::HoverIn |meta: FingerHoverEvent| => RadioHoverIn { meta },
+        active_hover_out: RadioEvent::HoverOut |meta: FingerHoverEvent| => RadioHoverOut { meta }
+    }
+    pub fn active_clicked(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    RadioEvent::Clicked(RadioClicked {
+                        value: self.value,
+                        meta,
+                    }),
+                );
+            });
+        }
+    }
+    pub fn toggle(&mut self, cx: &mut Cx, value: bool) -> () {
+        self.value = value;
+        self.active_clicked(cx, None);
+    }
 }

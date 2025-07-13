@@ -90,7 +90,7 @@ impl Prop for RadioProp {
         4 * RadioBasicProp::len()
     }
 
-    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
+    fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
@@ -239,9 +239,10 @@ impl RadioBasicProp {
     pub fn default_container(theme: Theme, state: RadioState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
         container.set_height(Size::Fit);
-        container.set_width(Size::Fixed(200.0));
+        container.set_width(Size::Fit);
         container.set_flow(Flow::Right);
         container.set_background_visible(false);
+        container.set_align(Align::from_f64(0.5));
         container
     }
     pub fn default_label(theme: Theme, state: RadioState) -> LabelBasicProp {
@@ -272,7 +273,7 @@ pub struct RadioPartProp {
     pub border_width: f32,
     #[live(ActiveMode::Round)]
     pub mode: ActiveMode,
-    #[live]
+    #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(None)]
     pub abs_pos: Option<DVec2>,
@@ -327,7 +328,7 @@ impl TryFrom<(&Value, RadioState)> for RadioPartProp {
             || Ok(ActiveMode::Round),
             |item| item.try_into(),
         )?;
-        let margin = Margin::from_f64(6.0);
+        let margin = Margin::from_f64(0.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let abs_pos = get_from_itable(
             inline_table,
@@ -379,7 +380,7 @@ impl BasicProp for RadioPartProp {
             background_visible: true,
             border_width: 1.0,
             mode: ActiveMode::Round,
-            margin: Margin::from_f64(6.0),
+            margin: Margin::from_f64(0.0),
             abs_pos: None,
             cursor,
         }
@@ -390,7 +391,7 @@ impl BasicProp for RadioPartProp {
             RadioState::Basic => (200, 200, 400),
             RadioState::Hover => (200, 200, 400),
             RadioState::Active => (500, 200, 500),
-            RadioState::Disabled => (300, 300, 200),
+            RadioState::Disabled => (100, 100, 300),
         };
 
         match theme {
@@ -463,7 +464,7 @@ impl BasicProp for RadioPartProp {
                 self.mode = ActiveMode::from_live_value(value).unwrap_or(ActiveMode::Round);
             }
             MARGIN => {
-                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             ABS_POS => {
                 self.abs_pos = DVec2::from_live_value(value);
