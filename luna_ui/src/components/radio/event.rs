@@ -1,4 +1,4 @@
-use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerUpEvent, FingerHoverEvent};
+use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent};
 
 #[derive(Clone, Debug, DefaultNone)]
 pub enum RadioEvent {
@@ -22,5 +22,20 @@ pub struct RadioHoverOut {
 pub struct RadioClicked {
     pub meta: Option<FingerUpEvent>,
     pub active: bool,
-    pub value: String
+    pub value: String,
+}
+
+#[derive(Debug, Clone, DefaultNone)]
+pub enum RadioGroupEvent {
+    Changed(RadioChanged),
+    None,
+}
+
+#[derive(Clone, Debug)]
+pub struct RadioChanged {
+    pub meta: Option<FingerUpEvent>,
+    /// The index of the active radio.
+    pub index: i32,
+    /// The value of the active radio.
+    pub value: Option<String>,
 }

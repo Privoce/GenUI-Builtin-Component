@@ -19,11 +19,11 @@ use crate::{
 pub struct ViewProp {
     #[live(ViewBasicProp::default())]
     pub basic: ViewBasicProp,
-    #[live]
+    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Hover))]
     pub hover: ViewBasicProp,
-    #[live]
+    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Pressed))]
     pub pressed: ViewBasicProp,
-    #[live]
+    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Disabled))]
     pub disabled: ViewBasicProp,
 }
 
@@ -33,7 +33,7 @@ impl Default for ViewProp {
             basic: ViewBasicProp::default(),
             hover: ViewBasicProp::from_state(Theme::default(), ViewState::Hover),
             pressed: ViewBasicProp::from_state(Theme::default(), ViewState::Pressed),
-            disabled: ViewBasicProp::from_state(Theme::default(), ViewState::Basic),
+            disabled: ViewBasicProp::from_state(Theme::default(), ViewState::Disabled),
         }
     }
 }
@@ -298,7 +298,7 @@ impl BasicProp for ViewBasicProp {
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
-            MouseCursor::Hand
+            MouseCursor::default()
         };
 
         Self {

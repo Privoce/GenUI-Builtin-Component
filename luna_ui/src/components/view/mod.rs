@@ -452,6 +452,8 @@ impl Widget for GView {
                 if let Some((id, child)) = self.children.get_mut(step) {
                     if child.visible() {
                         let walk = child.walk(cx);
+                        child.set_disabled(cx, self.disabled);
+
                         if resume {
                             scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk))?;
                         } else if let Some(fw) = cx.defer_walk(walk) {
@@ -473,6 +475,7 @@ impl Widget for GView {
                 let (id, dw) = &mut self.defer_walks[step];
                 if let Some((id, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
                     let walk = dw.resolve(cx);
+                    child.set_disabled(cx, self.disabled);
                     scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk))?;
                 }
                 self.draw_state.set(DrawState::DeferWalk(step + 1));
@@ -609,19 +612,8 @@ impl Component for GView {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
-
-        self.draw_view.background_color = self.prop.get(state).background_color;
-        self.draw_view.border_color = self.prop.get(state).border_color;
-        self.draw_view.border_width = self.prop.get(state).border_width;
-        self.draw_view.border_radius = self.prop.get(state).border_radius.into();
-        self.draw_view.shadow_color = self.prop.get(state).shadow_color;
-        self.draw_view.spread_radius = self.prop.get(state).spread_radius;
-        self.draw_view.blur_radius = self.prop.get(state).blur_radius;
-        self.draw_view.shadow_offset = self.prop.get(state).shadow_offset;
-        self.draw_view.background_visible = self.prop.get(state).background_visible.to_f32();
-        self.draw_view.rotation = self.prop.get(state).rotation;
-        self.draw_view.scale = self.prop.get(state).scale;
-
+        let prop = self.prop.get(state);
+        self.draw_view.merge(prop);
         Ok(())
     }
 

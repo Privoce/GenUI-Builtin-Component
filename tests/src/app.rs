@@ -127,10 +127,12 @@ live_design! {
                                     }
                                 }
                             }
-                            disabled: true,
-                            label: <GLabel>{
-                                text: "Radio Cross",
-                                mode: Bold,
+
+                            extra: {
+                                <GLabel>{
+                                    text: "Radio Cross",
+                                    mode: Bold,
+                                }
                             }
                         }
                         <GRadio>{
@@ -149,11 +151,14 @@ live_design! {
                                     }
                                 }
                             }
-                            label: <GLabel> {
-                                text: "Radio Tick"
+                            extra: {
+                                 <GLabel> {
+                                    text: "Radio Tick"
+                                }
                             }
                         }
                     }
+
                 }
             }
         }

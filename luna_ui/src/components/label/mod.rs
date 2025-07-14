@@ -139,6 +139,13 @@ impl Widget for GLabel {
         cx.end_turtle_with_area(&mut self.area);
         DrawStep::done()
     }
+
+    fn set_disabled(&mut self, cx: &mut Cx, disabled: bool) {
+        let _ = self.set_disabled(cx, disabled);
+    }
+    fn disabled(&self, _cx: &Cx) -> bool {
+        self.disabled
+    }
 }
 
 impl LiveHook for GLabel {
@@ -269,7 +276,7 @@ impl GLabel {
             set_mode(mode: FontMode) {|c, _cx| {c.mode = mode; Ok(())}},
             set_text(text: String) {|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}},
             set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
-            set_disabled(disabled: bool) {|c, _cx| {c.disabled = disabled; Ok(())}}
+            set_disabled(disabled: bool) {|c, cx| {c.disabled = disabled; c.redraw(cx); Ok(())}}
         }
     }
 }
