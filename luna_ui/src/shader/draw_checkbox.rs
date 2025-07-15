@@ -1,20 +1,27 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::radio::RadioPartProp,
+    components::checkbox::CheckboxPartProp,
     prop::{traits::ToFloat, ActiveMode},
 };
 
 live_design! {
     use link::shaders::*;
 
-    DrawRadio = {{DrawRadio}} {
+    DrawCheckbox = {{DrawCheckbox}} {
         fn pixel(self) -> vec4 {
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);
             // draw background circle
             let center = vec2(self.rect_size.x * 0.5, self.rect_size.y * 0.5);
             let r = self.rect_size.x * 0.5 - self.border_width * 0.5;
-            sdf.circle(center.x, center.y, r);
+            // sdf.circle(center.x, center.y, r);
+            sdf.box(
+                self.pos.x,
+                self.pos.y,
+                self.rect_size.x,
+                self.rect_size.y,
+                self.size * 0.125
+            );
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);
             }
@@ -57,7 +64,7 @@ live_design! {
 
 #[derive(Live, LiveRegister, LiveHook)]
 #[repr(C)]
-pub struct DrawRadio {
+pub struct DrawCheckbox {
     #[deref]
     pub draw_super: DrawQuad,
     // ---- event state
@@ -84,11 +91,11 @@ pub struct DrawRadio {
     pub mode: ActiveMode,
 }
 
-impl DrawRadio {
+impl DrawCheckbox {
     pub fn apply_type(&mut self, mode: ActiveMode) {
         self.mode = mode;
     }
-    pub fn merge(&mut self, other: &RadioPartProp) {
+    pub fn merge(&mut self, other: &CheckboxPartProp) {
         self.background_color = other.background_color;
         self.background_visible = other.background_visible.to_f32();
         self.stroke_color = other.stroke_color;

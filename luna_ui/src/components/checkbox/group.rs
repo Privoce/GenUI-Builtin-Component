@@ -1,6 +1,6 @@
-use super::event::{RadioChanged, RadioGroupEvent};
+use super::event::{CheckboxChanged, CheckboxGroupEvent};
 use crate::{
-    components::{radio::GRadioWidgetRefExt, view::GView},
+    components::{checkbox::GCheckboxWidgetRefExt, view::GView},
     visible,
 };
 use makepad_widgets::*;
@@ -8,7 +8,7 @@ use makepad_widgets::*;
 live_design! {
     link luna_basic;
 
-    pub GRadioGroupBase = {{GRadioGroup}} {
+    pub GCheckboxGroupBase = {{GCheckboxGroup}} {
         prop: {
             basic: {
                 height: Fit,
@@ -26,7 +26,7 @@ live_design! {
 }
 
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
-pub struct GRadioGroup {
+pub struct GCheckboxGroup {
     #[deref]
     pub deref_widget: GView,
     // target active radio, only one radio can be active in a group
@@ -34,7 +34,7 @@ pub struct GRadioGroup {
     pub active: Option<String>,
 }
 
-impl WidgetNode for GRadioGroup {
+impl WidgetNode for GCheckboxGroup {
     fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
         self.deref_widget.uid_to_widget(uid)
     }
@@ -57,7 +57,7 @@ impl WidgetNode for GRadioGroup {
     visible!();
 }
 
-impl Widget for GRadioGroup {
+impl Widget for GCheckboxGroup {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         self.deref_widget.draw_walk(cx, scope, walk)
     }
@@ -70,39 +70,39 @@ impl Widget for GRadioGroup {
         };
         let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
 
-        let mut active_index = None;
-        let mut active_value = None;
-        let mut active_event = None;
+        let mut active_indexs = None;
+        let mut active_values = None;
+        let mut active_events = None;
         for (index, (_id, child)) in self.children.iter().enumerate() {
-            let _ = child.as_gradio().borrow().map(|radio| {
+            let _ = child.as_gcheckbox().borrow().map(|radio| {
                 if let Some(param) = radio.clicked(&actions) {
-                    if param.active && active_index.is_none() && active_event.is_none() {
-                        active_value.replace(param.value);
-                        active_index = Some(index);
-                        active_event = param.meta;
+                    if param.active && active_indexs.is_none() && active_events.is_none() {
+                        active_values.replace(param.value);
+                        active_indexs = Some(index);
+                        active_events = param.meta;
                     }
                 }
             });
-            if active_index.is_some() {
+            if active_indexs.is_some() {
                 break;
             }
         }
-        if active_index.is_some() && active_value.is_some() {
-            let _ = self.set_active(cx, active_value.clone());
+        if active_indexs.is_some() && active_values.is_some() {
+            let _ = self.set_active(cx, active_values.clone());
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
-                RadioGroupEvent::Changed(RadioChanged {
-                    meta: active_event,
-                    value: active_value,
-                    index: active_index.unwrap() as i32,
+                CheckboxGroupEvent::Changed(CheckboxChanged {
+                    meta: active_events,
+                    values: active_values,
+                    indexs: active_indexs.unwrap() as i32,
                 }),
             );
         }
     }
 }
 
-impl LiveHook for GRadioGroup {
+impl LiveHook for GCheckboxGroup {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
         if let Some(active) = self.active.as_ref() {
@@ -138,7 +138,7 @@ impl LiveHook for GRadioGroup {
     }
 }
 
-impl GRadioGroup {
+impl GCheckboxGroup {
     pub fn find_active(&mut self) -> () {
         if self.active.is_some() {
             return;
@@ -149,7 +149,7 @@ impl GRadioGroup {
             .iter()
             .enumerate()
             .for_each(|(index, (_id, child))| {
-                if let Some(mut child) = child.as_gradio().borrow_mut() {
+                if let Some(mut child) = child.as_gcheckbox().borrow_mut() {
                     // 判断radio的value是否为空，如果是就按照iter的index设置
                     if child.value.is_empty() {
                         child.value = index.to_string();
@@ -158,12 +158,12 @@ impl GRadioGroup {
                         active_value.replace(child.value.to_string());
                     } else if child.active && active_value.is_some() {
                         panic!(
-                            "GRadioGroup can only have one active GRadio, but found multiple: {}",
+                            "GCheckboxGroup can only have one active GCheckbox, but found multiple: {}",
                             child.value
                         );
                     }
                 } else {
-                    panic!("GRadioGroup only allows GRadio as child!");
+                    panic!("GCheckboxGroup only allows GCheckbox as child!");
                 }
             });
 
@@ -180,14 +180,14 @@ impl GRadioGroup {
             .iter()
             .enumerate()
             .for_each(|(index, (_id, child))| {
-                if let Some(mut child) = child.as_gradio().borrow_mut() {
+                if let Some(mut child) = child.as_gcheckbox().borrow_mut() {
                     if child.value.is_empty() {
                         child.value = index.to_string();
                     }
                     let active = child.value.eq(self.active.as_ref().unwrap());
                     child.toggle(cx, active);
                 } else {
-                    panic!("GRadioGroup only allows GRadio as child!")
+                    panic!("GCheckboxGroup only allows GCheckbox as child!")
                 }
             });
     }
