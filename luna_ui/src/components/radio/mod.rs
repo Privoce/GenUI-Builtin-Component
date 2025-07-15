@@ -8,15 +8,23 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, components::{
+    active_event, animation_open_then_redraw,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
-    }, error::Error, event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
+    },
+    error::Error,
+    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::{draw_radio::DrawRadio, draw_view::DrawView}, themes::Conf, visible, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::{draw_radio::DrawRadio, draw_view::DrawView},
+    themes::Conf,
+    visible, ComponentAnInit,
 };
 
 live_design! {
@@ -602,6 +610,11 @@ impl GRadio {
     }
     pub fn toggle(&mut self, cx: &mut Cx, active: bool) -> () {
         self.active = active;
+        if active {
+            self.play_animation(cx, id!(hover.active));
+        } else {
+            self.play_animation(cx, id!(hover.off));
+        }
         self.active_clicked(cx, None);
     }
 }

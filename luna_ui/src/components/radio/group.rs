@@ -1,6 +1,6 @@
 use super::event::{RadioChanged, RadioGroupEvent};
 use crate::{
-    components::{radio::GRadioWidgetRefExt, view::GView},
+    components::{radio::GRadioWidgetRefExt, traits::Component, view::GView},
     visible,
 };
 use makepad_widgets::*;
@@ -139,45 +139,56 @@ impl LiveHook for GRadioGroup {
 }
 
 impl GRadioGroup {
-    pub fn find_active(&self) -> () {
+    pub fn find_active(&mut self) -> () {
         if self.active.is_some() {
             return;
         }
 
-        let mut is_active = false;
         let mut active_value = None;
-        self.children.iter().for_each(|(_id, child)| {
-            if let Some(child) = child.as_gradio().borrow() {
-                if child.active && !is_active {
-                    is_active = true;
-                    active_value.replace(child.value.to_string());
-                } else if child.active && is_active {
-                    panic!(
-                        "GRadioGroup can only have one active GRadio, but found multiple: {}",
-                        child.value
-                    );
+        self.children
+            .iter()
+            .enumerate()
+            .for_each(|(index, (_id, child))| {
+                if let Some(mut child) = child.as_gradio().borrow_mut() {
+                    // 判断radio的value是否为空，如果是就按照iter的index设置
+                    if child.value.is_empty() {
+                        child.value = index.to_string();
+                    }
+                    if child.active && active_value.is_none() {
+                        active_value.replace(child.value.to_string());
+                    } else if child.active && active_value.is_some() {
+                        panic!(
+                            "GRadioGroup can only have one active GRadio, but found multiple: {}",
+                            child.value
+                        );
+                    }
+                } else {
+                    panic!("GRadioGroup only allows GRadio as child!");
                 }
-            } else {
-                panic!("GRadioGroup only allows GRadio as child!");
-            }
-        });
+            });
+
+        if let Some(active_value) = active_value {
+            self.active.replace(active_value);
+        }
     }
     /// if active is not set(None) in the group: find the active radio in the group
     /// else: set the active radio depending on the value of `active`
     pub fn set_active(&mut self, cx: &mut Cx, active_value: Option<String>) -> () {
         self.active = active_value;
 
-        self.children.iter().for_each(|(_id, child)| {
-            if let Some(mut child) = child.as_gradio().borrow_mut() {
-                if child.value.eq(self.active.as_ref().unwrap()) {
-                    child.active = true;
+        self.children
+            .iter()
+            .enumerate()
+            .for_each(|(index, (_id, child))| {
+                if let Some(mut child) = child.as_gradio().borrow_mut() {
+                    if child.value.is_empty() {
+                        child.value = index.to_string();
+                    }
+                    let active = child.value.eq(self.active.as_ref().unwrap());
+                    child.toggle(cx, active);
                 } else {
-                    child.active = false;
+                    panic!("GRadioGroup only allows GRadio as child!")
                 }
-                child.redraw(cx);
-            } else {
-                panic!("GRadioGroup only allows GRadio as child!")
-            }
-        });
+            });
     }
 }
