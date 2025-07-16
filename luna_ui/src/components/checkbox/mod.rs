@@ -15,7 +15,7 @@ use crate::{
         view::{GView, ViewBasicProp},
     },
     error::Error,
-    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    event_option,  lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
@@ -41,7 +41,7 @@ live_design! {
                     ease: InOutQuad,
                     apply: {
                         draw_container: <AN_DRAW_VIEW> {},
-                        draw_checkbox: <AN_DRAW_RADIO> {}
+                        draw_checkbox: <AN_DRAW_CHECKBOX> {}
                     }
                 }
 
@@ -53,7 +53,7 @@ live_design! {
                     },
                     apply: {
                        draw_container: <AN_DRAW_VIEW> {},
-                       draw_checkbox: <AN_DRAW_RADIO> {}
+                       draw_checkbox: <AN_DRAW_CHECKBOX> {}
                     }
                 }
 
@@ -62,7 +62,7 @@ live_design! {
                     ease: InOutQuad,
                     apply: {
                         draw_container: <AN_DRAW_VIEW> {},
-                        draw_checkbox: <AN_DRAW_RADIO> {}
+                        draw_checkbox: <AN_DRAW_CHECKBOX> {}
                     }
                 }
             }
@@ -229,13 +229,19 @@ impl LiveHook for GCheckbox {
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
-                    component.apply_slot_map.insert(CheckboxState::Basic, applys);
+                    component
+                        .apply_slot_map
+                        .insert(CheckboxState::Basic, applys);
                 }
                 HOVER => {
-                    component.apply_slot_map.insert(CheckboxState::Hover, applys);
+                    component
+                        .apply_slot_map
+                        .insert(CheckboxState::Hover, applys);
                 }
                 ACTIVE => {
-                    component.apply_slot_map.insert(CheckboxState::Active, applys);
+                    component
+                        .apply_slot_map
+                        .insert(CheckboxState::Active, applys);
                 }
                 DISABLED => {
                     component
@@ -296,39 +302,49 @@ impl Component for GCheckbox {
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
         animation_open_then_redraw!(self, cx, event);
-        if !self.active {
-            match hit {
-                Hit::FingerDown(_) => {
-                    if self.grab_key_focus {
-                        cx.set_key_focus(area);
-                    }
+        match hit {
+            Hit::FingerDown(_) => {
+                if self.grab_key_focus {
+                    cx.set_key_focus(area);
                 }
-                Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+            }
+            Hit::FingerHoverIn(e) => {
+                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                if !self.active {
                     self.switch_state_with_animation(cx, CheckboxState::Hover);
-                    hit_hover_in!(self, cx, e);
+                    self.play_animation(cx, id!(hover.on));
                 }
-                Hit::FingerHoverOut(e) => {
+                self.active_hover_in(cx, e);
+            }
+            Hit::FingerHoverOut(e) => {
+                if !self.active {
                     self.switch_state_with_animation(cx, CheckboxState::Basic);
-                    hit_hover_out!(self, cx, e);
+                    self.play_animation(cx, id!(hover.off));
                 }
-                Hit::FingerUp(e) => {
-                    if e.is_over {
-                        if e.has_hovers() {
-                            self.active = true;
-                            self.switch_state_with_animation(cx, CheckboxState::Active);
-                            self.play_animation(cx, id!(hover.active));
+                self.active_hover_out(cx, e);
+            }
+            Hit::FingerUp(e) => {
+                if e.is_over {
+                    if e.has_hovers() {
+                        let (state_an, state) = if self.animator_in_state(cx, id!(hover.active)) {
+                            self.active = false;
+                            (id!(hover.off), CheckboxState::Basic)
                         } else {
-                            self.switch_state_with_animation(cx, CheckboxState::Basic);
-                            self.play_animation(cx, id!(hover.off));
-                        }
-                        self.active_clicked(cx, Some(e));
+                            self.active = true;
+                            (id!(hover.active), CheckboxState::Active)
+                        };
+                        self.switch_state_with_animation(cx, state);
+                        self.play_animation(cx, state_an);
                     } else {
                         self.switch_state_with_animation(cx, CheckboxState::Basic);
+                        self.play_animation(cx, id!(hover.off));
                     }
+                    self.active_clicked(cx, Some(e));
+                } else {
+                    self.switch_state_with_animation(cx, CheckboxState::Basic);
                 }
-                _ => {}
             }
+            _ => {}
         }
     }
 
@@ -372,7 +388,8 @@ impl Component for GCheckbox {
             return;
         }
         self.switch_state(state);
-        self.draw_checkbox.apply_type(self.prop.get(state).radio.mode);
+        self.draw_checkbox
+            .apply_type(self.prop.get(state).radio.mode);
         self.set_animation(cx);
     }
 

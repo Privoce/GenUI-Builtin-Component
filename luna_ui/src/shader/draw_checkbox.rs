@@ -14,7 +14,6 @@ live_design! {
             // draw background circle
             let center = vec2(self.rect_size.x * 0.5, self.rect_size.y * 0.5);
             let r = self.rect_size.x * 0.5 - self.border_width * 0.5;
-            // sdf.circle(center.x, center.y, r);
             sdf.box(
                 self.pos.x,
                 self.pos.y,
@@ -30,8 +29,13 @@ live_design! {
             // draw inner
             match self.mode {
                 ActiveMode::Round => {
-                    // draw a circle with 1/4 rect_size.x
-                    sdf.circle(center.x, center.y, self.rect_size.x * 0.25);
+                    sdf.box(
+                        center.x - self.rect_size.x * 0.25,
+                        center.y - self.rect_size.y * 0.25,
+                        self.rect_size.x * 0.5,
+                        self.rect_size.y * 0.5,
+                        self.rect_size.x * 0.5 * 0.125
+                    );
                     sdf.fill(self.stroke_color);
                 }
                 ActiveMode::Tick => {

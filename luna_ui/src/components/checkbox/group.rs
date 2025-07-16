@@ -70,35 +70,35 @@ impl Widget for GCheckboxGroup {
         };
         let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
 
-        let mut active_indexs = None;
-        let mut active_values = None;
-        let mut active_events = None;
-        for (index, (_id, child)) in self.children.iter().enumerate() {
-            let _ = child.as_gcheckbox().borrow().map(|radio| {
-                if let Some(param) = radio.clicked(&actions) {
-                    if param.active && active_indexs.is_none() && active_events.is_none() {
-                        active_values.replace(param.value);
-                        active_indexs = Some(index);
-                        active_events = param.meta;
-                    }
-                }
-            });
-            if active_indexs.is_some() {
-                break;
-            }
-        }
-        if active_indexs.is_some() && active_values.is_some() {
-            let _ = self.set_active(cx, active_values.clone());
-            cx.widget_action(
-                self.widget_uid(),
-                &scope.path,
-                CheckboxGroupEvent::Changed(CheckboxChanged {
-                    meta: active_events,
-                    values: active_values,
-                    indexs: active_indexs.unwrap() as i32,
-                }),
-            );
-        }
+        // let mut active_indexs = None;
+        // let mut active_values = None;
+        // let mut active_events = None;
+        // for (index, (_id, child)) in self.children.iter().enumerate() {
+        //     let _ = child.as_gcheckbox().borrow().map(|radio| {
+        //         if let Some(param) = radio.clicked(&actions) {
+        //             if param.active && active_indexs.is_none() && active_events.is_none() {
+        //                 active_values.replace(param.value);
+        //                 active_indexs = Some(index);
+        //                 active_events = param.meta;
+        //             }
+        //         }
+        //     });
+        //     if active_indexs.is_some() {
+        //         break;
+        //     }
+        // }
+        // if active_indexs.is_some() && active_values.is_some() {
+        //     let _ = self.set_active(cx, active_values.clone());
+        //     cx.widget_action(
+        //         self.widget_uid(),
+        //         &scope.path,
+        //         CheckboxGroupEvent::Changed(CheckboxChanged {
+        //             meta: active_events,
+        //             values: active_values,
+        //             indexs: active_indexs.unwrap() as i32,
+        //         }),
+        //     );
+        // }
     }
 }
 

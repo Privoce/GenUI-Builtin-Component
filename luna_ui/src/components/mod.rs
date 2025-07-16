@@ -74,6 +74,16 @@ live_design! {
         }
     }
     pub GRadioGroup = <GRadioGroupBase> {}
+
+    pub GCheckbox = <GCheckboxBase> {
+        extra: <GView> {
+            <GLabel> {
+                text: "Extra",
+            }
+        }
+    }
+
+    pub GCheckboxGroup = <GCheckboxGroupBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -83,6 +93,8 @@ pub fn components_register(cx: &mut Cx) {
     card::live_design(cx);
     radio::live_design(cx);
     radio::group::live_design(cx);
+    checkbox::live_design(cx);
+    checkbox::group::live_design(cx);
 }
 
 component! {

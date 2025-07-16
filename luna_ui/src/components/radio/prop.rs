@@ -243,6 +243,7 @@ impl RadioBasicProp {
         container.set_flow(Flow::Right);
         container.set_background_visible(false);
         container.set_align(Align::from_f64(0.5));
+        container.set_cursor(MouseCursor::Hand);
         container
     }
     pub fn default_extra(theme: Theme, state: RadioState) -> ViewBasicProp {

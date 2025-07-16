@@ -158,7 +158,7 @@ live_design! {
                             }
                         }
                     }
-
+                    <GCheckbox>{}
                 }
             }
         }
