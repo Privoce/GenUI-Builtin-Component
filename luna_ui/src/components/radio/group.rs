@@ -1,6 +1,6 @@
 use super::event::{RadioChanged, RadioGroupEvent};
 use crate::{
-    components::{radio::GRadioWidgetRefExt, view::GView},
+    components::{radio::GRadioWidgetRefExt, traits::Component, view::GView},
     visible,
 };
 use makepad_widgets::*;
@@ -88,7 +88,7 @@ impl Widget for GRadioGroup {
             }
         }
         if active_index.is_some() && active_value.is_some() {
-            let _ = self.set_active(cx, active_value.clone());
+            let _ = self.toggle(cx, active_value.clone(), false);
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
@@ -174,6 +174,9 @@ impl GRadioGroup {
     /// if active is not set(None) in the group: find the active radio in the group
     /// else: set the active radio depending on the value of `active`
     pub fn set_active(&mut self, cx: &mut Cx, active_value: Option<String>) -> () {
+       self.toggle(cx, active_value, true);
+    }
+    pub fn toggle(&mut self, cx: &mut Cx, active_value: Option<String>, init: bool) -> () {
         self.active = active_value;
 
         self.children
@@ -185,7 +188,7 @@ impl GRadioGroup {
                         child.value = index.to_string();
                     }
                     let active = child.value.eq(self.active.as_ref().unwrap());
-                    child.toggle(cx, active);
+                    child.toggle(cx, active, init);
                 } else {
                     panic!("GRadioGroup only allows GRadio as child!")
                 }

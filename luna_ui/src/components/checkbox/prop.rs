@@ -9,8 +9,8 @@ use crate::{
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, RADIO, SIZE,
-            STROKE_COLOR, THEME,
+            BORDER_WIDTH, CHECKBOX, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE,
+            SIZE, STROKE_COLOR, THEME,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
@@ -58,7 +58,11 @@ impl SlotProp for CheckboxProp {
                 (CheckboxState::Active, &mut self.active),
                 (CheckboxState::Disabled, &mut self.disabled),
             ],
-            [CheckboxPart::Container, CheckboxPart::Checkbox, CheckboxPart::Extra],
+            [
+                CheckboxPart::Container,
+                CheckboxPart::Checkbox,
+                CheckboxPart::Extra,
+            ],
         );
     }
 }
@@ -104,7 +108,7 @@ try_from_toml_item! {
         hover => HOVER, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
         active => ACTIVE, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active),|v| (v, CheckboxState::Active).try_into(),
         disabled => DISABLED, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled),|v| (v, CheckboxState::Disabled).try_into()
-    }, "[component.radio] should be a table"
+    }, "[component.checkbox] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -112,8 +116,8 @@ try_from_toml_item! {
 pub struct CheckboxBasicProp {
     #[live(Self::default_container(Theme::default(), CheckboxState::Basic))]
     pub container: ViewBasicProp,
-    #[live(Self::default_radio(Theme::default(), CheckboxState::Basic))]
-    pub radio: CheckboxPartProp,
+    #[live(Self::default_checkbox(Theme::default(), CheckboxState::Basic))]
+    pub checkbox: CheckboxPartProp,
     #[live(Self::default_extra(Theme::default(), CheckboxState::Basic))]
     pub extra: ViewBasicProp,
 }
@@ -136,7 +140,7 @@ impl SlotBasicProp for CheckboxBasicProp {
     ) -> () {
         match part {
             CheckboxPart::Container => self.container.set_from_str(key, value, state.into()),
-            CheckboxPart::Checkbox => self.radio.set_from_str(key, value, state),
+            CheckboxPart::Checkbox => self.checkbox.set_from_str(key, value, state),
             CheckboxPart::Extra => self.extra.set_from_str(key, value, state.into()),
         }
     }
@@ -144,7 +148,7 @@ impl SlotBasicProp for CheckboxBasicProp {
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
         match part {
             CheckboxPart::Container => self.container.sync(state.into()),
-            CheckboxPart::Checkbox => self.radio.sync(state),
+            CheckboxPart::Checkbox => self.checkbox.sync(state),
             CheckboxPart::Extra => self.extra.sync(state.into()),
         }
     }
@@ -158,7 +162,7 @@ impl BasicProp for CheckboxBasicProp {
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
             container: Self::default_container(theme, state),
-            radio: Self::default_radio(theme, state),
+            checkbox: Self::default_checkbox(theme, state),
             extra: Self::default_extra(theme, state),
         }
     }
@@ -182,7 +186,7 @@ impl BasicProp for CheckboxBasicProp {
 
     fn sync(&mut self, state: Self::State) -> () {
         self.container.sync(state.into());
-        self.radio.sync(state);
+        self.checkbox.sync(state);
         self.extra.sync(state.into());
     }
 
@@ -206,7 +210,7 @@ impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicProp {
 
     fn try_from((value, state): (&Item, CheckboxState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.radio.$part] should be an inline table".to_string(),
+            "[component.checkbox.$part] should be an inline table".to_string(),
         ))?;
         let container = get_from_itable(
             inline_table,
@@ -214,10 +218,10 @@ impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicProp {
             || Ok(Self::default_container(Theme::default(), state)),
             |v| (v, state.into()).try_into(),
         )?;
-        let radio = get_from_itable(
+        let checkbox = get_from_itable(
             inline_table,
-            RADIO,
-            || Ok(Self::default_radio(Theme::default(), state)),
+            CHECKBOX,
+            || Ok(Self::default_checkbox(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
         let extra = get_from_itable(
@@ -229,7 +233,7 @@ impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicProp {
 
         Ok(Self {
             container,
-            radio,
+            checkbox,
             extra,
         })
     }
@@ -250,7 +254,7 @@ impl CheckboxBasicProp {
         Self::default_container(theme, state)
     }
 
-    pub fn default_radio(theme: Theme, state: CheckboxState) -> CheckboxPartProp {
+    pub fn default_checkbox(theme: Theme, state: CheckboxState) -> CheckboxPartProp {
         CheckboxPartProp::from_state(theme, state)
     }
 }
@@ -287,7 +291,7 @@ impl TryFrom<(&Value, CheckboxState)> for CheckboxPartProp {
 
     fn try_from((value, state): (&Value, CheckboxState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.radio.radio] should be an inline table".to_string(),
+            "[component.checkbox.checkbox] should be an inline table".to_string(),
         ))?;
 
         let theme = Theme::default();
@@ -557,7 +561,9 @@ impl ComponentState for CheckboxState {
 impl From<CheckboxState> for LabelState {
     fn from(value: CheckboxState) -> Self {
         match value {
-            CheckboxState::Basic | CheckboxState::Hover | CheckboxState::Active => LabelState::Basic,
+            CheckboxState::Basic | CheckboxState::Hover | CheckboxState::Active => {
+                LabelState::Basic
+            }
 
             CheckboxState::Disabled => LabelState::Disabled,
         }
@@ -597,7 +603,7 @@ impl Part for CheckboxPart {
     fn to_live_id(&self) -> LiveId {
         match self {
             CheckboxPart::Container => live_id!(container),
-            CheckboxPart::Checkbox => live_id!(radio),
+            CheckboxPart::Checkbox => live_id!(checkbox),
             CheckboxPart::Extra => live_id!(extra),
         }
     }

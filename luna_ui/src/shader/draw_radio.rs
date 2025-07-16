@@ -13,7 +13,7 @@ live_design! {
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);
             // draw background circle
             let center = vec2(self.rect_size.x * 0.5, self.rect_size.y * 0.5);
-            let r = self.rect_size.x * 0.5 - self.border_width * 0.5;
+            let r = self.rect_size.x * 0.5 - self.border_width;
             sdf.circle(center.x, center.y, r);
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);

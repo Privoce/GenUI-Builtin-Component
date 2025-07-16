@@ -31,4 +31,5 @@ pub struct ComponentAnInit{
     view: bool,
     card: bool,
     radio: bool,
+    checkbox: bool,
 }

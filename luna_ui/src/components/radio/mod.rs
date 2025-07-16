@@ -608,13 +608,21 @@ impl GRadio {
         hover_out: RadioEvent::HoverOut => RadioHoverOut,
         clicked: RadioEvent::Clicked => RadioClicked
     }
-    pub fn toggle(&mut self, cx: &mut Cx, active: bool) -> () {
+    pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
         self.active = active;
-        if active {
-            self.play_animation(cx, id!(hover.active));
-        } else {
-            self.play_animation(cx, id!(hover.off));
+
+        let (state, hover_id) = match (active, init) {
+            (true, false) => (RadioState::Active, Some(id!(hover.active))),
+            (true, true) => (RadioState::Active, None),
+            (false, true) => (RadioState::Basic, None),
+            (false, false) => (RadioState::Basic, Some(id!(hover.off))),
+        };
+        self.switch_state(state);
+        if let Some(hover_id) = hover_id {
+            self.play_animation(cx, hover_id);
         }
+
         self.active_clicked(cx, None);
+        // self.redraw(cx);
     }
 }

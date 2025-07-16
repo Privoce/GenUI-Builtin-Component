@@ -118,6 +118,7 @@ live_design! {
                 //     }
                 //    <GCard>{}
                     <GRadioGroup> {
+                        active: "2",
                         <GRadio> {
                             prop: {
                                 basic: {
@@ -150,7 +151,7 @@ live_design! {
 
                                     }
                                 }
-                            }
+                            },
                             extra: {
                                  <GLabel> {
                                     text: "Radio Tick"
@@ -158,7 +159,42 @@ live_design! {
                             }
                         }
                     }
-                    <GCheckbox>{}
+
+                    <GCheckboxGroup>{ 
+                        // active: ["coffee", "milk"],
+                        <GCheckbox>{
+                            prop: {
+                                basic: {
+                                    checkbox: {
+                                        theme: Warning,
+                                        mode: Cross,
+                                    }
+                                }
+                            },
+                            value: "coffee",
+                            extra: {
+                                <GLabel>{
+                                    text: "coffee"
+                                }
+                            }
+                        }
+                        <GCheckbox>{
+                            value: "tea",
+                            extra: {
+                                <GLabel>{
+                                    text: "tea"
+                                }
+                            }
+                        }
+                        <GCheckbox>{
+                            value: "milk",
+                            extra: {
+                                <GLabel>{
+                                    text: "milk"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

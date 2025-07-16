@@ -33,9 +33,9 @@ pub enum CheckboxGroupEvent {
 
 #[derive(Clone, Debug)]
 pub struct CheckboxChanged {
-    pub meta: Option<Vec<FingerUpEvent>>,
-    /// The indexs of the active checkbox
-    pub indexs: Vec<i32>,
-    /// The values of the active checkbox.
-    pub values: Vec<String>,
+    pub meta: Option<FingerUpEvent>,
+    /// The index of the active checkbox
+    pub index: Vec<i32>,
+    /// The value of the active checkbox.
+    pub value: Vec<String>,
 }

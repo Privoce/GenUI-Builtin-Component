@@ -17,8 +17,8 @@ live_design! {
             sdf.box(
                 self.pos.x,
                 self.pos.y,
-                self.rect_size.x,
-                self.rect_size.y,
+                self.rect_size.x - self.border_width * 2,
+                self.rect_size.y - self.border_width * 2,
                 self.size * 0.125
             );
             if self.background_visible == 1.0 {

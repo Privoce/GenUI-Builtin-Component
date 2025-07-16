@@ -113,10 +113,10 @@ pub struct GCheckbox {
     #[live(true)]
     pub sync: bool,
     // --- value -------------------
-    // is radio active? if is true, it can not be changed by user
+    // is checkbox active? if is true, it can not be changed by user
     #[live]
     pub active: bool,
-    // specific value of the radio, can be used to identify the radio
+    // specific value of the checkbox, can be used to identify the checkbox
     #[live]
     pub value: String,
 }
@@ -170,7 +170,7 @@ impl Widget for GCheckbox {
             self.draw_container
                 .begin(cx, prop.container.walk(), prop.container.layout());
             self.draw_checkbox
-                .begin(cx, prop.radio.walk(), prop.radio.layout());
+                .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
             self.draw_checkbox.end(cx);
             if self.extra.visible {
                 self.extra.disabled = self.disabled;
@@ -193,7 +193,7 @@ impl Widget for GCheckbox {
             return;
         }
         self.set_animation(cx);
-        cx.global::<ComponentAnInit>().radio = true;
+        cx.global::<ComponentAnInit>().checkbox = true;
         let area = self.area();
         let hit = event.hits(cx, area);
         if self.disabled {
@@ -275,7 +275,7 @@ impl Component for GCheckbox {
         let state = self.current_state();
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
-        self.draw_checkbox.merge(&prop.radio);
+        self.draw_checkbox.merge(&prop.checkbox);
         let _ = self.extra.render(cx)?;
         if self.active {
             self.switch_state(CheckboxState::Active);
@@ -389,7 +389,7 @@ impl Component for GCheckbox {
         }
         self.switch_state(state);
         self.draw_checkbox
-            .apply_type(self.prop.get(state).radio.mode);
+            .apply_type(self.prop.get(state).checkbox.mode);
         self.set_animation(cx);
     }
 
@@ -412,7 +412,7 @@ impl Component for GCheckbox {
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
-        let init_global = cx.global::<ComponentAnInit>().radio;
+        let init_global = cx.global::<ComponentAnInit>().checkbox;
         let live_ptr = match self.animator.live_ptr {
             Some(ptr) => ptr.file_id.0,
             None => return,
@@ -505,31 +505,31 @@ impl Component for GCheckbox {
             set_animation! {
                 nodes: draw_checkbox = {
                     basic_index => {
-                        background_color => basic_prop.radio.background_color,
-                        background_visible => basic_prop.radio.background_visible.to_f64(),
-                        border_color => basic_prop.radio.border_color,
-                        border_width => (basic_prop.radio.border_width as f64),
-                        size => (basic_prop.radio.size as f64),
-                        mode => basic_prop.radio.mode,
-                        stroke_color => basic_prop.radio.stroke_color
+                        background_color => basic_prop.checkbox.background_color,
+                        background_visible => basic_prop.checkbox.background_visible.to_f64(),
+                        border_color => basic_prop.checkbox.border_color,
+                        border_width => (basic_prop.checkbox.border_width as f64),
+                        size => (basic_prop.checkbox.size as f64),
+                        mode => basic_prop.checkbox.mode,
+                        stroke_color => basic_prop.checkbox.stroke_color
                     },
                     hover_index => {
-                        background_color => hover_prop.radio.background_color,
-                        background_visible => hover_prop.radio.background_visible.to_f64(),
-                        border_color => hover_prop.radio.border_color,
-                        border_width => (hover_prop.radio.border_width as f64),
-                        size => (hover_prop.radio.size as f64),
-                        mode => hover_prop.radio.mode,
-                        stroke_color => hover_prop.radio.stroke_color
+                        background_color => hover_prop.checkbox.background_color,
+                        background_visible => hover_prop.checkbox.background_visible.to_f64(),
+                        border_color => hover_prop.checkbox.border_color,
+                        border_width => (hover_prop.checkbox.border_width as f64),
+                        size => (hover_prop.checkbox.size as f64),
+                        mode => hover_prop.checkbox.mode,
+                        stroke_color => hover_prop.checkbox.stroke_color
                     },
                     active_index => {
-                        background_color => active_prop.radio.background_color,
-                        background_visible => active_prop.radio.background_visible.to_f64(),
-                        border_color => active_prop.radio.border_color,
-                        border_width => (active_prop.radio.border_width as f64),
-                        size => (active_prop.radio.size as f64),
-                        mode => active_prop.radio.mode,
-                        stroke_color => active_prop.radio.stroke_color
+                        background_color => active_prop.checkbox.background_color,
+                        background_visible => active_prop.checkbox.background_visible.to_f64(),
+                        border_color => active_prop.checkbox.border_color,
+                        border_width => (active_prop.checkbox.border_width as f64),
+                        size => (active_prop.checkbox.size as f64),
+                        mode => active_prop.checkbox.mode,
+                        stroke_color => active_prop.checkbox.stroke_color
                     }
                 }
             }
@@ -581,13 +581,13 @@ impl Component for GCheckbox {
             set_animation! {
                 nodes: draw_checkbox = {
                     index => {
-                        background_color => prop.radio.background_color,
-                        background_visible => prop.radio.background_visible.to_f64(),
-                        border_color => prop.radio.border_color,
-                        border_width => (prop.radio.border_width as f64),
-                        size => (prop.radio.size as f64),
-                        mode => prop.radio.mode,
-                        stroke_color => prop.radio.stroke_color
+                        background_color => prop.checkbox.background_color,
+                        background_visible => prop.checkbox.background_visible.to_f64(),
+                        border_color => prop.checkbox.border_color,
+                        border_width => (prop.checkbox.border_width as f64),
+                        size => (prop.checkbox.size as f64),
+                        mode => prop.checkbox.mode,
+                        stroke_color => prop.checkbox.stroke_color
                     }
                 }
             }
