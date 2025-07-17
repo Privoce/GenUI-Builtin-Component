@@ -15,7 +15,7 @@ use crate::{
         view::{GView, ViewBasicProp},
     },
     error::Error,
-    event_option,  lifecycle, play_animation,
+    event_option, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
@@ -276,9 +276,13 @@ impl Component for GCheckbox {
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
         self.draw_checkbox.merge(&prop.checkbox);
+
         let _ = self.extra.render(cx)?;
         if self.active {
+            self.draw_checkbox.active = 1.0;
             self.switch_state(CheckboxState::Active);
+        } else {
+            self.draw_checkbox.active = 0.0;
         }
         Ok(())
     }
@@ -326,13 +330,12 @@ impl Component for GCheckbox {
             Hit::FingerUp(e) => {
                 if e.is_over {
                     if e.has_hovers() {
-                        let (state_an, state) = if self.animator_in_state(cx, id!(hover.active)) {
-                            self.active = false;
+                        let (state_an, state) = if self.active {
                             (id!(hover.off), CheckboxState::Basic)
                         } else {
-                            self.active = true;
                             (id!(hover.active), CheckboxState::Active)
                         };
+                        self.active = !self.active;
                         self.switch_state_with_animation(cx, state);
                         self.play_animation(cx, state_an);
                     } else {
@@ -625,12 +628,17 @@ impl GCheckbox {
         hover_out: CheckboxEvent::HoverOut => CheckboxHoverOut,
         clicked: CheckboxEvent::Clicked => CheckboxClicked
     }
-    pub fn toggle(&mut self, cx: &mut Cx, active: bool) -> () {
+    pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
         self.active = active;
-        if active {
-            self.play_animation(cx, id!(hover.active));
-        } else {
-            self.play_animation(cx, id!(hover.off));
+        let (state, hover_id) = match (active, init) {
+            (true, false) => (CheckboxState::Active, Some(id!(hover.active))),
+            (true, true) => (CheckboxState::Active, None),
+            (false, true) => (CheckboxState::Basic, None),
+            (false, false) => (CheckboxState::Basic, Some(id!(hover.off))),
+        };
+        self.switch_state(state);
+        if let Some(hover_id) = hover_id {
+            self.play_animation(cx, hover_id);
         }
         self.active_clicked(cx, None);
     }

@@ -161,7 +161,7 @@ live_design! {
                     }
 
                     <GCheckboxGroup>{ 
-                        // active: ["coffee", "milk"],
+                        active: ["coffee", "milk"],
                         <GCheckbox>{
                             prop: {
                                 basic: {

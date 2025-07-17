@@ -93,7 +93,8 @@ impl Widget for GCheckboxGroup {
         }
 
         if active_event.is_some() {
-            let _ = self.set_active(cx, active_values.as_ref().unwrap().clone());
+            // let _ = self.toggle(cx, active_values.as_ref().unwrap().clone(), false);
+            let _ = self.find_active();
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
@@ -167,6 +168,9 @@ impl GCheckboxGroup {
     /// if active is not set(None) in the group: find the active radio in the group
     /// else: set the active radio depending on the value of `active`
     pub fn set_active(&mut self, cx: &mut Cx, active: Vec<String>) -> () {
+        self.toggle(cx, active, true);
+    }
+    pub fn toggle(&mut self, cx: &mut Cx, active: Vec<String>, init: bool) -> () {
         self.active = active;
 
         self.children
@@ -178,7 +182,7 @@ impl GCheckboxGroup {
                         child.value = index.to_string();
                     }
                     let active = self.active.contains(&child.value);
-                    child.toggle(cx, active);
+                    child.toggle(cx, active, init);
                 } else {
                     panic!("GCheckboxGroup only allows GCheckbox as child!")
                 }

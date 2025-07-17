@@ -1,6 +1,6 @@
 use super::event::{RadioChanged, RadioGroupEvent};
 use crate::{
-    components::{radio::GRadioWidgetRefExt, traits::Component, view::GView},
+    components::{radio::GRadioWidgetRefExt, view::GView},
     visible,
 };
 use makepad_widgets::*;
