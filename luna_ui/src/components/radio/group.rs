@@ -6,7 +6,7 @@ use crate::{
 use makepad_widgets::*;
 
 live_design! {
-    link luna_basic;
+    link genui_basic;
 
     pub GRadioGroupBase = {{GRadioGroup}} {
         prop: {

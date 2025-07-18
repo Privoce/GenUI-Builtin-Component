@@ -28,8 +28,8 @@ use crate::{
 };
 
 live_design! {
-    link luna_basic;
-    use link::luna_animation_prop::*;
+    link genui_basic;
+    use link::genui_animation_prop::*;
 
     pub GRadioBase = {{GRadio}} {
         animator: {

@@ -12,6 +12,18 @@ pub mod radio;
 pub mod switch;
 pub mod tag;
 pub mod view;
+pub mod svg;
+pub mod image;
+pub mod divider;
+pub mod link;
+pub mod loading;
+pub mod collapse;
+pub mod select;
+pub mod popup;
+pub mod popover;
+pub mod dialog;
+pub mod tooltip;
+pub mod drawer;
 
 pub mod lifecycle;
 pub mod traits;
@@ -23,7 +35,7 @@ live_design! {
 
     // use link::luna_theme::*;
     use link::shaders::*;
-    use link::luna_basic::*;
+    use link::genui_basic::*;
     use link::theme::*;
 
     pub GLabel = <GLabelBase>{}

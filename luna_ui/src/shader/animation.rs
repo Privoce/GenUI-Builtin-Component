@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    link luna_animation_prop;
+    link genui_animation_prop;
 
     pub AN_DURATION = 0.25, // default animation duration
 

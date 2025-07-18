@@ -23,7 +23,7 @@ pub use prop::*;
 use super::traits::Component;
 
 live_design! {
-    link luna_basic;
+    link genui_basic;
     use link::theme::*;
     pub GLabelBase = {{GLabel}} {
         font_regular: <THEME_FONT_REGULAR>{}
