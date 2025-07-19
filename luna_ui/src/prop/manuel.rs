@@ -44,6 +44,8 @@ pub const PRESSED: &str = "pressed";
 pub const DISABLED: &str = "disabled";
 pub const BASIC: &str = "basic";
 pub const ACTIVE: &str = "active";
+pub const HOVER_BASIC: &str = "hover_basic";
+pub const HOVER_ACTIVE: &str = "hover_active";
 // --- slot ------------------------------------------------------
 pub const SLOT: &str = "slot";
 pub const HEADER: &str = "header";
@@ -65,3 +67,4 @@ pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";
 pub const TICK: &str = "Tick";
 pub const CROSS: &str = "Cross";
+pub const RECT: &str = "Rect";

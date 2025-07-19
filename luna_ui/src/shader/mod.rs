@@ -2,6 +2,7 @@ pub mod animation;
 pub mod draw_checkbox;
 pub mod draw_radio;
 pub mod draw_view;
+pub mod draw_switch;
 
 use makepad_widgets::Cx;
 

@@ -1,34 +1,36 @@
 use crate::{
     component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        label::LabelState,
+        traits::{BasicProp, ComponentState, Part, Prop},
+        view::ViewState,
     },
     error::Error,
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_WIDTH, CHECKBOX, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE,
-            SIZE, STROKE_COLOR, THEME,
+            BORDER_WIDTH, CURSOR, DISABLED, HOVER, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE,
+            STROKE_COLOR, THEME,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
-        ActiveMode, ApplySlotMapImpl,
+        ApplyStateMapImpl,
     },
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable,
 };
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::Item;
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct SwitchProp {
     #[live(SwitchBasicProp::default())]
     pub basic: SwitchBasicProp,
-    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::Hover))]
-    pub hover: SwitchBasicProp,
+    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic))]
+    pub hover_basic: SwitchBasicProp,
+    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive))]
+    pub hover_active: SwitchBasicProp,
     #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::Active))]
     pub active: SwitchBasicProp,
     #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled))]
@@ -39,31 +41,11 @@ impl Default for SwitchProp {
     fn default() -> Self {
         Self {
             basic: SwitchBasicProp::default(),
-            hover: SwitchBasicProp::from_state(Theme::default(), SwitchState::Hover),
+            hover_basic: SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),
+            hover_active: SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),
             active: SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),
             disabled: SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),
         }
-    }
-}
-
-impl SlotProp for SwitchProp {
-    type Part = SwitchPart;
-
-    fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
-        map.sync(
-            &mut self.basic,
-            SwitchState::Basic,
-            [
-                (SwitchState::Hover, &mut self.hover),
-                (SwitchState::Active, &mut self.active),
-                (SwitchState::Disabled, &mut self.disabled),
-            ],
-            [
-                SwitchPart::Container,
-                SwitchPart::Switch,
-                SwitchPart::Extra,
-            ],
-        );
     }
 }
 
@@ -75,7 +57,8 @@ impl Prop for SwitchProp {
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
             SwitchState::Basic => &self.basic,
-            SwitchState::Hover => &self.hover,
+            SwitchState::HoverBasic => &self.hover_basic,
+            SwitchState::HoverActive => &self.hover_active,
             SwitchState::Active => &self.active,
             SwitchState::Disabled => &self.disabled,
         }
@@ -84,7 +67,8 @@ impl Prop for SwitchProp {
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
         match state {
             SwitchState::Basic => &mut self.basic,
-            SwitchState::Hover => &mut self.hover,
+            SwitchState::HoverBasic => &mut self.hover_basic,
+            SwitchState::HoverActive => &mut self.hover_active,
             SwitchState::Active => &mut self.active,
             SwitchState::Disabled => &mut self.disabled,
         }
@@ -94,18 +78,28 @@ impl Prop for SwitchProp {
         4 * SwitchBasicProp::len()
     }
 
-    fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
+    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        ()
+        map.sync(
+            &mut self.basic,
+            SwitchState::Basic,
+            [
+                (SwitchState::HoverBasic, &mut self.hover_basic),
+                (SwitchState::HoverActive, &mut self.hover_active),
+                (SwitchState::Active, &mut self.active),
+                (SwitchState::Disabled, &mut self.disabled),
+            ],
+        );
     }
 }
 
 try_from_toml_item! {
     SwitchProp {
         basic => BASIC, SwitchBasicProp::default(),|v| (v, SwitchState::Basic).try_into(),
-        hover => HOVER, SwitchBasicProp::from_state(Theme::default(), SwitchState::Hover),|v| (v, SwitchState::Hover).try_into(),
+        hover_basic => HOVER_BASIC, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),
+        hover_active => HOVER_ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),|v| (v, SwitchState::HoverActive).try_into(),
         active => ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),|v| (v, SwitchState::Active).try_into(),
         disabled => DISABLED, SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),|v| (v, SwitchState::Disabled).try_into()
     }, "[component.checkbox] should be a table"
@@ -114,154 +108,6 @@ try_from_toml_item! {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct SwitchBasicProp {
-    #[live(Self::default_container(Theme::default(), SwitchState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(Self::default_checkbox(Theme::default(), SwitchState::Basic))]
-    pub checkbox: SwitchPartProp,
-    #[live(Self::default_extra(Theme::default(), SwitchState::Basic))]
-    pub extra: ViewBasicProp,
-}
-
-impl Default for SwitchBasicProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), SwitchState::Basic)
-    }
-}
-
-impl SlotBasicProp for SwitchBasicProp {
-    type Part = SwitchPart;
-
-    fn set_from_str_slot(
-        &mut self,
-        key: &str,
-        value: &LiveValue,
-        state: Self::State,
-        part: Self::Part,
-    ) -> () {
-        match part {
-            SwitchPart::Container => self.container.set_from_str(key, value, state.into()),
-            SwitchPart::Switch => self.checkbox.set_from_str(key, value, state),
-            SwitchPart::Extra => self.extra.set_from_str(key, value, state.into()),
-        }
-    }
-
-    fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
-        match part {
-            SwitchPart::Container => self.container.sync(state.into()),
-            SwitchPart::Switch => self.checkbox.sync(state),
-            SwitchPart::Extra => self.extra.sync(state.into()),
-        }
-    }
-}
-
-impl BasicProp for SwitchBasicProp {
-    type State = SwitchState;
-
-    type Colors = (Color, Color, Color);
-
-    fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
-        Self {
-            container: Self::default_container(theme, state),
-            checkbox: Self::default_checkbox(theme, state),
-            extra: Self::default_extra(theme, state),
-        }
-    }
-
-    fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        SwitchPartProp::state_colors(theme, state)
-    }
-
-    fn len() -> usize {
-        3 * (SwitchPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len())
-    }
-
-    fn set_from_str(
-        &mut self,
-        _key: &str,
-        _value: &makepad_widgets::LiveValue,
-        _state: Self::State,
-    ) -> () {
-        ()
-    }
-
-    fn sync(&mut self, state: Self::State) -> () {
-        self.container.sync(state.into());
-        self.checkbox.sync(state);
-        self.extra.sync(state.into());
-    }
-
-    fn live_props() -> Vec<(
-        makepad_widgets::LiveId,
-        Option<Vec<makepad_widgets::LiveId>>,
-    )> {
-        vec![]
-    }
-
-    fn walk(&self) -> makepad_widgets::Walk {
-        self.container.walk()
-    }
-    fn layout(&self) -> Layout {
-        self.container.layout()
-    }
-}
-
-impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, SwitchState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.checkbox.$part] should be an inline table".to_string(),
-        ))?;
-        let container = get_from_itable(
-            inline_table,
-            CONTAINER,
-            || Ok(Self::default_container(Theme::default(), state)),
-            |v| (v, state.into()).try_into(),
-        )?;
-        let checkbox = get_from_itable(
-            inline_table,
-            CHECKBOX,
-            || Ok(Self::default_checkbox(Theme::default(), state)),
-            |v| (v, state).try_into(),
-        )?;
-        let extra = get_from_itable(
-            inline_table,
-            EXTRA,
-            || Ok(Self::default_extra(Theme::default(), state)),
-            |v| (v, state.into()).try_into(),
-        )?;
-
-        Ok(Self {
-            container,
-            checkbox,
-            extra,
-        })
-    }
-}
-
-impl SwitchBasicProp {
-    pub fn default_container(theme: Theme, state: SwitchState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
-        container.set_height(Size::Fit);
-        container.set_width(Size::Fit);
-        container.set_flow(Flow::Right);
-        container.set_background_visible(false);
-        container.set_align(Align::from_f64(0.5));
-        container.set_cursor(MouseCursor::Hand);
-        container
-    }
-    pub fn default_extra(theme: Theme, state: SwitchState) -> ViewBasicProp {
-        Self::default_container(theme, state)
-    }
-
-    pub fn default_checkbox(theme: Theme, state: SwitchState) -> SwitchPartProp {
-        SwitchPartProp::from_state(theme, state)
-    }
-}
-
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct SwitchPartProp {
     #[live(Theme::default())]
     pub theme: Theme,
     #[live(16.0)]
@@ -276,8 +122,6 @@ pub struct SwitchPartProp {
     pub background_visible: bool,
     #[live(1.0)]
     pub border_width: f32,
-    #[live(ActiveMode::Round)]
-    pub mode: ActiveMode,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(None)]
@@ -286,10 +130,10 @@ pub struct SwitchPartProp {
     pub cursor: MouseCursor,
 }
 
-impl TryFrom<(&Value, SwitchState)> for SwitchPartProp {
+impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Value, SwitchState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Item, SwitchState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[component.checkbox.checkbox] should be an inline table".to_string(),
         ))?;
@@ -327,12 +171,6 @@ impl TryFrom<(&Value, SwitchState)> for SwitchPartProp {
         )?;
         let border_width =
             get_from_itable(inline_table, BORDER_WIDTH, || Ok(1.0), |item| item.to_f32())?;
-        let mode = get_from_itable(
-            inline_table,
-            MODE,
-            || Ok(ActiveMode::Round),
-            |item| item.try_into(),
-        )?;
         let margin = Margin::from_f64(0.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let abs_pos = get_from_itable(
@@ -356,7 +194,6 @@ impl TryFrom<(&Value, SwitchState)> for SwitchPartProp {
             border_color,
             background_visible,
             border_width,
-            mode,
             margin,
             abs_pos,
             cursor,
@@ -364,7 +201,7 @@ impl TryFrom<(&Value, SwitchState)> for SwitchPartProp {
     }
 }
 
-impl BasicProp for SwitchPartProp {
+impl BasicProp for SwitchBasicProp {
     type State = SwitchState;
     /// (background_color, stroke_color, border_color)
     type Colors = (Color, Color, Color);
@@ -384,7 +221,6 @@ impl BasicProp for SwitchPartProp {
             border_color: border_color.into(),
             background_visible: true,
             border_width: 1.0,
-            mode: ActiveMode::Round,
             margin: Margin::from_f64(0.0),
             abs_pos: None,
             cursor,
@@ -394,7 +230,8 @@ impl BasicProp for SwitchPartProp {
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, stroke_level, border_level) = match state {
             SwitchState::Basic => (200, 200, 400),
-            SwitchState::Hover => (200, 200, 400),
+            SwitchState::HoverBasic => (300, 300, 500),
+            SwitchState::HoverActive => (400, 400, 600),
             SwitchState::Active => (500, 200, 500),
             SwitchState::Disabled => (100, 100, 300),
         };
@@ -465,9 +302,6 @@ impl BasicProp for SwitchPartProp {
             BORDER_WIDTH => {
                 self.border_width = f32::from_live_value(value).unwrap_or(1.0);
             }
-            MODE => {
-                self.mode = ActiveMode::from_live_value(value).unwrap_or(ActiveMode::Round);
-            }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
@@ -536,7 +370,7 @@ impl BasicProp for SwitchPartProp {
     }
 }
 
-impl Default for SwitchPartProp {
+impl Default for SwitchBasicProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), SwitchState::Basic)
     }
@@ -545,7 +379,8 @@ impl Default for SwitchPartProp {
 component_state! {
     SwitchState {
         Basic => BASIC,
-        Hover => HOVER,
+        HoverBasic => HOVER_BASIC,
+        HoverActive => HOVER_ACTIVE,
         Active => ACTIVE,
         Disabled => DISABLED
     },
@@ -555,56 +390,5 @@ component_state! {
 impl ComponentState for SwitchState {
     fn is_disabled(&self) -> bool {
         matches!(self, SwitchState::Disabled)
-    }
-}
-
-impl From<SwitchState> for LabelState {
-    fn from(value: SwitchState) -> Self {
-        match value {
-            SwitchState::Basic | SwitchState::Hover | SwitchState::Active => {
-                LabelState::Basic
-            }
-
-            SwitchState::Disabled => LabelState::Disabled,
-        }
-    }
-}
-
-impl From<SwitchState> for ViewState {
-    fn from(value: SwitchState) -> Self {
-        match value {
-            SwitchState::Basic => ViewState::Basic,
-            SwitchState::Hover => ViewState::Hover,
-            SwitchState::Active => ViewState::Pressed,
-            SwitchState::Disabled => ViewState::Disabled,
-        }
-    }
-}
-impl From<ViewState> for SwitchState {
-    fn from(value: ViewState) -> Self {
-        match value {
-            ViewState::Basic => SwitchState::Basic,
-            ViewState::Hover => SwitchState::Hover,
-            ViewState::Pressed => SwitchState::Active,
-            ViewState::Disabled => SwitchState::Disabled,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SwitchPart {
-    Container,
-    Switch,
-    Extra,
-}
-
-impl Part for SwitchPart {
-    type State = SwitchState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            SwitchPart::Container => live_id!(container),
-            SwitchPart::Switch => live_id!(checkbox),
-            SwitchPart::Extra => live_id!(extra),
-        }
     }
 }

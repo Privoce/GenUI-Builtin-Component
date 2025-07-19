@@ -6,7 +6,7 @@ use toml_edit::Value;
 use crate::{
     error::Error,
     prop::{
-        manuel::{CROSS, ROUND, TICK},
+        manuel::{RECT, ROUND},
         traits::FromLiveValue,
     },
 };
@@ -14,30 +14,26 @@ use crate::{
 #[derive(Live, LiveHook, Clone, Copy, Default, PartialEq, Eq, Hash, Debug)]
 #[live_ignore]
 #[repr(u32)]
-pub enum ActiveMode {
+pub enum SwitchMode {
     #[pick]
     #[default]
-    /// 🔴 (实心圆)
     Round = shader_enum(1),
-    /// ✔️ (勾)
-    Tick = shader_enum(2),
-    /// ⛔ (横线)
-    Cross = shader_enum(3),
+    Rect = shader_enum(2),
 }
 
-impl TryFrom<&Value> for ActiveMode {
+impl TryFrom<&Value> for SwitchMode {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let mode_str = value
             .as_str()
-            .ok_or_else(|| Error::ThemeStyleParse("ActiveMode should be a string".to_string()))?;
+            .ok_or_else(|| Error::ThemeStyleParse("SwitchMode should be a string".to_string()))?;
 
         mode_str.parse()
     }
 }
 
-impl FromLiveValue for ActiveMode {
+impl FromLiveValue for SwitchMode {
     fn from_live_value(v: &LiveValue) -> Option<Self>
     where
         Self: Sized,
@@ -50,26 +46,23 @@ impl FromLiveValue for ActiveMode {
     }
 }
 
-impl FromStr for ActiveMode {
+impl FromStr for SwitchMode {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             ROUND => Ok(Self::Round),
-            TICK => Ok(Self::Tick),
-            CROSS => Ok(Self::Cross),
-            _ => Err(Error::ThemeStyleParse(format!("Unknown ActiveMode: {}", s))),
+            RECT => Ok(Self::Rect),
+            _ => Err(Error::ThemeStyleParse(format!("Unknown SwitchMode: {}", s))),
         }
     }
 }
 
-
-impl ToLiveValue for ActiveMode {
+impl ToLiveValue for SwitchMode {
     fn to_live_value(&self) -> LiveValue {
         match self {
-            ActiveMode::Round => LiveValue::BareEnum(live_id!(Round)),
-            ActiveMode::Tick => LiveValue::BareEnum(live_id!(Tick)),
-            ActiveMode::Cross => LiveValue::BareEnum(live_id!(Cross)),
+            SwitchMode::Round => LiveValue::BareEnum(live_id!(Round)),
+            SwitchMode::Rect => LiveValue::BareEnum(live_id!(Rect)),
         }
     }
 }

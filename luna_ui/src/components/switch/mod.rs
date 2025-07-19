@@ -1,5 +1,4 @@
 mod event;
-pub mod group;
 mod prop;
 
 pub use event::*;
@@ -19,10 +18,10 @@ use crate::{
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::{draw_checkbox::DrawSwitch, draw_view::DrawView},
+    shader::{draw_switch::DrawSwitch, draw_view::DrawView},
     themes::Conf,
     visible, ComponentAnInit,
 };
@@ -40,8 +39,8 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
-                        draw_container: <AN_DRAW_VIEW> {},
-                        draw_checkbox: <AN_DRAW_CHECKBOX> {}
+                        draw_switch: <AN_DRAW_VIEW> {},
+                        draw_switch: <AN_DRAW_CHECKBOX> {}
                     }
                 }
 
@@ -52,8 +51,8 @@ live_design! {
                         ease: InOutQuad,
                     },
                     apply: {
-                       draw_container: <AN_DRAW_VIEW> {},
-                       draw_checkbox: <AN_DRAW_CHECKBOX> {}
+                       draw_switch: <AN_DRAW_VIEW> {},
+                       draw_switch: <AN_DRAW_CHECKBOX> {}
                     }
                 }
 
@@ -61,8 +60,8 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
-                        draw_container: <AN_DRAW_VIEW> {},
-                        draw_checkbox: <AN_DRAW_CHECKBOX> {}
+                        draw_switch: <AN_DRAW_VIEW> {},
+                        draw_switch: <AN_DRAW_CHECKBOX> {}
                     }
                 }
             }
@@ -88,16 +87,10 @@ pub struct GSwitch {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    apply_slot_map: ApplySlotMap<SwitchState, SwitchPart>,
+    apply_state_map: ApplyStateMap<SwitchState>,
     // --- draw -------------------
     #[live]
-    pub draw_checkbox: DrawSwitch,
-    #[live]
-    pub extra: GView,
-    #[live]
-    pub draw_container: DrawView,
-    // #[rust]
-    // defer_walks: DeferWalks,
+    pub draw_switch: DrawSwitch,
     // --- animation ---------------
     #[live(true)]
     pub animation_open: bool,
@@ -116,9 +109,9 @@ pub struct GSwitch {
     // is checkbox active? if is true, it can not be changed by user
     #[live]
     pub active: bool,
-    // specific value of the checkbox, can be used to identify the checkbox
+    // alias for active
     #[live]
-    pub value: String,
+    pub value: bool,
 }
 
 impl WidgetNode for GSwitch {
@@ -132,21 +125,17 @@ impl WidgetNode for GSwitch {
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.current_state());
-        prop.container.walk()
+        prop.walk()
     }
 
     fn area(&self) -> Area {
-        self.draw_container.area
+        self.draw_switch.area
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
         if self.visible {
             let _ = self.render(cx);
-            self.draw_container.redraw(cx);
-            self.draw_checkbox.redraw(cx);
-            if self.extra.visible {
-                self.extra.redraw(cx);
-            }
+            self.draw_switch.redraw(cx);
         }
     }
 
@@ -167,22 +156,9 @@ impl Widget for GSwitch {
             let state = self.current_state();
             let prop = self.prop.get(state);
 
-            self.draw_container
-                .begin(cx, prop.container.walk(), prop.container.layout());
-            self.draw_checkbox
-                .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
-            self.draw_checkbox.end(cx);
-            if self.extra.visible {
-                self.extra.disabled = self.disabled;
-                let _ = self.extra.draw_walk(cx, scope, prop.extra.walk());
-
-                // let _ = SlotDrawer::new(
-                //     [(live_id!(extra), (&mut self.extra).into())],
-                //     &mut self.defer_walks,
-                // )
-                // .draw_walk(cx, scope);
-            }
-            self.draw_container.end(cx);
+            self.draw_switch
+                .begin(cx, prop.walk(), prop.layout());
+            self.draw_switch.end(cx);
         }
 
         self.set_scope_path(&scope.path);
@@ -212,45 +188,39 @@ impl LiveHook for GSwitch {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        self.set_apply_slot_map(
-            nodes,
-            index,
-            [
-                live_id!(basic),
-                live_id!(hover),
-                live_id!(active),
-                live_id!(disabled),
-            ],
-            [
-                (SwitchPart::Container, &ViewBasicProp::live_props()),
-                (SwitchPart::Switch, &SwitchPartProp::live_props()),
-                (SwitchPart::Extra, &ViewBasicProp::live_props()),
-            ],
-            |_| {},
-            |prefix, component, applys| match prefix.to_string().as_str() {
-                BASIC => {
-                    component
-                        .apply_slot_map
-                        .insert(SwitchState::Basic, applys);
-                }
-                HOVER => {
-                    component
-                        .apply_slot_map
-                        .insert(SwitchState::Hover, applys);
-                }
-                ACTIVE => {
-                    component
-                        .apply_slot_map
-                        .insert(SwitchState::Active, applys);
-                }
-                DISABLED => {
-                    component
-                        .apply_slot_map
-                        .insert(SwitchState::Disabled, applys);
-                }
-                _ => {}
-            },
-        );
+        // self.set_apply_slot_map(
+        //     nodes,
+        //     index,
+        //     [
+        //         live_id!(basic),
+        //         live_id!(hover),
+        //         live_id!(active),
+        //         live_id!(disabled),
+        //     ],
+        //     [
+        //         (SwitchPart::Container, &ViewBasicProp::live_props()),
+        //         (SwitchPart::Switch, &SwitchPartProp::live_props()),
+        //         (SwitchPart::Extra, &ViewBasicProp::live_props()),
+        //     ],
+        //     |_| {},
+        //     |prefix, component, applys| match prefix.to_string().as_str() {
+        //         BASIC => {
+        //             component.apply_state_map.insert(SwitchState::Basic, applys);
+        //         }
+        //         HOVER => {
+        //             component.apply_state_map.insert(SwitchState::Hover, applys);
+        //         }
+        //         ACTIVE => {
+        //             component.apply_state_map.insert(SwitchState::Active, applys);
+        //         }
+        //         DISABLED => {
+        //             component
+        //                 .apply_state_map
+        //                 .insert(SwitchState::Disabled, applys);
+        //         }
+        //         _ => {}
+        //     },
+        // );
     }
 }
 
@@ -264,25 +234,23 @@ impl Component for GSwitch {
     type State = SwitchState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.checkbox;
+        let prop = &cx.global::<Conf>().components.switch;
         self.prop = prop.clone();
-        self.extra.prop.basic = self.prop.basic.extra;
-        self.extra.prop.hover = self.prop.hover.extra;
-        self.extra.prop.pressed = self.prop.active.extra;
+       
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
         let prop = self.prop.get(state);
-        self.draw_container.merge(&prop.container);
-        self.draw_checkbox.merge(&prop.checkbox);
+        self.draw_switch.merge(&prop.container);
+        self.draw_switch.merge(&prop.checkbox);
 
         let _ = self.extra.render(cx)?;
         if self.active {
-            self.draw_checkbox.active = 1.0;
+            self.draw_switch.active = 1.0;
             self.switch_state(SwitchState::Active);
         } else {
-            self.draw_checkbox.active = 0.0;
+            self.draw_switch.active = 0.0;
         }
         Ok(())
     }
@@ -291,7 +259,7 @@ impl Component for GSwitch {
         if self.disabled {
             SwitchState::Disabled
         } else {
-            self.draw_container.current_state().into()
+            self.draw_switch.current_state().into()
         }
     }
 
@@ -352,14 +320,14 @@ impl Component for GSwitch {
     }
 
     fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_container.apply_over(
+        self.draw_switch.apply_over(
             cx,
             live! {
                 hover: 0.0,
                 pressed: 0.0,
             },
         );
-        self.draw_checkbox.apply_over(
+        self.draw_switch.apply_over(
             cx,
             live! {
                 hover: 0.0,
@@ -371,16 +339,16 @@ impl Component for GSwitch {
     fn switch_state(&mut self, state: Self::State) -> () {
         match state {
             SwitchState::Basic => {
-                self.draw_container.state_basic();
-                self.draw_checkbox.state_basic();
+                self.draw_switch.state_basic();
+                self.draw_switch.state_basic();
             }
             SwitchState::Hover => {
-                self.draw_container.state_hover();
-                self.draw_checkbox.state_hover();
+                self.draw_switch.state_hover();
+                self.draw_switch.state_hover();
             }
             SwitchState::Active => {
-                self.draw_container.state_pressed();
-                self.draw_checkbox.state_active();
+                self.draw_switch.state_pressed();
+                self.draw_switch.state_active();
             }
             SwitchState::Disabled => {}
         }
@@ -391,7 +359,7 @@ impl Component for GSwitch {
             return;
         }
         self.switch_state(state);
-        self.draw_checkbox
+        self.draw_switch
             .apply_type(self.prop.get(state).checkbox.mode);
         self.set_animation(cx);
     }
@@ -468,7 +436,7 @@ impl Component for GSwitch {
             }
 
             set_animation! {
-                nodes: draw_container = {
+                nodes: draw_switch = {
                     basic_index => {
                         background_color => basic_prop.container.background_color,
                         border_color =>basic_prop.container.border_color,
@@ -506,7 +474,7 @@ impl Component for GSwitch {
             }
 
             set_animation! {
-                nodes: draw_checkbox = {
+                nodes: draw_switch = {
                     basic_index => {
                         background_color => basic_prop.checkbox.background_color,
                         background_visible => basic_prop.checkbox.background_visible.to_f64(),
@@ -567,7 +535,7 @@ impl Component for GSwitch {
                 _ => None,
             };
             set_animation! {
-                nodes: draw_container = {
+                nodes: draw_switch = {
                     index => {
                         background_color => prop.container.background_color,
                         border_color => prop.container.border_color,
@@ -582,7 +550,7 @@ impl Component for GSwitch {
                 }
             }
             set_animation! {
-                nodes: draw_checkbox = {
+                nodes: draw_switch = {
                     index => {
                         background_color => prop.checkbox.background_color,
                         background_visible => prop.checkbox.background_visible.to_f64(),

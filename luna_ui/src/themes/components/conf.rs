@@ -3,9 +3,10 @@ use crate::components::card::CardProp;
 use crate::components::checkbox::CheckboxProp;
 use crate::components::label::LabelProp;
 use crate::components::radio::RadioProp;
+use crate::components::switch::SwitchProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
-use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW, CHECKBOX};
+use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW, CHECKBOX, SWITCH};
 use crate::try_from_toml_item;
 
 #[derive(Debug, Clone, Default)]
@@ -15,7 +16,8 @@ pub struct ComponentsConf {
     pub button: ButtonProp,
     pub card: CardProp,
     pub radio: RadioProp,
-    pub checkbox: CheckboxProp
+    pub checkbox: CheckboxProp,
+    pub switch: SwitchProp
 }
 
 try_from_toml_item! {
@@ -25,6 +27,7 @@ try_from_toml_item! {
         button => BUTTON, ButtonProp::default(), |item| item.try_into(),
         card => CARD, CardProp::default(), |item| item.try_into(),
         radio => RADIO, RadioProp::default(), |item| item.try_into(),
-        checkbox => CHECKBOX, CheckboxProp::default(), |item| item.try_into()
+        checkbox => CHECKBOX, CheckboxProp::default(), |item| item.try_into(),
+        switch => SWITCH, SwitchProp::default(), |item| item.try_into()
     }, "[components] should be a table"
 }
