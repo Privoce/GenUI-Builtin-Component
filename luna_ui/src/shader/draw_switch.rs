@@ -2,7 +2,6 @@ use makepad_widgets::*;
 
 use crate::{
     components::{
-        radio::RadioBasicProp,
         switch::{SwitchBasicProp, SwitchState},
     },
     prop::traits::ToFloat,
@@ -14,51 +13,41 @@ live_design! {
     DrawSwitch = {{DrawSwitch}} {
         fn pixel(self) -> vec4 {
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);
-            let box_size = vec2(self.rect_size.x - self.border_width * 2.0, self.rect_size.y - self.border_width * 2.0);
-
-            sdf.box(self.pos.x, self.pos.y, box_size.x, box_size.y, self.border_radius);
+            let box_size = vec2(self.rect_size.x - self.border_width * 3.0, self.rect_size.y - self.border_width * 3.0);
+            let start_point = vec2(self.pos.x + self.border_width, self.pos.y + self.border_width);
+            sdf.box_all(
+                start_point.x,
+                start_point.y,
+                box_size.x,
+                box_size.y,
+                self.border_radius.r,
+                self.border_radius.g,
+                self.border_radius.b,
+                self.border_radius.a
+            );
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);
             }
             sdf.stroke(self.border_color, self.border_width);
-            // let circle = vec2(box_size.y * 0.5 - 1.0);
-            // let center = self.rect_size.y * 0.5;
-            // let offset = self.rect_size.y - box_size.y;
-            // match self.toggle_type{
-            //     SwitchType::Round => {
-            //         sdf.circle(mix(
-            //             mix(circle.x + self.border_width + offset, circle.x + self.border_width + offset * 2.0, self.hover),
-            //             mix(self.rect_size.x - circle.x - offset - self.border_width,self.rect_size.x - circle.x - offset * 2.0 - self.border_width, self.hover),
-            //             self.active
-            //         ), center, circle.x);
-
-            //         sdf.circle(mix(
-            //             mix(circle.x + self.border_width + offset, circle.x + self.border_width + offset * 2.0, self.hover),
-            //             mix(self.rect_size.x - circle.x - offset - self.border_width,self.rect_size.x - circle.x - offset * 2.0 - self.border_width, self.hover),
-            //             self.active
-            //         ), center, circle.x);
-            //     }
-            //     SwitchType::Rect => {
-            //         let y = self.border_width + offset * 0.5;
-            //         sdf.box(mix(
-            //             mix(circle.x + self.border_width - circle.x + offset,circle.x + self.border_width - circle.x + offset * 2.0, self.hover),
-            //             mix(self.rect_size.x - circle.x * 2.0 - offset - self.border_width, self.rect_size.x - circle.x * 2.0 - offset * 2.0 - self.border_width, self.hover),
-            //             self.active
-            //         ), y, circle.x * 2.0, circle.x* 2.0, border_radius);
-
-            //         sdf.box(mix(
-            //             mix(circle.x + self.border_width - circle.x + offset,circle.x + self.border_width - circle.x + offset * 2.0, self.hover),
-            //             mix(self.rect_size.x - circle.x * 2.0 - offset - self.border_width, self.rect_size.x - circle.x * 2.0 - offset * 2.0 - self.border_width, self.hover),
-            //             self.active
-            //         ),y , circle.x* 2.0, circle.x* 2.0, border_radius);
-            //     }
-            // }
-
-            // sdf.blend(self.active)
-            // sdf.fill(
-            //    self.get_stroke_color()
-            // );
-
+            let spacing = self.rect_size.x * 0.01;
+            let inner_box_size = vec2(box_size.x / 2.0, box_size.y) - vec2(spacing * 2.0, spacing * 2.0);
+            let inner_pos = mix(
+                vec2(start_point.x + spacing, start_point.y + spacing),
+                vec2(self.pos.x + self.rect_size.x - inner_box_size.x - spacing * 3.0, start_point.y + spacing),
+                self.active
+            );
+            let inner_radius = self.border_radius - vec4(spacing);
+            sdf.box_all(
+                inner_pos.x,
+                inner_pos.y,
+                inner_box_size.x,
+                inner_box_size.y,
+                inner_radius.r,
+                inner_radius.g,
+                inner_radius.b,
+                inner_radius.a
+            );
+            sdf.fill(self.stroke_color);
             return sdf.result
         }
     }
@@ -85,8 +74,8 @@ pub struct DrawSwitch {
     pub border_color: Vec4, // 盒子的边框颜色
     #[live(1.0)]
     pub border_width: f32,
-    #[live(2.0)]
-    pub border_radius: f32,
+    #[live]
+    pub border_radius: Vec4,
 }
 
 impl DrawSwitch {
@@ -106,6 +95,7 @@ impl DrawSwitch {
         self.border_color = other.border_color;
         // self.size = other.size;
         self.border_width = other.border_width;
+        self.border_radius = other.border_radius.into();
     }
     pub fn state_basic(&mut self) {
         if self.hover != 0.0 || self.active != 0.0 {

@@ -236,10 +236,10 @@ impl BasicProp for SwitchBasicProp {
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, stroke_level, border_level) = match state {
-            SwitchState::Basic => (200, 200, 400),
-            SwitchState::HoverBasic => (300, 300, 500),
-            SwitchState::HoverActive => (400, 400, 600),
-            SwitchState::Active => (500, 200, 500),
+            SwitchState::Basic => (200, 400, 400),
+            SwitchState::HoverBasic => (100, 300, 500),
+            SwitchState::HoverActive => (500, 300, 500),
+            SwitchState::Active => (600, 400, 500),
             SwitchState::Disabled => (100, 100, 300),
         };
 
@@ -361,7 +361,7 @@ impl BasicProp for SwitchBasicProp {
         Walk {
             abs_pos: self.abs_pos,
             margin: self.margin,
-            width: Size::Fixed(self.size as f64),
+            width: Size::Fixed(self.size as f64  * 2.0),
             height: Size::Fixed(self.size as f64),
         }
     }

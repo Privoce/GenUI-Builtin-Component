@@ -34,7 +34,7 @@ live_design! {
         ui: <Root>{
             main_window = <Window>{
                 body = <View>{
-                    flow: Down,
+                    flow: Right,
                     spacing:30,
                     align: {
                         x: 0.5,
@@ -42,7 +42,7 @@ live_design! {
                     },
                     show_bg: true,
                     draw_bg: {
-                        color: #444,
+                        color: #999,
                     }
                     // <GButton>{
                     //         prop: {
@@ -195,7 +195,27 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GSwitch>{}
+                    <GSwitch>{
+                        prop: {
+                            basic: {
+                                size: 60.0
+                            }
+                        }
+                    }
+                    <GSwitch>{
+                        prop: {
+                            basic: {
+                                theme: Warning,
+                                size: 60.0,
+                                border_radius: {
+                                    top: 15.0,
+                                    left: 15.0,
+                                    bottom: 15.0,
+                                    right: 15.0,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

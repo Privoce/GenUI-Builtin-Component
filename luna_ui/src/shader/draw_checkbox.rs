@@ -14,12 +14,13 @@ live_design! {
             // draw background circle
             let center = vec2(self.rect_size.x * 0.5, self.rect_size.y * 0.5);
             let r = self.rect_size.x * 0.5 - self.border_width * 0.5;
+            let start_point = vec2(self.pos.x + self.border_width, self.pos.y + self.border_width);
             sdf.box(
-                self.pos.x,
-                self.pos.y,
-                self.rect_size.x - self.border_width * 2,
-                self.rect_size.y - self.border_width * 2,
-                self.size * 0.125
+                start_point.x,
+                start_point.y,
+                self.rect_size.x - self.border_width * 3.0,
+                self.rect_size.y - self.border_width * 3.0,
+                self.size * 0.12
             );
             if self.background_visible == 1.0 {
                 sdf.fill_keep(self.background_color);

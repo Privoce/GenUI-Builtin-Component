@@ -37,7 +37,7 @@ live_design! {
 
                 off = {
                     from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
+                    ease: Linear,
                     apply: {
                         draw_switch: <AN_DRAW_SWITCH> {
                             hover: 0.0,
@@ -48,7 +48,7 @@ live_design! {
 
                 on = {
                     from: {all: Forward {duration: (AN_DURATION),}},
-                    ease: InOutQuad,
+                    ease: Linear,
                     apply: {
                        draw_switch: <AN_DRAW_SWITCH> {
                             hover: 0.0,
@@ -59,7 +59,7 @@ live_design! {
 
                 off_hover = {
                     from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
+                    ease: Linear,
                     apply: {
                         draw_switch: <AN_DRAW_SWITCH> {
                             hover: 1.0,
@@ -70,7 +70,7 @@ live_design! {
 
                 on_hover = {
                     from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
+                    ease: Linear,
                     apply: {
                         draw_switch: <AN_DRAW_SWITCH> {
                             hover: 1.0,
