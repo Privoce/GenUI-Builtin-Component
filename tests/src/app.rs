@@ -117,84 +117,85 @@ live_design! {
 
                 //     }
                 //    <GCard>{}
-                    <GRadioGroup> {
-                        active: "2",
-                        <GRadio> {
-                            prop: {
-                                basic: {
-                                    radio: {
-                                        theme: Warning,
-                                        mode: Cross,
-                                    }
-                                }
-                            }
+                    // <GRadioGroup> {
+                    //     active: "2",
+                    //     <GRadio> {
+                    //         prop: {
+                    //             basic: {
+                    //                 radio: {
+                    //                     theme: Warning,
+                    //                     mode: Cross,
+                    //                 }
+                    //             }
+                    //         }
 
-                            extra: {
-                                <GLabel>{
-                                    text: "Radio Cross",
-                                    mode: Bold,
-                                }
-                            }
-                        }
-                        <GRadio>{
-                            active: true,
-                        }
-                        <GRadio> {
-                            prop: {
-                                basic: {
-                                    container: {
-                                        background_visible: true,
-                                    },
-                                    radio: {
-                                        theme: Primary,
-                                        mode: Tick,
+                    //         extra: {
+                    //             <GLabel>{
+                    //                 text: "Radio Cross",
+                    //                 mode: Bold,
+                    //             }
+                    //         }
+                    //     }
+                    //     <GRadio>{
+                    //         active: true,
+                    //     }
+                    //     <GRadio> {
+                    //         prop: {
+                    //             basic: {
+                    //                 container: {
+                    //                     background_visible: true,
+                    //                 },
+                    //                 radio: {
+                    //                     theme: Primary,
+                    //                     mode: Tick,
 
-                                    }
-                                }
-                            },
-                            extra: {
-                                 <GLabel> {
-                                    text: "Radio Tick"
-                                }
-                            }
-                        }
-                    }
+                    //                 }
+                    //             }
+                    //         },
+                    //         extra: {
+                    //              <GLabel> {
+                    //                 text: "Radio Tick"
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
-                    <GCheckboxGroup>{ 
-                        active: ["coffee", "milk"],
-                        <GCheckbox>{
-                            prop: {
-                                basic: {
-                                    checkbox: {
-                                        theme: Warning,
-                                        mode: Cross,
-                                    }
-                                }
-                            },
-                            value: "coffee",
-                            extra: {
-                                <GLabel>{
-                                    text: "coffee"
-                                }
-                            }
-                        }
-                        <GCheckbox>{
-                            value: "tea",
-                            extra: {
-                                <GLabel>{
-                                    text: "tea"
-                                }
-                            }
-                        }
-                        <GCheckbox>{
-                            value: "milk",
-                            extra: {
-                                <GLabel>{
-                                    text: "milk"
-                                }
-                            }
-                        }
-                    }
+                    // <GCheckboxGroup>{ 
+                    //     active: ["coffee", "milk"],
+                    //     <GCheckbox>{
+                    //         prop: {
+                    //             basic: {
+                    //                 checkbox: {
+                    //                     theme: Warning,
+                    //                     mode: Cross,
+                    //                 }
+                    //             }
+                    //         },
+                    //         value: "coffee",
+                    //         extra: {
+                    //             <GLabel>{
+                    //                 text: "coffee"
+                    //             }
+                    //         }
+                    //     }
+                    //     <GCheckbox>{
+                    //         value: "tea",
+                    //         extra: {
+                    //             <GLabel>{
+                    //                 text: "tea"
+                    //             }
+                    //         }
+                    //     }
+                    //     <GCheckbox>{
+                    //         value: "milk",
+                    //         extra: {
+                    //             <GLabel>{
+                    //                 text: "milk"
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    <GSwitch>{}
                 }
             }
         }
