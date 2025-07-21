@@ -96,6 +96,8 @@ live_design! {
     }
 
     pub GCheckboxGroup = <GCheckboxGroupBase> {}
+    
+    pub GSwitch = <GSwitchBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -107,6 +109,7 @@ pub fn components_register(cx: &mut Cx) {
     radio::group::live_design(cx);
     checkbox::live_design(cx);
     checkbox::group::live_design(cx);
+    switch::live_design(cx);
 }
 
 component! {

@@ -8,12 +8,10 @@ use crate::{
     error::Error,
     prop::{
         manuel::{
-            ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_WIDTH, CURSOR, DISABLED, HOVER, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE,
-            STROKE_COLOR, THEME,
+            ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE, STROKE_COLOR, THEME
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
-        ApplyStateMapImpl,
+        ApplyStateMapImpl, Radius,
     },
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
@@ -110,7 +108,7 @@ try_from_toml_item! {
 pub struct SwitchBasicProp {
     #[live(Theme::default())]
     pub theme: Theme,
-    #[live(16.0)]
+    #[live(22.0)]
     pub size: f32,
     #[live]
     pub background_color: Vec4,
@@ -122,6 +120,8 @@ pub struct SwitchBasicProp {
     pub background_visible: bool,
     #[live(1.0)]
     pub border_width: f32,
+    #[live(Radius::new(4.0))]
+    pub border_radius: Radius,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(None)]
@@ -162,7 +162,7 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
             |v| v.try_into(),
         )?
         .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(16.0), |item| item.to_f32())?;
+        let size = get_from_itable(inline_table, SIZE, || Ok(22.0), |item| item.to_f32())?;
         let background_visible = get_from_itable(
             inline_table,
             BACKGROUND_VISIBLE,
@@ -185,7 +185,12 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
             MouseCursor::Hand
         };
         let cursor = get_from_itable(inline_table, "cursor", || Ok(cursor), |v| v.to_cursor())?;
-
+        let border_radius = get_from_itable(
+            inline_table,
+            BORDER_RADIUS,
+            || Ok(Radius::new(4.0)),
+            |v| v.try_into(),
+        )?;
         Ok(Self {
             theme,
             size,
@@ -197,6 +202,7 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
             margin,
             abs_pos,
             cursor,
+            border_radius
         })
     }
 }
@@ -215,7 +221,7 @@ impl BasicProp for SwitchBasicProp {
         };
         Self {
             theme,
-            size: 16.0,
+            size: 22.0,
             background_color: backgroud_color.into(),
             stroke_color: stroke_color.into(),
             border_color: border_color.into(),
@@ -223,6 +229,7 @@ impl BasicProp for SwitchBasicProp {
             border_width: 1.0,
             margin: Margin::from_f64(0.0),
             abs_pos: None,
+            border_radius: Radius::new(4.0),
             cursor,
         }
     }
@@ -294,7 +301,7 @@ impl BasicProp for SwitchBasicProp {
                 self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
             }
             SIZE => {
-                self.size = f32::from_live_value(value).unwrap_or(16.0);
+                self.size = f32::from_live_value(value).unwrap_or(22.0);
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);
@@ -336,7 +343,6 @@ impl BasicProp for SwitchBasicProp {
             (live_id!(border_color), None),
             (live_id!(background_visible), None),
             (live_id!(border_width), None),
-            (live_id!(mode), None),
             (
                 live_id!(margin),
                 Some(vec![

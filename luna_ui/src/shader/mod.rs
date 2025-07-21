@@ -10,5 +10,6 @@ pub fn shader_register(cx: &mut Cx) {
     draw_view::live_design(cx);
     draw_radio::live_design(cx);
     draw_checkbox::live_design(cx);
+    draw_switch::live_design(cx);
     animation::live_design(cx);
 }

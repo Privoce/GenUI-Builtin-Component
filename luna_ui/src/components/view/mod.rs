@@ -51,8 +51,8 @@ live_design! {
                     from: {
                         all: Forward {duration: (AN_DURATION),},
                         pressed: Forward {duration: (AN_DURATION)},
-                        ease: InOutQuad,
                     },
+                    ease: InOutQuad,
                     apply: {
                        draw_view: <AN_DRAW_VIEW> {}
                     }

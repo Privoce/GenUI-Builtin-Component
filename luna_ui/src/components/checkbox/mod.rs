@@ -49,8 +49,8 @@ live_design! {
                     from: {
                         all: Forward {duration: (AN_DURATION),},
                         active: Forward {duration: (AN_DURATION)},
-                        ease: InOutQuad,
                     },
+                    ease: InOutQuad,
                     apply: {
                        draw_container: <AN_DRAW_VIEW> {},
                        draw_checkbox: <AN_DRAW_CHECKBOX> {}

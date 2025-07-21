@@ -45,10 +45,8 @@ live_design! {
                 }
 
                 on = {
-                    from: {
-                        all: Forward {duration: (AN_DURATION),},
-                        ease: InOutQuad,
-                    },
+                    from: {all: Forward {duration: (AN_DURATION),},},
+                    ease: InOutQuad,
                     apply: {
                        draw_card: <AN_DRAW_VIEW> {}
                     }

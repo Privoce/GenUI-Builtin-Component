@@ -37,4 +37,12 @@ live_design!{
         size: 16.0,
         stroke_color: #ffffff,
     }
+
+    pub AN_DRAW_SWITCH = {
+        background_color: #535d6d,
+        background_visible: 1.0,
+        border_color: #535d6d,
+        border_width: 1.0,
+        stroke_color: #ffffff,
+    }
 }
