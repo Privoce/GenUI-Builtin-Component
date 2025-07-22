@@ -195,13 +195,13 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GSwitch>{
-                        prop: {
-                            basic: {
-                                size: 60.0
-                            }
-                        }
-                    }
+                    // <GSwitch>{
+                    //     prop: {
+                    //         basic: {
+                    //             size: 60.0
+                    //         }
+                    //     }
+                    // }
                     <GSwitch>{
                         prop: {
                             basic: {
@@ -215,6 +215,8 @@ live_design! {
                                 }
                             }
                         }
+                        disabled: true,
+                        value: true
                     }
                 }
             }

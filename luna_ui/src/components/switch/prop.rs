@@ -1,14 +1,12 @@
 use crate::{
     component_state,
-    components::{
-        label::LabelState,
-        traits::{BasicProp, ComponentState, Part, Prop},
-        view::ViewState,
-    },
+    components::traits::{BasicProp, ComponentState, Prop},
     error::Error,
     prop::{
         manuel::{
-            ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE, STROKE_COLOR, THEME
+            ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
+            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER_ACTIVE, HOVER_BASIC,
+            MARGIN, SIZE, STROKE_COLOR, THEME,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
@@ -202,7 +200,7 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
             margin,
             abs_pos,
             cursor,
-            border_radius
+            border_radius,
         })
     }
 }
@@ -240,7 +238,7 @@ impl BasicProp for SwitchBasicProp {
             SwitchState::HoverBasic => (100, 300, 500),
             SwitchState::HoverActive => (500, 300, 500),
             SwitchState::Active => (600, 400, 500),
-            SwitchState::Disabled => (100, 100, 300),
+            SwitchState::Disabled => (100, 200, 300),
         };
 
         match theme {
@@ -361,7 +359,7 @@ impl BasicProp for SwitchBasicProp {
         Walk {
             abs_pos: self.abs_pos,
             margin: self.margin,
-            width: Size::Fixed(self.size as f64  * 2.0),
+            width: Size::Fixed(self.size as f64 * 2.0),
             height: Size::Fixed(self.size as f64),
         }
     }

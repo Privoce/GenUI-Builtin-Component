@@ -10,18 +10,17 @@ use crate::{
     active_event, animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        traits::{BasicProp, Component, Prop},
     },
     error::Error,
     event_option, lifecycle, play_animation,
     prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER, HOVER_ACTIVE, HOVER_BASIC},
+        manuel::{ACTIVE, BASIC, HOVER_ACTIVE, HOVER_BASIC},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap,
+        ApplyStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::{draw_switch::DrawSwitch, draw_view::DrawView},
+    shader::draw_switch::DrawSwitch,
     themes::Conf,
     visible, ComponentAnInit,
 };
@@ -121,10 +120,7 @@ pub struct GSwitch {
     pub sync: bool,
     // --- value -------------------
     // is checkbox active? if is true, it can not be changed by user
-    #[live]
-    pub active: bool,
-    // alias for active
-    #[live]
+    #[live(false)]
     pub value: bool,
 }
 
@@ -201,45 +197,16 @@ impl LiveHook for GSwitch {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        // self.set_apply_slot_map(
-        //     nodes,
-        //     index,
-        //     [
-        //         live_id!(basic),
-        //         live_id!(hover),
-        //         live_id!(active),
-        //         live_id!(disabled),
-        //     ],
-        //     [
-        //         (SwitchPart::Container, &ViewBasicProp::live_props()),
-        //         (SwitchPart::Switch, &SwitchPartProp::live_props()),
-        //         (SwitchPart::Extra, &ViewBasicProp::live_props()),
-        //     ],
-        //     |_| {},
-        //     |prefix, component, applys| match prefix.to_string().as_str() {
-        //         BASIC => {
-        //             component.apply_state_map.insert(SwitchState::Basic, applys);
-        //         }
-        //         HOVER => {
-        //             component.apply_state_map.insert(SwitchState::Hover, applys);
-        //         }
-        //         ACTIVE => {
-        //             component.apply_state_map.insert(SwitchState::Active, applys);
-        //         }
-        //         DISABLED => {
-        //             component
-        //                 .apply_state_map
-        //                 .insert(SwitchState::Disabled, applys);
-        //         }
-        //         _ => {}
-        //     },
-        // );
-
         self.set_apply_state_map(
             nodes,
             index,
             &SwitchBasicProp::live_props(),
-            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            [
+                live_id!(basic),
+                live_id!(hover_basic),
+                live_id!(hover_active),
+                live_id!(active),
+            ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
@@ -254,6 +221,11 @@ impl LiveHook for GSwitch {
                     component
                         .apply_state_map
                         .insert(SwitchState::HoverActive, applys);
+                }
+                ACTIVE => {
+                    component
+                        .apply_state_map
+                        .insert(SwitchState::Active, applys);
                 }
                 _ => {}
             },
@@ -271,16 +243,16 @@ impl Component for GSwitch {
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
         let prop = self.prop.get(state);
         self.draw_switch.merge(&prop);
-        if self.active {
-            self.draw_switch.active = 1.0;
-            self.switch_state(SwitchState::Active);
+        let state = if self.value {
+            SwitchState::Active
         } else {
-            self.draw_switch.active = 0.0;
-        }
+            SwitchState::Basic
+        };
+        self.switch_state(state);
         Ok(())
     }
 
@@ -311,41 +283,42 @@ impl Component for GSwitch {
             }
             Hit::FingerHoverIn(e) => {
                 cx.set_cursor(self.prop.get(self.current_state()).cursor);
-                let (state, state_an) = if self.active {
+                let (state, state_an) = if self.value {
                     (SwitchState::HoverActive, id!(active.on_hover))
                 } else {
                     (SwitchState::HoverBasic, id!(active.off_hover))
                 };
                 self.switch_state_with_animation(cx, state);
                 self.play_animation(cx, state_an);
-                // self.active_hover_in(cx, e);
+                self.active_hover_in(cx, e);
             }
             Hit::FingerHoverOut(e) => {
-                let (state, state_an) = if self.active {
+                let (state, state_an) = if self.value {
                     (SwitchState::Active, id!(active.on))
                 } else {
                     (SwitchState::Basic, id!(active.off))
                 };
                 self.switch_state_with_animation(cx, state);
                 self.play_animation(cx, state_an);
-                // self.active_hover_out(cx, e);
+                self.active_hover_out(cx, e);
             }
             Hit::FingerUp(e) => {
                 if e.is_over {
                     if e.has_hovers() {
-                        let (state_an, state) = if self.active {
+                        let (state_an, state) = if self.value {
                             (id!(active.off), SwitchState::Basic)
                         } else {
                             (id!(active.on), SwitchState::Active)
                         };
-                        self.active = !self.active;
+                        self.value = !self.value;
                         self.switch_state_with_animation(cx, state);
                         self.play_animation(cx, state_an);
                     } else {
                         self.switch_state_with_animation(cx, SwitchState::Basic);
                         self.play_animation(cx, id!(active.off));
                     }
-                    // self.active_clicked(cx, Some(e));
+                    self.active_clicked(cx, e.clone());
+                    self.active_changed(cx, Some(e));
                 } else {
                     self.switch_state_with_animation(cx, SwitchState::Basic);
                 }
@@ -502,7 +475,7 @@ impl Component for GSwitch {
         } else {
             let state = self.current_state();
             let prop = self.prop.get(state);
-            let (index, active, hover) = match state {
+            let (index, _active, _hover) = match state {
                 SwitchState::Basic => (
                     nodes.child_by_path(
                         self.index,
@@ -575,30 +548,44 @@ impl Component for GSwitch {
 }
 
 impl GSwitch {
-    // active_event! {
-    //     active_hover_in: SwitchEvent::HoverIn |meta: FingerHoverEvent| => SwitchHoverIn { meta },
-    //     active_hover_out: SwitchEvent::HoverOut |meta: FingerHoverEvent| => SwitchHoverOut { meta }
-    // }
-    // pub fn active_clicked(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
-    //     if self.event_open {
-    //         self.scope_path.as_ref().map(|path| {
-    //             cx.widget_action(
-    //                 self.widget_uid(),
-    //                 path,
-    //                 SwitchEvent::Clicked(SwitchClicked {
-    //                     active: self.active,
-    //                     value: self.value.to_string(),
-    //                     meta,
-    //                 }),
-    //             );
-    //         });
-    //     }
-    // }
-    // event_option! {
-    //     hover_in: SwitchEvent::HoverIn => SwitchHoverIn,
-    //     hover_out: SwitchEvent::HoverOut => SwitchHoverOut,
-    //     clicked: SwitchEvent::Clicked => SwitchClicked
-    // }
+    active_event! {
+        active_hover_in: SwitchEvent::HoverIn |meta: FingerHoverEvent| => SwitchHoverIn { meta },
+        active_hover_out: SwitchEvent::HoverOut |meta: FingerHoverEvent| => SwitchHoverOut { meta }
+    }
+    pub fn active_clicked(&mut self, cx: &mut Cx, meta: FingerUpEvent) -> () {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    SwitchEvent::Clicked(SwitchClicked {
+                        value: self.value,
+                        meta,
+                    }),
+                );
+            });
+        }
+    }
+    /// This function is called when the switch value changes. (happend when setter is called)
+    pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) -> () {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    SwitchEvent::Changed(SwitchChanged {
+                        value: self.value,
+                        meta,
+                    }),
+                );
+            });
+        }
+    }
+    event_option! {
+        hover_in: SwitchEvent::HoverIn => SwitchHoverIn,
+        hover_out: SwitchEvent::HoverOut => SwitchHoverOut,
+        clicked: SwitchEvent::Clicked => SwitchClicked
+    }
     // pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
     //     self.active = active;
     //     let (state, hover_id) = match (active, init) {

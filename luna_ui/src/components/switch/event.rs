@@ -1,41 +1,32 @@
 use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent};
 
 #[derive(Clone, Debug, DefaultNone)]
-pub enum CheckboxEvent {
-    HoverIn(CheckboxHoverIn),
-    HoverOut(CheckboxHoverOut),
-    Clicked(CheckboxClicked),
+pub enum SwitchEvent {
+    HoverIn(SwitchHoverIn),
+    HoverOut(SwitchHoverOut),
+    Clicked(SwitchClicked),
+    Changed(SwitchChanged),
     None,
 }
 
 #[derive(Clone, Debug)]
-pub struct CheckboxHoverIn {
+pub struct SwitchHoverIn {
     pub meta: FingerHoverEvent,
 }
 
 #[derive(Clone, Debug)]
-pub struct CheckboxHoverOut {
+pub struct SwitchHoverOut {
     pub meta: FingerHoverEvent,
 }
 
 #[derive(Clone, Debug)]
-pub struct CheckboxClicked {
-    pub meta: Option<FingerUpEvent>,
-    pub active: bool,
-    pub value: String,
-}
-
-#[derive(Debug, Clone, DefaultNone)]
-pub enum CheckboxGroupEvent {
-    Changed(CheckboxChanged),
-    None,
+pub struct SwitchClicked {
+    pub meta: FingerUpEvent,
+    pub value: bool,
 }
 
 #[derive(Clone, Debug)]
-pub struct CheckboxChanged {
+pub struct SwitchChanged {
     pub meta: Option<FingerUpEvent>,
-    /// The index of the active checkbox
-    pub index: Vec<i32>,
-    /// The value of the active checkbox.
-    pub value: Vec<String>,
+    pub value: bool,
 }
