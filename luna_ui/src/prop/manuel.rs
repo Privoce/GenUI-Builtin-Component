@@ -63,6 +63,7 @@ pub const RADIO: &str = "radio";
 pub const EXTRA: &str = "extra";
 pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
+pub const DIVIDER: &str = "divider";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

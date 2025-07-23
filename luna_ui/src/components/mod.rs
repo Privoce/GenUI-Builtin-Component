@@ -98,6 +98,8 @@ live_design! {
     pub GCheckboxGroup = <GCheckboxGroupBase> {}
     
     pub GSwitch = <GSwitchBase> {}
+
+    pub GDivider = <GDividerBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -110,6 +112,7 @@ pub fn components_register(cx: &mut Cx) {
     checkbox::live_design(cx);
     checkbox::group::live_design(cx);
     switch::live_design(cx);
+    divider::live_design(cx);
 }
 
 component! {

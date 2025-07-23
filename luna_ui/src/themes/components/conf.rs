@@ -1,12 +1,13 @@
 use crate::components::button::ButtonProp;
 use crate::components::card::CardProp;
 use crate::components::checkbox::CheckboxProp;
+use crate::components::divider::DividerProp;
 use crate::components::label::LabelProp;
 use crate::components::radio::RadioProp;
 use crate::components::switch::SwitchProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
-use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW, CHECKBOX, SWITCH};
+use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW, CHECKBOX, SWITCH, DIVIDER};
 use crate::try_from_toml_item;
 
 #[derive(Debug, Clone, Default)]
@@ -17,7 +18,8 @@ pub struct ComponentsConf {
     pub card: CardProp,
     pub radio: RadioProp,
     pub checkbox: CheckboxProp,
-    pub switch: SwitchProp
+    pub switch: SwitchProp,
+    pub divider: DividerProp,
 }
 
 try_from_toml_item! {
@@ -28,6 +30,7 @@ try_from_toml_item! {
         card => CARD, CardProp::default(), |item| item.try_into(),
         radio => RADIO, RadioProp::default(), |item| item.try_into(),
         checkbox => CHECKBOX, CheckboxProp::default(), |item| item.try_into(),
-        switch => SWITCH, SwitchProp::default(), |item| item.try_into()
+        switch => SWITCH, SwitchProp::default(), |item| item.try_into(),
+        divider => DIVIDER, DividerProp::default(), |item| item.try_into()
     }, "[components] should be a table"
 }

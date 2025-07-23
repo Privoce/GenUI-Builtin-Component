@@ -160,7 +160,7 @@ live_design! {
                     //     }
                     // }
 
-                    // <GCheckboxGroup>{ 
+                    // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
                     //     <GCheckbox>{
                     //         prop: {
@@ -219,6 +219,7 @@ live_design! {
                     //     value: true
                     // }
                     <GButton>{}
+                    <GDivider>{}
                 }
             }
         }
