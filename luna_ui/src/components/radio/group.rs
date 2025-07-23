@@ -1,7 +1,7 @@
 use super::event::{RadioChanged, RadioGroupEvent};
 use crate::{
     components::{radio::GRadioWidgetRefExt, view::GView},
-    visible,
+    inherits_view_livehook, inherits_view_widget_node,
 };
 use makepad_widgets::*;
 
@@ -34,28 +34,7 @@ pub struct GRadioGroup {
     pub active: Option<String>,
 }
 
-impl WidgetNode for GRadioGroup {
-    fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
-        self.deref_widget.uid_to_widget(uid)
-    }
-
-    fn find_widgets(&self, path: &[LiveId], cached: WidgetCache, results: &mut WidgetSet) {
-        self.deref_widget.find_widgets(path, cached, results);
-    }
-
-    fn walk(&mut self, cx: &mut Cx) -> Walk {
-        self.deref_widget.walk(cx)
-    }
-
-    fn area(&self) -> Area {
-        self.deref_widget.area()
-    }
-
-    fn redraw(&mut self, cx: &mut Cx) {
-        self.deref_widget.redraw(cx);
-    }
-    visible!();
-}
+inherits_view_widget_node!(GRadioGroup);
 
 impl Widget for GRadioGroup {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
@@ -117,25 +96,7 @@ impl LiveHook for GRadioGroup {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
     }
-    fn after_new_before_apply(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_new_before_apply(cx);
-    }
-    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        self.deref_widget.before_apply(cx, apply, index, nodes);
-    }
-    fn after_update_from_doc(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_update_from_doc(cx);
-    }
-    fn apply_value_instance(
-        &mut self,
-        cx: &mut Cx,
-        apply: &mut Apply,
-        index: usize,
-        nodes: &[LiveNode],
-    ) -> usize {
-        self.deref_widget
-            .apply_value_instance(cx, apply, index, nodes)
-    }
+    inherits_view_livehook!();
 }
 
 impl GRadioGroup {
@@ -174,7 +135,7 @@ impl GRadioGroup {
     /// if active is not set(None) in the group: find the active radio in the group
     /// else: set the active radio depending on the value of `active`
     pub fn set_active(&mut self, cx: &mut Cx, active_value: Option<String>) -> () {
-       self.toggle(cx, active_value, true);
+        self.toggle(cx, active_value, true);
     }
     pub fn toggle(&mut self, cx: &mut Cx, active_value: Option<String>, init: bool) -> () {
         self.active = active_value;

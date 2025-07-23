@@ -4,6 +4,7 @@
 
 // --- theme -----------------------------------------------------
 pub const THEME: &str = "theme";
+pub const COMPONENTS: &str = "components";
 // --- background ------------------------------------------------
 pub const BACKGROUND_COLOR: &str = "background_color";
 pub const BACKGROUND_VISIBLE: &str = "background_visible";
@@ -68,3 +69,7 @@ pub const ROUND: &str = "Round";
 pub const TICK: &str = "Tick";
 pub const CROSS: &str = "Cross";
 pub const RECT: &str = "Rect";
+// --- direction ---------------------------------------------
+pub const DIRECTION: &str = "direction";
+pub const VERTICAL: &str = "Vertical";
+pub const HORIZONTAL: &str = "Horizontal";

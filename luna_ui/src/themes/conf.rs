@@ -1,9 +1,11 @@
+use std::env::current_dir;
 use std::fmt::Display;
 
 use toml_edit::{DocumentMut, Item};
 
 use super::{components::conf::ComponentsConf, global::conf::GlobalConf, theme::conf::ThemeConf};
 use crate::error::Error;
+use crate::prop::manuel::{COMPONENTS, THEME};
 use crate::utils::get_from_doc as get;
 
 #[derive(Debug, Clone, Default)]
@@ -25,13 +27,13 @@ impl TryFrom<DocumentMut> for Conf {
         // )?;
         let theme = get(
             &value,
-            "theme",
+            THEME,
             || Ok(ThemeConf::default()),
             |item| item.try_into(),
         )?;
         let components = get(
             &value,
-            "components",
+            COMPONENTS,
             || Ok(ComponentsConf::default()),
             |item| item.try_into(),
         )?;
@@ -47,6 +49,27 @@ impl TryFrom<DocumentMut> for Conf {
 impl Conf {
     pub fn components(&self) -> &ComponentsConf {
         &self.components
+    }
+    /// 从项目根路径加载配置文件
+    /// - path:
+    ///     - None时加载默认配置
+    ///     - Some时加载指定路径的配置文件(根路径，不需要增加文件路径)
+    pub fn load<P>(path: Option<P>) -> Result<Self, Error>
+    where
+        P: AsRef<std::path::Path>,
+    {
+        let conf_path = path
+            .map_or_else(
+                || current_dir().map_err(|e| Error::ThemeStyleFileLoad(e.to_string())),
+                |path| Ok(path.as_ref().to_path_buf()),
+            )?
+            .join("genui.theme.toml");
+        let content = std::fs::read_to_string(&conf_path)
+            .map_err(|e| Error::ThemeStyleFileLoad(e.to_string()))?;
+        let doc = content
+            .parse::<DocumentMut>()
+            .map_err(|e| Error::ThemeStyleParse(e.to_string()))?;
+        doc.try_into()
     }
 }
 

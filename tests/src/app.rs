@@ -202,22 +202,23 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GSwitch>{
-                        prop: {
-                            basic: {
-                                theme: Warning,
-                                size: 60.0,
-                                border_radius: {
-                                    top: 15.0,
-                                    left: 15.0,
-                                    bottom: 15.0,
-                                    right: 15.0,
-                                }
-                            }
-                        }
-                        disabled: true,
-                        value: true
-                    }
+                    // <GSwitch>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Warning,
+                    //             size: 60.0,
+                    //             border_radius: {
+                    //                 top: 15.0,
+                    //                 left: 15.0,
+                    //                 bottom: 15.0,
+                    //                 right: 15.0,
+                    //             }
+                    //         }
+                    //     }
+                    //     disabled: true,
+                    //     value: true
+                    // }
+                    <GButton>{}
                 }
             }
         }

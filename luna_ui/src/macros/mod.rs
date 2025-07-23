@@ -7,3 +7,4 @@ mod impl_ref;
 mod component;
 mod state;
 mod from;
+mod inherits;

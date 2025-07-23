@@ -1,0 +1,9 @@
+[theme]
+
+
+[components]
+
+[components.button]
+basic = {height = "Fit", width = 300.0}
+hover = {background_color = "#888888", width = 200.0}
+pressed = {background_color = "#d0d0d0"}
