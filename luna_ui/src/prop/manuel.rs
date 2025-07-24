@@ -64,6 +64,9 @@ pub const EXTRA: &str = "extra";
 pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
 pub const DIVIDER: &str = "divider";
+pub const SVG: &str = "svg";
+pub const IMAGE: &str = "image";
+pub const TAG: &str = "tag";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

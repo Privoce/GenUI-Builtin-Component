@@ -34,7 +34,7 @@ live_design! {
         ui: <Root>{
             main_window = <Window>{
                 body = <View>{
-                    flow: Right,
+                    flow: Down,
                     spacing:30,
                     align: {
                         x: 0.5,
@@ -218,8 +218,20 @@ live_design! {
                     //     disabled: true,
                     //     value: true
                     // }
-                    <GButton>{}
-                    <GDivider>{}
+                    <GButton>{
+                        prop: {
+                            basic: {
+                                theme: Success,
+                            }
+                        }
+                    }
+                    <GDivider>{
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                            }
+                        }
+                    }
                 }
             }
         }

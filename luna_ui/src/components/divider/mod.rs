@@ -52,9 +52,6 @@ impl Widget for GDivider {
         self.set_scope_path(&scope.path);
         DrawStep::done()
     }
-    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        // let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
-    }
 }
 
 impl WidgetNode for GDivider {
@@ -127,8 +124,8 @@ impl Component for GDivider {
         DividerState::Basic
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-        todo!()
+    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
+        ()
     }
 
     fn clear_animation(&mut self, _cx: &mut Cx) -> () {

@@ -4,10 +4,11 @@ use crate::components::checkbox::CheckboxProp;
 use crate::components::divider::DividerProp;
 use crate::components::label::LabelProp;
 use crate::components::radio::RadioProp;
+use crate::components::svg::SvgProp;
 use crate::components::switch::SwitchProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
-use crate::prop::manuel::{BUTTON, CARD, LABEL, RADIO, VIEW, CHECKBOX, SWITCH, DIVIDER};
+use crate::prop::manuel::{BUTTON, CARD, CHECKBOX, DIVIDER, LABEL, RADIO, SVG, SWITCH, VIEW};
 use crate::try_from_toml_item;
 
 #[derive(Debug, Clone, Default)]
@@ -20,6 +21,7 @@ pub struct ComponentsConf {
     pub checkbox: CheckboxProp,
     pub switch: SwitchProp,
     pub divider: DividerProp,
+    pub svg: SvgProp,
 }
 
 try_from_toml_item! {
@@ -31,6 +33,7 @@ try_from_toml_item! {
         radio => RADIO, RadioProp::default(), |item| item.try_into(),
         checkbox => CHECKBOX, CheckboxProp::default(), |item| item.try_into(),
         switch => SWITCH, SwitchProp::default(), |item| item.try_into(),
-        divider => DIVIDER, DividerProp::default(), |item| item.try_into()
+        divider => DIVIDER, DividerProp::default(), |item| item.try_into(),
+        svg => SVG, SvgProp::default(), |item| item.try_into()
     }, "[components] should be a table"
 }
