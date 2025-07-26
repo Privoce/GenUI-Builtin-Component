@@ -7,6 +7,7 @@ mod number;
 mod padding;
 mod size;
 mod vec;
+mod image_fit;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 

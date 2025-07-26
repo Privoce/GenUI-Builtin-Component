@@ -35,6 +35,10 @@ pub const CLIP_X: &str = "clip_x";
 pub const CLIP_Y: &str = "clip_y";
 pub const ABS_POS: &str = "abs_pos";
 pub const SIZE: &str = "size";
+pub const FIT: &str = "fit";
+pub const MIN_WIDTH: &str = "min_width";
+pub const MIN_HEIGHT: &str = "min_height";
+pub const WIDTH_SCALE: &str = "width_scale";
 // --- text ------------------------------------------------------
 pub const FONT_SIZE: &str = "font_size";
 pub const COLOR: &str = "color";
@@ -77,3 +81,7 @@ pub const RECT: &str = "Rect";
 pub const DIRECTION: &str = "direction";
 pub const VERTICAL: &str = "Vertical";
 pub const HORIZONTAL: &str = "Horizontal";
+// --- image fit ---------------------------------------------
+pub const BIGGEST: &str = "Biggest";
+pub const SMALLEST: &str = "Smallest";
+pub const STRETCH: &str = "Stretch";

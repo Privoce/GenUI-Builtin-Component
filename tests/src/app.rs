@@ -233,23 +233,9 @@ live_design! {
                     //     }
                     // }
                     <GSvg> {
-                        prop: {
-                            basic: {
-                                height: 100.0,
-                                width: 100.0,
-                                theme: Error,
-                            }
-                        }
                         src: dep("crate://self/resources/heavy.svg"),
                     }
                     <GSvg> {
-                        prop: {
-                            basic: {
-                                height: 100.0,
-                                width: 100.0,
-                                color: #f00
-                            }
-                        }
                         src: dep("crate://self/resources/rain.svg")
                     }
                     <GButton>{}

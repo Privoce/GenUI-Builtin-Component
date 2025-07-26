@@ -105,9 +105,9 @@ pub struct SvgBasicProp {
     pub margin: Margin,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
-    #[live(Size::Fixed(1.2))]
+    #[live(Size::Fixed(16.0))]
     pub height: Size,
-    #[live(Size::Fill)]
+    #[live(Size::Fixed(16.0))]
     pub width: Size,
     #[live(None)]
     pub abs_pos: Option<DVec2>,
@@ -131,8 +131,8 @@ impl BasicProp for SvgBasicProp {
             color,
             margin: Margin::from_f64(0.0),
             cursor: MouseCursor::default(),
-            height: Size::Fixed(1.2),
-            width: Size::Fill,
+            height: Size::Fixed(16.0),
+            width: Size::Fixed(16.0),
             abs_pos: None,
         }
     }
@@ -173,10 +173,10 @@ impl BasicProp for SvgBasicProp {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             HEIGHT => {
-                self.height = Size::from_live_value(value).unwrap_or(Size::Fixed(1.2));
+                self.height = Size::from_live_value(value).unwrap_or(Size::Fixed(16.0));
             }
             WIDTH => {
-                self.width = Size::from_live_value(value).unwrap_or(Size::Fill);
+                self.width = Size::from_live_value(value).unwrap_or(Size::Fixed(16.0));
             }
             ABS_POS => {
                 self.abs_pos = DVec2::from_live_value(value);
@@ -257,10 +257,10 @@ impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
         let height = get_from_itable(
             inline_table,
             HEIGHT,
-            || Ok(Size::Fixed(1.2)),
+            || Ok(Size::Fixed(16.0)),
             |v| v.to_size(),
         )?;
-        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fill), |v| v.to_size())?;
+        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fixed(16.0)), |v| v.to_size())?;
         let abs_pos = get_from_itable(
             inline_table,
             ABS_POS,

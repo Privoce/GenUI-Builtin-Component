@@ -6,11 +6,19 @@ mod theme;
 pub use components::*;
 pub use conf::*;
 pub use global::*;
-use makepad_widgets::{Align, DVec2, Flow, Margin, MouseCursor, Padding, Size, Vec2};
+use makepad_widgets::{
+    image_cache::ImageFit, Align, DVec2, Flow, Margin, MouseCursor, Padding, Size, Vec2,
+};
 pub use theme::*;
 use toml_edit::Value;
 
-use crate::{error::Error, prop::traits::ToCursor};
+use crate::{
+    error::Error,
+    prop::{
+        manuel::{BIGGEST, HORIZONTAL, SIZE, SMALLEST, STRETCH, VERTICAL},
+        traits::ToCursor,
+    },
+};
 
 pub trait TomlValueTo {
     fn to_f32(&self) -> Result<f32, Error>;
@@ -24,6 +32,7 @@ pub trait TomlValueTo {
     fn to_size(&self) -> Result<Size, Error>;
     fn to_cursor(&self) -> Result<MouseCursor, Error>;
     fn to_dvec2(&self) -> Result<DVec2, Error>;
+    fn to_image_fit(&self) -> Result<ImageFit, Error>;
 }
 
 impl TomlValueTo for Value {
@@ -191,6 +200,23 @@ impl TomlValueTo for Value {
             .map_or_else(|| Ok(0.0), |item| item.to_f64())?;
 
         Ok(DVec2 { x, y })
+    }
+
+    fn to_image_fit(&self) -> Result<ImageFit, Error> {
+        let fit_str = self.as_str().ok_or(Error::ThemeStyleParse(
+            "Expected a string value for ImageFit".to_string(),
+        ))?;
+        match fit_str {
+            BIGGEST => Ok(ImageFit::Biggest),
+            HORIZONTAL => Ok(ImageFit::Horizontal),
+            SIZE => Ok(ImageFit::Size),
+            SMALLEST => Ok(ImageFit::Smallest),
+            STRETCH => Ok(ImageFit::Stretch),
+            VERTICAL => Ok(ImageFit::Vertical),
+            _ => Err(Error::ThemeStyleParse(
+                "ImageFit should be Contain, Cover, Fill or None".to_string(),
+            )),
+        }
     }
 }
 
