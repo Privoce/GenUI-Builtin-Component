@@ -7,11 +7,11 @@ live_design!{
 
     // animation for default draw view
     pub AN_DRAW_VIEW = {
-        background_color: #535d6d,
-        border_color: #535d6d,
+        background_color: #777777,
+        border_color: #777777,
         border_width: 0.0,
         // border_radius: vec4(4.0, 4.0, 4.0, 4.0),
-        shadow_color: #535d6d,
+        shadow_color: #777777,
         spread_radius: 0.0,
         blur_radius: 0.0,
         background_visible: 1.0,
@@ -21,28 +21,32 @@ live_design!{
     }
 
     pub AN_DRAW_RADIO = {
-        background_color: #535d6d,
+        background_color: #777777,
         background_visible: 1.0,
-        border_color: #535d6d,
+        border_color: #777777,
         border_width: 1.0,
         size: 16.0,
         stroke_color: #ffffff,
     }
 
     pub AN_DRAW_CHECKBOX = {
-        background_color: #535d6d,
+        background_color: #777777,
         background_visible: 1.0,
-        border_color: #535d6d,
+        border_color: #777777,
         border_width: 1.0,
         size: 16.0,
         stroke_color: #ffffff,
     }
 
     pub AN_DRAW_SWITCH = {
-        background_color: #535d6d,
+        background_color: #777777,
         background_visible: 1.0,
-        border_color: #535d6d,
+        border_color: #777777,
         border_width: 1.0,
         stroke_color: #ffffff,
+    }
+
+    pub AN_DRAW_SVG = {
+        color: #777777,
     }
 }

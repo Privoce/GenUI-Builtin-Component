@@ -218,20 +218,41 @@ live_design! {
                     //     disabled: true,
                     //     value: true
                     // }
-                    <GButton>{
+                    // <GButton>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Success,
+                    //         }
+                    //     }
+                    // }
+                    // <GDivider>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Primary,
+                    //         }
+                    //     }
+                    // }
+                    <GSvg> {
                         prop: {
                             basic: {
-                                theme: Success,
+                                height: 100.0,
+                                width: 100.0,
+                                theme: Error,
                             }
                         }
+                        src: dep("crate://self/resources/heavy.svg"),
                     }
-                    <GDivider>{
+                    <GSvg> {
                         prop: {
                             basic: {
-                                theme: Primary,
+                                height: 100.0,
+                                width: 100.0,
+                                color: #f00
                             }
                         }
+                        src: dep("crate://self/resources/rain.svg")
                     }
+                    <GButton>{}
                 }
             }
         }

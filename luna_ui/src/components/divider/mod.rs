@@ -13,7 +13,7 @@ use crate::{
     prop::{manuel::BASIC, ApplyStateMap},
     pure_after_apply, set_index, set_scope_path,
     shader::draw_view::DrawView,
-    themes::Conf,
+    themes::Conf, visible,
 };
 
 live_design! {
@@ -76,6 +76,14 @@ impl WidgetNode for GDivider {
         let _ = self.render(cx);
         self.draw_divider.redraw(cx);
     }
+
+    fn state(&self) -> String {
+        self.current_state().to_string()
+    }
+    fn animation_spread(&self) -> bool {
+        true
+    }
+    visible!();
 }
 
 impl LiveHook for GDivider {

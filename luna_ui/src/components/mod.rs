@@ -100,6 +100,8 @@ live_design! {
     pub GSwitch = <GSwitchBase> {}
 
     pub GDivider = <GDividerBase> {}
+
+    pub GSvg = <GSvgBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -113,6 +115,7 @@ pub fn components_register(cx: &mut Cx) {
     checkbox::group::live_design(cx);
     switch::live_design(cx);
     divider::live_design(cx);
+    svg::live_design(cx);
 }
 
 component! {

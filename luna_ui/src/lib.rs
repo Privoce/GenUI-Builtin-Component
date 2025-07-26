@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use makepad_widgets::*;
 use themes::Conf;
 
@@ -41,4 +39,5 @@ pub struct ComponentAnInit {
     card: bool,
     radio: bool,
     checkbox: bool,
+    svg: bool
 }

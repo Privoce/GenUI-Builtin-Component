@@ -6,12 +6,16 @@ use crate::{
     components::traits::{BasicProp, ComponentState, Prop},
     error::Error,
     prop::{
-        manuel::{ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CURSOR, HEIGHT, MARGIN, THEME, WIDTH},
+        manuel::{
+            ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CURSOR, DISABLED, HEIGHT, HOVER, MARGIN,
+            PRESSED, THEME, WIDTH,
+        },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl,
     },
     themes::{Color, Theme, TomlValueTo},
-    utils::{get_from_itable, get_from_table},
+    try_from_toml_item,
+    utils::{get_from_itable},
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -19,6 +23,12 @@ use crate::{
 pub struct SvgProp {
     #[live(SvgBasicProp::default())]
     pub basic: SvgBasicProp,
+    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Hover))]
+    pub hover: SvgBasicProp,
+    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Pressed))]
+    pub pressed: SvgBasicProp,
+    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Disabled))]
+    pub disabled: SvgBasicProp,
 }
 
 impl Prop for SvgProp {
@@ -29,24 +39,38 @@ impl Prop for SvgProp {
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
             SvgState::Basic => &self.basic,
+            SvgState::Hover => &self.hover,
+            SvgState::Pressed => &self.pressed,
+            SvgState::Disabled => &self.disabled,
         }
     }
 
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
         match state {
             SvgState::Basic => &mut self.basic,
+            SvgState::Hover => &mut self.hover,
+            SvgState::Pressed => &mut self.pressed,
+            SvgState::Disabled => &mut self.disabled,
         }
     }
 
     fn len() -> usize {
-        1 * SvgBasicProp::len()
+        4 * SvgBasicProp::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        map.sync(&mut self.basic, SvgState::Basic, []);
+        map.sync(
+            &mut self.basic,
+            SvgState::Basic,
+            [
+                (SvgState::Hover, &mut self.hover),
+                (SvgState::Pressed, &mut self.pressed),
+                (SvgState::Disabled, &mut self.disabled),
+            ],
+        );
     }
 }
 
@@ -54,27 +78,20 @@ impl Default for SvgProp {
     fn default() -> Self {
         Self {
             basic: Default::default(),
+            hover: SvgBasicProp::from_state(Theme::default(), SvgState::Hover),
+            pressed: SvgBasicProp::from_state(Theme::default(), SvgState::Pressed),
+            disabled: SvgBasicProp::from_state(Theme::default(), SvgState::Disabled),
         }
     }
 }
 
-impl TryFrom<&Item> for SvgProp {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let table = value.as_table().ok_or(Error::ThemeStyleParse(
-            "[components.svg] should be a table".to_string(),
-        ))?;
-
-        let basic = get_from_table(
-            table,
-            BASIC,
-            || Ok(SvgBasicProp::default()),
-            |item| (item, SvgState::Basic).try_into(),
-        )?;
-
-        Ok(Self { basic })
-    }
+try_from_toml_item! {
+    SvgProp {
+        basic => BASIC, SvgBasicProp::default(), |v| (v, SvgState::Basic).try_into(),
+        hover => HOVER, SvgBasicProp::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),
+        pressed => PRESSED, SvgBasicProp::from_state(Theme::default(), SvgState::Pressed), |v| (v, SvgState::Pressed).try_into(),
+        disabled => DISABLED, SvgBasicProp::from_state(Theme::default(), SvgState::Disabled), |v| (v, SvgState::Disabled).try_into()
+    }, "[components.svg] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -123,6 +140,9 @@ impl BasicProp for SvgBasicProp {
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
         let color_level = match state {
             SvgState::Basic => 500,
+            SvgState::Hover => 400,
+            SvgState::Pressed => 600,
+            SvgState::Disabled => 300,
         };
 
         match theme {
@@ -136,7 +156,7 @@ impl BasicProp for SvgBasicProp {
     }
 
     fn len() -> usize {
-        12
+        6
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
@@ -261,12 +281,15 @@ impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
 
 component_state! {
     SvgState {
-        Basic => BASIC
+        Basic => BASIC,
+        Hover => HOVER,
+        Pressed => PRESSED,
+        Disabled => DISABLED
     }, _ => SvgState::Basic
 }
 
 impl ComponentState for SvgState {
     fn is_disabled(&self) -> bool {
-        false
+        matches!(self, SvgState::Disabled)
     }
 }
