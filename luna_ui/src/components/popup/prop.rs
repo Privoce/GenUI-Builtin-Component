@@ -3,15 +3,16 @@ use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
     component_state,
-    components::traits::{BasicProp, ComponentState, Prop},
+    components::{
+        traits::{BasicProp, ComponentState, Prop},
+        view::ViewBasicProp,
+    },
     error::Error,
-    getter_setter_prop,
     prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
-            BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
-            MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING,
-            SPREAD_RADIUS, THEME, WIDTH,
+            BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, FLOW, HEIGHT, MARGIN, PADDING,
+            ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
@@ -23,82 +24,57 @@ use crate::{
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
-pub struct ViewProp {
-    #[live(ViewBasicProp::default())]
-    pub basic: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Hover))]
-    pub hover: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Pressed))]
-    pub pressed: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Disabled))]
-    pub disabled: ViewBasicProp,
+pub struct PopupProp {
+    #[live(PopupBasicProp::default())]
+    pub basic: PopupBasicProp,
 }
 
-impl Default for ViewProp {
+impl Default for PopupProp {
     fn default() -> Self {
         Self {
-            basic: ViewBasicProp::default(),
-            hover: ViewBasicProp::from_state(Theme::default(), ViewState::Hover),
-            pressed: ViewBasicProp::from_state(Theme::default(), ViewState::Pressed),
-            disabled: ViewBasicProp::from_state(Theme::default(), ViewState::Disabled),
+            basic: PopupBasicProp::default(),
         }
     }
 }
 
-impl Prop for ViewProp {
-    type State = ViewState;
-    type Basic = ViewBasicProp;
+impl Prop for PopupProp {
+    type State = PopupState;
+
+    type Basic = PopupBasicProp;
 
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
-            ViewState::Basic => &self.basic,
-            ViewState::Hover => &self.hover,
-            ViewState::Pressed => &self.pressed,
-            ViewState::Disabled => &self.disabled,
+            PopupState::Basic => &self.basic,
         }
     }
 
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
         match state {
-            ViewState::Basic => &mut self.basic,
-            ViewState::Hover => &mut self.hover,
-            ViewState::Pressed => &mut self.pressed,
-            ViewState::Disabled => &mut self.disabled,
+            PopupState::Basic => &mut self.basic,
         }
     }
 
     fn len() -> usize {
-        ViewBasicProp::len() * 3
+        PopupBasicProp::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        map.sync(
-            &mut self.basic,
-            ViewState::Basic,
-            [
-                (ViewState::Hover, &mut self.hover),
-                (ViewState::Pressed, &mut self.pressed),
-                (ViewState::Disabled, &mut self.disabled),
-            ],
-        );
+        map.sync(&mut self.basic, PopupState::Basic, []);
     }
 }
 
 try_from_toml_item! {
-    ViewProp {
-        basic => BASIC, ViewBasicProp::default(),|v| (v, ViewState::Basic).try_into(),
-        hover => HOVER, ViewBasicProp::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),
-        pressed => PRESSED, ViewBasicProp::from_state(Theme::default(), ViewState::Pressed), |v| (v, ViewState::Pressed).try_into(),
-        disabled => DISABLED, ViewBasicProp::from_state(Theme::default(), ViewState::Disabled), |v| (v, ViewState::Disabled).try_into()
-    }, "[component.view] should be a table"
+    PopupProp {
+        basic => BASIC, PopupBasicProp::default(),|v| (v, PopupState::Basic).try_into()
+    }, "[component.popup] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct ViewBasicProp {
+pub struct PopupBasicProp {
     #[live]
     pub theme: Theme,
     #[live]
@@ -147,8 +123,8 @@ pub struct ViewBasicProp {
     pub abs_pos: Option<DVec2>,
 }
 
-impl BasicProp for ViewBasicProp {
-    type State = ViewState;
+impl BasicProp for PopupBasicProp {
+    type State = PopupState;
 
     type Colors = (Color, Color, Color);
 
@@ -286,10 +262,7 @@ impl BasicProp for ViewBasicProp {
 
     fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
         let (bg_level, border_level, shadow_level) = match state {
-            ViewState::Basic => (500, 500, 400),
-            ViewState::Hover => (400, 400, 300),
-            ViewState::Pressed => (600, 600, 500),
-            ViewState::Disabled => (300, 300, 200),
+            PopupState::Basic => (500, 500, 400),
         };
 
         match theme {
@@ -399,16 +372,16 @@ impl BasicProp for ViewBasicProp {
     }
 }
 
-impl Default for ViewBasicProp {
+impl Default for PopupBasicProp {
     fn default() -> Self {
-        ViewBasicProp::from_state(Theme::default(), ViewState::Basic)
+        PopupBasicProp::from_state(Theme::default(), PopupState::Basic)
     }
 }
 
-impl TryFrom<(&Value, ViewState)> for ViewBasicProp {
+impl TryFrom<(&Value, PopupState)> for PopupBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Value, ViewState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Value, PopupState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[components.view.$state] should be an inline table".to_string(),
         ))?;
@@ -416,10 +389,10 @@ impl TryFrom<(&Value, ViewState)> for ViewBasicProp {
     }
 }
 
-impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
+impl TryFrom<(&Item, PopupState)> for PopupBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Item, ViewState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Item, PopupState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
             "[components.view.$state] should be an inline table".to_string(),
         ))?;
@@ -427,10 +400,10 @@ impl TryFrom<(&Item, ViewState)> for ViewBasicProp {
     }
 }
 
-impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
+impl TryFrom<(&InlineTable, PopupState)> for PopupBasicProp {
     type Error = Error;
 
-    fn try_from((inline_table, state): (&InlineTable, ViewState)) -> Result<Self, Self::Error> {
+    fn try_from((inline_table, state): (&InlineTable, PopupState)) -> Result<Self, Self::Error> {
         let theme = Theme::default();
         let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
 
@@ -548,56 +521,69 @@ impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
     }
 }
 
-impl ViewBasicProp {
-    getter_setter_prop! {
-        get_theme, set_theme: theme -> Theme,
-        get_background_color, set_background_color: background_color -> Vec4,
-        get_border_color, set_border_color: border_color -> Vec4,
-        get_border_width, set_border_width: border_width -> f32,
-        get_border_radius, set_border_radius: border_radius -> Radius,
-        get_shadow_color, set_shadow_color: shadow_color -> Vec4,
-        get_spread_radius, set_spread_radius: spread_radius -> f32,
-        get_blur_radius, set_blur_radius: blur_radius -> f32,
-        get_shadow_offset, set_shadow_offset: shadow_offset -> Vec2,
-        get_background_visible, set_background_visible: background_visible -> bool,
-        get_rotation, set_rotation: rotation -> f32,
-        get_scale, set_scale: scale -> f32,
-        get_padding, set_padding: padding -> Padding,
-        get_margin, set_margin: margin -> Margin,
-        get_clip_x, set_clip_x: clip_x -> bool,
-        get_clip_y, set_clip_y: clip_y -> bool,
-        get_align, set_align: align -> Align,
-        get_cursor, set_cursor: cursor -> MouseCursor,
-        get_flow, set_flow: flow -> Flow,
-        get_spacing, set_spacing: spacing -> f64,
-        get_height, set_height: height -> Size,
-        get_width, set_width: width -> Size,
-        get_abs_pos, set_abs_pos: abs_pos -> Option<DVec2>
-    }
-}
-
-component_state! {
-    ViewState {
-        Basic => BASIC,
-        Hover => HOVER,
-        Pressed => PRESSED,
-        Disabled => DISABLED
-    }, _ => ViewState::Basic
-}
-
-impl ViewState {
-    pub fn id(&self) -> &[LiveId; 2] {
-        match self {
-            ViewState::Basic => id!(hover.off),
-            ViewState::Hover => id!(hover.on),
-            ViewState::Pressed => id!(hover.pressed),
-            ViewState::Disabled => id!(hover.off),
+impl From<&PopupBasicProp> for ViewBasicProp {
+    fn from(value: &PopupBasicProp) -> Self {
+        let PopupBasicProp {
+            theme,
+            background_color,
+            border_color,
+            border_width,
+            border_radius,
+            shadow_color,
+            spread_radius,
+            blur_radius,
+            shadow_offset,
+            background_visible,
+            rotation,
+            scale,
+            padding,
+            margin,
+            clip_x,
+            clip_y,
+            align,
+            cursor,
+            flow,
+            spacing,
+            height,
+            width,
+            abs_pos,
+        } = *value;
+        ViewBasicProp {
+            theme,
+            background_color,
+            border_color,
+            border_width,
+            border_radius,
+            shadow_color,
+            spread_radius,
+            blur_radius,
+            shadow_offset,
+            background_visible,
+            rotation,
+            scale,
+            padding,
+            margin,
+            clip_x,
+            clip_y,
+            align,
+            cursor,
+            flow,
+            spacing,
+            height,
+            width,
+            abs_pos,
         }
     }
 }
 
-impl ComponentState for ViewState {
+component_state! {
+    PopupState {
+        Basic => BASIC
+    }, _ => PopupState::Basic
+}
+
+impl ComponentState for PopupState {
     fn is_disabled(&self) -> bool {
-        matches!(self, ViewState::Disabled)
+        false
     }
 }

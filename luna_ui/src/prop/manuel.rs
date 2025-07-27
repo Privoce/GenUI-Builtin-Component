@@ -72,6 +72,7 @@ pub const DIVIDER: &str = "divider";
 pub const SVG: &str = "svg";
 pub const IMAGE: &str = "image";
 pub const TAG: &str = "tag";
+pub const POPUP: &str = "popup";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

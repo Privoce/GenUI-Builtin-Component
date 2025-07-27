@@ -3,7 +3,7 @@ use std::fmt::Display;
 
 use toml_edit::{DocumentMut, Item};
 
-use super::{components::conf::ComponentsConf, global::conf::GlobalConf, theme::conf::ThemeConf};
+use super::{components::conf::ComponentsConf, theme::conf::ThemeConf};
 use crate::error::Error;
 use crate::prop::manuel::{COMPONENTS, THEME};
 use crate::utils::get_from_doc as get;

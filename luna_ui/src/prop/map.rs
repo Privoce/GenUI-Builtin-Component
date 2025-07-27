@@ -74,7 +74,7 @@ where
     ) where
         C: Component,
         P: IntoIterator<Item = LiveId>,
-        LP: IntoIterator<Item= &'m (LiveId, Option<Vec<LiveId>>)>,
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
         PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy;
@@ -376,7 +376,7 @@ impl ApplyMapImpl for PropMap {
     }
 }
 
-fn insert_map(
+pub fn insert_map(
     nodes: &[LiveNode],
     index: usize,
     applys: &mut HashMap<String, LiveValue>,

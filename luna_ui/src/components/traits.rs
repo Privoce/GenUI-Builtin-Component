@@ -4,15 +4,89 @@ use std::{
 };
 
 use makepad_widgets::{
-    error, Area, Cx, Event,  HeapLiveIdPath, Hit, Layout, LiveId, LiveNode,
-    LiveValue, Walk, Widget, WidgetNode,
+    error, Area, Cx, Event, HeapLiveIdPath, Hit, Layout, LiveId, LiveIdAsProp, LiveNode, LiveValue, Walk, Widget, WidgetNode, live_id
 };
 
 use crate::{
     components::lifecycle::LifeCycle,
-    prop::{ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, PropMap, SlotMap},
+    prop::{insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, PropMap, SlotMap},
     themes::Theme,
 };
+
+pub trait PopupComponent
+where
+    Self::Error: std::fmt::Debug,
+{
+    type Error;
+    type State;
+    /// ## render component after prop apply
+    /// this function should use in LiveHook trait : `fn after_apply_from_doc`
+    fn render_after_apply(&mut self, cx: &mut Cx) -> () {
+        if !self.visible() {
+            return;
+        }
+        if let Err(e) = self.render(cx) {
+            error!("{} render error: {:?}", std::any::type_name::<Self>(), e);
+        }
+    }
+    /// ## merge component props from config theme toml
+    fn merge_conf_prop(&mut self, cx: &mut Cx) -> ();
+    /// ## render component
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error>;
+    /// ## Is the component visible?
+    fn visible(&self) -> bool;
+    /// ## set apply state map
+    fn set_apply_state_map<'m, LP, P, NF, IF>(
+        &mut self,
+        nodes: &[LiveNode],
+        index: usize,
+        live_props: LP,
+        prefixs: P,
+        next_or: NF,
+        insert: IF,
+    ) -> ()
+    where
+        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        P: IntoIterator<Item = LiveId>,
+        NF: FnOnce(&mut Self) -> (),
+        IF: FnOnce(LiveId, &mut Self, PropMap) -> () + Copy,
+        Self: Sized,
+        Self::State: Eq + Hash + Copy,
+    {
+        if self.lifecycle().is_created() {
+            self.set_index(index);
+            next_or(self);
+        }
+
+        for prefix in prefixs {
+            let mut applys = PropMap::new();
+            for (state, fields) in live_props {
+                let mut paths = vec![
+                    live_id!(prop).as_field(),
+                    prefix.as_field(),
+                    state.as_field(),
+                ];
+                if let Some(fields) = fields {
+                    for field in fields {
+                        paths.push(field.as_field());
+                    }
+                    // do loop
+                    insert_map(nodes, index, &mut applys, &paths);
+                } else {
+                    insert_map(nodes, index, &mut applys, &paths);
+                }
+            }
+            insert(prefix, self, applys);
+        }
+    }
+    /// ## sync component properties
+    /// do before render component
+    fn sync(&mut self) -> ();
+    fn lifecycle(&self) -> LifeCycle;
+    fn set_index(&mut self, index: usize) -> ();
+    /// ## get current state of component
+    fn current_state(&self) -> Self::State;
+}
 
 /// # Component Trait
 /// Each Component should implement this trait

@@ -2,12 +2,11 @@ mod async_impl;
 mod prop;
 
 use makepad_widgets::image_cache::{
-    AsyncImageLoad, AsyncLoadResult, ImageBuffer, ImageCache, ImageCacheEntry, ImageCacheImpl,
-    ImageError, ImageFit,
+    AsyncImageLoad, AsyncLoadResult, ImageCacheImpl, ImageError, ImageFit,
 };
 pub use prop::*;
 
-use crate::components::image::async_impl::{ImageAsync, TryFromCxImage};
+use crate::components::image::async_impl::ImageAsync;
 use crate::components::lifecycle::LifeCycle;
 use crate::components::traits::{BasicProp, Component, Prop};
 use crate::error::Error;
@@ -16,13 +15,12 @@ use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
 use crate::themes::Conf;
 use crate::{
-    lifecycle, play_animation, pure_after_apply, set_animation, set_index, set_scope_path, visible,
+    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, visible,
     ComponentAnInit,
 };
 use makepad_widgets::*;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::sync::Arc;
 
 live_design! {
     link genui_basic;
@@ -543,21 +541,6 @@ impl Component for GImage {
 
 impl GImage {
     pub fn load(&mut self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
-        fn from_bytes(
-            img: &mut GImage,
-            cx: &mut Cx,
-            buf: Vec<u8>,
-        ) -> Result<(), Box<dyn std::error::Error>> {
-            match imghdr::from_bytes(&buf) {
-                Some(ty) => match ty {
-                    imghdr::Type::Png => img.load_png_from_data(cx, &buf, 0).map_err(|e| e.into()),
-                    imghdr::Type::Jpeg => img.load_jpg_from_data(cx, &buf, 0).map_err(|e| e.into()),
-                    _ => Err(ImageError::UnsupportedFormat.into()),
-                },
-                None => Err(ImageError::UnsupportedFormat.into()),
-            }
-        }
-
         let src_type = SrcType::from_str(src)?;
         let _ = match src_type {
             SrcType::Path(path_buf) => self.load_from_local_break(cx, path_buf.as_path()),
@@ -576,7 +559,6 @@ impl GImage {
 
                 // from_bytes(self, cx, buf)
                 self.load_from_url_break(cx, url)
-             
             }
             SrcType::Base64 { data, ty } => match ty {
                 imghdr::Type::Png => self.load_png_from_data(cx, &data, 0).map_err(|e| e.into()),
@@ -597,7 +579,7 @@ impl GImage {
         self.handle_async_result(cx, result, PathBuf::from(url));
         Ok(())
     }
-    
+
     pub fn load_from_local_break<P>(
         &mut self,
         cx: &mut Cx,

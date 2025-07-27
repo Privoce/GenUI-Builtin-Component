@@ -36,61 +36,42 @@ pub trait ImageAsync: ImageCacheImpl {
                     .as_mut()
                     .unwrap()
                     .execute_rev(path.as_ref().to_path_buf(), move |image_path| {
-                        if let Ok(mut f) = File::open(&image_path) {
-                            let mut data = Vec::new();
-                            match f.read_to_end(&mut data) {
-                                Ok(_len) => {
-                                    if image_path.extension().map(|s| s == "jpg").unwrap_or(false) {
-                                        match ImageBuffer::from_jpg(&*data) {
-                                            Ok(data) => {
-                                                Cx::post_action(AsyncImageLoad {
-                                                    image_path,
-                                                    result: RefCell::new(Some(Ok(data))),
-                                                });
-                                            }
-                                            Err(err) => {
-                                                Cx::post_action(AsyncImageLoad {
-                                                    image_path,
-                                                    result: RefCell::new(Some(Err(err))),
-                                                });
-                                            }
-                                        }
-                                    } else if image_path
-                                        .extension()
-                                        .map(|s| s == "png")
-                                        .unwrap_or(false)
-                                    {
-                                        match ImageBuffer::from_png(&*data) {
-                                            Ok(data) => {
-                                                Cx::post_action(AsyncImageLoad {
-                                                    image_path,
-                                                    result: RefCell::new(Some(Ok(data))),
-                                                });
-                                            }
-                                            Err(err) => {
-                                                Cx::post_action(AsyncImageLoad {
-                                                    image_path,
-                                                    result: RefCell::new(Some(Err(err))),
-                                                });
-                                            }
-                                        }
-                                    } else {
+                        if let Ok(data) = fpath_u8(image_path.as_path()) {
+                            if image_path.extension().map(|s| s == "jpg").unwrap_or(false) {
+                                match ImageBuffer::from_jpg(&data) {
+                                    Ok(data) => {
                                         Cx::post_action(AsyncImageLoad {
                                             image_path,
-                                            result: RefCell::new(Some(Err(
-                                                ImageError::UnsupportedFormat,
-                                            ))),
+                                            result: RefCell::new(Some(Ok(data))),
+                                        });
+                                    }
+                                    Err(err) => {
+                                        Cx::post_action(AsyncImageLoad {
+                                            image_path,
+                                            result: RefCell::new(Some(Err(err))),
                                         });
                                     }
                                 }
-                                Err(_err) => {
-                                    Cx::post_action(AsyncImageLoad {
-                                        image_path: image_path.clone(),
-                                        result: RefCell::new(Some(Err(ImageError::PathNotFound(
+                            } else if image_path.extension().map(|s| s == "png").unwrap_or(false) {
+                                match ImageBuffer::from_png(&data) {
+                                    Ok(data) => {
+                                        Cx::post_action(AsyncImageLoad {
                                             image_path,
-                                        )))),
-                                    });
+                                            result: RefCell::new(Some(Ok(data))),
+                                        });
+                                    }
+                                    Err(err) => {
+                                        Cx::post_action(AsyncImageLoad {
+                                            image_path,
+                                            result: RefCell::new(Some(Err(err))),
+                                        });
+                                    }
                                 }
+                            } else {
+                                Cx::post_action(AsyncImageLoad {
+                                    image_path,
+                                    result: RefCell::new(Some(Err(ImageError::UnsupportedFormat))),
+                                });
                             }
                         } else {
                             Cx::post_action(AsyncImageLoad {
