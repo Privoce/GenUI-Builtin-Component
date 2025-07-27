@@ -10,6 +10,9 @@ default = ["dev"]
 
 
 [dependencies]
+base64 = "0.22.1"
 cargo_metadata = "0.20.0"
-makepad-widgets = {path="/Users/shengyifei/projects/makepad/makepad/widgets"}
+imghdr = "0.7.0"
+makepad-widgets = { path = "/Users/shengyifei/projects/makepad/makepad/widgets" }
+reqwest = { version = "0.12.22", features = ["blocking"] }
 toml_edit = "0.22.26"

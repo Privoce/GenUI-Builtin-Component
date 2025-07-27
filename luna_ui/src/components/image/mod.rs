@@ -1,16 +1,27 @@
+mod async_impl;
 mod prop;
 
-use makepad_widgets::image_cache::{AsyncLoadResult, ImageCacheImpl, ImageError, ImageFit};
+use makepad_widgets::image_cache::{
+    AsyncImageLoad, AsyncLoadResult, ImageBuffer, ImageCache, ImageCacheEntry, ImageCacheImpl,
+    ImageError, ImageFit,
+};
 pub use prop::*;
 
+use crate::components::image::async_impl::{ImageAsync, TryFromCxImage};
+use crate::components::lifecycle::LifeCycle;
 use crate::components::traits::{BasicProp, Component, Prop};
 use crate::error::Error;
-use crate::prop::Src;
+use crate::prop::manuel::{BASIC, LOADING};
+use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
 use crate::themes::Conf;
-use crate::visible;
+use crate::{
+    lifecycle, play_animation, pure_after_apply, set_animation, set_index, set_scope_path, visible,
+    ComponentAnInit,
+};
 use makepad_widgets::*;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::sync::Arc;
 
 live_design! {
@@ -19,20 +30,18 @@ live_design! {
 
     pub GImageBase = {{GImage}} {
         animator: {
-            async_load = {
+            loading = {
                 default: off,
                 off = {
-                    from: {all: Forward {duration: 0.1}}
+                    from: {all: Forward {duration: (AN_DURATION)}},
                     apply: {
-                        draw_img: {async_load: 0.0}
+                        draw_img: {load: 0.0}
                     }
                 }
                 on = {
-                    from: {
-                        all: Forward {duration: 0.1}
-                    }
+                    from: {all: Forward {duration: (AN_DURATION)}},
                     apply: {
-                        draw_img: {async_load: 1.0}
+                        draw_img: {load: 1.0}
                     }
                 }
             }
@@ -48,8 +57,6 @@ pub struct GImage {
     animator: Animator,
     #[live]
     pub draw_img: DrawImg,
-    #[live(ImageAnimation::BounceFps(25.0))]
-    pub animation: ImageAnimation,
     #[rust]
     last_time: Option<f64>,
     #[rust]
@@ -66,6 +73,26 @@ pub struct GImage {
     async_image_size: Option<(usize, usize)>,
     #[rust]
     texture: Option<Texture>,
+    // --- animation -----------------
+    #[live(ImageAnimation::BounceFps(25.0))]
+    pub animation: ImageAnimation,
+    #[live(true)]
+    pub animation_open: bool,
+    // --- init ----------------------
+    #[rust]
+    pub lifecycle: LifeCycle,
+    #[rust]
+    index: usize,
+    #[live(true)]
+    pub sync: bool,
+    #[live]
+    pub grab_key_focus: bool,
+    #[live(true)]
+    pub event_open: bool,
+    #[rust]
+    pub scope_path: Option<HeapLiveIdPath>,
+    #[rust]
+    pub apply_state_map: ApplyStateMap<ImageState>,
 }
 
 impl WidgetNode for GImage {
@@ -87,7 +114,7 @@ impl WidgetNode for GImage {
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
-        let _ = self.render(cx);
+        // let _ = self.render(cx);
         self.draw_img.redraw(cx);
     }
     fn state(&self) -> String {
@@ -110,27 +137,40 @@ impl ImageCacheImpl for GImage {
 }
 
 impl LiveHook for GImage {
-    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, _index: usize, _nodes: &[LiveNode]) {
-        // match apply.from{
-        //     ApplyFrom::NewFromDoc{..}|// newed from DSL,
-        //     ApplyFrom:: UpdateFromDoc{..}|
-        //     ApplyFrom::Over{..}=>{
-        //         self.lazy_create_image_cache(cx);
-        //         let source = self.src.clone();
-        //         if source.as_str().len()>0 {
-        //             let _ = self.load_image_dep_by_path(cx, source.as_str(), 0);
-        //         }
-        //     }
-        //     _=>()
-        // }
+    pure_after_apply!();
+    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.set_apply_state_map(
+            nodes,
+            index,
+            &ImageBasicProp::live_props(),
+            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
+                BASIC => {
+                    component.apply_state_map.insert(ImageState::Basic, applys);
+                }
+                LOADING => {
+                    component
+                        .apply_state_map
+                        .insert(ImageState::Loading, applys);
+                }
+
+                _ => {}
+            },
+        );
     }
 }
 
 impl Widget for GImage {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
+        if !self.visible {
+            return;
+        }
+        cx.global::<ComponentAnInit>().image = true;
         if self.animator_handle_event(cx, event).must_redraw() {
             self.draw_img.redraw(cx);
         }
+
         // lets check if we have a post action
         if let Event::Actions(actions) = &event {
             for action in actions {
@@ -145,19 +185,20 @@ impl Widget for GImage {
                         // see if we can load from cache
                         self.load_image_from_cache(cx, image_path, 0);
                         self.async_image_size = None;
-                        self.animator_play(cx, id!(async_load.off));
+                        self.animator_play(cx, id!(loading.off));
                         self.redraw(cx);
                     }
                 }
             }
         }
+        let prop = self.prop.get(self.current_state());
         if let Some(nf) = self.next_frame.is_event(event) {
             // compute the next frame and patch things up
             if let Some(image_texture) = &self.texture {
                 let (texture_width, texture_height) = image_texture
                     .get_format(cx)
                     .vec_width_height()
-                    .unwrap_or((self.min_width as usize, self.min_height as usize));
+                    .unwrap_or((prop.min_width as usize, prop.min_height as usize));
                 if let Some(animation) = image_texture.animation(cx).clone() {
                     let delta = if let Some(last_time) = &self.last_time {
                         nf.time - last_time
@@ -243,27 +284,7 @@ impl Widget for GImage {
         }
     }
 
-    fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, walk: Walk) -> DrawStep {
-        self.draw_walk(cx, walk)
-    }
-}
-
-impl GImage {
-    /// Returns the original size of the image in pixels (not its displayed size).
-    ///
-    /// Returns `None` if the image has not been loaded into a texture yet.
-    pub fn size_in_pixels(&self, cx: &mut Cx) -> Option<(usize, usize)> {
-        self.texture
-            .as_ref()
-            .and_then(|t| t.get_format(cx).vec_width_height())
-    }
-
-    /// True if a texture has been set on this `GImage`.
-    pub fn has_texture(&self) -> bool {
-        self.texture.is_some()
-    }
-
-    pub fn draw_walk(&mut self, cx: &mut Cx2d, mut walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, mut walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
@@ -271,7 +292,7 @@ impl GImage {
         // we change either nothing, or width or height
         let rect = cx.peek_walk_turtle(walk);
         let dpi = cx.current_dpi_factor();
-
+        let prop = self.prop.get(self.current_state());
         let (width, height) = if let Some((w, h)) = &self.async_image_size {
             // still loading
 
@@ -281,7 +302,7 @@ impl GImage {
             let (width, height) = image_texture
                 .get_format(cx)
                 .vec_width_height()
-                .unwrap_or((self.min_width as usize, self.min_height as usize));
+                .unwrap_or((prop.min_width as usize, prop.min_height as usize));
             if let Some(animation) = image_texture.animation(cx) {
                 let (w, h) = (animation.width as f64, animation.height as f64);
                 self.next_frame = cx.new_next_frame();
@@ -293,15 +314,15 @@ impl GImage {
             } else {
                 self.draw_img.image_scale = vec2(1.0, 1.0);
                 self.draw_img.image_pan = vec2(0.0, 0.0);
-                (width as f64 * self.width_scale, height as f64)
+                (width as f64 * prop.width_scale, height as f64)
             }
         } else {
             self.draw_img.draw_vars.empty_texture(0);
-            (self.min_width as f64 / dpi, self.min_height as f64 / dpi)
+            (prop.min_width as f64 / dpi, prop.min_height as f64 / dpi)
         };
 
         let aspect = width / height;
-        match self.fit {
+        match prop.fit {
             ImageFit::Size => {
                 walk.width = Size::Fixed(width);
                 walk.height = Size::Fixed(height);
@@ -335,53 +356,7 @@ impl GImage {
 
         DrawStep::done()
     }
-
-    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
-    pub fn load_image_file_by_path_async(
-        &mut self,
-        cx: &mut Cx,
-        image_path: &Path,
-    ) -> Result<(), ImageError> {
-        if let Ok(result) = self.load_image_file_by_path_async_impl(cx, image_path, 0) {
-            match result {
-                AsyncLoadResult::Loading(w, h) => {
-                    self.async_image_size = Some((w, h));
-                    self.async_image_path = Some(image_path.into());
-                    self.animator_play(cx, id!(async_load.on));
-                    self.redraw(cx);
-                }
-                AsyncLoadResult::Loaded => {
-                    self.redraw(cx);
-                }
-            }
-            // lets set the w-h
-        }
-        Ok(())
-    }
-    pub fn load_image_from_data_async(
-        &mut self,
-        cx: &mut Cx,
-        image_path: &Path,
-        data: Arc<Vec<u8>>,
-    ) -> Result<(), ImageError> {
-        if let Ok(result) = self.load_image_from_data_async_impl(cx, image_path, data, 0) {
-            match result {
-                AsyncLoadResult::Loading(w, h) => {
-                    self.async_image_size = Some((w, h));
-                    self.async_image_path = Some(image_path.into());
-                    self.animator_play(cx, id!(async_load.on));
-                    self.redraw(cx);
-                }
-                AsyncLoadResult::Loaded => {
-                    self.redraw(cx);
-                }
-            }
-            // lets set the w-h
-        }
-        Ok(())
-    }
 }
-
 pub enum AsyncLoad {
     Yes,
     No,
@@ -410,30 +385,30 @@ impl GImageRef {
         }
     }
 
-    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
-    pub fn load_image_file_by_path_async(
-        &self,
-        cx: &mut Cx,
-        image_path: &Path,
-    ) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            return inner.load_image_file_by_path_async(cx, image_path);
-        }
-        Ok(())
-    }
+    // /// Loads the image at the given `image_path` on disk into this `ImageRef`.
+    // pub fn load_image_file_by_path_async(
+    //     &self,
+    //     cx: &mut Cx,
+    //     image_path: &Path,
+    // ) -> Result<(), ImageError> {
+    //     if let Some(mut inner) = self.borrow_mut() {
+    //         return inner.load_image_file_by_path_async(cx, image_path);
+    //     }
+    //     Ok(())
+    // }
 
-    /// Loads the image at the given `image_path` on disk into this `ImageRef`.
-    pub fn load_image_from_data_async(
-        &self,
-        cx: &mut Cx,
-        image_path: &Path,
-        data: Arc<Vec<u8>>,
-    ) -> Result<(), ImageError> {
-        if let Some(mut inner) = self.borrow_mut() {
-            return inner.load_image_from_data_async(cx, image_path, data);
-        }
-        Ok(())
-    }
+    // /// Loads the image at the given `image_path` on disk into this `ImageRef`.
+    // pub fn load_image_from_data_async(
+    //     &self,
+    //     cx: &mut Cx,
+    //     image_path: &Path,
+    //     data: Arc<Vec<u8>>,
+    // ) -> Result<(), ImageError> {
+    //     if let Some(mut inner) = self.borrow_mut() {
+    //         return inner.load_image_from_data_async(cx, image_path, data);
+    //     }
+    //     Ok(())
+    // }
 
     /// Loads a JPEG into this `ImageRef` by decoding the given encoded JPEG `data`.
     pub fn load_jpg_from_data(&self, cx: &mut Cx, data: &[u8]) -> Result<(), ImageError> {
@@ -498,50 +473,235 @@ impl Component for GImage {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        todo!()
-    }
-
-    fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> () {
-        todo!()
+        // let prop = self.prop.get(self.current_state());
+        // self.draw_button.merge(&prop.into());
+        self.lazy_create_image_cache(cx);
+        match self.src.clone() {
+            Src::None => {}
+            Src::Live(live_dependency) => {
+                if !live_dependency.as_str().is_empty() {
+                    let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
+                }
+            }
+            _ => {
+                let src = self.src.to_string();
+                let _ = self.load(cx, &src);
+            }
+        }
+        Ok(())
     }
 
     fn current_state(&self) -> Self::State {
-        todo!()
+        self.draw_img.current_state()
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-        todo!()
-    }
-
-    fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> () {
-        todo!()
+    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
+        ()
     }
 
     fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        todo!()
+        self.draw_img.apply_over(
+            cx,
+            live! {
+                load: 0.0,
+            },
+        );
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        todo!()
+        match state {
+            ImageState::Basic => self.draw_img.state_basic(),
+            ImageState::Loading => self.draw_img.state_loading(),
+        }
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        todo!()
+        if !self.animation_open {
+            return;
+        }
+        self.switch_state(state);
+        self.set_animation(cx);
     }
 
     fn sync(&mut self) -> () {
-        todo!()
+        if !self.sync {
+            return;
+        }
+        // sync state if is not Basic
+        self.prop.sync(&self.apply_state_map);
     }
 
-    fn set_animation(&mut self, cx: &mut Cx) -> () {
-        todo!()
+    fn set_animation(&mut self, _cx: &mut Cx) -> () {
+        ()
     }
 
-    fn lifecycle(&self) -> super::lifecycle::LifeCycle {
-        todo!()
-    }
-
-    fn set_index(&mut self, index: usize) -> () {
-        todo!()
-    }
+    play_animation!();
+    set_scope_path!();
+    set_index!();
+    lifecycle!();
 }
+
+impl GImage {
+    pub fn load(&mut self, cx: &mut Cx, src: &str) -> Result<(), Box<dyn std::error::Error>> {
+        fn from_bytes(
+            img: &mut GImage,
+            cx: &mut Cx,
+            buf: Vec<u8>,
+        ) -> Result<(), Box<dyn std::error::Error>> {
+            match imghdr::from_bytes(&buf) {
+                Some(ty) => match ty {
+                    imghdr::Type::Png => img.load_png_from_data(cx, &buf, 0).map_err(|e| e.into()),
+                    imghdr::Type::Jpeg => img.load_jpg_from_data(cx, &buf, 0).map_err(|e| e.into()),
+                    _ => Err(ImageError::UnsupportedFormat.into()),
+                },
+                None => Err(ImageError::UnsupportedFormat.into()),
+            }
+        }
+
+        let src_type = SrcType::from_str(src)?;
+        let _ = match src_type {
+            SrcType::Path(path_buf) => self.load_from_local_break(cx, path_buf.as_path()),
+            SrcType::Url(url) => {
+                // use reqwest::get do not jam the main thread
+                self.animator_play(cx, id!(loading.on));
+                // let (sender, reciver) = std::sync::mpsc::channel();
+                // std::thread::spawn(move || {
+                //     let buf = reqwest::blocking::get(&url)
+                //         .map_err(|e| e.to_string())
+                //         .and_then(|res| res.bytes().map_err(|e| e.to_string()))
+                //         .map(|bytes| bytes.to_vec());
+                //     sender.send(buf).unwrap();
+                // });
+                // let buf = reciver.recv()??;
+
+                // from_bytes(self, cx, buf)
+                self.load_from_url_break(cx, url)
+             
+            }
+            SrcType::Base64 { data, ty } => match ty {
+                imghdr::Type::Png => self.load_png_from_data(cx, &data, 0).map_err(|e| e.into()),
+                imghdr::Type::Jpeg => self.load_jpg_from_data(cx, &data, 0).map_err(|e| e.into()),
+                _ => Err(ImageError::UnsupportedFormat.into()),
+            },
+        }?;
+        Ok(())
+    }
+
+    pub fn load_from_url_break(
+        &mut self,
+        cx: &mut Cx,
+        url: String,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let (height, width) = self.get_size_when_load();
+        let result = self.load_from_url(cx, &url, height, width)?;
+        self.handle_async_result(cx, result, PathBuf::from(url));
+        Ok(())
+    }
+    
+    pub fn load_from_local_break<P>(
+        &mut self,
+        cx: &mut Cx,
+        image_path: P,
+    ) -> Result<(), Box<dyn std::error::Error>>
+    where
+        P: AsRef<std::path::Path>,
+    {
+        let (height, width) = self.get_size_when_load();
+        let result = self.load_from_local(cx, image_path.as_ref(), height, width)?;
+        self.handle_async_result(cx, result, image_path);
+        Ok(())
+    }
+    pub fn handle_async_result<P>(&mut self, cx: &mut Cx, result: AsyncLoadResult, path: P) -> ()
+    where
+        P: AsRef<std::path::Path>,
+    {
+        match result {
+            AsyncLoadResult::Loading(w, h) => {
+                self.async_image_size = Some((w, h));
+                self.async_image_path = Some(path.as_ref().to_path_buf());
+                self.animator_play(cx, id!(loading.on));
+                self.redraw(cx);
+            }
+            AsyncLoadResult::Loaded => {
+                self.load_image_from_cache(cx, path.as_ref(), 0);
+                self.async_image_size = None;
+                self.animator_play(cx, id!(loading.off));
+                self.redraw(cx);
+            }
+        }
+    }
+
+    pub fn get_size_when_load(&self) -> (usize, usize) {
+        let prop = self.prop.get(self.current_state());
+        let height = match prop.height {
+            Size::Fixed(h) => h,
+            _ => prop.min_height,
+        };
+        let width = match prop.width {
+            Size::Fixed(w) => w,
+            _ => prop.min_width,
+        };
+        (height as usize, width as usize)
+    }
+
+    /// Returns the original size of the image in pixels (not its displayed size).
+    ///
+    /// Returns `None` if the image has not been loaded into a texture yet.
+    pub fn size_in_pixels(&self, cx: &mut Cx) -> Option<(usize, usize)> {
+        self.texture
+            .as_ref()
+            .and_then(|t| t.get_format(cx).vec_width_height())
+    }
+
+    /// True if a texture has been set on this `GImage`.
+    pub fn has_texture(&self) -> bool {
+        self.texture.is_some()
+    }
+
+    // /// Loads the image at the given `image_path` on disk into this `ImageRef`.
+    // pub fn load_image_file_by_path_async(
+    //     &mut self,
+    //     cx: &mut Cx,
+    //     image_path: &Path,
+    // ) -> Result<(), ImageError> {
+    //     if let Ok(result) = self.load_image_file_by_path_async_impl(cx, image_path, 0) {
+    //         match result {
+    //             AsyncLoadResult::Loading(w, h) => {
+    //                 self.async_image_size = Some((w, h));
+    //                 self.async_image_path = Some(image_path.into());
+    //                 self.animator_play(cx, id!(loading.on));
+    //                 self.redraw(cx);
+    //             }
+    //             AsyncLoadResult::Loaded => {
+    //                 self.redraw(cx);
+    //             }
+    //         }
+    //         // lets set the w-h
+    //     }
+    //     Ok(())
+    // }
+    // pub fn load_image_from_data_async(
+    //     &mut self,
+    //     cx: &mut Cx,
+    //     image_path: &Path,
+    //     data: Arc<Vec<u8>>,
+    // ) -> Result<(), ImageError> {
+    //     if let Ok(result) = self.load_image_from_data_async_impl(cx, image_path, data, 0) {
+    //         match result {
+    //             AsyncLoadResult::Loading(w, h) => {
+    //                 self.async_image_size = Some((w, h));
+    //                 self.async_image_path = Some(image_path.into());
+    //                 self.animator_play(cx, id!(loading.on));
+    //                 self.redraw(cx);
+    //             }
+    //             AsyncLoadResult::Loaded => {
+    //                 self.redraw(cx);
+    //             }
+    //         }
+    //         // lets set the w-h
+    //     }
+    //     Ok(())
+    // }
+}
+
+impl ImageAsync for GImage {}

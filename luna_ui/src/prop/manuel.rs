@@ -51,6 +51,7 @@ pub const BASIC: &str = "basic";
 pub const ACTIVE: &str = "active";
 pub const HOVER_BASIC: &str = "hover_basic";
 pub const HOVER_ACTIVE: &str = "hover_active";
+pub const LOADING: &str = "loading";
 // --- slot ------------------------------------------------------
 pub const SLOT: &str = "slot";
 pub const HEADER: &str = "header";

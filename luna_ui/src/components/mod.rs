@@ -102,6 +102,10 @@ live_design! {
     pub GDivider = <GDividerBase> {}
 
     pub GSvg = <GSvgBase> {}
+
+    pub GImage = <GImageBase> {
+        
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -116,6 +120,7 @@ pub fn components_register(cx: &mut Cx) {
     switch::live_design(cx);
     divider::live_design(cx);
     svg::live_design(cx);
+    image::live_design(cx);
 }
 
 component! {

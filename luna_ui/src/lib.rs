@@ -39,5 +39,6 @@ pub struct ComponentAnInit {
     card: bool,
     radio: bool,
     checkbox: bool,
-    svg: bool
+    svg: bool,
+    image: bool
 }

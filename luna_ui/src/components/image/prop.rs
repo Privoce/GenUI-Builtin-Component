@@ -7,11 +7,13 @@ use crate::{
     error::Error,
     prop::{
         manuel::{
-            ABS_POS, BASIC, CURSOR, FIT, HEIGHT, MARGIN, MIN_HEIGHT, MIN_WIDTH, WIDTH, WIDTH_SCALE,
+            ABS_POS, BASIC, CURSOR, FIT, HEIGHT, LOADING, MARGIN, MIN_HEIGHT, MIN_WIDTH, WIDTH,
+            WIDTH_SCALE,
         },
-        traits::{FromLiveValue, NewFrom}, ApplyStateMapImpl,
+        traits::{FromLiveValue, NewFrom},
+        ApplyStateMapImpl,
     },
-    themes::TomlValueTo,
+    themes::{Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable,
 };
@@ -19,21 +21,25 @@ use crate::{
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct ImageProp {
-    #[live]
+    #[live(ImageBasicProp::default())]
     pub basic: ImageBasicProp,
+    #[live(ImageBasicProp::from_state(Theme::default(), ImageState::Loading))]
+    pub loading: ImageBasicProp,
 }
 
 impl Default for ImageProp {
     fn default() -> Self {
         Self {
             basic: Default::default(),
+            loading: ImageBasicProp::from_state(Theme::default(), ImageState::Loading),
         }
     }
 }
 
 try_from_toml_item! {
     ImageProp {
-        basic => BASIC, ImageBasicProp::default(), |v| (v, ImageState::Basic).try_into()
+        basic => BASIC, ImageBasicProp::default(), |v| (v, ImageState::Basic).try_into(),
+        loading => LOADING, ImageBasicProp::default(), |v| (v, ImageState::Loading).try_into()
     }, "[component.image] should be a table"
 }
 
@@ -45,12 +51,14 @@ impl Prop for ImageProp {
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
             ImageState::Basic => &self.basic,
+            ImageState::Loading => &self.loading,
         }
     }
 
     fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
         match state {
             ImageState::Basic => &mut self.basic,
+            ImageState::Loading => &mut self.loading,
         }
     }
 
@@ -62,28 +70,32 @@ impl Prop for ImageProp {
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        map.sync(&mut self.basic, ImageState::Basic, []);
+        map.sync(
+            &mut self.basic,
+            ImageState::Basic,
+            [(ImageState::Loading, &mut self.loading)],
+        );
     }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
 pub struct ImageBasicProp {
-    #[live]
+    #[live(ImageFit::default())]
     pub fit: ImageFit,
-    #[live]
+    #[live(Size::Fixed(64.0))]
     pub height: Size,
-    #[live]
+    #[live(Size::Fixed(128.0))]
     pub width: Size,
-    #[live]
+    #[live(Margin::from_f64(6.0))]
     pub margin: Margin,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
     #[live(None)]
     pub abs_pos: Option<DVec2>,
-    #[live]
+    #[live(128.0)]
     pub min_width: f64,
-    #[live]
+    #[live(64.0)]
     pub min_height: f64,
     #[live(1.0)]
     pub width_scale: f64,
@@ -92,15 +104,15 @@ pub struct ImageBasicProp {
 impl Default for ImageBasicProp {
     fn default() -> Self {
         Self {
-            fit: Default::default(),
-            height: Default::default(),
-            width: Default::default(),
-            margin: Default::default(),
-            cursor: Default::default(),
-            abs_pos: Default::default(),
-            min_width: Default::default(),
-            min_height: Default::default(),
-            width_scale: Default::default(),
+            fit: ImageFit::default(),
+            height: Size::Fixed(64.0),
+            width: Size::Fixed(128.0),
+            margin: Margin::from_f64(6.0),
+            cursor: MouseCursor::default(),
+            abs_pos: None,
+            min_width: 128.0,
+            min_height: 64.0,
+            width_scale: 1.0,
         }
     }
 }
@@ -129,8 +141,8 @@ impl TryFrom<(&Item, ImageState)> for ImageBasicProp {
         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
         let margin = Margin::from_f64(6.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
-        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
+        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fixed(64.0)), |v| v.to_size())?;
+        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fixed(128.0)), |v| v.to_size())?;
         let abs_pos = get_from_itable(
             inline_table,
             ABS_POS,
@@ -138,8 +150,8 @@ impl TryFrom<(&Item, ImageState)> for ImageBasicProp {
             |v| v.to_dvec2().map(Some),
         )?;
 
-        let min_width = get_from_itable(inline_table, MIN_WIDTH, || Ok(16.0), |v| v.to_f64())?;
-        let min_height = get_from_itable(inline_table, MIN_HEIGHT, || Ok(16.0), |v| v.to_f64())?;
+        let min_width = get_from_itable(inline_table, MIN_WIDTH, || Ok(128.0), |v| v.to_f64())?;
+        let min_height = get_from_itable(inline_table, MIN_HEIGHT, || Ok(64.0), |v| v.to_f64())?;
         let width_scale = get_from_itable(inline_table, WIDTH_SCALE, || Ok(1.0), |v| v.to_f64())?;
 
         Ok(Self {
@@ -169,13 +181,13 @@ impl BasicProp for ImageBasicProp {
         };
         Self {
             fit: ImageFit::default(),
-            height: Size::Fit,
-            width: Size::Fit,
+            height: Size::Fixed(64.0),
+            width: Size::Fixed(128.0),
             margin: Margin::from_f64(6.0),
             cursor,
             abs_pos: None,
-            min_width: 16.0,
-            min_height: 16.0,
+            min_width: 128.0,
+            min_height: 64.0,
             width_scale: 1.0,
         }
     }
@@ -214,10 +226,10 @@ impl BasicProp for ImageBasicProp {
                 self.abs_pos = DVec2::from_live_value(value);
             }
             MIN_WIDTH => {
-                self.min_width = f64::from_live_value(value).unwrap_or(16.0);
+                self.min_width = f64::from_live_value(value).unwrap_or(128.0);
             }
             MIN_HEIGHT => {
-                self.min_height = f64::from_live_value(value).unwrap_or(16.0);
+                self.min_height = f64::from_live_value(value).unwrap_or(64.0);
             }
             WIDTH_SCALE => {
                 self.width_scale = f64::from_live_value(value).unwrap_or(1.0);
@@ -265,7 +277,8 @@ impl BasicProp for ImageBasicProp {
 
 component_state! {
     ImageState {
-        Basic => BASIC
+        Basic => BASIC,
+        Loading => LOADING
     }, _ => ImageState::Basic
 }
 
