@@ -4,12 +4,16 @@ use std::{
 };
 
 use makepad_widgets::{
-    error, Area, Cx, Event, HeapLiveIdPath, Hit, Layout, LiveId, LiveIdAsProp, LiveNode, LiveValue, Walk, Widget, WidgetNode, live_id
+    error, live_id, Area, Cx, Cx2d, DVec2, Event, HeapLiveIdPath, Hit, Layout, LiveId,
+    LiveIdAsProp, LiveNode, LiveValue, Scope, Walk, Widget, WidgetNode,
 };
 
 use crate::{
     components::lifecycle::LifeCycle,
-    prop::{insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, PropMap, SlotMap},
+    prop::{
+        insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, Position,
+        PropMap, SlotMap,
+    },
     themes::Theme,
 };
 
@@ -86,6 +90,20 @@ where
     fn set_index(&mut self, index: usize) -> ();
     /// ## get current state of component
     fn current_state(&self) -> Self::State;
+    /// ## Begin to draw popup
+    /// this method is used to begin drawing the popup
+    fn begin(&mut self, cx: &mut Cx2d) -> ();
+    fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> ();
+    fn redraw(&mut self, cx: &mut Cx) -> ();
+    fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
+    fn draw_popup(
+        &mut self,
+        cx: &mut Cx2d,
+        scope: &mut Scope,
+        position: Option<Position>,
+        angle_offset: f32,
+        redraw: &mut bool,
+    ) -> ();
 }
 
 /// # Component Trait

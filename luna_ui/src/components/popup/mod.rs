@@ -15,8 +15,8 @@ use crate::{
     error::Error,
     lifecycle,
     prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, PopupMode},
-    pure_after_apply, set_index,
-    shader::draw_view::DrawView,
+    pure_after_apply, set_index, set_scope_path,
+    shader::{draw_popup::DrawPopup, },
     themes::Conf,
 };
 
@@ -45,12 +45,10 @@ pub struct GPopup {
     pub sync: bool,
     // --- popup ---------------------
     #[live]
-    pub mode: PopupMode,
-    #[live]
     pub close_mode: CloseMode,
     // --- draw ----------------------
     #[live]
-    pub draw_popup: DrawView,
+    pub draw_popup: DrawPopup,
     /// draw list is necessary!!!
     /// because we need to draw the popup on top of everything
     /// although the name of DrawList2d may let you think it's only for 2d list drawing
@@ -58,6 +56,8 @@ pub struct GPopup {
     #[live]
     draw_list: DrawList2d,
     // --- from view -------------------
+    #[rust]
+    pub area: Area,
     #[live]
     pub scroll: DVec2,
     #[live]
@@ -198,13 +198,145 @@ impl PopupComponent for GPopup {
     }
 
     fn sync(&mut self) -> () {
-        todo!()
+        if !self.sync {
+            return;
+        }
+        self.prop.sync(&self.apply_state_map);
     }
 
     fn current_state(&self) -> Self::State {
         PopupState::Basic
     }
 
+    fn begin(&mut self, cx: &mut Cx2d) -> () {
+        self.draw_list.begin_overlay_reuse(cx);
+        cx.begin_pass_sized_turtle(Layout::flow_down());
+        let prop = self.prop.get(self.current_state());
+        self.draw_popup.begin(cx, prop.walk(), prop.layout());
+    }
+
+    fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
+        self.draw_popup.end(cx);
+        cx.end_pass_sized_turtle_with_shift(shift_area, shift);
+        self.draw_list.end(cx);
+        self.set_scope_path(&scope.path);
+    }
+
+    fn draw_popup(
+        &mut self,
+        cx: &mut Cx2d,
+        scope: &mut Scope,
+        position: Option<crate::prop::Position>,
+        angle_offset: f32,
+        redraw: &mut bool,
+    ) -> () {
+        let _ = position.map(|position| {
+            self.draw_popup.position = position;
+        });
+        self.draw_popup.angle_offset = angle_offset;
+        // draw the popup ------------------------------------------------------------------------
+
+        // ---------------------------------------------------------------------------------------
+        if *redraw {
+            self.draw_popup.redraw(cx);
+            *redraw = !*redraw;
+        }
+    }
+    fn redraw(&mut self, cx: &mut Cx) -> () {
+        if self.visible {
+            let _ = self.render(cx);
+            self.draw_popup.redraw(cx);
+            self.draw_list.redraw(cx);
+            for (_, child) in &mut self.children {
+                if child.visible() {
+                    child.redraw(cx);
+                }
+            }
+        }
+    }
     set_index!();
     lifecycle!();
+    set_scope_path!();
+}
+
+impl GPopup {
+    pub fn draw_container(&mut self, cx: &mut Cx2d, scope: &mut Scope) {
+        let prop = self.prop.get(self.current_state());
+
+        // the beginning state
+        if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
+            if !self.visible {
+                self.draw_state.end();
+                return;
+            }
+            self.defer_walks.clear();
+
+            let scroll = if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+                scroll_bars.begin_nav_area(cx);
+                scroll_bars.get_scroll_pos()
+            } else {
+                self.scroll
+            };
+
+            let layout = prop.layout().with_scroll(scroll);
+            let walk = prop.walk();
+            if prop.background_visible {
+                self.draw_popup.begin(cx, walk, layout);
+            } else {
+                cx.begin_turtle(walk, layout);
+            }
+        }
+
+        while let Some(DrawState::Drawing(step, resume)) = self.draw_state.get() {
+            if step < self.children.len() {
+                if let Some((id, child)) = self.children.get_mut(step) {
+                    if child.visible() {
+                        let walk = child.walk(cx);
+                        // child.set_disabled(cx, self.disabled);
+                        if resume {
+                            scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                        } else if let Some(fw) = cx.defer_walk(walk) {
+                            self.defer_walks.push((*id, fw));
+                        } else {
+                            self.draw_state.set(DrawState::Drawing(step, true));
+                            scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                        }
+                    }
+                }
+                self.draw_state.set(DrawState::Drawing(step + 1, false));
+            } else {
+                self.draw_state.set(DrawState::DeferWalk(0));
+            }
+        }
+
+        while let Some(DrawState::DeferWalk(step)) = self.draw_state.get() {
+            if step < self.defer_walks.len() {
+                let (id, dw) = &mut self.defer_walks[step];
+                if let Some((id, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
+                    let walk = dw.resolve(cx);
+                    // child.set_disabled(cx, self.disabled);
+                    scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                }
+                self.draw_state.set(DrawState::DeferWalk(step + 1));
+            } else {
+                if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+                    scroll_bars.draw_scroll_bars(cx);
+                };
+
+                if prop.background_visible {
+                    self.draw_popup.end(cx);
+                    self.area = self.draw_popup.area();
+                } else {
+                    cx.end_turtle_with_area(&mut self.area);
+                };
+
+                if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+                    scroll_bars.set_area(self.area);
+                    scroll_bars.end_nav_area(cx);
+                };
+
+                self.draw_state.end();
+            }
+        }
+    }
 }

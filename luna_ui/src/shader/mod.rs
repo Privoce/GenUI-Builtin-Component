@@ -5,6 +5,7 @@ pub mod draw_view;
 pub mod draw_switch;
 pub mod draw_svg;
 pub mod draw_image;
+pub mod draw_popup;
 
 use makepad_widgets::Cx;
 
@@ -15,5 +16,7 @@ pub fn shader_register(cx: &mut Cx) {
     draw_switch::live_design(cx);
     draw_svg::live_design(cx);
     draw_image::live_design(cx);
+    draw_popup::live_design(cx);
     animation::live_design(cx);
+
 }
