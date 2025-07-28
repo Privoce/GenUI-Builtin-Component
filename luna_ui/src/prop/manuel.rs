@@ -73,6 +73,7 @@ pub const SVG: &str = "svg";
 pub const IMAGE: &str = "image";
 pub const TAG: &str = "tag";
 pub const POPUP: &str = "popup";
+pub const POPUP_CONTAINER: &str = "popup_container";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

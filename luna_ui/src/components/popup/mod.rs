@@ -1,4 +1,5 @@
 mod prop;
+pub mod container;
 
 use std::cell::RefCell;
 
@@ -7,6 +8,7 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
+    animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, PopupComponent, Prop},
@@ -14,15 +16,16 @@ use crate::{
     },
     error::Error,
     lifecycle,
-    prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, PopupMode},
+    prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, PopupMode, Position},
     pure_after_apply, set_index, set_scope_path,
-    shader::{draw_popup::DrawPopup, },
+    shader::draw_popup::DrawPopup,
     themes::Conf,
 };
 
 live_design! {
     link genui_basic;
-    GPopupBase = {{GPopup}}{}
+
+    pub GPopupBase = {{GPopup}}{}
 }
 
 #[derive(Live, LiveRegister)]
@@ -49,12 +52,6 @@ pub struct GPopup {
     // --- draw ----------------------
     #[live]
     pub draw_popup: DrawPopup,
-    /// draw list is necessary!!!
-    /// because we need to draw the popup on top of everything
-    /// although the name of DrawList2d may let you think it's only for 2d list drawing
-    /// actually it's for all the drawing that needs to be on top of everything!!!
-    #[live]
-    draw_list: DrawList2d,
     // --- from view -------------------
     #[rust]
     pub area: Area,
@@ -74,6 +71,10 @@ pub struct GPopup {
     live_update_order: SmallVec<[LiveId; 1]>,
     #[rust]
     find_cache: RefCell<SmallVec<[(u64, WidgetSet); 3]>>,
+    #[live(false)]
+    pub block_signal_event: bool,
+    #[live]
+    pub event_order: EventOrder,
 }
 
 impl LiveHook for GPopup {
@@ -209,16 +210,13 @@ impl PopupComponent for GPopup {
     }
 
     fn begin(&mut self, cx: &mut Cx2d) -> () {
-        self.draw_list.begin_overlay_reuse(cx);
-        cx.begin_pass_sized_turtle(Layout::flow_down());
+        
         let prop = self.prop.get(self.current_state());
         self.draw_popup.begin(cx, prop.walk(), prop.layout());
     }
 
     fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
         self.draw_popup.end(cx);
-        cx.end_pass_sized_turtle_with_shift(shift_area, shift);
-        self.draw_list.end(cx);
         self.set_scope_path(&scope.path);
     }
 
@@ -226,7 +224,7 @@ impl PopupComponent for GPopup {
         &mut self,
         cx: &mut Cx2d,
         scope: &mut Scope,
-        position: Option<crate::prop::Position>,
+        position: Option<Position>,
         angle_offset: f32,
         redraw: &mut bool,
     ) -> () {
@@ -235,7 +233,7 @@ impl PopupComponent for GPopup {
         });
         self.draw_popup.angle_offset = angle_offset;
         // draw the popup ------------------------------------------------------------------------
-
+        self.draw_container(cx, scope);
         // ---------------------------------------------------------------------------------------
         if *redraw {
             self.draw_popup.redraw(cx);
@@ -246,7 +244,7 @@ impl PopupComponent for GPopup {
         if self.visible {
             let _ = self.render(cx);
             self.draw_popup.redraw(cx);
-            self.draw_list.redraw(cx);
+           
             for (_, child) in &mut self.children {
                 if child.visible() {
                     child.redraw(cx);
@@ -260,6 +258,84 @@ impl PopupComponent for GPopup {
 }
 
 impl GPopup {
+    pub fn handle_event_with(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        scope: &mut Scope,
+        sweep_area: Area,
+    ) {
+        if !self.visible && event.requires_visibility() {
+            return;
+        }
+
+        // animation_open_then_redraw!(self, cx, event);
+
+        if self.block_signal_event {
+            if let Event::Signal = event {
+                return;
+            }
+        }
+        if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+            let mut actions = Vec::new();
+            scroll_bars.handle_main_event(cx, event, scope, &mut actions);
+            if actions.len() > 0 {
+                cx.redraw_area_and_children(self.area);
+            };
+        }
+
+        // If the UI tree has changed significantly (e.g. AdaptiveView varaints changed),
+        // we need to clear the cache and re-query widgets.
+        if cx.widget_query_invalidation_event.is_some() {
+            self.find_cache.borrow_mut().clear();
+        }
+
+        match &self.event_order {
+            EventOrder::Up => {
+                for (id, child) in self.children.iter_mut().rev() {
+                    scope.with_id(*id, |scope| {
+                        child.handle_event(cx, event, scope);
+                    });
+                }
+            }
+            EventOrder::Down => {
+                for (id, child) in self.children.iter_mut() {
+                    scope.with_id(*id, |scope| {
+                        child.handle_event(cx, event, scope);
+                    });
+                }
+            }
+            EventOrder::List(list) => {
+                for id in list {
+                    if let Some((_, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
+                        scope.with_id(*id, |scope| {
+                            child.handle_event(cx, event, scope);
+                        });
+                    }
+                }
+            }
+        }
+
+        // match event.hit_designer(cx, self.area) {
+        //     HitDesigner::DesignerPick(_e) => {
+        //         cx.widget_action(uid, &scope.path, WidgetDesignAction::PickedBody)
+        //     }
+        //     _ => (),
+        // }
+
+        // if self.visible || self.animator.live_ptr.is_some() {
+        //     let hit = event.hits_with_capture_overload(cx, self.area(), self.capture_overload);
+        //     if self.disabled {
+        //         self.handle_when_disabled(cx, event, hit);
+        //     } else {
+        //         self.handle_widget_event(cx, event, hit, self.area());
+        //     }
+        // }
+
+        if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+            scroll_bars.handle_scroll_event(cx, event, scope, &mut Vec::new());
+        }
+    }
     pub fn draw_container(&mut self, cx: &mut Cx2d, scope: &mut Scope) {
         let prop = self.prop.get(self.current_state());
 
@@ -294,12 +370,12 @@ impl GPopup {
                         let walk = child.walk(cx);
                         // child.set_disabled(cx, self.disabled);
                         if resume {
-                            scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                            let _ = scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
                         } else if let Some(fw) = cx.defer_walk(walk) {
                             self.defer_walks.push((*id, fw));
                         } else {
                             self.draw_state.set(DrawState::Drawing(step, true));
-                            scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                            let _ = scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
                         }
                     }
                 }
@@ -315,7 +391,7 @@ impl GPopup {
                 if let Some((id, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
                     let walk = dw.resolve(cx);
                     // child.set_disabled(cx, self.disabled);
-                    scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
+                    let _ = scope.with_id(*id, |scope| child.draw_walk(cx, scope, walk));
                 }
                 self.draw_state.set(DrawState::DeferWalk(step + 1));
             } else {
@@ -338,5 +414,93 @@ impl GPopup {
                 self.draw_state.end();
             }
         }
+    }
+
+    pub fn draw_container_drawer(
+        &mut self,
+        cx: &mut Cx2d,
+        scope: &mut Scope,
+        position: Position,
+        proportion: f32,
+        redraw: &mut bool,
+    ) {
+        self.draw_popup.position = position;
+        let w = Walk {
+            height: Size::All,
+            width: Size::All,
+            ..Default::default()
+        };
+        let popup_size = cx.peek_walk_turtle(w).size;
+        // now get virtual box as rect
+        let (adjust_size, adjust_pos) = match position {
+            Position::Left | Position::LeftTop | Position::LeftBottom => {
+                let x = if proportion > 1.0 {
+                    proportion as f64
+                } else {
+                    proportion as f64 * popup_size.x
+                };
+                let size = DVec2 { x, y: popup_size.y };
+                let pos = DVec2 { x: 0.0, y: 0.0 };
+                (size, pos)
+            }
+            Position::Right | Position::RightTop | Position::RightBottom => {
+                let x = if proportion > 1.0 {
+                    proportion as f64
+                } else {
+                    proportion as f64 * popup_size.x
+                };
+                let size = DVec2 { x, y: popup_size.y };
+                let pos = DVec2 {
+                    x: (1.0 - proportion) as f64 * popup_size.x,
+                    y: 0.0,
+                };
+                (size, pos)
+            }
+            Position::Top | Position::TopLeft | Position::TopRight => {
+                let y = if proportion > 1.0 {
+                    proportion as f64
+                } else {
+                    proportion as f64 * popup_size.y
+                };
+                let size = DVec2 { x: popup_size.x, y };
+                let pos = DVec2 { x: 0.0, y: 0.0 };
+                (size, pos)
+            }
+            Position::Bottom | Position::BottomLeft | Position::BottomRight => {
+                let y = if proportion > 1.0 {
+                    proportion as f64
+                } else {
+                    proportion as f64 * popup_size.y
+                };
+                let size = DVec2 { x: popup_size.x, y };
+                let pos = DVec2 {
+                    x: 0.0,
+                    y: (1.0 - proportion) as f64 * popup_size.y,
+                };
+                (size, pos)
+            }
+        };
+
+        // self.container_walk.replace(Walk {
+        //     abs_pos: Some(adjust_pos),
+        //     width: Size::Fixed(adjust_size.x),
+        //     height: Size::Fixed(adjust_size.y),
+        //     ..Default::default()
+        // });
+
+        // self.container
+        //     .draw_item_drawer(cx, scope, self.container_walk.unwrap());
+
+        if *redraw {
+            self.draw_popup.redraw(cx);
+            *redraw = !*redraw;
+        }
+    }
+
+    pub fn menu_contains_pos(&self, cx: &mut Cx, pos: DVec2) -> bool {
+        self.draw_popup.area().clipped_rect(cx).contains(pos)
+    }
+    pub fn container_contains_pos(&self, cx: &mut Cx, pos: DVec2) -> bool {
+        self.area.clipped_rect(cx).contains(pos)
     }
 }

@@ -232,13 +232,46 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GSvg> {
-                        src: dep("crate://self/resources/heavy.svg"),
+                    // <GSvg> {
+                    //     src: dep("crate://self/resources/heavy.svg"),
+                    // }
+                    // <GImage> {
+                    //     src: Live(dep("crate://self/resources/install.png")),
+                    //     prop: {
+                    //         basic: {
+                    //             height: 300.0,
+                    //             width: 500.0,
+                    //         }
+                    //     }
+                    // }
+                    // <GImage> {
+                    //     // src: Url("https://genui.privoce.com/genui.png"),
+                    //     src: File("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png"),
+                    //     // src: Live(dep("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png")),
+                       
+                    // }
+                    // <GImage> {
+                    //     src: Url("https://aisearch.bj.bcebos.com/homepage/input_panel/aisearch_online.png"),
+                    //     prop: {
+                    //         basic: {
+                    //             height: 100.0,
+                    //             width: 200.0,
+                    //         }
+                    //     }
+                    // }
+                    // <GImage> {
+                    //     src: Url("https://miro.medium.com/v2/resize:fit:1200/0*fmpeXj1eUS-Nrkkv.png"),
+                    //     prop: {
+                    //         basic: {
+                    //             height: 100.0,
+                    //             width: 200.0,
+                    //         }
+                    //     }
+                    // }
+                    <GDialog> {
+                        opened: true,
+                        <GButton> {}
                     }
-                    <GSvg> {
-                        src: dep("crate://self/resources/rain.svg")
-                    }
-                    <GButton>{}
                 }
             }
         }

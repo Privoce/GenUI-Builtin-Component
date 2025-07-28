@@ -1,29 +1,31 @@
 use makepad_widgets::*;
 
 use crate::{
-    component, components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, view::GView}
+    component,
+    components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, view::GView},
 };
 
 pub mod button;
 pub mod card;
 pub mod checkbox;
-pub mod label;
-pub mod radio;
-pub mod switch;
-pub mod tag;
-pub mod view;
-pub mod svg;
-pub mod image;
+pub mod collapse;
+pub mod dialog;
 pub mod divider;
+pub mod drawer;
+pub mod drop_down;
+pub mod image;
+pub mod label;
 pub mod link;
 pub mod loading;
-pub mod collapse;
-pub mod select;
-pub mod popup;
 pub mod popover;
-pub mod dialog;
+pub mod popup;
+pub mod radio;
+pub mod select;
+pub mod svg;
+pub mod switch;
+pub mod tag;
 pub mod tooltip;
-pub mod drawer;
+pub mod view;
 
 pub mod lifecycle;
 pub mod traits;
@@ -96,15 +98,65 @@ live_design! {
     }
 
     pub GCheckboxGroup = <GCheckboxGroupBase> {}
-    
+
     pub GSwitch = <GSwitchBase> {}
 
     pub GDivider = <GDividerBase> {}
 
     pub GSvg = <GSvgBase> {}
 
-    pub GImage = <GImageBase> {
-        
+    pub GImage = <GImageBase> {}
+
+    pub GPopup = <GPopupBase>{}
+
+    pub GDialogPopup = <GPopup> {
+        draw_popup: {
+            // this is a mask
+            fn pixel(self) -> vec4{
+                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                sdf.rect(self.pos.x, self.pos.y, self.rect_size.x, self.rect_size.y);
+                let color = self.background_color;
+                sdf.fill(vec4(color.r, color.g, color.b, self.opacity));
+                return sdf.result;
+            }
+        }
+    }
+
+    pub GPopupContainer = <GPopupContainerBase>{
+        popup: <GPopup> {}
+    }
+
+    pub GDialogContainer = <GPopupContainer>{
+        prop: {
+            basic: {
+                height: All,
+                width: All,
+                align: {
+                    x: 0.5,
+                    y: 0.5,
+                },
+            }
+        }
+        popup: <GDialogPopup> {
+            prop: {
+                basic: {
+                    background_color: #ff0000,
+                    background_visible: true,
+                    height: 300.0,
+                    width: 400.0,
+                }
+            }
+        }
+    }
+
+    pub GDialog = <GDropDownBase>{
+        mode: Dialog,
+        popup: <GDialogContainer>{}
+    }
+
+    pub GDropDown = <GDropDownBase>{
+
+        popup: <GPopupContainer>{}
     }
 }
 
@@ -121,6 +173,9 @@ pub fn components_register(cx: &mut Cx) {
     divider::live_design(cx);
     svg::live_design(cx);
     image::live_design(cx);
+    popup::live_design(cx);
+    popup::container::live_design(cx);
+    drop_down::live_design(cx);
 }
 
 component! {

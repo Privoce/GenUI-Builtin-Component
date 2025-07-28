@@ -267,7 +267,7 @@ impl BasicProp for ViewBasicProp {
             spread_radius: 0.0,
             blur_radius: 0.0,
             shadow_offset: vec2(0.0, 0.0),
-            background_visible: true,
+            background_visible: false,
             rotation: 0.0,
             scale: 1.0,
             padding: Padding::from_f64(6.0),
@@ -484,7 +484,7 @@ impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
         let background_visible = get_from_itable(
             inline_table,
             BACKGROUND_VISIBLE,
-            || Ok(true),
+            || Ok(false),
             |v| v.to_bool(),
         )?;
 

@@ -132,3 +132,32 @@ impl Position {
         }
     }
 }
+
+/// The `TriggerMode` enum represents the different modes for a trigger
+#[derive(Live, LiveHook, PartialEq, Eq, Clone, Copy)]
+#[live_ignore]
+#[repr(u32)]
+pub enum TriggerMode {
+    #[pick]
+    Click = shader_enum(1),
+    Hover = shader_enum(2),
+    Press = shader_enum(3),
+}
+
+impl Default for TriggerMode {
+    fn default() -> Self {
+        TriggerMode::Click
+    }
+}
+
+impl TriggerMode {
+    pub fn is_click(&self) -> bool {
+        matches!(self, TriggerMode::Click)
+    }
+    pub fn is_hover(&self) -> bool {
+        matches!(self, TriggerMode::Hover)
+    }
+    pub fn is_press(&self) -> bool {
+        matches!(self, TriggerMode::Press)
+    }
+}
