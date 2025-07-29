@@ -197,6 +197,31 @@ impl Widget for GButton {
             self.handle_widget_event(cx, event, hit, area);
         }
     }
+
+    fn handle_event_with(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        _scope: &mut Scope,
+        sweep_area: Area,
+    ) {
+        if !self.visible {
+            return;
+        }
+
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().button = true;
+        let hit = event.hits_with_options(
+            cx,
+            self.area(),
+            HitOptions::new().with_sweep_area(sweep_area),
+        );
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, sweep_area);
+        }
+    }
 }
 
 impl LiveHook for GButton {

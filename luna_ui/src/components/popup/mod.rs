@@ -1,5 +1,5 @@
-mod prop;
 pub mod container;
+mod prop;
 
 use std::cell::RefCell;
 
@@ -19,7 +19,7 @@ use crate::{
     prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, PopupMode, Position},
     pure_after_apply, set_index, set_scope_path,
     shader::draw_popup::DrawPopup,
-    themes::Conf,
+    themes::{Color, Conf, Hex},
 };
 
 live_design! {
@@ -44,7 +44,7 @@ pub struct GPopup {
     pub lifecycle: LifeCycle,
     #[rust]
     index: usize,
-    #[rust]
+    #[rust(true)]
     pub sync: bool,
     // --- popup ---------------------
     #[live]
@@ -210,7 +210,6 @@ impl PopupComponent for GPopup {
     }
 
     fn begin(&mut self, cx: &mut Cx2d) -> () {
-        
         let prop = self.prop.get(self.current_state());
         self.draw_popup.begin(cx, prop.walk(), prop.layout());
     }
@@ -244,7 +243,7 @@ impl PopupComponent for GPopup {
         if self.visible {
             let _ = self.render(cx);
             self.draw_popup.redraw(cx);
-           
+
             for (_, child) in &mut self.children {
                 if child.visible() {
                     child.redraw(cx);
@@ -294,14 +293,14 @@ impl GPopup {
             EventOrder::Up => {
                 for (id, child) in self.children.iter_mut().rev() {
                     scope.with_id(*id, |scope| {
-                        child.handle_event(cx, event, scope);
+                        child.handle_event_with(cx, event, scope, sweep_area);
                     });
                 }
             }
             EventOrder::Down => {
                 for (id, child) in self.children.iter_mut() {
                     scope.with_id(*id, |scope| {
-                        child.handle_event(cx, event, scope);
+                        child.handle_event_with(cx, event, scope, sweep_area);
                     });
                 }
             }
@@ -309,7 +308,7 @@ impl GPopup {
                 for id in list {
                     if let Some((_, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
                         scope.with_id(*id, |scope| {
-                            child.handle_event(cx, event, scope);
+                            child.handle_event_with(cx, event, scope, sweep_area);
                         });
                     }
                 }

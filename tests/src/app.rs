@@ -248,7 +248,7 @@ live_design! {
                     //     // src: Url("https://genui.privoce.com/genui.png"),
                     //     src: File("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png"),
                     //     // src: Live(dep("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png")),
-                       
+
                     // }
                     // <GImage> {
                     //     src: Url("https://aisearch.bj.bcebos.com/homepage/input_panel/aisearch_online.png"),
@@ -269,7 +269,15 @@ live_design! {
                     //     }
                     // }
                     <GDialog> {
-                        opened: true,
+                        popup: {
+                            popup: {
+                                <GButton> {
+                                    prop: {
+                                        basic: {theme: Success}
+                                    }
+                                }
+                            }
+                        }
                         <GButton> {}
                     }
                 }

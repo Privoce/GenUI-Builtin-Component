@@ -110,16 +110,7 @@ live_design! {
     pub GPopup = <GPopupBase>{}
 
     pub GDialogPopup = <GPopup> {
-        draw_popup: {
-            // this is a mask
-            fn pixel(self) -> vec4{
-                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
-                sdf.rect(self.pos.x, self.pos.y, self.rect_size.x, self.rect_size.y);
-                let color = self.background_color;
-                sdf.fill(vec4(color.r, color.g, color.b, self.opacity));
-                return sdf.result;
-            }
-        }
+        
     }
 
     pub GPopupContainer = <GPopupContainerBase>{
@@ -136,18 +127,25 @@ live_design! {
                     y: 0.5,
                 },
                 background_visible: true,
-                background_color: #ffffff,
             }
-        }
+        },
         popup: <GDialogPopup> {
             prop: {
                 basic: {
-                    // background_color: #ff0000,
-                    theme: Primary,
-                    background_visible: true,
                     height: 300.0,
                     width: 400.0,
                 }
+            }
+        },
+        draw_popup_container: {
+            // this is a mask
+            fn pixel(self) -> vec4{
+                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                sdf.rect(self.pos.x, self.pos.y, self.rect_size.x, self.rect_size.y);
+                let color = self.background_color;
+                // sdf.fill(vec4(color.r, color.g, color.b, self.opacity));
+                sdf.fill(color);
+                return sdf.result;
             }
         }
     }

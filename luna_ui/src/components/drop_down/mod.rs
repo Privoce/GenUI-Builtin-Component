@@ -19,7 +19,14 @@ use crate::{
 live_design! {
     link genui_basic;
 
-    pub GDropDownBase = {{GDropDown}} {}
+    pub GDropDownBase = {{GDropDown}} {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+            }
+        }
+    }
 }
 
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]

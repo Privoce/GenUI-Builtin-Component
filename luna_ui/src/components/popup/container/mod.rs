@@ -40,7 +40,7 @@ pub struct GPopupContainer {
     pub apply_state_map: ApplyStateMap<PopupState>,
     #[rust]
     pub index: usize,
-    #[rust]
+    #[rust(true)]
     pub sync: bool,
     #[rust]
     pub lifecycle: LifeCycle,

@@ -49,6 +49,14 @@ impl Hex {
     fn to_vec4(self) -> Vec4 {
         self.0
     }
+    pub fn with_opacity(self, opacity: f32) -> Self {
+        Hex(Vec4 {
+            x: self.0.x,
+            y: self.0.y,
+            z: self.0.z,
+            w: (self.0.w * opacity).clamp(0.0, 1.0),
+        })
+    }
 }
 
 impl From<Hex> for Vec4 {

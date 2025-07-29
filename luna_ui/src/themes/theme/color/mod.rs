@@ -23,6 +23,18 @@ pub enum Color {
     BLACK,
 }
 
+impl Color {
+    pub fn with_opacity(self, opacity: f32) -> Self {
+        match self {
+            Color::Hex(hex) => Color::Hex(hex.with_opacity(opacity)),
+            Color::RGB(rgb) => Color::RGBA(Rgba::from_rgb(rgb, opacity)),
+            Color::RGBA(rgba) => Color::RGBA(rgba.with_opacity(opacity)),
+            Color::WHITE => Color::RGBA(Rgba::new(255, 255, 255, opacity)),
+            Color::BLACK => Color::RGBA(Rgba::new(0, 0, 0, opacity)),
+        }
+    }
+}
+
 impl TryFrom<&Value> for Color {
     type Error = Error;
 

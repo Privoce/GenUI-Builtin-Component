@@ -3,7 +3,11 @@ use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
     component_state,
-    components::{popup::PopupState, traits::{BasicProp, ComponentState, Prop}, view::ViewBasicProp},
+    components::{
+        popup::PopupState,
+        traits::{BasicProp, ComponentState, Prop},
+        view::ViewBasicProp,
+    },
     error::Error,
     prop::{
         manuel::{
@@ -85,7 +89,10 @@ pub struct PopupContainerBasicProp {
     pub clip_x: bool,
     #[live(false)]
     pub clip_y: bool,
-    #[live(Align::default())]
+    #[live(Align{
+        x: 0.5,
+        y: 0.5,
+    })]
     pub align: Align,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
@@ -107,7 +114,7 @@ impl BasicProp for PopupContainerBasicProp {
     type Colors = Color;
 
     fn len() -> usize {
-        22
+        14
     }
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
@@ -137,7 +144,7 @@ impl BasicProp for PopupContainerBasicProp {
                 self.clip_y = bool::from_live_value(value).unwrap_or(false);
             }
             ALIGN => {
-                self.align = Align::from_live_value(value).unwrap_or(Align::default());
+                self.align = Align::from_live_value(value).unwrap_or(Align { x: 0.5, y: 0.5 });
             }
             CURSOR => {
                 let cursor = if state.is_disabled() {
@@ -188,7 +195,7 @@ impl BasicProp for PopupContainerBasicProp {
             margin: Margin::from_f64(0.0),
             clip_x: false,
             clip_y: false,
-            align: Align::default(),
+            align: Align { x: 0.5, y: 0.5 },
             cursor,
             flow: Flow::Down,
             spacing: 6.0,
@@ -349,7 +356,7 @@ impl TryFrom<(&InlineTable, PopupState)> for PopupContainerBasicProp {
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let clip_x = get_from_itable(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
         let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;
-        let align = Align::default();
+        let align = Align { x: 0.5, y: 0.5 };
         let align = get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
