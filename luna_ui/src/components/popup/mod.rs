@@ -78,7 +78,7 @@ pub struct GPopup {
 }
 
 impl LiveHook for GPopup {
-    // pure_after_apply!();
+    pure_after_apply!();
     fn before_apply(
         &mut self,
         _cx: &mut Cx,

@@ -1,10 +1,19 @@
+mod event;
+
+pub use event::*;
+
 use std::{cell::RefCell, rc::Rc};
 
 use makepad_widgets::*;
 
 use crate::{
-    components::{popup::{container::GPopupContainer, GPopup}, traits::PopupComponent, view::GView},
-    prop::{CloseMode, PopupMode, Position, TriggerMode}, visible,
+    components::{
+        popup::{container::GPopupContainer, GPopup},
+        traits::PopupComponent,
+        view::GView,
+    },
+    prop::{CloseMode, PopupMode, Position, TriggerMode},
+    visible,
 };
 
 live_design! {
@@ -163,12 +172,12 @@ impl Widget for GDropDown {
                 match self.mode {
                     PopupMode::Popup | PopupMode::ToolTip => {
                         let is_in = popup_menu.menu_contains_pos(cx, e.abs);
-                        // self.close_inner(cx, GDropDownToggleKind::Other, is_in);
+                        self.close_inner(cx, DropDownToggleEvent::Other, is_in);
                     }
 
                     PopupMode::Dialog | PopupMode::Drawer => {
                         let is_in = popup_menu.container_contains_pos(cx, e.abs);
-                        // self.close_inner(cx, GDropDownToggleKind::Other, is_in);
+                        self.close_inner(cx, DropDownToggleEvent::Other, is_in);
                     }
                 }
                 return;
@@ -189,27 +198,27 @@ impl Widget for GDropDown {
             Hit::FingerDown(e) => {
                 cx.set_key_focus(self.area());
                 if self.trigger_mode.is_press() {
-                    // self.open_inner(cx, GDropDownToggleKind::Press(e));
+                    self.open_inner(cx, DropDownToggleEvent::Press(e));
                 }
             }
             Hit::FingerHoverIn(e) => {
                 cx.set_cursor(MouseCursor::Hand);
                 if self.trigger_mode.is_hover() {
-                    // self.open_inner(cx, GDropDownToggleKind::Hover(e));
+                    self.open_inner(cx, DropDownToggleEvent::Hover(e));
                 }
             }
             Hit::FingerHoverOut(f) => {
                 cx.set_cursor(MouseCursor::Default);
                 if self.trigger_mode.is_hover() {
-                    // self.close_inner(cx, GDropDownToggleKind::Hover(f), false);
+                    self.close_inner(cx, DropDownToggleEvent::Hover(f), false);
                 }
             }
             Hit::FingerUp(e) => {
                 if e.is_over && self.trigger_mode.is_click() {
-                    // self.open_inner(cx, GDropDownToggleKind::Click(e));
+                    self.open_inner(cx, DropDownToggleEvent::Click(e));
                 } else {
                     // focus lost
-                    // self.close_inner(cx, GDropDownToggleKind::Other, false);
+                    self.close_inner(cx, DropDownToggleEvent::Other, false);
                 }
             }
             _ => {}
@@ -251,9 +260,59 @@ impl LiveHook for GDropDown {
         let mut global_map = global.map.borrow_mut();
         global_map.retain(|k, _| cx.live_registry.borrow().generation_valid(*k));
         let popup = self.popup.unwrap();
-        let popup = global_map.get_or_insert(cx, popup, |cx| GPopupContainer::new_from_ptr(cx, Some(popup)));
+        let popup = global_map.get_or_insert(cx, popup, |cx| {
+            GPopupContainer::new_from_ptr(cx, Some(popup))
+        });
         // self.close_mode = popup.close_mode;
         // self.mode = popup.mode;
         popup.popup.close_mode = self.close_mode;
+    }
+}
+
+impl GDropDown {
+    /// open the popup only inner control
+    fn open_inner(&mut self, cx: &mut Cx, e_kind: DropDownToggleEvent) {
+        if self.opened {
+            return;
+        }
+        self.opened = true;
+        self.redraw(cx);
+        cx.sweep_lock(self.area());
+        self.active_toggled(cx, e_kind);
+    }
+    /// close the popup only inner control
+    fn close_inner(&mut self, cx: &mut Cx, e_kind: DropDownToggleEvent, is_in: bool) {
+        // here is a quick return to optimize
+        if !self.opened {
+            return;
+        }
+        let mut flag = false;
+        match self.close_mode {
+            CloseMode::Out => {
+                if !is_in {
+                    flag = true;
+                }
+            }
+            CloseMode::Virtual => {
+                flag = false;
+            }
+        }
+        if flag {
+            self.opened = false;
+            self.redraw(cx);
+            cx.sweep_unlock(self.area());
+            self.active_toggled(cx, e_kind);
+        }
+        self.redraw_flag = true;
+    }
+    fn active_toggled(&mut self, cx: &mut Cx, e_kind: DropDownToggleEvent) {
+        cx.widget_action(
+            self.widget_uid(),
+            self.scope_path.as_ref().unwrap(),
+            DropDownEvent::Changed(DropDownChanged {
+                meta: e_kind,
+                opened: self.opened,
+            }),
+        );
     }
 }

@@ -135,12 +135,15 @@ live_design! {
                     x: 0.5,
                     y: 0.5,
                 },
+                background_visible: true,
+                background_color: #ffffff,
             }
         }
         popup: <GDialogPopup> {
             prop: {
                 basic: {
-                    background_color: #ff0000,
+                    // background_color: #ff0000,
+                    theme: Primary,
                     background_visible: true,
                     height: 300.0,
                     width: 400.0,

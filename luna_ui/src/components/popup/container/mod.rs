@@ -8,7 +8,7 @@ use crate::{
         lifecycle::LifeCycle,
         popup::{GPopup, PopupState},
         traits::{BasicProp, PopupComponent, Prop},
-    }, error::Error, lifecycle, prop::{ApplyStateMap, Position}, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf
+    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap, Position}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf
 };
 
 live_design! {
@@ -46,7 +46,32 @@ pub struct GPopupContainer {
     pub lifecycle: LifeCycle,
 }
 
-impl LiveHook for GPopupContainer {}
+impl LiveHook for GPopupContainer {
+    pure_after_apply!();
+    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        // self.popup.before_apply(cx, apply, index, nodes);
+    }
+
+    fn after_new_before_apply(&mut self, cx: &mut Cx) {
+        self.merge_conf_prop(cx);
+    }
+
+    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.set_apply_state_map(
+            nodes,
+            index,
+            &PopupContainerBasicProp::live_props(),
+            [live_id!(basic)],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
+                BASIC => {
+                    component.apply_state_map.insert(PopupState::Basic, applys);
+                }
+                _ => {}
+            },
+        );
+    }
+}
 
 impl PopupComponent for GPopupContainer {
     type Error = Error;
@@ -59,7 +84,7 @@ impl PopupComponent for GPopupContainer {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-         let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.current_state());
         self.draw_popup_container.merge(&prop.into());
         Ok(())
     }
