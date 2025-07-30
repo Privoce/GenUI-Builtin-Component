@@ -84,7 +84,7 @@ pub struct GSvg {
     pub apply_state_map: ApplyStateMap<SvgState>,
     // --- draw ----------------------
     #[live]
-    draw_svg: DrawSvg,
+    pub draw_svg: DrawSvg,
     // --- init ----------------------
     #[rust]
     lifecycle: LifeCycle,

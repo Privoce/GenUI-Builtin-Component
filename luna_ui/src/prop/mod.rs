@@ -7,6 +7,7 @@ mod slot;
 mod mode;
 mod direction;
 mod src;
+mod route;
 
 pub use map::*;
 pub use radius::Radius;

@@ -8,18 +8,17 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, PopupComponent, Prop},
-        view::{needs_draw_list, DrawState},
+        traits::{BasicProp, PopupComponent, Prop},
+        view::DrawState,
     },
     error::Error,
     lifecycle,
-    prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, PopupMode, Position},
+    prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, Position},
     pure_after_apply, set_index, set_scope_path,
     shader::draw_popup::DrawPopup,
-    themes::{Color, Conf, Hex},
+    themes::Conf,
 };
 
 live_design! {
@@ -188,7 +187,7 @@ impl PopupComponent for GPopup {
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let prop = self.prop.get(self.current_state());
         self.draw_popup.merge(&prop.into());
         Ok(())
@@ -209,15 +208,9 @@ impl PopupComponent for GPopup {
         PopupState::Basic
     }
 
-    fn begin(&mut self, cx: &mut Cx2d) -> () {
-        // let prop = self.prop.get(self.current_state());
-        // self.draw_popup.begin(cx, prop.walk(), prop.layout());
-    }
+    fn begin(&mut self, _cx: &mut Cx2d) -> () {}
 
-    fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
-        // self.draw_popup.end(cx);
-        // self.set_scope_path(&scope.path);
-    }
+    fn end(&mut self, _cx: &mut Cx2d, _scope: &mut Scope, _shift_area: Area, _shift: DVec2) -> () {}
 
     fn draw_popup(
         &mut self,
@@ -480,20 +473,12 @@ impl GPopup {
             }
         };
 
-        // self.container_walk.replace(Walk {
-        //     abs_pos: Some(adjust_pos),
-        //     width: Size::Fixed(adjust_size.x),
-        //     height: Size::Fixed(adjust_size.y),
-        //     ..Default::default()
-        // });
         let walk = Walk {
             abs_pos: Some(adjust_pos),
             width: Size::Fixed(adjust_size.x),
             height: Size::Fixed(adjust_size.y),
             ..Default::default()
         };
-
-        dbg!(walk);
 
         self.draw_walk(cx, scope, Some(walk));
 
