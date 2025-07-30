@@ -280,6 +280,19 @@ live_design! {
                         }
                         <GButton> {}
                     }
+
+                    <GDrawer> {
+                        popup: {
+                            popup: {
+                                <GButton> {
+                                    prop: {
+                                        basic: {theme: Success}
+                                    }
+                                }
+                            }
+                        }
+                        <GButton> {}
+                    }
                 }
             }
         }

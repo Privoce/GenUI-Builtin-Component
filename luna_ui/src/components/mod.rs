@@ -110,11 +110,22 @@ live_design! {
     pub GPopup = <GPopupBase>{}
 
     pub GDialogPopup = <GPopup> {
-        
+        prop: {
+            basic: {
+                height: 300.0,
+                width: 400.0,
+            }
+        }
     }
+
+    pub GDrawerPopup = <GPopup> {}
 
     pub GPopupContainer = <GPopupContainerBase>{
         popup: <GPopup> {}
+    }
+
+    pub GDropDown = <GDropDownBase>{
+        popup: <GPopupContainer>{}
     }
 
     pub GDialogContainer = <GPopupContainer>{
@@ -129,14 +140,7 @@ live_design! {
                 background_visible: true,
             }
         },
-        popup: <GDialogPopup> {
-            prop: {
-                basic: {
-                    height: 300.0,
-                    width: 400.0,
-                }
-            }
-        },
+        popup: <GDialogPopup> {},
         draw_popup_container: {
             // this is a mask
             fn pixel(self) -> vec4{
@@ -150,14 +154,18 @@ live_design! {
         }
     }
 
+    pub GDrawerContainer = <GPopupContainer> {
+        popup: <GDrawerPopup> {},
+    }
+
     pub GDialog = <GDropDownBase>{
         mode: Dialog,
         popup: <GDialogContainer>{}
     }
 
-    pub GDropDown = <GDropDownBase>{
-
-        popup: <GPopupContainer>{}
+    pub GDrawer = <GDropDownBase> {
+        mode: Drawer,
+        popup: <GDrawerContainer> {}
     }
 }
 

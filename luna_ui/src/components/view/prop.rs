@@ -367,7 +367,7 @@ impl BasicProp for ViewBasicProp {
             ),
             (live_id!(clip_x), None),
             (live_id!(clip_y), None),
-            (live_id!(align), None),
+            (live_id!(align), Some(vec![live_id!(x), live_id!(y)])),
             (live_id!(cursor), None),
             (live_id!(flow), None),
             (live_id!(spacing), None),

@@ -210,13 +210,13 @@ impl PopupComponent for GPopup {
     }
 
     fn begin(&mut self, cx: &mut Cx2d) -> () {
-        let prop = self.prop.get(self.current_state());
-        self.draw_popup.begin(cx, prop.walk(), prop.layout());
+        // let prop = self.prop.get(self.current_state());
+        // self.draw_popup.begin(cx, prop.walk(), prop.layout());
     }
 
     fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
-        self.draw_popup.end(cx);
-        self.set_scope_path(&scope.path);
+        // self.draw_popup.end(cx);
+        // self.set_scope_path(&scope.path);
     }
 
     fn draw_popup(
@@ -232,7 +232,7 @@ impl PopupComponent for GPopup {
         });
         self.draw_popup.angle_offset = angle_offset;
         // draw the popup ------------------------------------------------------------------------
-        self.draw_container(cx, scope);
+        self.draw_walk(cx, scope, None);
         // ---------------------------------------------------------------------------------------
         if *redraw {
             self.draw_popup.redraw(cx);
@@ -335,7 +335,7 @@ impl GPopup {
             scroll_bars.handle_scroll_event(cx, event, scope, &mut Vec::new());
         }
     }
-    pub fn draw_container(&mut self, cx: &mut Cx2d, scope: &mut Scope) {
+    pub fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Option<Walk>) {
         let prop = self.prop.get(self.current_state());
 
         // the beginning state
@@ -354,7 +354,7 @@ impl GPopup {
             };
 
             let layout = prop.layout().with_scroll(scroll);
-            let walk = prop.walk();
+            let walk = walk.unwrap_or(prop.walk());
             if prop.background_visible {
                 self.draw_popup.begin(cx, walk, layout);
             } else {
@@ -486,9 +486,16 @@ impl GPopup {
         //     height: Size::Fixed(adjust_size.y),
         //     ..Default::default()
         // });
+        let walk = Walk {
+            abs_pos: Some(adjust_pos),
+            width: Size::Fixed(adjust_size.x),
+            height: Size::Fixed(adjust_size.y),
+            ..Default::default()
+        };
 
-        // self.container
-        //     .draw_item_drawer(cx, scope, self.container_walk.unwrap());
+        dbg!(walk);
+
+        self.draw_walk(cx, scope, Some(walk));
 
         if *redraw {
             self.draw_popup.redraw(cx);

@@ -56,7 +56,7 @@ impl LiveHook for GPopupContainer {
         self.merge_conf_prop(cx);
     }
 
-    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.set_apply_state_map(
             nodes,
             index,
@@ -83,7 +83,7 @@ impl PopupComponent for GPopupContainer {
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let prop = self.prop.get(self.current_state());
         self.draw_popup_container.merge(&prop.into());
         Ok(())
@@ -108,13 +108,14 @@ impl PopupComponent for GPopupContainer {
         self.draw_list.begin_overlay_reuse(cx);
         cx.begin_pass_sized_turtle(Layout::flow_down());
         let prop = self.prop.get(self.current_state());
+        dbg!(prop.layout());
         self.draw_popup_container
             .begin(cx, prop.walk(), prop.layout());
-        self.popup.begin(cx);
+        // self.popup.begin(cx);
     }
 
     fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
-        self.popup.end(cx, scope, shift_area, shift);
+        // self.popup.end(cx, scope, shift_area, shift);
         self.draw_popup_container.end(cx);
         cx.end_pass_sized_turtle_with_shift(shift_area, shift);
         self.draw_list.end(cx);

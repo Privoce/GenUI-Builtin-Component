@@ -2,7 +2,6 @@ use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state,
     components::{
         popup::PopupState,
         traits::{BasicProp, ComponentState, Prop},
@@ -81,7 +80,7 @@ pub struct PopupContainerBasicProp {
     pub background_color: Vec4,
     #[live(true)]
     pub background_visible: bool,
-    #[live(Padding::from_f64(6.0))]
+    #[live(Padding::from_f64(0.0))]
     pub padding: Padding,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
@@ -89,10 +88,7 @@ pub struct PopupContainerBasicProp {
     pub clip_x: bool,
     #[live(false)]
     pub clip_y: bool,
-    #[live(Align{
-        x: 0.5,
-        y: 0.5,
-    })]
+    #[live(Align::default())]
     pub align: Align,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
@@ -132,7 +128,7 @@ impl BasicProp for PopupContainerBasicProp {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);
             }
             PADDING => {
-                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(6.0));
+                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(0.0));
             }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
@@ -144,7 +140,7 @@ impl BasicProp for PopupContainerBasicProp {
                 self.clip_y = bool::from_live_value(value).unwrap_or(false);
             }
             ALIGN => {
-                self.align = Align::from_live_value(value).unwrap_or(Align { x: 0.5, y: 0.5 });
+                self.align = Align::from_live_value(value).unwrap_or(Align::default());
             }
             CURSOR => {
                 let cursor = if state.is_disabled() {
@@ -191,11 +187,11 @@ impl BasicProp for PopupContainerBasicProp {
             theme,
             background_color: background_color.into(),
             background_visible: true,
-            padding: Padding::from_f64(6.0),
+            padding: Padding::from_f64(0.0),
             margin: Margin::from_f64(0.0),
             clip_x: false,
             clip_y: false,
-            align: Align { x: 0.5, y: 0.5 },
+            align: Align::default(),
             cursor,
             flow: Flow::Down,
             spacing: 6.0,
@@ -223,24 +219,7 @@ impl BasicProp for PopupContainerBasicProp {
         vec![
             (live_id!(theme), None),
             (live_id!(background_color), None),
-            (live_id!(border_color), None),
-            (live_id!(border_width), None),
-            (
-                live_id!(border_radius),
-                Some(vec![
-                    live_id!(top),
-                    live_id!(bottom),
-                    live_id!(left),
-                    live_id!(right),
-                ]),
-            ),
-            (live_id!(shadow_color), None),
-            (live_id!(spread_radius), None),
-            (live_id!(blur_radius), None),
-            (live_id!(shadow_offset), None),
             (live_id!(background_visible), None),
-            (live_id!(rotation), None),
-            (live_id!(scale), None),
             (
                 live_id!(padding),
                 Some(vec![
@@ -261,7 +240,7 @@ impl BasicProp for PopupContainerBasicProp {
             ),
             (live_id!(clip_x), None),
             (live_id!(clip_y), None),
-            (live_id!(align), None),
+            (live_id!(align), Some(vec![live_id!(x), live_id!(y)])),
             (live_id!(cursor), None),
             (live_id!(flow), None),
             (live_id!(spacing), None),
@@ -345,7 +324,7 @@ impl TryFrom<(&InlineTable, PopupState)> for PopupContainerBasicProp {
             |v| v.to_bool(),
         )?;
 
-        let padding = Padding::from_f64(6.0);
+        let padding = Padding::from_f64(0.0);
         let padding = get_from_itable(
             inline_table,
             PADDING,
@@ -356,7 +335,7 @@ impl TryFrom<(&InlineTable, PopupState)> for PopupContainerBasicProp {
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let clip_x = get_from_itable(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
         let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;
-        let align = Align { x: 0.5, y: 0.5 };
+        let align = Align::default();
         let align = get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed

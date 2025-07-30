@@ -409,7 +409,7 @@ impl BasicProp for ButtonBasicProp {
                     live_id!(right),
                 ]),
             ),
-            (live_id!(align), None),
+            (live_id!(align), Some(vec![live_id!(x), live_id!(y)])),
             (live_id!(flow), None),
             (live_id!(spacing), None),
             (live_id!(abs_pos), None),
