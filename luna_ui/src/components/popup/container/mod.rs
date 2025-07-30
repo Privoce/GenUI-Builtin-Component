@@ -48,10 +48,6 @@ pub struct GPopupContainer {
 
 impl LiveHook for GPopupContainer {
     pure_after_apply!();
-    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        // self.popup.before_apply(cx, apply, index, nodes);
-    }
-
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
     }
@@ -108,14 +104,11 @@ impl PopupComponent for GPopupContainer {
         self.draw_list.begin_overlay_reuse(cx);
         cx.begin_pass_sized_turtle(Layout::flow_down());
         let prop = self.prop.get(self.current_state());
-        dbg!(prop.layout());
         self.draw_popup_container
             .begin(cx, prop.walk(), prop.layout());
-        // self.popup.begin(cx);
     }
 
-    fn end(&mut self, cx: &mut Cx2d, scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
-        // self.popup.end(cx, scope, shift_area, shift);
+    fn end(&mut self, cx: &mut Cx2d, _scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {
         self.draw_popup_container.end(cx);
         cx.end_pass_sized_turtle_with_shift(shift_area, shift);
         self.draw_list.end(cx);

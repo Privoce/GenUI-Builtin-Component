@@ -81,7 +81,7 @@ impl Widget for GDropDown {
             let popup_menu = map.get_mut(&self.popup.unwrap()).unwrap();
             popup_menu.begin(cx);
             match self.mode {
-                PopupMode::Popup | PopupMode::ToolTip => {
+                PopupMode::Popover | PopupMode::ToolTip => {
                     let area = self.area().rect(cx);
                     let angle_offset = self.position.angle_offset(area.size);
                     popup_menu.draw_popup(
@@ -177,7 +177,7 @@ impl Widget for GDropDown {
             popup_menu.handle_event_with(cx, event, scope, self.area());
             if let Event::MouseDown(e) = event {
                 match self.mode {
-                    PopupMode::Popup | PopupMode::ToolTip => {
+                    PopupMode::Popover | PopupMode::ToolTip => {
                         let is_in = popup_menu.menu_contains_pos(cx, e.abs);
                         self.close_inner(cx, DropDownToggleEvent::Other, is_in);
                     }

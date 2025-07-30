@@ -293,6 +293,15 @@ live_design! {
                         }
                         <GButton> {}
                     }
+
+                    <GPopover> {
+                        position: Right
+                        <GButton> {}
+                    }
+
+                    <GToolTip> {
+                        <GButton> {}
+                    }
                 }
             }
         }

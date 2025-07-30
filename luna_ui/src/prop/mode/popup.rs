@@ -7,7 +7,7 @@ use makepad_widgets::*;
 pub enum PopupMode {
     #[pick]
     #[default]
-    Popup = shader_enum(1),
+    Popover = shader_enum(1),
     ToolTip = shader_enum(2),
     Dialog = shader_enum(3),
     Drawer = shader_enum(4),

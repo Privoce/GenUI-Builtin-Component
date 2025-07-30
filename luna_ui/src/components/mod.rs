@@ -120,6 +120,24 @@ live_design! {
 
     pub GDrawerPopup = <GPopup> {}
 
+    pub GPopoverPopup = <GPopup> {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+            }
+        }
+    }
+
+    pub GToolTipPopup = <GPopup> {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+            }
+        }
+    }
+
     pub GPopupContainer = <GPopupContainerBase>{
         popup: <GPopup> {}
     }
@@ -158,6 +176,36 @@ live_design! {
         popup: <GDrawerPopup> {},
     }
 
+    pub GPopoverContainer = <GPopupContainer> {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+                background_visible: false,
+            }
+        },
+        popup: <GPopoverPopup> {
+            <GLabel> {
+                text: "Popover",
+            }
+        },
+    }
+
+    pub GTooltipContainer = <GPopupContainer> {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+                background_visible: false,
+            }
+        },
+        popup: <GToolTipPopup> {
+            <GLabel> {
+                text: "Tooltip",
+            }
+        },
+    }
+
     pub GDialog = <GDropDownBase>{
         mode: Dialog,
         popup: <GDialogContainer>{}
@@ -166,6 +214,16 @@ live_design! {
     pub GDrawer = <GDropDownBase> {
         mode: Drawer,
         popup: <GDrawerContainer> {}
+    }
+
+    pub GPopover = <GDropDownBase> {
+        mode: Popover,
+        popup: <GPopoverContainer> {}
+    }
+
+    pub GToolTip = <GDropDownBase> {
+        mode: ToolTip,
+        popup: <GTooltipContainer> {}
     }
 }
 
