@@ -172,7 +172,7 @@ impl BasicProp for CheckboxBasicProp {
     }
 
     fn len() -> usize {
-        3 * (CheckboxPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len())
+        CheckboxPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len()
     }
 
     fn set_from_str(

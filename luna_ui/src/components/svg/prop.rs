@@ -1,21 +1,23 @@
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{Item, Value};
 
 use crate::{
     component_state,
-    components::traits::{BasicProp, ComponentState, Prop},
+    components::{
+        svg,
+        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
+        view::{ViewBasicProp, ViewState},
+    },
     error::Error,
     prop::{
         manuel::{
-            ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CURSOR, DISABLED, HEIGHT, HOVER, MARGIN,
-            PRESSED, THEME, WIDTH,
-        },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
-        ApplyStateMapImpl,
+            ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CONTAINER, CURSOR, DISABLED, HEIGHT, HOVER,
+            MARGIN, PRESSED, SVG, THEME, WIDTH,
+        }, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplySlotMapImpl, ApplyStateMapImpl
     },
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
-    utils::{get_from_itable},
+    utils::get_from_itable,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -74,6 +76,26 @@ impl Prop for SvgProp {
     }
 }
 
+impl SlotProp for SvgProp {
+    type Part = SvgPart;
+
+    fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
+        map.sync(
+            &mut self.basic,
+            SvgState::Basic,
+            [
+                (SvgState::Hover, &mut self.hover),
+                (SvgState::Pressed, &mut self.pressed),
+                (SvgState::Disabled, &mut self.disabled),
+            ],
+            [
+                SvgPart::Container,
+                SvgPart::Svg,
+            ]
+        );
+    }
+}
+
 impl Default for SvgProp {
     fn default() -> Self {
         Self {
@@ -98,6 +120,129 @@ try_from_toml_item! {
 #[live_ignore]
 pub struct SvgBasicProp {
     #[live]
+    pub svg: SvgPartProp,
+    #[live]
+    pub container: ViewBasicProp,
+}
+
+impl Default for SvgBasicProp {
+    fn default() -> Self {
+        Self::from_state(Theme::default(), SvgState::Basic)
+    }
+}
+
+impl SlotBasicProp for SvgBasicProp {
+    type Part = SvgPart;
+
+    fn set_from_str_slot(
+        &mut self,
+        key: &str,
+        value: &LiveValue,
+        state: Self::State,
+        part: Self::Part,
+    ) -> () {
+        match part {
+            SvgPart::Container => self.container.set_from_str(key, value, state.into()),
+            SvgPart::Svg => self.svg.set_from_str(key, value, state),
+        }
+    }
+
+    fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
+        match part {
+            SvgPart::Container => self.container.sync(state.into()),
+            SvgPart::Svg => self.svg.sync(state),
+        }
+    }
+}
+
+impl BasicProp for SvgBasicProp {
+    type State = SvgState;
+
+    type Colors = Color;
+
+    fn from_state(theme: Theme, state: Self::State) -> Self {
+        Self {
+            svg: Self::default_svg(theme, state),
+            container: Self::default_container(theme, state),
+        }
+    }
+
+    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
+        SvgPartProp::state_colors(theme, state)
+    }
+
+    fn len() -> usize {
+        SvgPartProp::len() + ViewBasicProp::len()
+    }
+
+    fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
+        ()
+    }
+
+    fn sync(&mut self, state: Self::State) -> () {
+        self.svg.sync(state);
+        self.container.sync(state.into());
+    }
+
+    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+        vec![]
+    }
+
+    fn walk(&self) -> Walk {
+        self.container.walk()
+    }
+
+    fn layout(&self) -> Layout {
+        self.container.layout()
+    }
+}
+
+impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
+    type Error = Error;
+
+    fn try_from((value, state): (&Item, SvgState)) -> Result<Self, Self::Error> {
+        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "[component.svg.$part] should be an inline table".to_string(),
+        ))?;
+
+        let svg = get_from_itable(
+            inline_table,
+            SVG,
+            || Ok(Self::default_svg(Theme::default(), state)),
+            |v| (v, state).try_into(),
+        )?;
+
+        let container = get_from_itable(
+            inline_table,
+            CONTAINER,
+            || Ok(Self::default_container(Theme::default(), state)),
+            |v| (v, state.into()).try_into(),
+        )?;
+
+        Ok(Self { container, svg })
+    }
+}
+
+impl SvgBasicProp {
+    pub fn default_container(theme: Theme, state: SvgState) -> ViewBasicProp {
+        let mut container = ViewBasicProp::from_state(theme, state.into());
+        container.set_clip_x(true);
+        container.set_clip_y(true);
+        container.set_align(Align::from_f64(0.5));
+        container.set_width(Size::Fit);
+        container.set_height(Size::Fit);
+        container.set_background_visible(false);
+        container
+    }
+    pub fn default_svg(theme: Theme, state: SvgState) -> SvgPartProp {
+        SvgPartProp::from_state(theme, state)
+    }
+}
+
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[live_ignore]
+pub struct SvgPartProp {
+    #[live]
     pub theme: Theme,
     #[live]
     pub color: Vec4,
@@ -113,13 +258,13 @@ pub struct SvgBasicProp {
     pub abs_pos: Option<DVec2>,
 }
 
-impl Default for SvgBasicProp {
+impl Default for SvgPartProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), SvgState::default())
     }
 }
 
-impl BasicProp for SvgBasicProp {
+impl BasicProp for SvgPartProp {
     type State = SvgState;
     /// color
     type Colors = Color;
@@ -228,12 +373,12 @@ impl BasicProp for SvgBasicProp {
     }
 }
 
-impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
+impl TryFrom<(&Value, SvgState)> for SvgPartProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Item, SvgState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Value, SvgState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[components.divider.$state] should be an inline table".to_string(),
+            "[components.svg.svg] should be an inline table".to_string(),
         ))?;
 
         let theme = Theme::default();
@@ -260,7 +405,12 @@ impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
             || Ok(Size::Fixed(16.0)),
             |v| v.to_size(),
         )?;
-        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fixed(16.0)), |v| v.to_size())?;
+        let width = get_from_itable(
+            inline_table,
+            WIDTH,
+            || Ok(Size::Fixed(16.0)),
+            |v| v.to_size(),
+        )?;
         let abs_pos = get_from_itable(
             inline_table,
             ABS_POS,
@@ -291,5 +441,32 @@ component_state! {
 impl ComponentState for SvgState {
     fn is_disabled(&self) -> bool {
         matches!(self, SvgState::Disabled)
+    }
+}
+
+impl From<SvgState> for ViewState {
+    fn from(value: SvgState) -> Self {
+        match value {
+            SvgState::Basic => ViewState::Basic,
+            SvgState::Hover => ViewState::Hover,
+            SvgState::Pressed => ViewState::Pressed,
+            SvgState::Disabled => ViewState::Disabled,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum SvgPart {
+    Container,
+    Svg,
+}
+
+impl Part for SvgPart {
+    type State = SvgState;
+    fn to_live_id(&self) -> LiveId {
+        match self {
+            SvgPart::Container => live_id!(container),
+            SvgPart::Svg => live_id!(svg),
+        }
     }
 }

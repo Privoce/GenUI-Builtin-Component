@@ -16,11 +16,10 @@ use crate::{
     makepad_draw::*,
     play_animation,
     prop::{
-        manuel::{BASIC, HOVER, PRESSED},
-        ApplyStateMap,
+        manuel::{BASIC, HOVER, PRESSED}, ApplySlotMap, ApplyStateMap
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::draw_svg::DrawSvg,
+    shader::{draw_svg::DrawSvg, draw_view::DrawView},
     themes::Conf,
     visible,
     widget::*,
@@ -81,10 +80,12 @@ pub struct GSvg {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    pub apply_state_map: ApplyStateMap<SvgState>,
+   apply_slot_map: ApplySlotMap<SvgState, SvgPart>,
     // --- draw ----------------------
     #[live]
     pub draw_svg: DrawSvg,
+    #[live]
+    pub draw_svg_container: DrawView,
     // --- init ----------------------
     #[rust]
     lifecycle: LifeCycle,

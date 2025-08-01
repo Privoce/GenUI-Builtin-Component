@@ -3,7 +3,7 @@ mod prop;
 pub use prop::*;
 use makepad_widgets::*;
 
-use crate::{components::{label::GLabel, svg::GSvg}, shader::draw_view::DrawView, themes::Theme};
+use crate::{components::{label::GLabel, lifecycle::LifeCycle, svg::GSvg}, prop::ApplySlotMap, shader::draw_view::DrawView, themes::Theme};
 
 live_design! {
     link gen_base;
@@ -62,14 +62,19 @@ live_design! {
 pub struct GTabbarItem {
     #[live]
     pub prop: TabbarItemProp,
+    // --- draw ----------------------
     #[live]
     pub draw_item: DrawView,
+    // --- slots ----------------------
     #[live]
-    pub icon_slot: GSvg,
+    pub icon: GSvg,
     #[live]
-    pub text_slot: GLabel,
+    pub text: GLabel,
+    // --- other ----------------------
     #[live(false)]
     pub grab_key_focus: bool,
+    #[rust]
+    apply_slot_map: ApplySlotMap<TabbarItemState, TabbarItemPart>,
     // visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -84,11 +89,18 @@ pub struct GTabbarItem {
     pub event_open: bool,
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
+     // --- init ----------------------
+    #[rust]
+    pub lifecycle: LifeCycle,
+    #[rust]
+    index: usize,
+    #[live(true)]
+    pub sync: bool,
 }
 
 impl WidgetNode for GTabbarItem {
-    fn uid_to_widget(&self, _uid: WidgetUid) -> WidgetRef {
-        todo!()
+    fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
+        
     }
 
     fn find_widgets(&self, _path: &[LiveId], _cached: WidgetCache, _results: &mut WidgetSet) {
