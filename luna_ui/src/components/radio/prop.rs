@@ -2,6 +2,7 @@ use crate::{
     component_state,
     components::{
         label::{LabelBasicProp, LabelState},
+        live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
@@ -186,11 +187,12 @@ impl BasicProp for RadioBasicProp {
         self.extra.sync(state.into());
     }
 
-    fn live_props() -> Vec<(
-        makepad_widgets::LiveId,
-        Option<Vec<makepad_widgets::LiveId>>,
-    )> {
-        vec![]
+    fn live_props() -> LiveProps {
+        vec![
+            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(radio), RadioPartProp::live_props().into()),
+            (live_id!(extra), ViewBasicProp::live_props().into()),
+        ]
     }
 
     fn walk(&self) -> makepad_widgets::Walk {
@@ -489,16 +491,16 @@ impl BasicProp for RadioPartProp {
         self.border_color = border_color.into();
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(size), None),
-            (live_id!(background_color), None),
-            (live_id!(stroke_color), None),
-            (live_id!(border_color), None),
-            (live_id!(background_visible), None),
-            (live_id!(border_width), None),
-            (live_id!(mode), None),
+            (live_id!(theme), None.into()),
+            (live_id!(size), None.into()),
+            (live_id!(background_color), None.into()),
+            (live_id!(stroke_color), None.into()),
+            (live_id!(border_color), None.into()),
+            (live_id!(background_visible), None.into()),
+            (live_id!(border_width), None.into()),
+            (live_id!(mode), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -506,10 +508,11 @@ impl BasicProp for RadioPartProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(abs_pos), None),
-            (live_id!(cursor), None),
+            (live_id!(abs_pos), None.into()),
+            (live_id!(cursor), None.into()),
         ]
     }
 

@@ -1,56 +1,58 @@
 mod prop;
 
-pub use prop::*;
 use makepad_widgets::*;
+pub use prop::*;
 
-use crate::{components::{label::GLabel, lifecycle::LifeCycle, svg::GSvg}, prop::ApplySlotMap, shader::draw_view::DrawView, themes::Theme};
+use crate::{
+    components::{
+        label::{GLabel, LabelBasicProp},
+        lifecycle::LifeCycle,
+        svg::{GSvg, SvgBasicProp, SvgState},
+        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
+        view::ViewBasicProp,
+    },
+    error::Error,
+    lifecycle, play_animation,
+    prop::{
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::draw_view::DrawView,
+    themes::Conf,
+    visible, ComponentAnInit,
+};
 
 live_design! {
-    link gen_base;
-    use link::shaders::*;
-    use link::gen_theme::GLOBAL_DURATION;
+    link genui_basic;
+    use link::genui_animation_prop::*;
 
     pub GTabbarItemBase = {{GTabbarItem}}{
-        height: 36.0,
-        width: Fill,
-        flow: Down,
-        background_visible: false,
-        align: {
-            x: 0.5,
-            y: 0.5
-        },
-        cursor: Hand,
-        spacing: 2.0,
         animator: {
             hover = {
                 default: off,
                 off = {
-                    from: {all: Forward {duration: (GLOBAL_DURATION)}}
+                    from: {all: Forward {duration: (AN_DURATION)}}
                     apply: {
-                        icon_slot: {draw_svg: {hover: 0.0, focus: 0.0}},
-                        text_slot: {draw_text: {hover: 0.0, focus: 0.0}},
-                        draw_item: {hover: 0.0, focus: 0.0}
+                        draw_item: {hover: 0.0, pressed: 0.0}
                     }
                 }
 
                 on = {
                     from: {
-                        all: Forward {duration: (GLOBAL_DURATION)},
-                        focus: Forward {duration: (GLOBAL_DURATION)}
-                    }
+                        all: Forward {duration: (AN_DURATION),},
+                        active: Forward {duration: (AN_DURATION)},
+                    },
+                    ease: InOutQuad,
                     apply: {
-                        icon_slot: {draw_svg: {hover: 1.0, focus: 0.0}},
-                        text_slot: {draw_text: {hover: 1.0, focus: 0.0}},
-                        draw_item: {hover: 1.0, focus: 0.0}
+                        draw_item: {hover: 1.0, pressed: 0.0}
                     }
                 }
 
                 focus = {
-                    from: {all: Forward {duration: (GLOBAL_DURATION)}}
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
                     apply: {
-                        icon_slot: {draw_svg: {focus: 1.0, hover: 0.0}},
-                        text_slot: {draw_text: {focus: 1.0, hover: 0.0}},
-                        draw_item: {focus: 1.0, hover: 0.0}
+                        draw_item: {focus: 1.0, pressed: 0.0}
                     }
                 }
             }
@@ -72,9 +74,11 @@ pub struct GTabbarItem {
     pub text: GLabel,
     // --- other ----------------------
     #[live(false)]
+    pub disabled: bool,
+    #[live(false)]
     pub grab_key_focus: bool,
     #[rust]
-    apply_slot_map: ApplySlotMap<TabbarItemState, TabbarItemPart>,
+    pub apply_slot_map: ApplySlotMap<TabbarItemState, TabbarItemPart>,
     // visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -89,35 +93,58 @@ pub struct GTabbarItem {
     pub event_open: bool,
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
-     // --- init ----------------------
+    // --- init ----------------------
     #[rust]
     pub lifecycle: LifeCycle,
     #[rust]
     index: usize,
     #[live(true)]
     pub sync: bool,
+    #[rust]
+    defer_walks: DeferWalks,
 }
 
 impl WidgetNode for GTabbarItem {
     fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
-        
+        let icon_ref = self.icon.uid_to_widget(uid);
+        let text_ref = self.text.uid_to_widget(uid);
+        match (icon_ref.is_empty(), text_ref.is_empty()) {
+            (true, true) => WidgetRef::empty(),
+            (true, false) => icon_ref,
+            (false, true) => text_ref,
+            (false, false) => unreachable!("GTabbarItem can not both have slot uid_to_widget"),
+        }
     }
 
     fn find_widgets(&self, _path: &[LiveId], _cached: WidgetCache, _results: &mut WidgetSet) {
-        todo!()
+        ()
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        todo!()
+        let prop = self.prop.get(self.current_state());
+        prop.walk()
     }
 
     fn area(&self) -> Area {
-        todo!()
+        self.draw_item.area
     }
 
-    fn redraw(&mut self, _cx: &mut Cx) {
-        todo!()
+    fn redraw(&mut self, cx: &mut Cx) {
+        let _ = self.render(cx);
+        if self.icon.visible {
+            self.icon.redraw(cx);
+        }
+        if self.text.visible {
+            self.text.redraw(cx);
+        }
+        self.draw_item.redraw(cx);
     }
+
+    fn state(&self) -> String {
+        self.current_state().to_string()
+    }
+
+    visible!();
 }
 
 impl Widget for GTabbarItem {
@@ -125,318 +152,364 @@ impl Widget for GTabbarItem {
         if !self.visible() {
             return DrawStep::done();
         }
-        self.set_scope_path(&scope.path);
+        let prop = self.prop.get(self.current_state());
 
-        let _ = self.draw_item.begin(cx, walk, self.layout);
-        if self.icon_slot.visible() {
-            let icon_walk = self.icon_slot.walk(cx);
-            let _ = self.icon_slot.draw_walk(cx, scope, icon_walk);
-        }
-        if self.text_slot.visible() {
-            let text_walk = self.text_slot.walk(cx);
-            let _ = self.text_slot.draw_walk(cx, scope, text_walk);
-        }
+        let _ = self.draw_item.begin(cx, prop.walk(), prop.layout());
+        let _ = SlotDrawer::new(
+            [
+                (live_id!(icon), (&mut self.icon).into()),
+                (live_id!(text), (&mut self.text).into()),
+            ],
+            &mut self.defer_walks,
+        )
+        .draw_walk(cx, scope);
+
         let _ = self.draw_item.end(cx);
+        self.set_scope_path(&scope.path);
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
         if !self.visible() {
             return;
         }
-        default_handle_animation!(self, cx, event);
 
-        match event.hits(cx, self.area()) {
-            Hit::FingerDown(_) => {
-                if self.grab_key_focus {
-                    cx.set_key_focus(self.area());
-                }
-                if !self.active {
-                    // self.play_animation(cx, id!(hover.focus));
-                    self.animate_focus_on(cx);
-                }
-            }
-            Hit::FingerHoverIn(e) => {
-                let _ = set_cursor(cx, self.cursor.as_ref());
-                if !self.active {
-                    self.play_animation(cx, id!(hover.on));
-                    self.active_hover_in(cx, e);
-                }
-            }
-            Hit::FingerHoverOut(_) => {
-                if !self.active {
-                    self.play_animation(cx, id!(hover.off));
-                }
-            }
-            Hit::FingerUp(e) => {
-                if e.is_over {
-                    if !self.active {
-                        self.active(cx);
-                        self.active_clicked(cx, e);
-                    }
-                }
-            }
-            _ => (),
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().tabbar_item = true;
+        let area = self.area();
+        let hit = event.hits(cx, area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, area);
         }
+        // default_handle_animation!(self, cx, event);
+
+        // match event.hits(cx, self.area()) {
+        //     Hit::FingerDown(_) => {
+        //         if self.grab_key_focus {
+        //             cx.set_key_focus(self.area());
+        //         }
+        //         if !self.active {
+        //             // self.play_animation(cx, id!(hover.focus));
+        //             self.animate_focus_on(cx);
+        //         }
+        //     }
+        //     Hit::FingerHoverIn(e) => {
+        //         let _ = set_cursor(cx, self.cursor.as_ref());
+        //         if !self.active {
+        //             self.play_animation(cx, id!(hover.on));
+        //             self.active_hover_in(cx, e);
+        //         }
+        //     }
+        //     Hit::FingerHoverOut(_) => {
+        //         if !self.active {
+        //             self.play_animation(cx, id!(hover.off));
+        //         }
+        //     }
+        //     Hit::FingerUp(e) => {
+        //         if e.is_over {
+        //             if !self.active {
+        //                 self.active(cx);
+        //                 self.active_clicked(cx, e);
+        //             }
+        //         }
+        //     }
+        //     _ => (),
+        // }
     }
 }
 
 impl LiveHook for GTabbarItem {
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        if !self.visible {
-            return;
-        }
-        if let Err(e) = self.render(cx) {
-            error!("GTabbarItem render error: {:?}", e);
-        }
+    pure_after_apply!();
+    fn after_new_before_apply(&mut self, cx: &mut Cx) {
+        self.merge_conf_prop(cx);
+    }
+    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.set_apply_slot_map(
+            nodes,
+            index,
+            [
+                live_id!(basic),
+                live_id!(hover),
+                live_id!(active),
+                live_id!(disabled),
+            ],
+            [
+                (TabbarItemPart::Icon, &SvgBasicProp::live_props()),
+                (TabbarItemPart::Text, &LabelBasicProp::live_props()),
+                (TabbarItemPart::Container, &ViewBasicProp::live_props()),
+            ],
+            |_| {},
+            |prefix, component, applys| match prefix.to_string().as_str() {
+                BASIC => {
+                    component
+                        .apply_slot_map
+                        .insert(TabbarItemState::Basic, applys);
+                }
+                HOVER => {
+                    component
+                        .apply_slot_map
+                        .insert(TabbarItemState::Hover, applys);
+                }
+                ACTIVE => {
+                    component
+                        .apply_slot_map
+                        .insert(TabbarItemState::Active, applys);
+                }
+                DISABLED => {
+                    component
+                        .apply_slot_map
+                        .insert(TabbarItemState::Disabled, applys);
+                }
+                _ => {}
+            },
+        );
     }
 }
 
-impl GTabbarItem {
-    set_scope_path!();
-    play_animation!();
-    widget_area! {
-        area, draw_item,
-        area_icon, icon_slot,
-        area_text, text_slot
-    }
-    event_option! {
-        clicked: GTabbarItemEvent::Clicked => GTabbarItemClickedParam,
-        hover: GTabbarItemEvent::Hover => GTabbarItemHoverParam
-    }
-    check_event_scope!();
-    pub fn active_hover_in(&mut self, cx: &mut Cx, e: FingerHoverEvent) -> () {
-        self.check_event_scope().map(|path| {
-            cx.widget_action(
-                self.widget_uid(),
-                path,
-                GTabbarItemEvent::Hover(GTabbarItemHoverParam {
-                    value: self.active,
-                    e,
-                }),
-            );
-        });
-    }
-    pub fn active_clicked(&mut self, cx: &mut Cx, e: FingerUpEvent) -> () {
-        self.check_event_scope().map(|path| {
-            cx.widget_action(
-                self.widget_uid(),
-                path,
-                GTabbarItemEvent::Clicked(GTabbarItemClickedParam {
-                    value: self.active,
-                    e,
-                    id: path.last(),
-                }),
-            );
-        });
-    }
-    pub fn clear_animation(&mut self, cx: &mut Cx) {
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                focus: 0.0
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                focus: 0.0
-            },
-        );
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                focus: 0.0
-            },
-        );
-    }
-    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
-        // ----------------- background color -------------------------------------------
-        let bg_color = self.background_color.use_or("#FFFFFF")?;
-        // ------------------ hover color -----------------------------------------------
-        let hover_color = self.hover_color.use_or("#FFFFFF")?;
-        // ------------------ focus color ---------------------------------------------
-        let focus_color = self.focus_color.use_or("#FFFFFF")?;
-        // ------------------ border color ----------------------------------------------
-        let border_color = self.border_color.use_or("#FFFFFF")?;
-        let shadow_color = self.shadow_color.use_or("#FFFFFF")?;
-        let background_visible = self.background_visible.to_f32();
-        let active = self.active.to_f32();
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                background_color: (bg_color),
-                background_visible: (background_visible),
-                border_color: (border_color),
-                border_width: (self.border_width),
-                border_radius: (self.border_radius),
-                focus_color: (focus_color),
-                hover_color: (hover_color),
-                shadow_color: (shadow_color),
-                shadow_offset: (self.shadow_offset),
-                spread_radius: (self.spread_radius),
-                blur_radius: (self.blur_radius),
-                focus: (active)
-            },
-        );
+impl SlotComponent<TabbarItemState> for GTabbarItem {
+    type Part = TabbarItemPart;
+}
 
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                focus: (active),
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                focus: (active),
-            },
-        );
+impl Component for GTabbarItem {
+    type Error = Error;
+
+    type State = TabbarItemState;
+
+    fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
+        let prop = &cx.global::<Conf>().components.tabbar_item;
+        self.prop = prop.clone();
+        self.icon.prop.basic = self.prop.basic.icon;
+        self.icon.prop.hover = self.prop.hover.icon;
+        self.icon.prop.pressed = self.prop.active.icon;
+        self.icon.prop.disabled = self.prop.disabled.icon;
+        self.text.prop.basic = self.prop.basic.text;
+        self.text.prop.disabled = self.prop.disabled.text;
+    }
+
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        let prop = self.prop.get(self.current_state());
+        self.draw_item.merge(&prop.container);
+        let _ = self.icon.render(cx)?;
+        let _ = self.text.render(cx)?;
         Ok(())
     }
-    pub fn animate_hover_on(&mut self, cx: &mut Cx) -> () {
-        self.clear_animation(cx);
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                hover: 1.0,
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                hover: 1.0,
-            },
-        );
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                hover: 1.0,
-            },
-        );
-    }
-    pub fn animate_hover_off(&mut self, cx: &mut Cx) -> () {
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-            },
-        );
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-            },
-        );
-    }
-    pub fn animate_focus_on(&mut self, cx: &mut Cx) -> () {
-        self.clear_animation(cx);
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                focus: 1.0,
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                focus: 1.0,
-            },
-        );
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                focus: 1.0,
-            },
-        );
-    }
-    pub fn animate_focus_off(&mut self, cx: &mut Cx) -> () {
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                focus: 0.0,
-            },
-        );
-        self.icon_slot.draw_svg.apply_over(
-            cx,
-            live! {
-                focus: 0.0,
-            },
-        );
-        self.text_slot.draw_text.apply_over(
-            cx,
-            live! {
-                focus: 0.0,
-            },
-        );
-    }
-    pub fn active(&mut self, cx: &mut Cx) -> () {
-        self.toggle(cx, true);
-    }
-    pub fn unactive(&mut self, cx: &mut Cx) -> () {
-        self.toggle(cx, false);
-    }
-    pub fn toggle(&mut self, cx: &mut Cx, active: bool) -> () {
-        self.active = active;
-        if let Err(e) = self.render(cx) {
-            error!("GTabbarItem render error: {:?}", e);
+
+    fn current_state(&self) -> Self::State {
+        if self.disabled {
+            TabbarItemState::Disabled
+        } else {
+            self.draw_item.current_state().into()
         }
     }
-    pub fn redraw(&self, cx: &mut Cx) -> () {
-        self.icon_slot.redraw(cx);
-        self.text_slot.redraw(cx);
-        self.draw_item.redraw(cx);
-    }
-}
 
-#[allow(dead_code)]
-impl GTabbarItemRef {
-    ref_area!();
-    ref_redraw!();
-    ref_render!();
-    ref_area_ext! {
-        area_icon,
-        area_text
-    }
-    ref_event_option! {
-        clicked => GTabbarItemClickedParam,
-        hover => GTabbarItemHoverParam
-    }
-    animatie_fn! {
-        animate_hover_on,
-        animate_hover_off,
-        animate_focus_on,
-        animate_focus_off
-    }
-    pub fn active(&self, cx: &mut Cx) -> () {
-        self.borrow_mut().map(|mut x| {
-            x.active(cx);
-        });
-    }
-    pub fn unactive(&self, cx: &mut Cx) -> () {
-        self.borrow_mut().map(|mut x| {
-            x.unactive(cx);
-        });
-    }
-    pub fn toggle(&self, cx: &mut Cx, active: bool) -> () {
-        self.borrow_mut().map(|mut x| {
-            x.toggle(cx, active);
-        });
-    }
-}
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {}
 
-#[allow(dead_code)]
-impl GTabbarItemSet {
-    set_event! {
-        clicked => GTabbarItemClickedParam,
-        hover => GTabbarItemHoverParam
+    fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
+        match hit {
+            Hit::FingerHoverIn(_) => {
+                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+            }
+            _ => {}
+        }
     }
+
+    fn clear_animation(&mut self, cx: &mut Cx) -> () {
+        self.draw_item.apply_over(
+            cx,
+            live! {
+                hover: 0.0,
+                pressed: 0.0,
+            },
+        );
+    }
+
+    fn switch_state(&mut self, state: Self::State) -> () {
+        match state {
+            TabbarItemState::Basic => {
+                self.draw_item.state_basic();
+            }
+            TabbarItemState::Hover => {
+                self.draw_item.state_hover();
+            }
+            TabbarItemState::Active => {
+                self.draw_item.state_pressed();
+            }
+            TabbarItemState::Disabled => {}
+        }
+    }
+
+    fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
+        if !self.animation_open || self.disabled {
+            return;
+        }
+        self.switch_state(state);
+        self.set_animation(cx);
+    }
+
+    fn sync(&mut self) -> () {
+        if !self.sync {
+            return;
+        }
+        let mut crossed_map = self.apply_slot_map.cross();
+        // let mut icon_slot_map = self.apply_slot_map.iter().map(|(k, v)| {
+        //     let icon_part_map = v.get(&TabbarItemPart::Icon).cloned().unwrap_or_default();
+
+        //     (SvgState::from(*k),)
+        // });
+        dbg!(&self.apply_slot_map);
+        // crossed_map.remove(&TabbarItemPart::Icon).map(|map| {
+        //     // let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
+        //     self.icon.apply_slot_map.merge(map);
+        // });
+
+        crossed_map.remove(&TabbarItemPart::Text).map(|map| {
+            let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
+            self.text.apply_state_map.merge(map);
+        });
+
+        self.prop.sync_slot(&self.apply_slot_map);
+    }
+
+    fn set_animation(&mut self, cx: &mut Cx) -> () {
+        let init_global = cx.global::<ComponentAnInit>().tabbar_item;
+        let live_ptr = match self.animator.live_ptr {
+            Some(ptr) => ptr.file_id.0,
+            None => return,
+        };
+
+        let mut registry = cx.live_registry.borrow_mut();
+        let live_file = match registry.live_files.get_mut(live_ptr as usize) {
+            Some(lf) => lf,
+            None => return,
+        };
+        let nodes = &mut live_file.expanded.nodes;
+        if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
+            self.lifecycle.next();
+            let basic_prop = self.prop.get(TabbarItemState::Basic);
+            let hover_prop = self.prop.get(TabbarItemState::Hover);
+            let active_prop = self.prop.get(TabbarItemState::Active);
+            let (mut basic_index, mut hover_index, mut active_index) = (None, None, None);
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(off).as_instance(),
+                ],
+            ) {
+                basic_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(on).as_instance(),
+                ],
+            ) {
+                hover_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(active).as_instance(),
+                ],
+            ) {
+                active_index = Some(index);
+            }
+
+            set_animation! {
+                nodes: draw_container = {
+                    basic_index => {
+                        background_color => basic_prop.container.background_color,
+                        border_color =>basic_prop.container.border_color,
+                        border_radius => basic_prop.container.border_radius,
+                        border_width =>(basic_prop.container.border_width as f64),
+                        shadow_color => basic_prop.container.shadow_color,
+                        spread_radius => (basic_prop.container.spread_radius as f64),
+                        blur_radius => (basic_prop.container.blur_radius as f64),
+                        shadow_offset => basic_prop.container.shadow_offset,
+                        background_visible => basic_prop.container.background_visible.to_f64()
+                    },
+                    hover_index => {
+                        background_color => hover_prop.container.background_color,
+                        border_color => hover_prop.container.border_color,
+                        border_radius => hover_prop.container.border_radius,
+                        border_width => (hover_prop.container.border_width as f64),
+                        shadow_color => hover_prop.container.shadow_color,
+                        spread_radius => (hover_prop.container.spread_radius as f64),
+                        blur_radius => (hover_prop.container.blur_radius as f64),
+                        shadow_offset => hover_prop.container.shadow_offset,
+                        background_visible => hover_prop.container.background_visible.to_f64()
+                    },
+                    active_index => {
+                        background_color => active_prop.container.background_color,
+                        border_color => active_prop.container.border_color,
+                        border_radius => active_prop.container.border_radius,
+                        border_width => (active_prop.container.border_width as f64),
+                        shadow_color => active_prop.container.shadow_color,
+                        spread_radius => (active_prop.container.spread_radius as f64),
+                        blur_radius => (active_prop.container.blur_radius as f64),
+                        shadow_offset => active_prop.container.shadow_offset,
+                        background_visible => active_prop.container.background_visible.to_f64()
+                    }
+                }
+            }
+        } else {
+            let state = self.current_state();
+            let prop = self.prop.get(state);
+            let index = match state {
+                TabbarItemState::Basic => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(off).as_instance(),
+                    ],
+                ),
+                TabbarItemState::Hover => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(on).as_instance(),
+                    ],
+                ),
+                TabbarItemState::Active => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(active).as_instance(),
+                    ],
+                ),
+                _ => None,
+            };
+            set_animation! {
+                nodes: draw_item = {
+                    index => {
+                        background_color => prop.container.background_color,
+                        border_color => prop.container.border_color,
+                        border_radius => prop.container.border_radius,
+                        border_width => (prop.container.border_width as f64),
+                        shadow_color => prop.container.shadow_color,
+                        spread_radius => (prop.container.spread_radius as f64),
+                        blur_radius => (prop.container.blur_radius as f64),
+                        shadow_offset => prop.container.shadow_offset,
+                        background_visible => prop.container.background_visible.to_f64()
+                    }
+                }
+            }
+        }
+    }
+
+    play_animation!();
+    set_scope_path!();
+    set_index!();
+    lifecycle!();
 }

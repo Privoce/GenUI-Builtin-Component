@@ -40,5 +40,6 @@ pub struct ComponentAnInit {
     radio: bool,
     checkbox: bool,
     svg: bool,
-    image: bool
+    image: bool,
+    tabbar_item: bool,
 }

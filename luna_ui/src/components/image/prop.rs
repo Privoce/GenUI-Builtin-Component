@@ -3,7 +3,10 @@ use toml_edit::Item;
 
 use crate::{
     component_state,
-    components::traits::{BasicProp, ComponentState, Prop},
+    components::{
+        live_props::LiveProps,
+        traits::{BasicProp, ComponentState, Prop},
+    },
     error::Error,
     prop::{
         manuel::{
@@ -141,8 +144,18 @@ impl TryFrom<(&Item, ImageState)> for ImageBasicProp {
         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
         let margin = Margin::from_f64(6.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fixed(64.0)), |v| v.to_size())?;
-        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fixed(128.0)), |v| v.to_size())?;
+        let height = get_from_itable(
+            inline_table,
+            HEIGHT,
+            || Ok(Size::Fixed(64.0)),
+            |v| v.to_size(),
+        )?;
+        let width = get_from_itable(
+            inline_table,
+            WIDTH,
+            || Ok(Size::Fixed(128.0)),
+            |v| v.to_size(),
+        )?;
         let abs_pos = get_from_itable(
             inline_table,
             ABS_POS,
@@ -242,11 +255,11 @@ impl BasicProp for ImageBasicProp {
         ()
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(fit), None),
-            (live_id!(height), None),
-            (live_id!(width), None),
+            (live_id!(fit), None.into()),
+            (live_id!(height), None.into()),
+            (live_id!(width), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -254,10 +267,11 @@ impl BasicProp for ImageBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(cursor), None),
-            (live_id!(abs_pos), None),
+            (live_id!(cursor), None.into()),
+            (live_id!(abs_pos), None.into()),
         ]
     }
 

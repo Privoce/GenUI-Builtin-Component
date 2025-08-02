@@ -58,7 +58,8 @@ pub const HEADER: &str = "header";
 pub const BODY: &str = "body";
 pub const FOOTER: &str = "footer";
 pub const CONTAINER: &str = "container";
-
+pub const ICON: &str = "icon";
+pub const TEXT: &str = "text";
 // --- component -------------------------------------------------
 pub const LABEL: &str = "label";
 pub const VIEW: &str = "view";
@@ -74,6 +75,9 @@ pub const IMAGE: &str = "image";
 pub const TAG: &str = "tag";
 pub const POPUP: &str = "popup";
 pub const POPUP_CONTAINER: &str = "popup_container";
+pub const TABBAR_ITEM: &str = "tabbar_item";
+pub const MENU: &str = "menu";
+pub const TABBAR: &str = "tabbar";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

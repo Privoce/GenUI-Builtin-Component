@@ -4,6 +4,7 @@ use toml_edit::Item;
 use crate::{
     component_state,
     components::{
+        live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
         view::{ViewBasicProp, ViewState},
     },
@@ -368,11 +369,11 @@ impl BasicProp for ButtonBasicProp {
         }
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(background_color), None),
-            (live_id!(border_color), None),
+            (live_id!(theme), None.into()),
+            (live_id!(background_color), None.into()),
+            (live_id!(border_color), None.into()),
             (
                 live_id!(border_radius),
                 Some(vec![
@@ -380,17 +381,18 @@ impl BasicProp for ButtonBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(border_width), None),
-            (live_id!(shadow_color), None),
-            (live_id!(spread_radius), None),
-            (live_id!(blur_radius), None),
-            (live_id!(shadow_offset), None),
-            (live_id!(background_visible), None),
-            (live_id!(cursor), None),
-            (live_id!(width), None),
-            (live_id!(height), None),
+            (live_id!(border_width), None.into()),
+            (live_id!(shadow_color), None.into()),
+            (live_id!(spread_radius), None.into()),
+            (live_id!(blur_radius), None.into()),
+            (live_id!(shadow_offset), None.into()),
+            (live_id!(background_visible), None.into()),
+            (live_id!(cursor), None.into()),
+            (live_id!(width), None.into()),
+            (live_id!(height), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -398,7 +400,8 @@ impl BasicProp for ButtonBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
             (
                 live_id!(padding),
@@ -407,12 +410,13 @@ impl BasicProp for ButtonBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(align), Some(vec![live_id!(x), live_id!(y)])),
-            (live_id!(flow), None),
-            (live_id!(spacing), None),
-            (live_id!(abs_pos), None),
+            (live_id!(align), Some(vec![live_id!(x), live_id!(y)]).into()),
+            (live_id!(flow), None.into()),
+            (live_id!(spacing), None.into()),
+            (live_id!(abs_pos), None.into()),
         ]
     }
 

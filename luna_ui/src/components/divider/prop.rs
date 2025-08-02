@@ -4,6 +4,7 @@ use toml_edit::Item;
 use crate::{
     component_state,
     components::{
+        live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
         view::ViewBasicProp,
     },
@@ -227,16 +228,16 @@ impl BasicProp for DividerBasicProp {
         self.shadow_color = shadow_color.into();
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(background_color), None),
-            (live_id!(border_radius), None),
-            (live_id!(shadow_color), None),
-            (live_id!(spread_radius), None),
-            (live_id!(blur_radius), None),
-            (live_id!(shadow_offset), None),
-            (live_id!(background_visible), None),
+            (live_id!(theme), None.into()),
+            (live_id!(background_color), None.into()),
+            (live_id!(border_radius), None.into()),
+            (live_id!(shadow_color), None.into()),
+            (live_id!(spread_radius), None.into()),
+            (live_id!(blur_radius), None.into()),
+            (live_id!(shadow_offset), None.into()),
+            (live_id!(background_visible), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -244,12 +245,13 @@ impl BasicProp for DividerBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(cursor), None),
-            (live_id!(height), None),
-            (live_id!(width), None),
-            (live_id!(abs_pos), None),
+            (live_id!(cursor), None.into()),
+            (live_id!(height), None.into()),
+            (live_id!(width), None.into()),
+            (live_id!(abs_pos), None.into()),
         ]
     }
 
@@ -328,7 +330,12 @@ impl TryFrom<(&Item, DividerState)> for DividerBasicProp {
             || Ok(MouseCursor::Default),
             |v| v.to_cursor(),
         )?;
-        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fixed(1.2)), |v| v.to_size())?;
+        let height = get_from_itable(
+            inline_table,
+            HEIGHT,
+            || Ok(Size::Fixed(1.2)),
+            |v| v.to_size(),
+        )?;
         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fill), |v| v.to_size())?;
         let abs_pos = get_from_itable(
             inline_table,

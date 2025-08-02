@@ -1,5 +1,5 @@
 use crate::{
-    components::traits::{BasicProp, Component, Part, SlotBasicProp},
+    components::{live_props::LivePropsValue, traits::{BasicProp, Component, Part, SlotBasicProp}},
     prop::manuel::THEME,
     themes::Theme,
 };
@@ -44,7 +44,7 @@ pub trait ApplyStateMapImpl<S>: ApplyMapImpl {
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, PropMap) -> () + Copy;
@@ -74,7 +74,7 @@ where
     ) where
         C: Component,
         P: IntoIterator<Item = LiveId>,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)>,
         PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy;
@@ -145,7 +145,7 @@ where
     ) where
         C: Component,
         P: IntoIterator<Item = LiveId>,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)>,
         PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy,
@@ -198,6 +198,7 @@ where
             let mut states_vec: Vec<_> = states.into_iter().collect();
             for part in parts {
                 if let Some(part_props) = basic_props.get(&part) {
+                    dbg!(part_props);
                     let mut parts = Cow::Borrowed(part_props);
                     if parts.contains_key(THEME) {
                         let parts = parts.to_mut();
@@ -325,7 +326,7 @@ where
         insert: IF,
     ) where
         C: Component,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut C) -> (),
         IF: FnOnce(LiveId, &mut C, PropMap) -> () + Copy,

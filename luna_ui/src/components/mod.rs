@@ -2,7 +2,7 @@ use makepad_widgets::*;
 
 use crate::{
     component,
-    components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, view::GView},
+    components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, svg::GSvg, view::GView},
 };
 
 pub mod button;
@@ -24,9 +24,9 @@ pub mod switch;
 pub mod tag;
 pub mod view;
 // pub mod router;
-// pub mod tabbar;
+pub mod tabbar;
 pub mod menu;
-
+pub mod live_props;
 pub mod lifecycle;
 pub mod traits;
 
@@ -225,6 +225,8 @@ live_design! {
         mode: ToolTip,
         popup: <GTooltipContainer> {}
     }
+
+    pub GTabbarItem = <GTabbarItemBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -243,6 +245,7 @@ pub fn components_register(cx: &mut Cx) {
     popup::live_design(cx);
     popup::container::live_design(cx);
     drop_down::live_design(cx);
+    tabbar::item::live_design(cx);
 }
 
 component! {
@@ -250,5 +253,6 @@ component! {
     View => GView,
     Button => GButton,
     Card => GCard,
-    Radio => GRadio
+    Radio => GRadio,
+    Svg => GSvg
 }

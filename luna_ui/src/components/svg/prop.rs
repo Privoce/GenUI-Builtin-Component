@@ -1,9 +1,10 @@
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
     component_state,
     components::{
+        live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
@@ -114,7 +115,7 @@ try_from_toml_item! {
     }, "[components.svg] should be a table"
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct SvgBasicProp {
     #[live]
@@ -182,8 +183,11 @@ impl BasicProp for SvgBasicProp {
         self.container.sync(state.into());
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
-        vec![]
+    fn live_props() -> LiveProps {
+        vec![
+            (live_id!(svg), SvgPartProp::live_props().into()),
+            (live_id!(container), ViewBasicProp::live_props().into()),
+        ]
     }
 
     fn walk(&self) -> Walk {
@@ -203,6 +207,26 @@ impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
             "[component.svg.$part] should be an inline table".to_string(),
         ))?;
 
+        (inline_table, state).try_into()
+    }
+}
+
+impl TryFrom<(&Value, SvgState)> for SvgBasicProp {
+    type Error = Error;
+
+    fn try_from((value, state): (&Value, SvgState)) -> Result<Self, Self::Error> {
+        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
+            "[component.svg.$part] should be an inline table".to_string(),
+        ))?;
+
+        (inline_table, state).try_into()
+    }
+}
+
+impl TryFrom<(&InlineTable, SvgState)> for SvgBasicProp {
+    type Error = Error;
+
+    fn try_from((inline_table, state): (&InlineTable, SvgState)) -> Result<Self, Self::Error> {
         let svg = get_from_itable(
             inline_table,
             SVG,
@@ -237,7 +261,7 @@ impl SvgBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct SvgPartProp {
     #[live]
@@ -333,10 +357,10 @@ impl BasicProp for SvgPartProp {
         self.color = color.into();
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(color), None),
+            (live_id!(theme), None.into()),
+            (live_id!(color), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -344,12 +368,12 @@ impl BasicProp for SvgPartProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ]).into(),
             ),
-            (live_id!(cursor), None),
-            (live_id!(height), None),
-            (live_id!(width), None),
-            (live_id!(abs_pos), None),
+            (live_id!(cursor), None.into()),
+            (live_id!(height), None.into()),
+            (live_id!(width), None.into()),
+            (live_id!(abs_pos), None.into()),
         ]
     }
 

@@ -215,7 +215,7 @@ impl BasicProp for PopupContainerBasicProp {
             Theme::Info => Theme::Info.color(bg_level),
         }
     }
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
             (live_id!(theme), None),
             (live_id!(background_color), None),

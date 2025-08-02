@@ -9,7 +9,7 @@ use makepad_widgets::{
 };
 
 use crate::{
-    components::lifecycle::LifeCycle,
+    components::{lifecycle::LifeCycle, live_props::{LiveProps, LivePropsValue}},
     prop::{
         insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, Position,
         PropMap, SlotMap,
@@ -50,7 +50,7 @@ where
         insert: IF,
     ) -> ()
     where
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, PropMap) -> () + Copy,
@@ -186,7 +186,7 @@ where
         insert: IF,
     ) -> ()
     where
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)> + Copy,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)> + Copy,
         P: IntoIterator<Item = LiveId>,
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, PropMap) -> () + Copy,
@@ -229,7 +229,7 @@ where
     ) -> ()
     where
         P: IntoIterator<Item = LiveId>,
-        LP: IntoIterator<Item = &'m (LiveId, Option<Vec<LiveId>>)>,
+        LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)>,
         PP: IntoIterator<Item = (Self::Part, LP)> + Copy,
         NF: FnOnce(&mut Self) -> (),
         IF: FnOnce(LiveId, &mut Self, SlotMap<Self::Part>) -> () + Copy,
@@ -298,7 +298,7 @@ pub trait BasicProp: Default + Debug {
     /// ## sync from Basic State what apply from map if not set in DSL from (super Prop trait)
     /// unlike Prop trait, this function only sync theme colors, and use in `set_from_str()`
     fn sync(&mut self, state: Self::State) -> ();
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)>;
+    fn live_props() -> LiveProps;
     fn walk(&self) -> Walk;
     fn layout(&self) -> Layout;
 }

@@ -4,16 +4,18 @@ use toml_edit::Item;
 use crate::{
     component_state,
     components::{
+        live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     prop::{
-        manuel::{BASIC, BODY, FOOTER, HEADER, HOVER, CONTAINER},
+        manuel::{BASIC, BODY, CONTAINER, FOOTER, HEADER, HOVER},
         ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme},
-    utils::{get_from_itable, get_from_table},
+    try_from_toml_item,
+    utils::get_from_itable,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -78,33 +80,11 @@ impl SlotProp for CardProp {
     }
 }
 
-impl TryFrom<&Item> for CardProp {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let table = value.as_table().ok_or(Error::ThemeStyleParse(
-            "[component.card] should be a table".to_string(),
-        ))?;
-
-        let basic = get_from_table(
-            table,
-            BASIC,
-            || Ok(CardBasicProp::default()),
-            |v| (v, CardState::Basic).try_into(),
-        )?;
-        let hover = get_from_table(
-            table,
-            "hover",
-            || {
-                Ok(CardBasicProp::from_state(
-                    Theme::default(),
-                    CardState::Hover,
-                ))
-            },
-            |v| (v, CardState::Hover).try_into(),
-        )?;
-        Ok(Self { basic, hover })
-    }
+try_from_toml_item! {
+    CardProp {
+        basic => BASIC, CardBasicProp::default(), |v| (v, CardState::Basic).try_into(),
+        hover => HOVER, CardBasicProp::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()
+    }, "[component.card] should be a table"
 }
 
 impl Default for CardProp {
@@ -171,8 +151,13 @@ impl BasicProp for CardBasicProp {
         self.footer.sync(state.into());
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
-        ViewBasicProp::live_props()
+    fn live_props() -> LiveProps {
+        vec![
+            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(header), ViewBasicProp::live_props().into()),
+            (live_id!(body), ViewBasicProp::live_props().into()),
+            (live_id!(footer), ViewBasicProp::live_props().into()),
+        ]
     }
 
     fn walk(&self) -> Walk {

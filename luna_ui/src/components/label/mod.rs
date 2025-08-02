@@ -133,7 +133,6 @@ impl Widget for GLabel {
         // let _ = self.text.as_ref().is_empty().then(|| {
         //     let _ = self.set_text(cx, " ");
         // });
-
         self.draw_text
             .draw_walk(cx, walk, Align::default(), self.text.as_ref());
         cx.end_turtle_with_area(&mut self.area);

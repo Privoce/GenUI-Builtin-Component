@@ -3,7 +3,10 @@ use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
     component_state,
-    components::traits::{BasicProp, ComponentState, Prop},
+    components::{
+        live_props::LiveProps,
+        traits::{BasicProp, ComponentState, Prop},
+    },
     error::Error,
     getter_setter_prop,
     prop::{
@@ -110,7 +113,7 @@ impl Prop for LabelProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct LabelBasicProp {
     #[live]
@@ -210,12 +213,12 @@ impl BasicProp for LabelBasicProp {
         }
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(color), None),
-            (live_id!(font_size), None),
-            (live_id!(line_spacing), None),
+            (live_id!(theme), None.into()),
+            (live_id!(color), None.into()),
+            (live_id!(font_size), None.into()),
+            (live_id!(line_spacing), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -223,7 +226,8 @@ impl BasicProp for LabelBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
             (
                 live_id!(padding),
@@ -232,9 +236,10 @@ impl BasicProp for LabelBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(flow), None),
+            (live_id!(flow), None.into()),
         ]
     }
 

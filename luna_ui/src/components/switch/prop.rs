@@ -1,12 +1,15 @@
 use crate::{
     component_state,
-    components::traits::{BasicProp, ComponentState, Prop},
+    components::{
+        live_props::LiveProps,
+        traits::{BasicProp, ComponentState, Prop},
+    },
     error::Error,
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
-            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER_ACTIVE, HOVER_BASIC,
-            MARGIN, SIZE, STROKE_COLOR, THEME,
+            BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE,
+            STROKE_COLOR, THEME,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
@@ -332,15 +335,15 @@ impl BasicProp for SwitchBasicProp {
         self.border_color = border_color.into();
     }
 
-    fn live_props() -> Vec<(LiveId, Option<Vec<LiveId>>)> {
+    fn live_props() -> LiveProps {
         vec![
-            (live_id!(theme), None),
-            (live_id!(size), None),
-            (live_id!(background_color), None),
-            (live_id!(stroke_color), None),
-            (live_id!(border_color), None),
-            (live_id!(background_visible), None),
-            (live_id!(border_width), None),
+            (live_id!(theme), None.into()),
+            (live_id!(size), None.into()),
+            (live_id!(background_color), None.into()),
+            (live_id!(stroke_color), None.into()),
+            (live_id!(border_color), None.into()),
+            (live_id!(background_visible), None.into()),
+            (live_id!(border_width), None.into()),
             (
                 live_id!(margin),
                 Some(vec![
@@ -348,10 +351,11 @@ impl BasicProp for SwitchBasicProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]),
+                ])
+                .into(),
             ),
-            (live_id!(abs_pos), None),
-            (live_id!(cursor), None),
+            (live_id!(abs_pos), None.into()),
+            (live_id!(cursor), None.into()),
         ]
     }
 

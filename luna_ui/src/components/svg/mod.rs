@@ -86,7 +86,7 @@ pub struct GSvg {
     #[rust]
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
-    apply_slot_map: ApplySlotMap<SvgState, SvgPart>,
+    pub apply_slot_map: ApplySlotMap<SvgState, SvgPart>,
     // --- draw ----------------------
     #[live]
     pub draw_svg: DrawSvg,
