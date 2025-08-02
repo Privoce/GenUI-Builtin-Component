@@ -292,17 +292,6 @@ impl Component for GCard {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.current_state();
-        // self.draw_card.background_color = self.prop.get(state).container.background_color;
-        // self.draw_card.border_color = self.prop.get(state).container.border_color;
-        // self.draw_card.border_width = self.prop.get(state).container.border_width;
-        // self.draw_card.border_radius = self.prop.get(state).container.border_radius.into();
-        // self.draw_card.shadow_color = self.prop.get(state).container.shadow_color;
-        // self.draw_card.spread_radius = self.prop.get(state).container.spread_radius;
-        // self.draw_card.blur_radius = self.prop.get(state).container.blur_radius;
-        // self.draw_card.shadow_offset = self.prop.get(state).container.shadow_offset;
-        // self.draw_card.background_visible = self.prop.get(state).container.background_visible.to_f32();
-        // self.draw_card.rotation = self.prop.get(state).container.rotation;
-        // self.draw_card.scale = self.prop.get(state).container.scale;
         let prop = self.prop.get(state);
         self.draw_card.merge(&prop.container);
         Ok(())

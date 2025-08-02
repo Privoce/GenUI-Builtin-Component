@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::components::svg::{SvgBasicProp, SvgState};
+use crate::components::svg::{SvgPartProp, SvgState};
 
 live_design! {
     DrawSvg = {{DrawSvg}} {
@@ -31,7 +31,7 @@ impl DrawSvg {
             }
         }
     }
-    pub fn merge(&mut self, prop: &SvgBasicProp) {
+    pub fn merge(&mut self, prop: &SvgPartProp) {
        self.color = prop.color;
     }
     pub fn state_basic(&mut self) {

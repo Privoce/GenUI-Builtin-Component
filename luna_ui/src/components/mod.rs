@@ -24,7 +24,7 @@ pub mod switch;
 pub mod tag;
 pub mod view;
 // pub mod router;
-pub mod tabbar;
+// pub mod tabbar;
 pub mod menu;
 
 pub mod lifecycle;

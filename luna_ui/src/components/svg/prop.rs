@@ -4,7 +4,6 @@ use toml_edit::{Item, Value};
 use crate::{
     component_state,
     components::{
-        svg,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
@@ -13,7 +12,9 @@ use crate::{
         manuel::{
             ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CONTAINER, CURSOR, DISABLED, HEIGHT, HOVER,
             MARGIN, PRESSED, SVG, THEME, WIDTH,
-        }, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplySlotMapImpl, ApplyStateMapImpl
+        },
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ApplySlotMapImpl, ApplyStateMapImpl,
     },
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
@@ -88,10 +89,7 @@ impl SlotProp for SvgProp {
                 (SvgState::Pressed, &mut self.pressed),
                 (SvgState::Disabled, &mut self.disabled),
             ],
-            [
-                SvgPart::Container,
-                SvgPart::Svg,
-            ]
+            [SvgPart::Container, SvgPart::Svg],
         );
     }
 }

@@ -97,6 +97,19 @@ where
     /// ## cross
     /// Used to intersect the outermost state component properties with the composition properties
     /// Meaning: convert `Map<State, Map<Part, Map<String, LiveValue>>>` to `Map<Part, Map<State, Map<String, LiveValue>>>`
+    /// - only use to slot
+    /// ### example
+    /// ```
+    /// let mut crossed_map = self.apply_slot_map.cross();
+    /// for (part, slot) in [(CheckboxPart::Extra, &mut self.extra)] {
+    ///     crossed_map.remove(&part).map(|map| {
+    ///         let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
+    ///         slot.apply_state_map.merge(map);
+    ///     });
+    ///
+    ///     slot.prop.sync(&slot.apply_state_map);
+    /// }
+    /// ```
     fn cross(&self) -> ApplySlotMap<PT, IS>;
 }
 

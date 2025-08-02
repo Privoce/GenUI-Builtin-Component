@@ -159,7 +159,6 @@ live_design! {
                     //         }
                     //     }
                     // }
-
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
                     //     <GCheckbox>{
@@ -233,6 +232,12 @@ live_design! {
                     //     }
                     // }
                     // <GSvg> {
+                    //     prop: {
+                    //         basic: {
+                    //             container: {background_visible: true, theme: Primary}
+                    //             svg: {height: 36.0, width: 36.0},
+                    //         }
+                    //     }
                     //     src: dep("crate://self/resources/heavy.svg"),
                     // }
                     // <GImage> {
@@ -268,40 +273,40 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GDialog> {
-                        popup: {
-                            popup: {
-                                <GButton> {
-                                    prop: {
-                                        basic: {theme: Success}
-                                    }
-                                }
-                            }
-                        }
-                        <GButton> {}
-                    }
+                    // <GDialog> {
+                    //     popup: {
+                    //         popup: {
+                    //             <GButton> {
+                    //                 prop: {
+                    //                     basic: {theme: Success}
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    //     <GButton> {}
+                    // }
 
-                    <GDrawer> {
-                        popup: {
-                            popup: {
-                                <GButton> {
-                                    prop: {
-                                        basic: {theme: Success}
-                                    }
-                                }
-                            }
-                        }
-                        <GButton> {}
-                    }
+                    // <GDrawer> {
+                    //     popup: {
+                    //         popup: {
+                    //             <GButton> {
+                    //                 prop: {
+                    //                     basic: {theme: Success}
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    //     <GButton> {}
+                    // }
 
-                    <GPopover> {
-                        position: Right
-                        <GButton> {}
-                    }
+                    // <GPopover> {
+                    //     position: Right
+                    //     <GButton> {}
+                    // }
 
-                    <GToolTip> {
-                        <GButton> {}
-                    }
+                    // <GToolTip> {
+                    //     <GButton> {}
+                    // }
                 }
             }
         }
