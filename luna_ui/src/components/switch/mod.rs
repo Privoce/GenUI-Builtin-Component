@@ -122,6 +122,8 @@ pub struct GSwitch {
     // is checkbox active? if is true, it can not be changed by user
     #[live(false)]
     pub value: bool,
+    #[rust]
+    pub state: SwitchState,
 }
 
 impl WidgetNode for GSwitch {
@@ -134,7 +136,7 @@ impl WidgetNode for GSwitch {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.walk()
     }
 
@@ -150,7 +152,7 @@ impl WidgetNode for GSwitch {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -163,7 +165,7 @@ impl WidgetNode for GSwitch {
 impl Widget for GSwitch {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if self.visible {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
 
             self.draw_switch.begin(cx, prop.walk(), prop.layout());
@@ -244,7 +246,7 @@ impl Component for GSwitch {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         self.draw_switch.merge(&prop);
         let state = if self.value {
@@ -256,18 +258,10 @@ impl Component for GSwitch {
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            SwitchState::Disabled
-        } else {
-            self.draw_switch.current_state().into()
-        }
-    }
-
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
         }
@@ -282,7 +276,7 @@ impl Component for GSwitch {
                 }
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
                 let (state, state_an) = if self.value {
                     (SwitchState::HoverActive, id!(active.on_hover))
                 } else {
@@ -338,21 +332,22 @@ impl Component for GSwitch {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            SwitchState::Basic => {
-                self.draw_switch.state_basic();
-            }
-            SwitchState::HoverBasic => {
-                self.draw_switch.state_hover_basic();
-            }
-            SwitchState::HoverActive => {
-                self.draw_switch.state_hover_active();
-            }
-            SwitchState::Active => {
-                self.draw_switch.state_active();
-            }
-            SwitchState::Disabled => {}
-        }
+        // match state {
+        //     SwitchState::Basic => {
+        //         self.draw_switch.state_basic();
+        //     }
+        //     SwitchState::HoverBasic => {
+        //         self.draw_switch.state_hover_basic();
+        //     }
+        //     SwitchState::HoverActive => {
+        //         self.draw_switch.state_hover_active();
+        //     }
+        //     SwitchState::Active => {
+        //         self.draw_switch.state_active();
+        //     }
+        //     SwitchState::Disabled => {}
+        // }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -473,7 +468,7 @@ impl Component for GSwitch {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let (index, _active, _hover) = match state {
                 SwitchState::Basic => (

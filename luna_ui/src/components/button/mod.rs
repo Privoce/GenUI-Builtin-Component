@@ -105,6 +105,8 @@ pub struct GButton {
     /// will have the same `border_radius: 10.0` if you set this to true. (default is true)
     #[live(true)]
     pub sync: bool,
+    #[rust]
+    pub state: ButtonState,
 }
 
 impl WidgetNode for GButton {
@@ -117,7 +119,7 @@ impl WidgetNode for GButton {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         Walk {
             margin: prop.margin,
             width: prop.width,
@@ -139,7 +141,7 @@ impl WidgetNode for GButton {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -155,22 +157,11 @@ impl Widget for GButton {
             return DrawStep::done();
         }
 
-        let state = self.current_state();
-        let prop = self.prop.get(state);
+        let state = self.state;
 
-        let _ = self.draw_button.begin(
-            cx,
-            prop.walk(),
-            Layout {
-                clip_x: false,
-                clip_y: false,
-                padding: prop.padding,
-                align: prop.align,
-                flow: prop.flow,
-                spacing: prop.spacing,
-                ..Default::default()
-            },
-        );
+        let prop = self.prop.get(state);
+        dbg!(state, prop.padding);
+        let _ = self.draw_button.begin(cx, prop.walk(), prop.layout());
 
         if self.slot.visible() {
             let slot_walk = self.slot.walk(cx);
@@ -267,24 +258,15 @@ impl Component for GButton {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
-        let prop = self.prop.get(state);
+        let prop = self.prop.get(self.state);
         self.draw_button.merge(&prop.into());
         Ok(())
-    }
-
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            ButtonState::Disabled
-        } else {
-            self.draw_button.current_state().into()
-        }
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
         }
@@ -299,7 +281,7 @@ impl Component for GButton {
                 hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
                 self.switch_state_with_animation(cx, ButtonState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -327,28 +309,17 @@ impl Component for GButton {
     }
 
     fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_button.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                pressed: 0.0
-            },
-        );
+        // self.draw_button.apply_over(
+        //     cx,
+        //     live! {
+        //         hover: 0.0,
+        //         pressed: 0.0
+        //     },
+        // );
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            ButtonState::Basic => {
-                self.draw_button.state_basic();
-            }
-            ButtonState::Hover => {
-                self.draw_button.state_hover();
-            }
-            ButtonState::Pressed => {
-                self.draw_button.state_pressed();
-            }
-            ButtonState::Disabled => {}
-        }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -357,6 +328,7 @@ impl Component for GButton {
         }
         self.switch_state(state);
         self.set_animation(cx);
+        self.redraw(cx);
     }
 
     // sync props if not set in DSL, depend on `self.sync` is true
@@ -461,7 +433,7 @@ impl Component for GButton {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 ButtonState::Basic => nodes.child_by_path(

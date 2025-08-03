@@ -1,4 +1,4 @@
-use makepad_widgets::LiveId;
+use makepad_widgets::{LiveId, LiveIdAsProp, LiveProp};
 
 /// 用于在after_apply中收集应用的属性
 pub type LiveProps = Vec<(LiveId, LivePropsValue)>;
@@ -21,6 +21,24 @@ impl LivePropsValue {
 
     pub fn is_slot(&self) -> bool {
         matches!(self, LivePropsValue::Slot(_))
+    }
+
+    pub fn paths(&self, paths: &mut Vec<LiveProp>) -> (){
+        match self {
+            LivePropsValue::Basic(fields) => {
+                if let Some(fields) = fields {
+                    for field in fields {
+                        paths.push(field.as_field());
+                    }
+                }
+            }, 
+            LivePropsValue::Slot(items) => {
+                for (id, value) in items {
+                    paths.push(id.as_field());
+                    
+                }
+            },
+        }
     }
 }
 

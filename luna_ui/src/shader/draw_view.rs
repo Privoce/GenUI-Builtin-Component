@@ -107,10 +107,10 @@ live_design! {
 pub struct DrawView {
     #[deref]
     pub draw_super: DrawQuad,
-    #[live]
-    pub hover: f32,
-    #[live]
-    pub pressed: f32,
+    // #[live]
+    // pub hover: f32,
+    // #[live]
+    // pub pressed: f32,
     #[live]
     pub background_color: Vec4,
     #[live]
@@ -136,17 +136,17 @@ pub struct DrawView {
 }
 
 impl DrawView {
-    pub fn current_state(&self) -> ViewState {
-        if self.pressed == 1.0 {
-            ViewState::Pressed
-        } else {
-            if self.hover == 1.0 {
-                ViewState::Hover
-            } else {
-                ViewState::Basic
-            }
-        }
-    }
+    // pub fn current_state(&self) -> ViewState {
+    //     if self.pressed == 1.0 {
+    //         ViewState::Pressed
+    //     } else {
+    //         if self.hover == 1.0 {
+    //             ViewState::Hover
+    //         } else {
+    //             ViewState::Basic
+    //         }
+    //     }
+    // }
     pub fn merge(&mut self, prop: &ViewBasicProp) {
         self.background_color = prop.background_color;
         self.border_color = prop.border_color;
@@ -160,22 +160,22 @@ impl DrawView {
         self.rotation = prop.rotation;
         self.scale = prop.scale;
     }
-    pub fn state_basic(&mut self) {
-        if self.hover != 0.0 || self.pressed != 0.0 {
-            self.hover = 0.0;
-            self.pressed = 0.0;
-        }
-    }
-    pub fn state_hover(&mut self) {
-        if self.hover != 1.0 {
-            self.hover = 1.0;
-            self.pressed = 0.0;
-        }
-    }
-    pub fn state_pressed(&mut self) {
-        if self.pressed != 1.0 {
-            self.pressed = 1.0;
-            self.hover = 0.0;
-        }
-    }
+    // pub fn state_basic(&mut self) {
+    //     if self.hover != 0.0 || self.pressed != 0.0 {
+    //         self.hover = 0.0;
+    //         self.pressed = 0.0;
+    //     }
+    // }
+    // pub fn state_hover(&mut self) {
+    //     if self.hover != 1.0 {
+    //         self.hover = 1.0;
+    //         self.pressed = 0.0;
+    //     }
+    // }
+    // pub fn state_pressed(&mut self) {
+    //     if self.pressed != 1.0 {
+    //         self.pressed = 1.0;
+    //         self.hover = 0.0;
+    //     }
+    // }
 }

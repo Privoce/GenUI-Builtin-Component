@@ -71,6 +71,8 @@ pub struct GLabel {
     pub sync: bool,
     #[rust]
     pub lifecycle: LifeCycle,
+    #[rust]
+    pub state: LabelState,
 }
 
 impl WidgetNode for GLabel {
@@ -83,7 +85,7 @@ impl WidgetNode for GLabel {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         Walk {
             abs_pos: Default::default(),
@@ -103,7 +105,7 @@ impl WidgetNode for GLabel {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
     fn animation_spread(&self) -> bool {
         // self.animation_spread
@@ -118,7 +120,7 @@ impl Widget for GLabel {
         if !self.visible {
             return DrawStep::done();
         }
-        let state = self.current_state();
+        let state = self.state;
         let walk = walk.with_add_padding(self.prop.get(state).padding);
         cx.begin_turtle(
             walk,
@@ -189,7 +191,7 @@ impl Component for GLabel {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         // [sync to draw_text] -------------------------------------------------------
         self.draw_text.color = self.prop.get(state).color;
         self.draw_text.text_style.font_size = self.prop.get(state).font_size;
@@ -201,14 +203,6 @@ impl Component for GLabel {
             FontMode::BoldItalic => self.font_bold_italic.font_family.clone(),
         };
         Ok(())
-    }
-
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            LabelState::Disabled
-        } else {
-            LabelState::Basic
-        }
     }
 
     fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
@@ -227,8 +221,8 @@ impl Component for GLabel {
         ()
     }
 
-    fn switch_state(&mut self, _state: Self::State) -> () {
-        ()
+    fn switch_state(&mut self, state: Self::State) -> () {
+        self.state = state
     }
     fn switch_state_with_animation(&mut self, _cx: &mut Cx, _state: Self::State) -> () {
         ()

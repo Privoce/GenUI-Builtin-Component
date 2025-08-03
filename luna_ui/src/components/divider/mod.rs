@@ -42,11 +42,13 @@ pub struct GDivider {
     index: usize,
     #[live(true)]
     pub sync: bool,
+    #[rust]
+    pub state: DividerState,
 }
 
 impl Widget for GDivider {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         self.draw_divider.begin(cx, prop.walk(), prop.layout());
         self.draw_divider.end(cx);
         self.set_scope_path(&scope.path);
@@ -64,7 +66,7 @@ impl WidgetNode for GDivider {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.walk()
     }
 
@@ -78,7 +80,7 @@ impl WidgetNode for GDivider {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
     fn animation_spread(&self) -> bool {
         true
@@ -123,14 +125,11 @@ impl Component for GDivider {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         self.draw_divider.merge(&prop.into());
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        DividerState::Basic
-    }
 
     fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
         ()
@@ -140,8 +139,8 @@ impl Component for GDivider {
         ()
     }
 
-    fn switch_state(&mut self, _state: Self::State) -> () {
-        ()
+    fn switch_state(&mut self, state: Self::State) -> () {
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, _cx: &mut Cx, _state: Self::State) -> () {

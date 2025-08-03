@@ -111,6 +111,8 @@ pub struct GSvg {
     pub event_open: bool,
     #[live]
     pub grab_key_focus: bool,
+    #[rust]
+    pub state: SvgState,
 }
 
 impl Widget for GSvg {
@@ -134,7 +136,7 @@ impl Widget for GSvg {
         if !self.visible {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         self.draw_svg_container.begin(cx, prop.container.walk(), prop.container.layout());
         self.draw_svg.draw_walk(cx, prop.svg.walk());
         self.draw_svg_container.end(cx);
@@ -153,7 +155,7 @@ impl WidgetNode for GSvg {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.walk()
     }
 
@@ -167,7 +169,7 @@ impl WidgetNode for GSvg {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -225,19 +227,11 @@ impl Component for GSvg {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         self.draw_svg_container.merge(&prop.container);
         self.draw_svg.merge(&prop.svg);
         self.draw_svg.svg_file = self.src.clone();
         Ok(())
-    }
-
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            SvgState::Disabled
-        } else {
-            self.draw_svg.current_state()
-        }
     }
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
@@ -249,7 +243,7 @@ impl Component for GSvg {
                 hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
                 self.switch_state_with_animation(cx, SvgState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -279,7 +273,7 @@ impl Component for GSvg {
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -296,18 +290,19 @@ impl Component for GSvg {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            SvgState::Basic => {
-                self.draw_svg.state_basic();
-            }
-            SvgState::Hover => {
-                self.draw_svg.state_hover();
-            }
-            SvgState::Pressed => {
-                self.draw_svg.state_pressed();
-            }
-            SvgState::Disabled => {}
-        }
+        // match state {
+        //     SvgState::Basic => {
+        //         self.draw_svg.state_basic();
+        //     }
+        //     SvgState::Hover => {
+        //         self.draw_svg.state_hover();
+        //     }
+        //     SvgState::Pressed => {
+        //         self.draw_svg.state_pressed();
+        //     }
+        //     SvgState::Disabled => {}
+        // }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -431,7 +426,7 @@ impl Component for GSvg {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 SvgState::Basic => nodes.child_by_path(

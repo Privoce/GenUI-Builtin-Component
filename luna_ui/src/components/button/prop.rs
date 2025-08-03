@@ -599,6 +599,17 @@ impl From<ViewState> for ButtonState {
     }
 }
 
+impl From<ButtonState> for ViewState {
+    fn from(value: ButtonState) -> Self {
+        match value {
+            ButtonState::Basic => ViewState::Basic,
+            ButtonState::Hover => ViewState::Hover,
+            ButtonState::Pressed => ViewState::Pressed,
+            ButtonState::Disabled => ViewState::Disabled,
+        }
+    }
+}
+
 impl ComponentState for ButtonState {
     fn is_disabled(&self) -> bool {
         matches!(self, ButtonState::Disabled)

@@ -100,6 +100,8 @@ pub struct GCard {
     // --- draw  --------------------
     #[rust]
     defer_walks: DeferWalks,
+    #[rust]
+    pub state: CardState
 }
 
 impl WidgetNode for GCard {
@@ -124,7 +126,7 @@ impl WidgetNode for GCard {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         Walk {
             abs_pos: prop.container.abs_pos,
             margin: prop.container.margin,
@@ -152,7 +154,7 @@ impl WidgetNode for GCard {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -168,7 +170,7 @@ impl Widget for GCard {
             return DrawStep::done();
         }
 
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
 
         let _ = self.draw_card.begin(
@@ -211,7 +213,7 @@ impl Widget for GCard {
         // handle slot events
         let mut is_slot_hover = false;
         for slot in [&mut self.header, &mut self.body, &mut self.footer] {
-            let slot_state = slot.current_state();
+            let slot_state = slot.state;
             
             slot.handle_event(cx, event, scope);
             match slot_state {
@@ -291,14 +293,10 @@ impl Component for GCard {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         self.draw_card.merge(&prop.container);
         Ok(())
-    }
-
-    fn current_state(&self) -> Self::State {
-        self.draw_card.current_state().into()
     }
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, _area: Area) {
@@ -306,7 +304,7 @@ impl Component for GCard {
 
         match hit {
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
                 self.switch_state_with_animation(cx, CardState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -328,20 +326,7 @@ impl Component for GCard {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            CardState::Basic => {
-                if self.draw_card.hover != 0.0 || self.draw_card.pressed != 0.0 {
-                    self.draw_card.hover = 0.0;
-                    self.draw_card.pressed = 0.0;
-                }
-            }
-            CardState::Hover => {
-                if self.draw_card.hover != 1.0 {
-                    self.draw_card.hover = 1.0;
-                    self.draw_card.pressed = 0.0;
-                }
-            }
-        }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -445,7 +430,7 @@ impl Component for GCard {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 CardState::Basic => nodes.child_by_path(

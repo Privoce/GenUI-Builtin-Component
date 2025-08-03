@@ -119,6 +119,8 @@ pub struct GRadio {
     // specific value of the radio, can be used to identify the radio
     #[live]
     pub value: String,
+    #[rust]
+    pub state: RadioState
 }
 
 impl WidgetNode for GRadio {
@@ -131,7 +133,7 @@ impl WidgetNode for GRadio {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.container.walk()
     }
 
@@ -151,7 +153,7 @@ impl WidgetNode for GRadio {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -164,8 +166,7 @@ impl WidgetNode for GRadio {
 impl Widget for GRadio {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if self.visible {
-            let state = self.current_state();
-            let prop = self.prop.get(state);
+            let prop = self.prop.get(self.state);
 
             self.draw_container
                 .begin(cx, prop.container.walk(), prop.container.layout());
@@ -266,7 +267,7 @@ impl Component for GRadio {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
         self.draw_radio.merge(&prop.radio);
@@ -277,18 +278,10 @@ impl Component for GRadio {
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            RadioState::Disabled
-        } else {
-            self.draw_container.current_state().into()
-        }
-    }
-
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -304,7 +297,7 @@ impl Component for GRadio {
                     }
                 }
                 Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                    cx.set_cursor(self.prop.get(self.state).container.cursor);
                     self.switch_state_with_animation(cx, RadioState::Hover);
                     hit_hover_in!(self, cx, e);
                 }
@@ -350,21 +343,22 @@ impl Component for GRadio {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            RadioState::Basic => {
-                self.draw_container.state_basic();
-                self.draw_radio.state_basic();
-            }
-            RadioState::Hover => {
-                self.draw_container.state_hover();
-                self.draw_radio.state_hover();
-            }
-            RadioState::Active => {
-                self.draw_container.state_pressed();
-                self.draw_radio.state_active();
-            }
-            RadioState::Disabled => {}
-        }
+        // match state {
+        //     RadioState::Basic => {
+        //         self.draw_container.state_basic();
+        //         self.draw_radio.state_basic();
+        //     }
+        //     RadioState::Hover => {
+        //         self.draw_container.state_hover();
+        //         self.draw_radio.state_hover();
+        //     }
+        //     RadioState::Active => {
+        //         self.draw_container.state_pressed();
+        //         self.draw_radio.state_active();
+        //     }
+        //     RadioState::Disabled => {}
+        // }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -517,7 +511,7 @@ impl Component for GRadio {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 RadioState::Basic => nodes.child_by_path(

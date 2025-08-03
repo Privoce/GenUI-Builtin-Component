@@ -37,26 +37,26 @@ pub struct DrawImg {
     pub image_scale: Vec2,
     #[live]
     pub image_pan: Vec2,
-    #[live]
-    pub load: f32,
+    // #[live]
+    // pub load: f32,
 }
 
 impl DrawImg {
-    pub fn current_state(&self) -> ImageState {
-        if self.load == 1.0 {
-            ImageState::Loading
-        } else {
-            ImageState::Basic
-        }
-    }
-    pub fn state_basic(&mut self) {
-        if self.load != 0.0 {
-            self.load = 0.0;
-        }
-    }
-    pub fn state_loading(&mut self) {
-        if self.load != 1.0 {
-            self.load = 1.0;
-        }
-    }
+    // pub fn current_state(&self) -> ImageState {
+    //     if self.load == 1.0 {
+    //         ImageState::Loading
+    //     } else {
+    //         ImageState::Basic
+    //     }
+    // }
+    // pub fn state_basic(&mut self) {
+    //     if self.load != 0.0 {
+    //         self.load = 0.0;
+    //     }
+    // }
+    // pub fn state_loading(&mut self) {
+    //     if self.load != 1.0 {
+    //         self.load = 1.0;
+    //     }
+    // }
 }

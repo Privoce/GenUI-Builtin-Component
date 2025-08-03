@@ -119,6 +119,8 @@ pub struct GCheckbox {
     // specific value of the checkbox, can be used to identify the checkbox
     #[live]
     pub value: String,
+    #[rust]
+    pub state: CheckboxState,
 }
 
 impl WidgetNode for GCheckbox {
@@ -131,7 +133,7 @@ impl WidgetNode for GCheckbox {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.container.walk()
     }
 
@@ -151,7 +153,7 @@ impl WidgetNode for GCheckbox {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     fn animation_spread(&self) -> bool {
@@ -164,7 +166,7 @@ impl WidgetNode for GCheckbox {
 impl Widget for GCheckbox {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if self.visible {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
 
             self.draw_container
@@ -272,7 +274,7 @@ impl Component for GCheckbox {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
         self.draw_checkbox.merge(&prop.checkbox);
@@ -287,18 +289,10 @@ impl Component for GCheckbox {
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            CheckboxState::Disabled
-        } else {
-            self.draw_container.current_state().into()
-        }
-    }
-
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -313,7 +307,7 @@ impl Component for GCheckbox {
                 }
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
                 if !self.active {
                     self.switch_state_with_animation(cx, CheckboxState::Hover);
                     self.play_animation(cx, id!(hover.on));
@@ -369,21 +363,23 @@ impl Component for GCheckbox {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            CheckboxState::Basic => {
-                self.draw_container.state_basic();
-                self.draw_checkbox.state_basic();
-            }
-            CheckboxState::Hover => {
-                self.draw_container.state_hover();
-                self.draw_checkbox.state_hover();
-            }
-            CheckboxState::Active => {
-                self.draw_container.state_pressed();
-                self.draw_checkbox.state_active();
-            }
-            CheckboxState::Disabled => {}
-        }
+        // match state {
+        //     CheckboxState::Basic => {
+        //         self.draw_container.state_basic();
+        //         self.draw_checkbox.state_basic();
+        //     }
+        //     CheckboxState::Hover => {
+        //         self.draw_container.state_hover();
+        //         self.draw_checkbox.state_hover();
+        //     }
+        //     CheckboxState::Active => {
+        //         self.draw_container.state_pressed();
+        //         self.draw_checkbox.state_active();
+        //     }
+        //     CheckboxState::Disabled => {}
+        // }
+        self.state = state;
+        self.extra.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -537,7 +533,7 @@ impl Component for GCheckbox {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 CheckboxState::Basic => nodes.child_by_path(

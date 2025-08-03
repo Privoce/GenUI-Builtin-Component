@@ -1,5 +1,8 @@
 use crate::{
-    components::{live_props::LivePropsValue, traits::{BasicProp, Component, Part, SlotBasicProp}},
+    components::{
+        live_props::LivePropsValue,
+        traits::{BasicProp, Component, Part, SlotBasicProp},
+    },
     prop::manuel::THEME,
     themes::Theme,
 };
@@ -167,15 +170,15 @@ where
                         live_part.as_field(),
                         state.as_field(),
                     ];
-                    if let Some(fields) = fields {
-                        for field in fields {
-                            paths.push(field.as_field());
-                        }
-                        // do loop
-                        insert_map(nodes, index, &mut applys, &paths);
-                    } else {
-                        insert_map(nodes, index, &mut applys, &paths);
-                    }
+                    // if let Some(fields) = fields {
+                    //     for field in fields {
+                    //         paths.push(field.as_field());
+                    //     }
+                    //     // do loop
+                    //     insert_map(nodes, index, &mut applys, &paths);
+                    // } else {
+                    //     insert_map(nodes, index, &mut applys, &paths);
+                    // }
                 }
                 slots.insert(part, applys);
             }
@@ -198,7 +201,6 @@ where
             let mut states_vec: Vec<_> = states.into_iter().collect();
             for part in parts {
                 if let Some(part_props) = basic_props.get(&part) {
-                    dbg!(part_props);
                     let mut parts = Cow::Borrowed(part_props);
                     if parts.contains_key(THEME) {
                         let parts = parts.to_mut();
@@ -344,14 +346,30 @@ where
                     prefix.as_field(),
                     state.as_field(),
                 ];
-                if let Some(fields) = fields {
-                    for field in fields {
-                        paths.push(field.as_field());
+                // if let Some(fields) = fields {
+                //     for field in fields {
+                //         paths.push(field.as_field());
+                //     }
+                //     // do loop
+                //     insert_map(nodes, index, &mut applys, &paths);
+                // } else {
+                //     insert_map(nodes, index, &mut applys, &paths);
+                // }
+                match fields {
+                    LivePropsValue::Basic(basic_fields) => {
+                        if let Some(fields) = basic_fields {
+                            for field in fields {
+                                paths.push(field.as_field());
+                                // 需要使用临时量来处理，因为field是需要push一个insert一个的
+                                let mut tmp_paths = paths.clone();
+                                tmp_paths.push(field.as_field());
+                                insert_map(nodes, index, &mut applys, &tmp_paths);
+                            }
+                        }else {
+                            insert_map(nodes, index, &mut applys, &paths);
+                        }
                     }
-                    // do loop
-                    insert_map(nodes, index, &mut applys, &paths);
-                } else {
-                    insert_map(nodes, index, &mut applys, &paths);
+                    LivePropsValue::Slot(slot_fields) => {}
                 }
             }
             insert(prefix, component, applys);
@@ -398,6 +416,7 @@ pub fn insert_map(
 ) {
     if let Some(i) = nodes.child_by_path(index, paths) {
         let node = &nodes[i];
+        dbg!(&node.value);
         applys.insert(node.id.to_string(), node.value.clone());
     }
 }

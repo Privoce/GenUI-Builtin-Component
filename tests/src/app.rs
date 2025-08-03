@@ -307,35 +307,59 @@ live_design! {
                     // <GToolTip> {
                     //     <GButton> {}
                     // }
-                    <GTabbarItem> {
+                    // <GTabbarItem> {
+                    //     prop: {
+                    //         basic: {
+                    //             icon: {
+                    //                 svg: {
+                    //                     theme: Error,
+                    //                 },
+                    //                 container: {
+                    //                     background_visible: true,
+                    //                     theme: Info,
+                    //                 }
+                    //             },
+                    //             text: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
+                    //     icon: <GSvg> {
+                    //         prop: {
+                    //             basic: {
+                    //                 svg: {
+                    //                     theme: Primary
+                    //                 }
+                    //             }
+                    //         }
+                    //         src: dep("crate://self/resources/wind.svg"),
+                    //     }
+                    //     text: <GLabel> {
+                    //         text: "Wind"
+                    //     }
+                    // }
+                    <GButton> {
                         prop: {
                             basic: {
-                                icon: {
-                                    svg: {
-                                        theme: Error,
-                                    },
-                                    container: {
-                                        background_visible: true,
-                                        theme: Info,
-                                    }
-                                },
-                                text: {
-                                    font_size: 24.0,
+                                // theme: Primary,
+                                // height: Fit,
+                                // width: Fit,
+                                padding: {
+                                    left: 30.0,
+                                    right: 60.0,
+                                    top: 5.0,
+                                    bottom: 5.0,
                                 }
                             }
-                        }
-                        icon: <GSvg> {
-                            prop: {
-                                basic: {
-                                    svg: {
-                                        theme: Primary
-                                    }
+                            hover: {
+                                theme: Primary,
+                                padding: {
+                                    left: 30.0,
+                                    right: 100.0,
+                                    top: 25.0,
+                                    bottom: 10.0,
                                 }
                             }
-                            src: dep("crate://self/resources/wind.svg"),
-                        }
-                        text: <GLabel> {
-                            text: "Wind"
                         }
                     }
                 }

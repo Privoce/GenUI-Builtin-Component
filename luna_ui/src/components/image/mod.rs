@@ -91,6 +91,8 @@ pub struct GImage {
     pub scope_path: Option<HeapLiveIdPath>,
     #[rust]
     pub apply_state_map: ApplyStateMap<ImageState>,
+    #[rust]
+    pub state: ImageState,
 }
 
 impl WidgetNode for GImage {
@@ -103,7 +105,7 @@ impl WidgetNode for GImage {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.walk()
     }
 
@@ -116,7 +118,7 @@ impl WidgetNode for GImage {
         self.draw_img.redraw(cx);
     }
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
     fn animation_spread(&self) -> bool {
         true
@@ -189,7 +191,7 @@ impl Widget for GImage {
                 }
             }
         }
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         if let Some(nf) = self.next_frame.is_event(event) {
             // compute the next frame and patch things up
             if let Some(image_texture) = &self.texture {
@@ -290,7 +292,7 @@ impl Widget for GImage {
         // we change either nothing, or width or height
         let rect = cx.peek_walk_turtle(walk);
         let dpi = cx.current_dpi_factor();
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         let (width, height) = if let Some((w, h)) = &self.async_image_size {
             // still loading
 
@@ -471,7 +473,7 @@ impl Component for GImage {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        // let prop = self.prop.get(self.current_state());
+        // let prop = self.prop.get(self.state);
         // self.draw_button.merge(&prop.into());
         self.lazy_create_image_cache(cx);
         match self.src.clone() {
@@ -489,10 +491,6 @@ impl Component for GImage {
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        self.draw_img.current_state()
-    }
-
     fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
         ()
     }
@@ -507,10 +505,11 @@ impl Component for GImage {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            ImageState::Basic => self.draw_img.state_basic(),
-            ImageState::Loading => self.draw_img.state_loading(),
-        }
+        // match state {
+        //     ImageState::Basic => self.draw_img.state_basic(),
+        //     ImageState::Loading => self.draw_img.state_loading(),
+        // }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -614,7 +613,7 @@ impl GImage {
     }
 
     pub fn get_size_when_load(&self) -> (usize, usize) {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         let height = match prop.height {
             Size::Fixed(h) => h,
             _ => prop.min_height,

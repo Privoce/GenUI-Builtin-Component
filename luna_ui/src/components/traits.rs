@@ -9,7 +9,10 @@ use makepad_widgets::{
 };
 
 use crate::{
-    components::{lifecycle::LifeCycle, live_props::{LiveProps, LivePropsValue}},
+    components::{
+        lifecycle::LifeCycle,
+        live_props::{LiveProps, LivePropsValue},
+    },
     prop::{
         insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, Position,
         PropMap, SlotMap,
@@ -70,14 +73,28 @@ where
                     prefix.as_field(),
                     state.as_field(),
                 ];
-                if let Some(fields) = fields {
-                    for field in fields {
-                        paths.push(field.as_field());
+                // if let Some(fields) = fields {
+                //     for field in fields {
+                //         paths.push(field.as_field());
+                //     }
+                //     // do loop
+                //     insert_map(nodes, index, &mut applys, &paths);
+                // } else {
+                //     insert_map(nodes, index, &mut applys, &paths);
+                // }
+                match fields {
+                    LivePropsValue::Basic(basic_fields) => {
+                        if let Some(fields) = basic_fields {
+                            for field in fields {
+                                paths.push(field.as_field());
+                            }
+                        }
+                        // do loop
+                        insert_map(nodes, index, &mut applys, &paths);
                     }
-                    // do loop
-                    insert_map(nodes, index, &mut applys, &paths);
-                } else {
-                    insert_map(nodes, index, &mut applys, &paths);
+                    LivePropsValue::Slot(slot_fields) => {
+
+                    }
                 }
             }
             insert(prefix, self, applys);
@@ -130,8 +147,6 @@ where
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error>;
     // fn area(&self) -> Area;
     fn set_scope_path(&mut self, path: &HeapLiveIdPath) -> ();
-    /// ## get current state of component
-    fn current_state(&self) -> Self::State;
     /// ## handle event for component
     /// from `fn handle_event()` in `impl Widget for $Component`
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area);

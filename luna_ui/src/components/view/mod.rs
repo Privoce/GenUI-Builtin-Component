@@ -140,6 +140,8 @@ pub struct GView {
     pub sync: bool,
     #[rust]
     pub apply_state_map: ApplyStateMap<ViewState>,
+    #[rust]
+    pub state: ViewState
 }
 
 impl LiveHook for GView {
@@ -260,7 +262,7 @@ impl LiveHook for GView {
 
 impl WidgetNode for GView {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         Walk {
             abs_pos: prop.abs_pos,
             margin: prop.margin,
@@ -346,7 +348,7 @@ impl WidgetNode for GView {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     visible!();
@@ -354,7 +356,7 @@ impl WidgetNode for GView {
 
 impl Widget for GView {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         // the beginning state
         if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
             if !self.visible {
@@ -611,7 +613,7 @@ impl Component for GView {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = self.current_state();
+        let state = self.state;
         let prop = self.prop.get(state);
         self.draw_view.merge(prop);
         Ok(())
@@ -647,7 +649,7 @@ impl Component for GView {
                 }
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
                 self.switch_state_with_animation(cx, ViewState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -670,17 +672,9 @@ impl Component for GView {
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).cursor);
+                cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
-        }
-    }
-
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            ViewState::Disabled
-        } else {
-            self.draw_view.current_state()
         }
     }
 
@@ -695,28 +689,7 @@ impl Component for GView {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            ViewState::Basic => {
-                // switch to normal state
-                if self.draw_view.hover != 0.0 || self.draw_view.pressed != 0.0 {
-                    self.draw_view.hover = 0.0;
-                    self.draw_view.pressed = 0.0;
-                }
-            }
-            ViewState::Hover => {
-                if self.draw_view.hover != 1.0 {
-                    self.draw_view.hover = 1.0;
-                    self.draw_view.pressed = 0.0;
-                }
-            }
-            ViewState::Pressed => {
-                if self.draw_view.pressed != 1.0 {
-                    self.draw_view.hover = 0.0;
-                    self.draw_view.pressed = 1.0;
-                }
-            }
-            ViewState::Disabled => {}
-        }
+        self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -827,7 +800,7 @@ impl Component for GView {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 ViewState::Basic => nodes.child_by_path(

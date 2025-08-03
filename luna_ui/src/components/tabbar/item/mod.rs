@@ -102,6 +102,8 @@ pub struct GTabbarItem {
     pub sync: bool,
     #[rust]
     defer_walks: DeferWalks,
+    #[rust]
+    pub state: TabbarItemState,
 }
 
 impl WidgetNode for GTabbarItem {
@@ -121,7 +123,7 @@ impl WidgetNode for GTabbarItem {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         prop.walk()
     }
 
@@ -141,7 +143,7 @@ impl WidgetNode for GTabbarItem {
     }
 
     fn state(&self) -> String {
-        self.current_state().to_string()
+        self.state.to_string()
     }
 
     visible!();
@@ -152,7 +154,7 @@ impl Widget for GTabbarItem {
         if !self.visible() {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
 
         let _ = self.draw_item.begin(cx, prop.walk(), prop.layout());
         let _ = SlotDrawer::new(
@@ -288,27 +290,21 @@ impl Component for GTabbarItem {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.current_state());
+        let prop = self.prop.get(self.state);
         self.draw_item.merge(&prop.container);
         let _ = self.icon.render(cx)?;
         let _ = self.text.render(cx)?;
         Ok(())
     }
 
-    fn current_state(&self) -> Self::State {
-        if self.disabled {
-            TabbarItemState::Disabled
-        } else {
-            self.draw_item.current_state().into()
-        }
-    }
+
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {}
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
-                cx.set_cursor(self.prop.get(self.current_state()).container.cursor);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -325,18 +321,21 @@ impl Component for GTabbarItem {
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
-        match state {
-            TabbarItemState::Basic => {
-                self.draw_item.state_basic();
-            }
-            TabbarItemState::Hover => {
-                self.draw_item.state_hover();
-            }
-            TabbarItemState::Active => {
-                self.draw_item.state_pressed();
-            }
-            TabbarItemState::Disabled => {}
-        }
+        // match state {
+        //     TabbarItemState::Basic => {
+        //         self.draw_item.state_basic();
+        //     }
+        //     TabbarItemState::Hover => {
+        //         self.draw_item.state_hover();
+        //     }
+        //     TabbarItemState::Active => {
+        //         self.draw_item.state_pressed();
+        //     }
+        //     TabbarItemState::Disabled => {}
+        // }
+        self.state = state;
+        self.icon.switch_state(state.into());
+        self.text.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -357,7 +356,7 @@ impl Component for GTabbarItem {
 
         //     (SvgState::from(*k),)
         // });
-        dbg!(&self.apply_slot_map);
+        // dbg!(&self.apply_slot_map);
         // crossed_map.remove(&TabbarItemPart::Icon).map(|map| {
         //     // let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
         //     self.icon.apply_slot_map.merge(map);
@@ -461,7 +460,7 @@ impl Component for GTabbarItem {
                 }
             }
         } else {
-            let state = self.current_state();
+            let state = self.state;
             let prop = self.prop.get(state);
             let index = match state {
                 TabbarItemState::Basic => nodes.child_by_path(
