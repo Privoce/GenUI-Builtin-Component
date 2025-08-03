@@ -14,7 +14,9 @@ use crate::{
     error::Error,
     lifecycle, play_animation,
     prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
+        traits::ToFloat,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -33,7 +35,7 @@ live_design! {
                 off = {
                     from: {all: Forward {duration: (AN_DURATION)}}
                     apply: {
-                        draw_item: {hover: 0.0, pressed: 0.0}
+                        draw_item: <AN_DRAW_VIEW> {}
                     }
                 }
 
@@ -44,15 +46,23 @@ live_design! {
                     },
                     ease: InOutQuad,
                     apply: {
-                        draw_item: {hover: 1.0, pressed: 0.0}
+                        draw_item: <AN_DRAW_VIEW> {}
                     }
                 }
 
-                focus = {
+                active = {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
-                        draw_item: {focus: 1.0, pressed: 0.0}
+                        draw_item: <AN_DRAW_VIEW> {}
+                    }
+                }
+
+                disabled = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_item: <AN_DRAW_VIEW> {}
                     }
                 }
             }
@@ -150,12 +160,11 @@ impl WidgetNode for GTabbarItem {
 }
 
 impl Widget for GTabbarItem {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if !self.visible() {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
-
         let _ = self.draw_item.begin(cx, prop.walk(), prop.layout());
         let _ = SlotDrawer::new(
             [
@@ -241,9 +250,16 @@ impl LiveHook for GTabbarItem {
                 (TabbarItemPart::Text, &LabelBasicProp::live_props()),
                 (TabbarItemPart::Container, &ViewBasicProp::live_props()),
             ],
-            |_| {},
+            |_| {
+            //     dbg!([
+            //     (TabbarItemPart::Icon, &SvgBasicProp::live_props()),
+            //     (TabbarItemPart::Text, &LabelBasicProp::live_props()),
+            //     (TabbarItemPart::Container, &ViewBasicProp::live_props()),
+            // ]);
+            },
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
+                    dbg!(&applys);
                     component
                         .apply_slot_map
                         .insert(TabbarItemState::Basic, applys);
@@ -290,6 +306,16 @@ impl Component for GTabbarItem {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        let state = if self.disabled {
+            TabbarItemState::Disabled
+        } else {
+            if self.active {
+                TabbarItemState::Active
+            } else {
+                TabbarItemState::Basic
+            }
+        };
+        self.switch_state(state);
         let prop = self.prop.get(self.state);
         self.draw_item.merge(&prop.container);
         let _ = self.icon.render(cx)?;
@@ -297,42 +323,19 @@ impl Component for GTabbarItem {
         Ok(())
     }
 
-
-
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {}
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, TabbarItemState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_item.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                pressed: 0.0,
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
-        // match state {
-        //     TabbarItemState::Basic => {
-        //         self.draw_item.state_basic();
-        //     }
-        //     TabbarItemState::Hover => {
-        //         self.draw_item.state_hover();
-        //     }
-        //     TabbarItemState::Active => {
-        //         self.draw_item.state_pressed();
-        //     }
-        //     TabbarItemState::Disabled => {}
-        // }
         self.state = state;
         self.icon.switch_state(state.into());
         self.text.switch_state(state.into());
@@ -351,6 +354,7 @@ impl Component for GTabbarItem {
             return;
         }
         let mut crossed_map = self.apply_slot_map.cross();
+        dbg!(&self.apply_slot_map);
         // let mut icon_slot_map = self.apply_slot_map.iter().map(|(k, v)| {
         //     let icon_part_map = v.get(&TabbarItemPart::Icon).cloned().unwrap_or_default();
 
@@ -388,7 +392,8 @@ impl Component for GTabbarItem {
             let basic_prop = self.prop.get(TabbarItemState::Basic);
             let hover_prop = self.prop.get(TabbarItemState::Hover);
             let active_prop = self.prop.get(TabbarItemState::Active);
-            let (mut basic_index, mut hover_index, mut active_index) = (None, None, None);
+            let disabled_prop = self.prop.get(TabbarItemState::Disabled);
+            let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) = (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -420,6 +425,17 @@ impl Component for GTabbarItem {
                 ],
             ) {
                 active_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
             }
 
             set_animation! {
@@ -456,6 +472,17 @@ impl Component for GTabbarItem {
                         blur_radius => (active_prop.container.blur_radius as f64),
                         shadow_offset => active_prop.container.shadow_offset,
                         background_visible => active_prop.container.background_visible.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.container.background_color,
+                        border_color => disabled_prop.container.border_color,
+                        border_radius => disabled_prop.container.border_radius,
+                        border_width => (disabled_prop.container.border_width as f64),
+                        shadow_color => disabled_prop.container.shadow_color,
+                        spread_radius => (disabled_prop.container.spread_radius as f64),
+                        blur_radius => (disabled_prop.container.blur_radius as f64),
+                        shadow_offset => disabled_prop.container.shadow_offset,
+                        background_visible => disabled_prop.container.background_visible.to_f64()
                     }
                 }
             }
@@ -487,7 +514,14 @@ impl Component for GTabbarItem {
                         live_id!(active).as_instance(),
                     ],
                 ),
-                _ => None,
+                TabbarItemState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_item = {

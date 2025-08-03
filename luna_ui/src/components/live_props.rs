@@ -47,6 +47,7 @@ impl LivePropsValue {
                     // value需要依据类型来处理, 递归调用
                     value.build_paths_and_insert(paths, insert);
                     paths.pop();
+                    
                 }
             }
         }

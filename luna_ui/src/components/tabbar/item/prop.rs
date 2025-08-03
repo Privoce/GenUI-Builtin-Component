@@ -4,7 +4,7 @@ use toml_edit::Item;
 use crate::{
     component_state,
     components::{
-        label::{LabelBasicProp, LabelState}, live_props::LiveProps, svg::{SvgBasicProp, SvgState}, traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp}, view::{ViewBasicProp, ViewState}
+        label::{LabelBasicProp, LabelState}, live_props::LiveProps, svg::{SvgBasicProp, SvgPart, SvgState}, traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp}, view::{ViewBasicProp, ViewState}
     },
     error::Error,
     prop::{
@@ -143,7 +143,10 @@ impl SlotBasicProp for TabbarItemBasicProp {
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
         match part {
             TabbarItemPart::Container => self.container.sync(state.into()),
-            TabbarItemPart::Icon => self.icon.sync(state.into()),
+            TabbarItemPart::Icon => {
+                self.icon.sync_slot(state.into(), SvgPart::Svg);
+                self.icon.sync_slot(state.into(), SvgPart::Container);
+            },
             TabbarItemPart::Text => self.text.sync(state.into()),
         }
     }

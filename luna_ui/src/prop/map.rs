@@ -7,7 +7,8 @@ use crate::{
     themes::Theme,
 };
 use makepad_widgets::{
-    live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp, LiveValue,
+    live_id, makepad_vector::path, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp,
+    LiveValue,
 };
 use std::{borrow::Cow, collections::HashMap, hash::Hash};
 
@@ -20,6 +21,63 @@ pub type SlotMap<P> = HashMap<P, PropMap>;
 pub type ApplyStateMap<K> = HashMap<K, PropMap>;
 /// ApplySlotMap is a mapping from a key to a SlotMap, used for applying slots in components
 pub type ApplySlotMap<K, P> = HashMap<K, SlotMap<P>>;
+/// 一个可以深度寻址的Applys，因为被应用到属性实际上可能非常深，但前2层永远是固定的[prop, state]
+/// 后续的层级将会出现：
+/// 1. 最基础的情况，直接应用的属性和值: [prop_key, prop_value] (`[String, LiveValue]`)
+/// 2. 带有深度的属性和值例如`Margin`: [prop_key, [prop_value_key, prop_value_value]] (`[String, [String, LiveValue]]`)
+/// 3. 出现插槽: [part, [...]], 这会混合前两种情况，并延伸更多的层级，例如：
+/// ```
+/// [prop, state, [part, [slot, [prop_key, [prop_value_key, prop_value_value]]]]]
+/// 对应如下：
+/// [prop, basic, [icon, [svg, [margin, [top, 10.0]]]]]
+/// ```
+/// 这个Applys不需要考虑前2层，只需要一个可以递归的结构来处理后续会扩展出的层级
+#[derive(Debug, Clone)]
+pub enum Applys {
+    /// 表示最基础的节点
+    Value(LiveValue),
+    /// 表示可深度嵌套的节点
+    Deep(HashMap<String, Applys>),
+}
+
+impl Applys {
+    /// 创建一个最简单的Applys
+    pub fn new() -> Self {
+        Applys::Deep(HashMap::new())
+    }
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Applys::Value(_) => false,
+            Applys::Deep(map) => map.is_empty(),
+        }
+    }
+    /// 访问并修改某个节点，level表示深度
+    pub fn visit_level(&mut self, level: usize) -> Option<&mut Applys> {
+        let mut current_level = 0_usize;
+        if level == 0 {
+            return Some(self);
+        } else {
+            if let Applys::Deep(map) = self {
+                for apply in map.values_mut() {
+                    if current_level == level {
+                        return Some(apply);
+                    }
+                    if let Some(apply) = apply.visit_level(level - 1) {
+                        return Some(apply);
+                    }
+                    current_level += 1;
+                }
+                return None;
+            }
+            // 如果是Value节点，说明没有更深的层级了
+            if level == current_level {
+                return Some(self);
+            } else {
+                return None;
+            }
+        }
+    }
+}
 
 pub trait ApplyMapImpl {
     /// ## merge
@@ -161,8 +219,9 @@ where
         for prefix in prefixs {
             let mut slots = HashMap::new();
             for (part, live_props) in part_props {
-                let mut applys = HashMap::new();
+                let mut applys = Applys::new();
                 let live_part = part.to_live_id();
+                // let mut slot_props = HashMap::new();
                 for (state, fields) in live_props {
                     let mut paths = vec![
                         live_id!(prop).as_field(),
@@ -170,17 +229,9 @@ where
                         live_part.as_field(),
                         state.as_field(),
                     ];
-                    // if let Some(fields) = fields {
-                    //     for field in fields {
-                    //         paths.push(field.as_field());
-                    //     }
-                    //     // do loop
-                    //     insert_map(nodes, index, &mut applys, &paths);
-                    // } else {
-                    //     insert_map(nodes, index, &mut applys, &paths);
-                    // }
                     fields.build_paths_and_insert(&mut paths, &mut |paths| {
-                        insert_map(nodes, index, &mut applys, paths);
+                        // 返回一个Applys，因为我们无法在创建时知道这个Applys的深度
+                        build_applys(nodes, index, &mut applys, paths)
                     });
                 }
                 slots.insert(part, applys);
@@ -349,32 +400,6 @@ where
                     prefix.as_field(),
                     state.as_field(),
                 ];
-                // if let Some(fields) = fields {
-                //     for field in fields {
-                //         paths.push(field.as_field());
-                //     }
-                //     // do loop
-                //     insert_map(nodes, index, &mut applys, &paths);
-                // } else {
-                //     insert_map(nodes, index, &mut applys, &paths);
-                // }
-                // match fields {
-                //     LivePropsValue::Basic(basic_fields) => {
-                //         if let Some(fields) = basic_fields {
-                //             for field in fields {
-                //                 // 需要使用临时量来处理，因为field是需要push一个insert一个的
-                //                 let mut tmp_paths = paths.clone();
-                //                 tmp_paths.push(field.as_field());
-                //                 insert_map(nodes, index, &mut applys, &tmp_paths);
-                //             }
-                //         }else {
-                //             insert_map(nodes, index, &mut applys, &paths);
-                //         }
-                //     }
-                //     LivePropsValue::Slot(slot_fields) => {
-
-                //     }
-                // }
                 fields.build_paths_and_insert(&mut paths, &mut |paths| {
                     insert_map(nodes, index, &mut applys, paths);
                 });
@@ -424,6 +449,54 @@ pub fn insert_map(
     if let Some(i) = nodes.child_by_path(index, paths) {
         let node = &nodes[i];
         applys.insert(node.id.to_string(), node.value.clone());
+    }
+}
+
+/// 构建Applys，由于无法在外部知道这个Applys的深度，所以在这个方法里实际上就要对Applys进行构建(变更/增加节点)
+/// 关键点在于paths, 我们知道paths的前两层是固定的[prop, state]，后续的层级会根据组件的不同而变化
+pub fn build_applys(
+    nodes: &[LiveNode],
+    index: usize,
+    applys: &mut Applys,
+    paths: &Vec<LiveProp>,
+) -> () {
+    // 去除前2层的paths
+    let splited_paths = paths[2..].to_vec();
+    // 和insert_map类似来获取最终的节点值，但需要从第三层开始进行扩展, 首先保证splited_paths的长度大于等于2，因为最小的情况都需要有值的KV
+    // 为空了说明没有足够的层级，这一般是不可能的，除非是错误的路径，这里直接不处理
+    if splited_paths.len() >= 2 {
+        if let Some(i) = nodes.child_by_path(index, paths) {
+            let live_node = &nodes[i];
+            // 接下来进行层级扩展
+            let splited_paths_len = splited_paths.len();
+            for (i, LiveProp(prop_key, ..)) in splited_paths.iter().enumerate() {
+                if let Some(applys) = applys.visit_level(i) {
+                    if let Applys::Deep(node) = applys {
+                        // Applys一定是深层的，检查是否已经有这个prop_key
+                        // 同时需要根据当前是否为splited_paths的最后一个元素来决定是否需要继续深入
+                        if splited_paths_len - 1 == i {
+                            // 说明当前为最终的值节点, 需要确定是否已经有这个prop_key，如果有需要确定是否是Value节点
+                            node.entry(prop_key.to_string())
+                                .and_modify(|applys| {
+                                    if let Applys::Value(value) = applys {
+                                        // 如果已经有这个prop_key，说明是重复的值节点, 暂时使用新值替换旧值 (待优化，可能无需替换)
+                                        *value = live_node.value.clone();
+                                    } else {
+                                        // 如果不是Value节点，说明是在上一层创建的Deep节点，需要转为Value节点
+                                        *applys = Applys::Value(live_node.value.clone());
+                                    }
+                                })
+                                .or_insert(Applys::Value(live_node.value.clone()));
+                        } else {
+                            // 说明当前不是最终的值节点，需要继续深入
+                            node.entry(prop_key.to_string()).or_insert(Applys::new());
+                        }
+                    }else{
+                       *applys = Applys::Value(live_node.value.clone());
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -73,15 +73,7 @@ where
                     prefix.as_field(),
                     state.as_field(),
                 ];
-                // if let Some(fields) = fields {
-                //     for field in fields {
-                //         paths.push(field.as_field());
-                //     }
-                //     // do loop
-                //     insert_map(nodes, index, &mut applys, &paths);
-                // } else {
-                //     insert_map(nodes, index, &mut applys, &paths);
-                // }
+
                 fields.build_paths_and_insert(&mut paths, &mut |paths| {
                     insert_map(nodes, index, &mut applys, paths);
                 });
