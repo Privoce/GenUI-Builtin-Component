@@ -13,7 +13,8 @@ use crate::{
         ApplyStateMap,
     },
     pure_after_apply, set_index, set_scope_path, setter,
-    themes::{Conf, Theme}, visible,
+    themes::{Conf, Theme},
+    visible,
 };
 
 mod prop;
@@ -85,14 +86,8 @@ impl WidgetNode for GLabel {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let state = self.state;
-        let prop = self.prop.get(state);
-        Walk {
-            abs_pos: Default::default(),
-            margin: prop.margin,
-            width: Size::Fit,
-            height: Size::Fit,
-        }
+        let prop = self.prop.get(self.state);
+        prop.walk()
     }
 
     fn area(&self) -> Area {
@@ -191,6 +186,9 @@ impl Component for GLabel {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
+        if self.disabled {
+            self.switch_state(LabelState::Disabled);
+        }
         let state = self.state;
         // [sync to draw_text] -------------------------------------------------------
         self.draw_text.color = self.prop.get(state).color;

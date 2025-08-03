@@ -1,15 +1,10 @@
 use makepad_widgets::*;
 
-use crate::components::image::ImageState;
-
 live_design! {
     use link::shaders::*;
-    
+
     DrawImg = {{DrawImg}}{
         texture image: texture2d
-        opacity: 1.0
-        image_scale: vec2(1.0, 1.0)
-        image_pan: vec2(0.0, 0.0)
 
         fn get_color_scale_pan(self, scale: vec2, pan: vec2) -> vec4 {
             return sample2d(self.image, self.pos * scale + pan).xyzw;
@@ -31,32 +26,12 @@ live_design! {
 pub struct DrawImg {
     #[deref]
     draw_super: DrawQuad,
-    #[live]
+    #[live(1.0)]
     pub opacity: f32,
-    #[live]
+    #[live(vec2(1.0, 1.0))]
     pub image_scale: Vec2,
-    #[live]
+    #[live(vec2(0.0, 0.0))]
     pub image_pan: Vec2,
-    // #[live]
-    // pub load: f32,
-}
-
-impl DrawImg {
-    // pub fn current_state(&self) -> ImageState {
-    //     if self.load == 1.0 {
-    //         ImageState::Loading
-    //     } else {
-    //         ImageState::Basic
-    //     }
-    // }
-    // pub fn state_basic(&mut self) {
-    //     if self.load != 0.0 {
-    //         self.load = 0.0;
-    //     }
-    // }
-    // pub fn state_loading(&mut self) {
-    //     if self.load != 1.0 {
-    //         self.load = 1.0;
-    //     }
-    // }
+    #[live]
+    pub load: f32,
 }

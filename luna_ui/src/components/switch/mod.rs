@@ -15,7 +15,7 @@ use crate::{
     error::Error,
     event_option, lifecycle, play_animation,
     prop::{
-        manuel::{ACTIVE, BASIC, HOVER_ACTIVE, HOVER_BASIC},
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER_ACTIVE, HOVER_BASIC},
         traits::ToFloat,
         ApplyStateMap,
     },
@@ -38,10 +38,7 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: Linear,
                     apply: {
-                        draw_switch: <AN_DRAW_SWITCH> {
-                            hover: 0.0,
-                            active: 0.0
-                        }
+                        draw_switch: <AN_DRAW_SWITCH> {}
                     }
                 }
 
@@ -49,10 +46,7 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION),}},
                     ease: Linear,
                     apply: {
-                       draw_switch: <AN_DRAW_SWITCH> {
-                            hover: 0.0,
-                            active: 1.0
-                       }
+                       draw_switch: <AN_DRAW_SWITCH> {}
                     }
                 }
 
@@ -60,10 +54,7 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: Linear,
                     apply: {
-                        draw_switch: <AN_DRAW_SWITCH> {
-                            hover: 1.0,
-                            active: 0.0
-                        }
+                        draw_switch: <AN_DRAW_SWITCH> {}
                     }
                 }
 
@@ -71,10 +62,15 @@ live_design! {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: Linear,
                     apply: {
-                        draw_switch: <AN_DRAW_SWITCH> {
-                            hover: 1.0,
-                            active: 1.0
-                        }
+                        draw_switch: <AN_DRAW_SWITCH> {}
+                    }
+                }
+
+                disabled = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: Linear,
+                    apply: {
+                        draw_switch: <AN_DRAW_SWITCH> {}
                     }
                 }
             },
@@ -208,6 +204,7 @@ impl LiveHook for GSwitch {
                 live_id!(hover_basic),
                 live_id!(hover_active),
                 live_id!(active),
+                live_id!(disabled),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -229,6 +226,11 @@ impl LiveHook for GSwitch {
                         .apply_state_map
                         .insert(SwitchState::Active, applys);
                 }
+                DISABLED => {
+                    component
+                        .apply_state_map
+                        .insert(SwitchState::Disabled, applys);
+                }
                 _ => {}
             },
         );
@@ -246,21 +248,27 @@ impl Component for GSwitch {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
+        let state = if self.disabled {
+            SwitchState::Disabled
+        } else {
+            if self.value {
+                SwitchState::Active
+            } else {
+                SwitchState::Basic
+            }
+        };
+        self.switch_state(state);
         let state = self.state;
         let prop = self.prop.get(state);
         self.draw_switch.merge(&prop);
-        let state = if self.value {
-            SwitchState::Active
-        } else {
-            SwitchState::Basic
-        };
-        self.switch_state(state);
+        self.draw_switch.active = self.value.to_f32();
         Ok(())
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, SwitchState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
@@ -321,37 +329,12 @@ impl Component for GSwitch {
         }
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_switch.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                active: 0.0,
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
-        // match state {
-        //     SwitchState::Basic => {
-        //         self.draw_switch.state_basic();
-        //     }
-        //     SwitchState::HoverBasic => {
-        //         self.draw_switch.state_hover_basic();
-        //     }
-        //     SwitchState::HoverActive => {
-        //         self.draw_switch.state_hover_active();
-        //     }
-        //     SwitchState::Active => {
-        //         self.draw_switch.state_active();
-        //     }
-        //     SwitchState::Disabled => {}
-        // }
         self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -385,8 +368,14 @@ impl Component for GSwitch {
             let hover_basic_prop = self.prop.get(SwitchState::HoverBasic);
             let hover_active_prop = self.prop.get(SwitchState::HoverActive);
             let active_prop = self.prop.get(SwitchState::Active);
-            let (mut basic_index, mut hover_basic_index, mut hover_active_index, mut active_index) =
-                (None, None, None, None);
+            let disabled_prop = self.prop.get(SwitchState::Disabled);
+            let (
+                mut basic_index,
+                mut hover_basic_index,
+                mut hover_active_index,
+                mut active_index,
+                mut disabled_index,
+            ) = (None, None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -431,6 +420,17 @@ impl Component for GSwitch {
                 hover_active_index = Some(index);
             }
 
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(active).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
+            }
+
             set_animation! {
                 nodes: draw_switch = {
                     basic_index => {
@@ -439,7 +439,8 @@ impl Component for GSwitch {
                         stroke_color => basic_prop.stroke_color,
                         border_radius => basic_prop.border_radius,
                         border_width => (basic_prop.border_width as f64),
-                        background_visible => basic_prop.background_visible.to_f64()
+                        background_visible => basic_prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
                     },
                     hover_basic_index => {
                         background_color => hover_basic_prop.background_color,
@@ -447,7 +448,8 @@ impl Component for GSwitch {
                         stroke_color => hover_basic_prop.stroke_color,
                         border_radius => hover_basic_prop.border_radius,
                         border_width => (hover_basic_prop.border_width as f64),
-                        background_visible => hover_basic_prop.background_visible.to_f64()
+                        background_visible => hover_basic_prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
                     },
                     hover_active_index => {
                         background_color => hover_active_prop.background_color,
@@ -455,7 +457,8 @@ impl Component for GSwitch {
                         stroke_color => hover_active_prop.stroke_color,
                         border_radius => hover_active_prop.border_radius,
                         border_width => (hover_active_prop.border_width as f64),
-                        background_visible => hover_active_prop.background_visible.to_f64()
+                        background_visible => hover_active_prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
                     },
                     active_index => {
                         background_color => active_prop.background_color,
@@ -463,63 +466,64 @@ impl Component for GSwitch {
                         stroke_color => active_prop.stroke_color,
                         border_radius => active_prop.border_radius,
                         border_width => (active_prop.border_width as f64),
-                        background_visible => active_prop.background_visible.to_f64()
+                        background_visible => active_prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.background_color,
+                        border_color => disabled_prop.border_color,
+                        stroke_color => disabled_prop.stroke_color,
+                        border_radius => disabled_prop.border_radius,
+                        border_width => (disabled_prop.border_width as f64),
+                        background_visible => disabled_prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
                     }
                 }
             }
         } else {
             let state = self.state;
             let prop = self.prop.get(state);
-            let (index, _active, _hover) = match state {
-                SwitchState::Basic => (
-                    nodes.child_by_path(
-                        self.index,
-                        &[
-                            live_id!(animator).as_field(),
-                            live_id!(active).as_instance(),
-                            live_id!(off).as_instance(),
-                        ],
-                    ),
-                    0.0,
-                    0.0,
+            let index = match state {
+                SwitchState::Basic => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(active).as_instance(),
+                        live_id!(off).as_instance(),
+                    ],
                 ),
-                SwitchState::HoverBasic => (
-                    nodes.child_by_path(
-                        self.index,
-                        &[
-                            live_id!(animator).as_field(),
-                            live_id!(active).as_instance(),
-                            live_id!(off_hover).as_instance(),
-                        ],
-                    ),
-                    0.0,
-                    1.0,
+                SwitchState::HoverBasic => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(active).as_instance(),
+                        live_id!(off_hover).as_instance(),
+                    ],
                 ),
-                SwitchState::HoverActive => (
-                    nodes.child_by_path(
-                        self.index,
-                        &[
-                            live_id!(animator).as_field(),
-                            live_id!(active).as_instance(),
-                            live_id!(on_hover).as_instance(),
-                        ],
-                    ),
-                    1.0,
-                    1.0,
+                SwitchState::HoverActive => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(active).as_instance(),
+                        live_id!(on_hover).as_instance(),
+                    ],
                 ),
-                SwitchState::Active => (
-                    nodes.child_by_path(
-                        self.index,
-                        &[
-                            live_id!(animator).as_field(),
-                            live_id!(active).as_instance(),
-                            live_id!(on).as_instance(),
-                        ],
-                    ),
-                    1.0,
-                    0.0,
+                SwitchState::Active => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(active).as_instance(),
+                        live_id!(on).as_instance(),
+                    ],
                 ),
-                _ => (None, self.draw_switch.hover, self.draw_switch.active),
+                SwitchState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(active).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_switch = {
@@ -529,7 +533,8 @@ impl Component for GSwitch {
                         border_radius => prop.border_radius,
                         border_width => (prop.border_width as f64),
                         stroke_color => prop.stroke_color,
-                        background_visible => prop.background_visible.to_f64()
+                        background_visible => prop.background_visible.to_f64(),
+                        active => self.value.to_f64()
                     }
                 }
             }

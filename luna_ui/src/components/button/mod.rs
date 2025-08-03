@@ -274,11 +274,11 @@ impl Component for GButton {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.state);
-        self.draw_button.merge(&prop.into());
         if self.disabled {
             self.switch_state(ButtonState::Disabled);
         }
+        let prop = self.prop.get(self.state);
+        self.draw_button.merge(&prop.into());
         Ok(())
     }
 

@@ -72,11 +72,6 @@ live_design! {
 pub struct DrawCheckbox {
     #[deref]
     pub draw_super: DrawQuad,
-    // ---- event state
-    #[live]
-    pub hover: f32,
-    #[live]
-    pub active: f32,
     // ---- colors
     #[live]
     pub background_color: Vec4,
@@ -108,23 +103,5 @@ impl DrawCheckbox {
         self.size = other.size;
         self.border_width = other.border_width;
         self.mode = other.mode;
-    }
-    pub fn state_basic(&mut self) {
-        if self.hover != 0.0 || self.active != 0.0 {
-            self.hover = 0.0;
-            self.active = 0.0;
-        }
-    }
-    pub fn state_hover(&mut self) {
-        if self.hover != 1.0 {
-            self.hover = 1.0;
-            self.active = 0.0;
-        }
-    }
-    pub fn state_active(&mut self) {
-        if self.active != 1.0 {
-            self.hover = 0.0;
-            self.active = 1.0;
-        }
     }
 }

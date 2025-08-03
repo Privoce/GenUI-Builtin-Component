@@ -1,11 +1,6 @@
 use makepad_widgets::*;
 
-use crate::{
-    components::{
-        switch::{SwitchBasicProp, SwitchState},
-    },
-    prop::traits::ToFloat,
-};
+use crate::{components::switch::SwitchBasicProp, prop::traits::ToFloat};
 
 live_design! {
     use link::shaders::*;
@@ -58,11 +53,6 @@ live_design! {
 pub struct DrawSwitch {
     #[deref]
     pub draw_super: DrawQuad,
-    // ---- event state
-    #[live]
-    pub hover: f32, // 盒子的hover状态
-    #[live]
-    pub active: f32, // 盒子的选中状态
     // ---- colors
     #[live]
     pub background_color: Vec4, // 盒子的背景色
@@ -76,18 +66,11 @@ pub struct DrawSwitch {
     pub border_width: f32,
     #[live]
     pub border_radius: Vec4,
+    #[live]
+    pub active: f32,
 }
 
 impl DrawSwitch {
-    // pub fn current_state(&self) -> SwitchState {
-    //     match (self.hover, self.active) {
-    //         (0.0, 0.0) => SwitchState::Basic,
-    //         (1.0, 0.0) => SwitchState::HoverBasic,
-    //         (1.0, 1.0) => SwitchState::HoverActive,
-    //         (0.0, 1.0) => SwitchState::Active,
-    //         _ => SwitchState::Basic,
-    //     }
-    // }
     pub fn merge(&mut self, other: &SwitchBasicProp) {
         self.background_color = other.background_color;
         self.background_visible = other.background_visible.to_f32();
@@ -97,28 +80,4 @@ impl DrawSwitch {
         self.border_width = other.border_width;
         self.border_radius = other.border_radius.into();
     }
-    // pub fn state_basic(&mut self) {
-    //     if self.hover != 0.0 || self.active != 0.0 {
-    //         self.hover = 0.0;
-    //         self.active = 0.0;
-    //     }
-    // }
-    // pub fn state_hover_basic(&mut self) {
-    //     if self.hover != 1.0 || self.active != 0.0 {
-    //         self.hover = 1.0;
-    //         self.active = 0.0;
-    //     }
-    // }
-    // pub fn state_hover_active(&mut self) {
-    //     if self.hover != 1.0 || self.active != 1.0 {
-    //         self.hover = 1.0;
-    //         self.active = 1.0;
-    //     }
-    // }
-    // pub fn state_active(&mut self) {
-    //     if self.hover != 0.0 || self.active != 1.0 {
-    //         self.hover = 0.0;
-    //         self.active = 1.0;
-    //     }
-    // }
 }

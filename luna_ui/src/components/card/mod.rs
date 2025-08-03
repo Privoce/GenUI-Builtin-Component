@@ -11,7 +11,7 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewState},
+        view::{GView, ViewBasicProp, ViewState},
     },
     error::Error,
     event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle,
@@ -101,7 +101,7 @@ pub struct GCard {
     #[rust]
     defer_walks: DeferWalks,
     #[rust]
-    pub state: CardState
+    pub state: CardState,
 }
 
 impl WidgetNode for GCard {
@@ -214,11 +214,10 @@ impl Widget for GCard {
         let mut is_slot_hover = false;
         for slot in [&mut self.header, &mut self.body, &mut self.footer] {
             let slot_state = slot.state;
-            
+
             slot.handle_event(cx, event, scope);
             match slot_state {
                 ViewState::Hover | ViewState::Pressed => {
-                    dbg!(slot_state);
                     is_slot_hover = true;
                 }
                 _ => {
@@ -228,15 +227,11 @@ impl Widget for GCard {
         }
 
         if is_slot_hover {
-            dbg!("hover");
             self.switch_state_with_animation(cx, CardState::Hover);
         } else {
             self.switch_state_with_animation(cx, CardState::Basic);
         }
 
-        // self.header.handle_event(cx, event, scope);
-        // self.body.handle_event(cx, event, scope);
-        // self.footer.handle_event(cx, event, scope);
         let area = self.area();
         let hit = event.hits(cx, area);
         self.handle_widget_event(cx, event, hit, area);
@@ -251,7 +246,7 @@ impl LiveHook for GCard {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        let live_props = CardBasicProp::live_props();
+        let live_props = ViewBasicProp::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
@@ -316,17 +311,11 @@ impl Component for GCard {
         };
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_card.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
+        self.header.switch_state(state.into());
+        self.body.switch_state(state.into());
+        self.footer.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {

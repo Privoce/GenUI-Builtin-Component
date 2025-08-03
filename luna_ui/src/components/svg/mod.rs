@@ -17,7 +17,7 @@ use crate::{
     makepad_draw::*,
     play_animation,
     prop::{
-        manuel::{BASIC, HOVER, PRESSED},
+        manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
         ApplySlotMap,
     },
@@ -60,6 +60,15 @@ live_design! {
                 }
 
                 pressed = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_svg: <AN_DRAW_SVG> {},
+                        draw_svg_container: <AN_DRAW_VIEW> {}
+                    }
+                }
+
+                disabled = {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
@@ -137,7 +146,8 @@ impl Widget for GSvg {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
-        self.draw_svg_container.begin(cx, prop.container.walk(), prop.container.layout());
+        self.draw_svg_container
+            .begin(cx, prop.container.walk(), prop.container.layout());
         self.draw_svg.draw_walk(cx, prop.svg.walk());
         self.draw_svg_container.end(cx);
         self.set_scope_path(&scope.path);
@@ -190,7 +200,12 @@ impl LiveHook for GSvg {
         self.set_apply_slot_map(
             nodes,
             index,
-            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            [
+                live_id!(basic),
+                live_id!(hover),
+                live_id!(pressed),
+                live_id!(disabled),
+            ],
             [
                 (SvgPart::Container, &ViewBasicProp::live_props()),
                 (SvgPart::Svg, &SvgPartProp::live_props()),
@@ -205,6 +220,9 @@ impl LiveHook for GSvg {
                 }
                 PRESSED => {
                     component.apply_slot_map.insert(SvgState::Pressed, applys);
+                }
+                DISABLED => {
+                    component.apply_slot_map.insert(SvgState::Disabled, applys);
                 }
                 _ => {}
             },
@@ -227,6 +245,9 @@ impl Component for GSvg {
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
+        if self.disabled {
+            self.switch_state(SvgState::Disabled);
+        }
         let prop = self.prop.get(self.state);
         self.draw_svg_container.merge(&prop.container);
         self.draw_svg.merge(&prop.svg);
@@ -273,40 +294,19 @@ impl Component for GSvg {
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, SvgState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
         }
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_svg.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                pressed: 0.0,
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
-        // match state {
-        //     SvgState::Basic => {
-        //         self.draw_svg.state_basic();
-        //     }
-        //     SvgState::Hover => {
-        //         self.draw_svg.state_hover();
-        //     }
-        //     SvgState::Pressed => {
-        //         self.draw_svg.state_pressed();
-        //     }
-        //     SvgState::Disabled => {}
-        // }
         self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -341,7 +341,9 @@ impl Component for GSvg {
             let basic_prop = self.prop.get(SvgState::Basic);
             let hover_prop = self.prop.get(SvgState::Hover);
             let pressed_prop = self.prop.get(SvgState::Pressed);
-            let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
+            let disabled_prop = self.prop.get(SvgState::Disabled);
+            let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
+                (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -375,6 +377,17 @@ impl Component for GSvg {
                 pressed_index = Some(index);
             }
 
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
+            }
+
             set_animation! {
                 nodes: draw_svg = {
                     basic_index => {
@@ -385,6 +398,9 @@ impl Component for GSvg {
                     },
                     pressed_index => {
                         color => pressed_prop.svg.color
+                    },
+                    disabled_index => {
+                        color => disabled_prop.svg.color
                     }
                 }
             }
@@ -422,6 +438,17 @@ impl Component for GSvg {
                         blur_radius => (pressed_prop.container.blur_radius as f64),
                         shadow_offset => pressed_prop.container.shadow_offset,
                         background_visible => pressed_prop.container.background_visible.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.container.background_color,
+                        border_color => disabled_prop.container.border_color,
+                        border_radius => disabled_prop.container.border_radius,
+                        border_width => (disabled_prop.container.border_width as f64),
+                        shadow_color => disabled_prop.container.shadow_color,
+                        spread_radius => (disabled_prop.container.spread_radius as f64),
+                        blur_radius => (disabled_prop.container.blur_radius as f64),
+                        shadow_offset => disabled_prop.container.shadow_offset,
+                        background_visible => disabled_prop.container.background_visible.to_f64()
                     }
                 }
             }
@@ -453,7 +480,14 @@ impl Component for GSvg {
                         live_id!(pressed).as_instance(),
                     ],
                 ),
-                SvgState::Disabled => None,
+                SvgState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_svg = {

@@ -154,7 +154,6 @@ impl LiveHook for GImage {
                         .apply_state_map
                         .insert(ImageState::Loading, applys);
                 }
-
                 _ => {}
             },
         );
@@ -472,22 +471,24 @@ impl Component for GImage {
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
+        // temp do not use
         // let prop = self.prop.get(self.state);
         // self.draw_button.merge(&prop.into());
-        self.lazy_create_image_cache(cx);
-        match self.src.clone() {
-            Src::None => {}
-            Src::Live(live_dependency) => {
-                if !live_dependency.as_str().is_empty() {
-                    let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
-                }
-            }
-            _ => {
-                let src = self.src.to_string();
-                let _ = self.load(cx, &src);
-            }
-        }
+        // self.lazy_create_image_cache(cx);
+        // match self.src.clone() {
+        //     Src::None => {}
+        //     Src::Live(live_dependency) => {
+        //         if !live_dependency.as_str().is_empty() {
+        //             let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
+        //         }
+        //     }
+        //     _ => {
+        //         let src = self.src.to_string();
+        //         let _ = self.load(cx, &src);
+        //     }
+        // }
+
         Ok(())
     }
 
@@ -495,20 +496,7 @@ impl Component for GImage {
         ()
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_img.apply_over(
-            cx,
-            live! {
-                load: 0.0,
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
-        // match state {
-        //     ImageState::Basic => self.draw_img.state_basic(),
-        //     ImageState::Loading => self.draw_img.state_loading(),
-        // }
         self.state = state;
     }
 
@@ -546,17 +534,6 @@ impl GImage {
             SrcType::Url(url) => {
                 // use reqwest::get do not jam the main thread
                 self.animator_play(cx, id!(loading.on));
-                // let (sender, reciver) = std::sync::mpsc::channel();
-                // std::thread::spawn(move || {
-                //     let buf = reqwest::blocking::get(&url)
-                //         .map_err(|e| e.to_string())
-                //         .and_then(|res| res.bytes().map_err(|e| e.to_string()))
-                //         .map(|bytes| bytes.to_vec());
-                //     sender.send(buf).unwrap();
-                // });
-                // let buf = reciver.recv()??;
-
-                // from_bytes(self, cx, buf)
                 self.load_from_url_break(cx, url)
             }
             SrcType::Base64 { data, ty } => match ty {
@@ -638,51 +615,6 @@ impl GImage {
     pub fn has_texture(&self) -> bool {
         self.texture.is_some()
     }
-
-    // /// Loads the image at the given `image_path` on disk into this `ImageRef`.
-    // pub fn load_image_file_by_path_async(
-    //     &mut self,
-    //     cx: &mut Cx,
-    //     image_path: &Path,
-    // ) -> Result<(), ImageError> {
-    //     if let Ok(result) = self.load_image_file_by_path_async_impl(cx, image_path, 0) {
-    //         match result {
-    //             AsyncLoadResult::Loading(w, h) => {
-    //                 self.async_image_size = Some((w, h));
-    //                 self.async_image_path = Some(image_path.into());
-    //                 self.animator_play(cx, id!(loading.on));
-    //                 self.redraw(cx);
-    //             }
-    //             AsyncLoadResult::Loaded => {
-    //                 self.redraw(cx);
-    //             }
-    //         }
-    //         // lets set the w-h
-    //     }
-    //     Ok(())
-    // }
-    // pub fn load_image_from_data_async(
-    //     &mut self,
-    //     cx: &mut Cx,
-    //     image_path: &Path,
-    //     data: Arc<Vec<u8>>,
-    // ) -> Result<(), ImageError> {
-    //     if let Ok(result) = self.load_image_from_data_async_impl(cx, image_path, data, 0) {
-    //         match result {
-    //             AsyncLoadResult::Loading(w, h) => {
-    //                 self.async_image_size = Some((w, h));
-    //                 self.async_image_path = Some(image_path.into());
-    //                 self.animator_play(cx, id!(loading.on));
-    //                 self.redraw(cx);
-    //             }
-    //             AsyncLoadResult::Loaded => {
-    //                 self.redraw(cx);
-    //             }
-    //         }
-    //         // lets set the w-h
-    //     }
-    //     Ok(())
-    // }
 }
 
 impl ImageAsync for GImage {}

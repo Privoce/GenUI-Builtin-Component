@@ -17,7 +17,7 @@ use crate::{
     event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
     hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
-        manuel::{BASIC, HOVER, PRESSED},
+        manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
     },
@@ -59,6 +59,14 @@ live_design! {
                 }
 
                 pressed = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_view: <AN_DRAW_VIEW> {}
+                    }
+                }
+
+                disabled = {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
@@ -141,7 +149,7 @@ pub struct GView {
     #[rust]
     pub apply_state_map: ApplyStateMap<ViewState>,
     #[rust]
-    pub state: ViewState
+    pub state: ViewState,
 }
 
 impl LiveHook for GView {
@@ -197,7 +205,12 @@ impl LiveHook for GView {
             nodes,
             index,
             &ViewBasicProp::live_props(),
-            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            [
+                live_id!(basic),
+                live_id!(hover),
+                live_id!(pressed),
+                live_id!(disabled),
+            ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
@@ -208,6 +221,11 @@ impl LiveHook for GView {
                 }
                 PRESSED => {
                     component.apply_state_map.insert(ViewState::Pressed, applys);
+                }
+                DISABLED => {
+                    component
+                        .apply_state_map
+                        .insert(ViewState::Disabled, applys);
                 }
                 _ => {}
             },
@@ -616,6 +634,9 @@ impl Component for GView {
         let state = self.state;
         let prop = self.prop.get(state);
         self.draw_view.merge(prop);
+        if self.disabled {
+            self.switch_state(ViewState::Disabled);
+        }
         Ok(())
     }
 
@@ -672,20 +693,11 @@ impl Component for GView {
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, ViewState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
         }
-    }
-
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_view.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                pressed: 0.0
-            },
-        );
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {
@@ -693,7 +705,7 @@ impl Component for GView {
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -728,7 +740,9 @@ impl Component for GView {
             let basic_prop = self.prop.get(ViewState::Basic);
             let hover_prop = self.prop.get(ViewState::Hover);
             let pressed_prop = self.prop.get(ViewState::Pressed);
-            let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
+            let disabled_prop = self.prop.get(ViewState::Disabled);
+            let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
+                (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -760,6 +774,17 @@ impl Component for GView {
                 ],
             ) {
                 pressed_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
             }
 
             set_animation! {
@@ -796,6 +821,17 @@ impl Component for GView {
                         blur_radius => (pressed_prop.blur_radius as f64),
                         shadow_offset => pressed_prop.shadow_offset,
                         background_visible => pressed_prop.background_visible.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.background_color,
+                        border_color => disabled_prop.border_color,
+                        border_radius => disabled_prop.border_radius,
+                        border_width => (disabled_prop.border_width as f64),
+                        shadow_color => disabled_prop.shadow_color,
+                        spread_radius => (disabled_prop.spread_radius as f64),
+                        blur_radius => (disabled_prop.blur_radius as f64),
+                        shadow_offset => disabled_prop.shadow_offset,
+                        background_visible => disabled_prop.background_visible.to_f64()
                     }
                 }
             }
@@ -827,7 +863,14 @@ impl Component for GView {
                         live_id!(pressed).as_instance(),
                     ],
                 ),
-                ViewState::Disabled => None,
+                ViewState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_view = {

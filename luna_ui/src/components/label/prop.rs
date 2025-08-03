@@ -246,6 +246,8 @@ impl BasicProp for LabelBasicProp {
     fn walk(&self) -> Walk {
         Walk {
             margin: self.margin,
+            height: Size::Fit,
+            width: Size::Fit,
             ..Default::default()
         }
         .with_add_padding(self.padding)

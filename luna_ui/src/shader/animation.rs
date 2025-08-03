@@ -44,6 +44,7 @@ live_design!{
         border_color: #777777,
         border_width: 1.0,
         stroke_color: #ffffff,
+        active: 0.0,
     }
 
     pub AN_DRAW_SVG = {

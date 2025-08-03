@@ -65,6 +65,15 @@ live_design! {
                         draw_checkbox: <AN_DRAW_CHECKBOX> {}
                     }
                 }
+
+                disabled = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_container: <AN_DRAW_VIEW> {},
+                        draw_checkbox: <AN_DRAW_CHECKBOX> {}
+                    }
+                }
             }
         }
     }
@@ -177,12 +186,6 @@ impl Widget for GCheckbox {
             if self.extra.visible {
                 self.extra.disabled = self.disabled;
                 let _ = self.extra.draw_walk(cx, scope, prop.extra.walk());
-
-                // let _ = SlotDrawer::new(
-                //     [(live_id!(extra), (&mut self.extra).into())],
-                //     &mut self.defer_walks,
-                // )
-                // .draw_walk(cx, scope);
             }
             self.draw_container.end(cx);
         }
@@ -274,24 +277,27 @@ impl Component for GCheckbox {
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        if self.disabled {
+            self.switch_state(CheckboxState::Disabled);
+        } else {
+            if self.active {
+                self.switch_state(CheckboxState::Active);
+            } else {
+                self.switch_state(CheckboxState::Basic);
+            }
+        }
         let state = self.state;
         let prop = self.prop.get(state);
         self.draw_container.merge(&prop.container);
         self.draw_checkbox.merge(&prop.checkbox);
-
         let _ = self.extra.render(cx)?;
-        if self.active {
-            self.draw_checkbox.active = 1.0;
-            self.switch_state(CheckboxState::Active);
-        } else {
-            self.draw_checkbox.active = 0.0;
-        }
         Ok(())
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, CheckboxState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).container.cursor);
             }
             _ => {}
@@ -345,45 +351,13 @@ impl Component for GCheckbox {
         }
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        self.draw_container.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                pressed: 0.0,
-            },
-        );
-        self.draw_checkbox.apply_over(
-            cx,
-            live! {
-                hover: 0.0,
-                active: 0.0
-            },
-        );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
-        // match state {
-        //     CheckboxState::Basic => {
-        //         self.draw_container.state_basic();
-        //         self.draw_checkbox.state_basic();
-        //     }
-        //     CheckboxState::Hover => {
-        //         self.draw_container.state_hover();
-        //         self.draw_checkbox.state_hover();
-        //     }
-        //     CheckboxState::Active => {
-        //         self.draw_container.state_pressed();
-        //         self.draw_checkbox.state_active();
-        //     }
-        //     CheckboxState::Disabled => {}
-        // }
         self.state = state;
         self.extra.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -429,7 +403,9 @@ impl Component for GCheckbox {
             let basic_prop = self.prop.get(CheckboxState::Basic);
             let hover_prop = self.prop.get(CheckboxState::Hover);
             let active_prop = self.prop.get(CheckboxState::Active);
-            let (mut basic_index, mut hover_index, mut active_index) = (None, None, None);
+            let disabled_prop = self.prop.get(CheckboxState::Disabled);
+            let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
+                (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -461,6 +437,17 @@ impl Component for GCheckbox {
                 ],
             ) {
                 active_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
             }
 
             set_animation! {
@@ -497,6 +484,17 @@ impl Component for GCheckbox {
                         blur_radius => (active_prop.container.blur_radius as f64),
                         shadow_offset => active_prop.container.shadow_offset,
                         background_visible => active_prop.container.background_visible.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.container.background_color,
+                        border_color => disabled_prop.container.border_color,
+                        border_radius => disabled_prop.container.border_radius,
+                        border_width => (disabled_prop.container.border_width as f64),
+                        shadow_color => disabled_prop.container.shadow_color,
+                        spread_radius => (disabled_prop.container.spread_radius as f64),
+                        blur_radius => (disabled_prop.container.blur_radius as f64),
+                        shadow_offset => disabled_prop.container.shadow_offset,
+                        background_visible => disabled_prop.container.background_visible.to_f64()
                     }
                 }
             }
@@ -529,6 +527,15 @@ impl Component for GCheckbox {
                         size => (active_prop.checkbox.size as f64),
                         mode => active_prop.checkbox.mode,
                         stroke_color => active_prop.checkbox.stroke_color
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.checkbox.background_color,
+                        background_visible => disabled_prop.checkbox.background_visible.to_f64(),
+                        border_color => disabled_prop.checkbox.border_color,
+                        border_width => (disabled_prop.checkbox.border_width as f64),
+                        size => (disabled_prop.checkbox.size as f64),
+                        mode => disabled_prop.checkbox.mode,
+                        stroke_color => disabled_prop.checkbox.stroke_color
                     }
                 }
             }
@@ -560,7 +567,14 @@ impl Component for GCheckbox {
                         live_id!(active).as_instance(),
                     ],
                 ),
-                _ => None,
+                CheckboxState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_container = {

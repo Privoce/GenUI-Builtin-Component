@@ -82,20 +82,9 @@ where
                 // } else {
                 //     insert_map(nodes, index, &mut applys, &paths);
                 // }
-                match fields {
-                    LivePropsValue::Basic(basic_fields) => {
-                        if let Some(fields) = basic_fields {
-                            for field in fields {
-                                paths.push(field.as_field());
-                            }
-                        }
-                        // do loop
-                        insert_map(nodes, index, &mut applys, &paths);
-                    }
-                    LivePropsValue::Slot(slot_fields) => {
-
-                    }
-                }
+                fields.build_paths_and_insert(&mut paths, &mut |paths| {
+                    insert_map(nodes, index, &mut applys, paths);
+                });
             }
             insert(prefix, self, applys);
         }
@@ -166,7 +155,9 @@ where
     /// depend on component struct `#[animator] animator: Animator`
     fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();
     /// ## clear animation if component has
-    fn clear_animation(&mut self, _cx: &mut Cx) -> (){()}
+    fn clear_animation(&mut self, _cx: &mut Cx) -> () {
+        ()
+    }
     /// only switch state
     fn switch_state(&mut self, state: Self::State) -> ();
     /// ## switch state and redraw component

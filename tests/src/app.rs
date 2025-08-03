@@ -44,6 +44,20 @@ live_design! {
                     draw_bg: {
                         color: #999,
                     }
+                    // <GView> {
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Primary,
+                    //             height: 200.0,
+                    //             width: 200.0,
+                    //             background_visible: true,
+                    //         }
+                    //         hover: {
+                    //             theme: Warning,
+                    //         }
+                    //     },
+                    //     animation_open: true
+                    // }
                     // <GButton>{
                     //         prop: {
                     //             basic: {
@@ -68,63 +82,68 @@ live_design! {
                     //             mode: Regular,
                     //         }
                     //     }
-                        btn1 = <GButton>{
-                            prop: {
-                                hover: {
-                                    theme: Warning,
-                                }
+                    //     btn1 = <GButton>{
+                    //         prop: {
+                    //             hover: {
+                    //                 theme: Warning,
+                    //             }
 
-                            }
-                            slot: <GLabel>{
-                                text: "Click me !",
-                                mode: Bold,
-                            }
-                        }
+                    //         }
+                    //         slot: <GLabel>{
+                    //             text: "Click me !",
+                    //             mode: Bold,
+                    //         }
+                    //     }
 
-                        lb = <GLabel>{
-                            text: "Hello World!",
-                            mode: Bold
-                            prop: {
-                                basic: {
-                                    font_size: 24.0,
-                                }
-                            }
-                        }
-                        lb2 = <GLabel>{
-                            text: "Hello World! hello",
-                            mode: Bold
-                            disabled: true,
-                            prop: {
-                                basic: {
-                                    font_size: 24.0,
-                                }
-                            }
-                        }
+                    //     lb = <GLabel>{
+                    //         text: "Hello World!",
+                    //         mode: Bold
+                    //         prop: {
+                    //             basic: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
+                    //     lb2 = <GLabel>{
+                    //         text: "Hello World! hello",
+                    //         mode: Bold
+                    //         disabled: true,
+                    //         prop: {
+                    //             basic: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
 
 
 
-                //     <GCard>{
-                //         prop: {
-                //             basic: {
-                //                 container: {
-                //                     theme: Primary,
-                //                     height: 200.0,
-                //                     width: 200.0,
-                //                 },
-                //                 header: {
-                //                     border_width: 2.0,
-                //                     border_color: #00f,
-                //                 }
-                //                 footer: {
-                //                     theme: Error,
-                //                     height: 40.0,
-                //                     border_width: 2.0,
-                //                     border_color: #f00,
-                //                 }
-                //             }
-                //         }
+                    // <GCard>{
+                    //     prop: {
+                    //         basic: {
+                    //             container: {
+                    //                 theme: Primary,
+                    //                 height: 200.0,
+                    //                 width: 200.0,
+                    //                 background_visible: true,
+                                    
+                    //             },
+                    //             header: {
+                    //                 border_width: 2.0,
+                    //                 border_color: #00f,
+                    //                 background_visible: true,
+                    //             }
+                    //             footer: {
+                    //                 theme: Error,
+                    //                 height: 40.0,
+                    //                 border_width: 2.0,
+                    //                 border_color: #f00,
+                    //                 background_visible: true,
+                    //             }
+                    //         }
+                    //     }
 
-                //     }
+                    // }
+
                 //    <GCard>{}
                     // <GRadioGroup> {
                     //     active: "2",
@@ -208,7 +227,7 @@ live_design! {
                     //         basic: {
                     //             size: 60.0
                     //         }
-                    //     }
+                    //     },
                     // }
                     // <GSwitch>{
                     //     prop: {
@@ -248,6 +267,16 @@ live_design! {
                     //         }
                     //     }
                     //     src: dep("crate://self/resources/heavy.svg"),
+                    // }
+                    // <GSvg> {
+                    //     prop: {
+                    //         basic: {
+                    //             container: {background_visible: true, theme: Primary}
+                    //             svg: {height: 36.0, width: 36.0},
+                    //         }
+                    //     },
+                    //     disabled: true, 
+                    //     src: dep("crate://self/resources/rain.svg"),
                     // }
                     // <GImage> {
                     //     src: Live(dep("crate://self/resources/install.png")),

@@ -135,10 +135,6 @@ impl Component for GDivider {
         ()
     }
 
-    fn clear_animation(&mut self, _cx: &mut Cx) -> () {
-        ()
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
     }
