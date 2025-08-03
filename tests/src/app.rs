@@ -52,6 +52,15 @@ live_design! {
                     //             hover: {
                     //                 theme: Primary,
                     //             }
+                    //             disabled: {
+                    //                 theme: Info,
+                    //                 padding: {
+                    //                     top: 20.0,
+                    //                     bottom: 20.0,
+                    //                     left: 20.0,
+                    //                     right: 20.0,
+                    //                 }
+                    //             }
                     //         }
                     //         disabled: true,
                     //         slot: <GLabel>{
@@ -59,38 +68,38 @@ live_design! {
                     //             mode: Regular,
                     //         }
                     //     }
-                    //     btn1 = <GButton>{
-                    //         prop: {
-                    //             hover: {
-                    //                 theme: Warning,
-                    //             }
+                        btn1 = <GButton>{
+                            prop: {
+                                hover: {
+                                    theme: Warning,
+                                }
 
-                    //         }
-                    //         slot: <GLabel>{
-                    //             text: "Click me !",
-                    //             mode: Bold,
-                    //         }
-                    //     }
+                            }
+                            slot: <GLabel>{
+                                text: "Click me !",
+                                mode: Bold,
+                            }
+                        }
 
-                    //     lb = <GLabel>{
-                    //         text: "Hello World!",
-                    //         mode: Bold
-                    //         prop: {
-                    //             basic: {
-                    //                 font_size: 24.0,
-                    //             }
-                    //         }
-                    //     }
-                    //     lb2 = <GLabel>{
-                    //         text: "Hello World! hello",
-                    //         mode: Bold
-                    //         disabled: true,
-                    //         prop: {
-                    //             basic: {
-                    //                 font_size: 24.0,
-                    //             }
-                    //         }
-                    //     }
+                        lb = <GLabel>{
+                            text: "Hello World!",
+                            mode: Bold
+                            prop: {
+                                basic: {
+                                    font_size: 24.0,
+                                }
+                            }
+                        }
+                        lb2 = <GLabel>{
+                            text: "Hello World! hello",
+                            mode: Bold
+                            disabled: true,
+                            prop: {
+                                basic: {
+                                    font_size: 24.0,
+                                }
+                            }
+                        }
 
 
 
@@ -338,30 +347,6 @@ live_design! {
                     //         text: "Wind"
                     //     }
                     // }
-                    <GButton> {
-                        prop: {
-                            basic: {
-                                // theme: Primary,
-                                // height: Fit,
-                                // width: Fit,
-                                padding: {
-                                    left: 30.0,
-                                    right: 60.0,
-                                    top: 5.0,
-                                    bottom: 5.0,
-                                }
-                            }
-                            hover: {
-                                theme: Primary,
-                                padding: {
-                                    left: 30.0,
-                                    right: 100.0,
-                                    top: 25.0,
-                                    bottom: 10.0,
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }

@@ -179,6 +179,9 @@ where
                     // } else {
                     //     insert_map(nodes, index, &mut applys, &paths);
                     // }
+                    fields.build_paths_and_insert(&mut paths, &mut |paths| {
+                        insert_map(nodes, index, &mut applys, paths);
+                    });
                 }
                 slots.insert(part, applys);
             }
@@ -355,22 +358,26 @@ where
                 // } else {
                 //     insert_map(nodes, index, &mut applys, &paths);
                 // }
-                match fields {
-                    LivePropsValue::Basic(basic_fields) => {
-                        if let Some(fields) = basic_fields {
-                            for field in fields {
-                                paths.push(field.as_field());
-                                // 需要使用临时量来处理，因为field是需要push一个insert一个的
-                                let mut tmp_paths = paths.clone();
-                                tmp_paths.push(field.as_field());
-                                insert_map(nodes, index, &mut applys, &tmp_paths);
-                            }
-                        }else {
-                            insert_map(nodes, index, &mut applys, &paths);
-                        }
-                    }
-                    LivePropsValue::Slot(slot_fields) => {}
-                }
+                // match fields {
+                //     LivePropsValue::Basic(basic_fields) => {
+                //         if let Some(fields) = basic_fields {
+                //             for field in fields {
+                //                 // 需要使用临时量来处理，因为field是需要push一个insert一个的
+                //                 let mut tmp_paths = paths.clone();
+                //                 tmp_paths.push(field.as_field());
+                //                 insert_map(nodes, index, &mut applys, &tmp_paths);
+                //             }
+                //         }else {
+                //             insert_map(nodes, index, &mut applys, &paths);
+                //         }
+                //     }
+                //     LivePropsValue::Slot(slot_fields) => {
+
+                //     }
+                // }
+                fields.build_paths_and_insert(&mut paths, &mut |paths| {
+                    insert_map(nodes, index, &mut applys, paths);
+                });
             }
             insert(prefix, component, applys);
         }
@@ -416,7 +423,6 @@ pub fn insert_map(
 ) {
     if let Some(i) = nodes.child_by_path(index, paths) {
         let node = &nodes[i];
-        dbg!(&node.value);
         applys.insert(node.id.to_string(), node.value.clone());
     }
 }

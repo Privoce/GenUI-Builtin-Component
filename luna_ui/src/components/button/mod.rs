@@ -15,7 +15,7 @@ use crate::{
     event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
     hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
-        manuel::{BASIC, HOVER, PRESSED},
+        manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
     },
@@ -54,6 +54,14 @@ live_design! {
                 }
 
                 pressed = {
+                    from: {all: Forward {duration: (AN_DURATION)}},
+                    ease: InOutQuad,
+                    apply: {
+                        draw_button: <AN_DRAW_VIEW> {}
+                    }
+                }
+
+                disabled = {
                     from: {all: Forward {duration: (AN_DURATION)}},
                     ease: InOutQuad,
                     apply: {
@@ -158,9 +166,7 @@ impl Widget for GButton {
         }
 
         let state = self.state;
-
         let prop = self.prop.get(state);
-        dbg!(state, prop.padding);
         let _ = self.draw_button.begin(cx, prop.walk(), prop.layout());
 
         if self.slot.visible() {
@@ -227,7 +233,12 @@ impl LiveHook for GButton {
             nodes,
             index,
             &ButtonBasicProp::live_props(),
-            [live_id!(basic), live_id!(hover), live_id!(pressed)],
+            [
+                live_id!(basic),
+                live_id!(hover),
+                live_id!(pressed),
+                live_id!(disabled),
+            ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
@@ -240,6 +251,11 @@ impl LiveHook for GButton {
                     component
                         .apply_state_map
                         .insert(ButtonState::Pressed, applys);
+                }
+                DISABLED => {
+                    component
+                        .apply_state_map
+                        .insert(ButtonState::Disabled, applys);
                 }
                 _ => {}
             },
@@ -260,12 +276,16 @@ impl Component for GButton {
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let prop = self.prop.get(self.state);
         self.draw_button.merge(&prop.into());
+        if self.disabled {
+            self.switch_state(ButtonState::Disabled);
+        }
         Ok(())
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
             Hit::FingerHoverIn(_) => {
+                self.switch_state_and_redraw(cx, ButtonState::Disabled);
                 cx.set_cursor(self.prop.get(self.state).cursor);
             }
             _ => {}
@@ -308,22 +328,12 @@ impl Component for GButton {
         };
     }
 
-    fn clear_animation(&mut self, cx: &mut Cx) -> () {
-        // self.draw_button.apply_over(
-        //     cx,
-        //     live! {
-        //         hover: 0.0,
-        //         pressed: 0.0
-        //     },
-        // );
-    }
-
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -361,7 +371,9 @@ impl Component for GButton {
             let basic_prop = self.prop.get(ButtonState::Basic);
             let hover_prop = self.prop.get(ButtonState::Hover);
             let pressed_prop = self.prop.get(ButtonState::Pressed);
-            let (mut basic_index, mut hover_index, mut pressed_index) = (None, None, None);
+            let disabled_prop = self.prop.get(ButtonState::Disabled);
+            let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
+                (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -393,6 +405,17 @@ impl Component for GButton {
                 ],
             ) {
                 pressed_index = Some(index);
+            }
+
+            if let Some(index) = nodes.child_by_path(
+                self.index,
+                &[
+                    live_id!(animator).as_field(),
+                    live_id!(hover).as_instance(),
+                    live_id!(disabled).as_instance(),
+                ],
+            ) {
+                disabled_index = Some(index);
             }
 
             set_animation! {
@@ -429,6 +452,17 @@ impl Component for GButton {
                         blur_radius => (pressed_prop.blur_radius as f64),
                         shadow_offset => pressed_prop.shadow_offset,
                         background_visible => pressed_prop.background_visible.to_f64()
+                    },
+                    disabled_index => {
+                        background_color => disabled_prop.background_color,
+                        border_color => disabled_prop.border_color,
+                        border_radius => disabled_prop.border_radius,
+                        border_width => (disabled_prop.border_width as f64),
+                        shadow_color => disabled_prop.shadow_color,
+                        spread_radius => (disabled_prop.spread_radius as f64),
+                        blur_radius => (disabled_prop.blur_radius as f64),
+                        shadow_offset => disabled_prop.shadow_offset,
+                        background_visible => disabled_prop.background_visible.to_f64()
                     }
                 }
             }
@@ -460,7 +494,14 @@ impl Component for GButton {
                         live_id!(pressed).as_instance(),
                     ],
                 ),
-                ButtonState::Disabled => None,
+                ButtonState::Disabled => nodes.child_by_path(
+                    self.index,
+                    &[
+                        live_id!(animator).as_field(),
+                        live_id!(hover).as_instance(),
+                        live_id!(disabled).as_instance(),
+                    ],
+                ),
             };
             set_animation! {
                 nodes: draw_button = {

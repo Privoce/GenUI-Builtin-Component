@@ -23,21 +23,32 @@ impl LivePropsValue {
         matches!(self, LivePropsValue::Slot(_))
     }
 
-    pub fn paths(&self, paths: &mut Vec<LiveProp>) -> (){
+    pub fn build_paths_and_insert(
+        &self,
+        paths: &mut Vec<LiveProp>,
+        insert: &mut dyn FnMut(&Vec<LiveProp>),
+    ) -> () {
         match self {
             LivePropsValue::Basic(fields) => {
                 if let Some(fields) = fields {
                     for field in fields {
-                        paths.push(field.as_field());
+                        // 需要使用临时量来处理，因为field是需要push一个insert一个的
+                        let mut tmp_paths = paths.clone();
+                        tmp_paths.push(field.as_field());
+                        insert(&tmp_paths);
                     }
+                } else {
+                    insert(paths);
                 }
-            }, 
+            }
             LivePropsValue::Slot(items) => {
                 for (id, value) in items {
                     paths.push(id.as_field());
-                    
+                    // value需要依据类型来处理, 递归调用
+                    value.build_paths_and_insert(paths, insert);
+                    paths.pop();
                 }
-            },
+            }
         }
     }
 }
@@ -53,4 +64,3 @@ impl From<Vec<(LiveId, LivePropsValue)>> for LivePropsValue {
         LivePropsValue::Slot(value)
     }
 }
-

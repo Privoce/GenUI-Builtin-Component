@@ -166,7 +166,7 @@ where
     /// depend on component struct `#[animator] animator: Animator`
     fn play_animation(&mut self, cx: &mut Cx, state: &[LiveId; 2]) -> ();
     /// ## clear animation if component has
-    fn clear_animation(&mut self, cx: &mut Cx) -> ();
+    fn clear_animation(&mut self, _cx: &mut Cx) -> (){()}
     /// only switch state
     fn switch_state(&mut self, state: Self::State) -> ();
     /// ## switch state and redraw component
