@@ -170,9 +170,9 @@ live_design! {
                         <GRadio> {
                             prop: {
                                 basic: {
-                                    container: {
-                                        background_visible: true,
-                                    },
+                                    // container: {
+                                    //     background_visible: true,
+                                    // },
                                     radio: {
                                         theme: Primary,
                                         mode: Tick,

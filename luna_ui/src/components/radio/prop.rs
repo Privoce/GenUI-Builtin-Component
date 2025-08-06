@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     component_part, component_state, components::{
         label::{LabelBasicProp, LabelState},
@@ -45,16 +47,75 @@ impl SlotProp for RadioProp {
     type Part = RadioPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
-        map.sync(
-            &mut self.basic,
-            RadioState::Basic,
-            [
+        // map.sync(
+        //     &mut self.basic,
+        //     RadioState::Basic,
+        //     [
+        //         (RadioState::Hover, &mut self.hover),
+        //         (RadioState::Active, &mut self.active),
+        //         (RadioState::Disabled, &mut self.disabled),
+        //     ],
+        //     [RadioPart::Container, RadioPart::Radio, RadioPart::Extra],
+        // );
+        let basic_prop = &mut self.basic;
+        let basic_state = RadioState::Basic;
+        let states = [
                 (RadioState::Hover, &mut self.hover),
                 (RadioState::Active, &mut self.active),
                 (RadioState::Disabled, &mut self.disabled),
-            ],
-            [RadioPart::Container, RadioPart::Radio, RadioPart::Extra],
-        );
+            ];
+
+        let parts = [RadioPart::Container, RadioPart::Radio, RadioPart::Extra];
+        if let Some(basic_props) = map.get(&RadioState::Basic) {
+            dbg!(basic_props);
+            let mut states_vec: Vec<_> = states.into_iter().collect();
+            for part in parts {
+                if let Some(part_props) = basic_props.get(&part) {
+                    dbg!(part, part_props);
+                    let mut parts = Cow::Borrowed(part_props);
+                    if parts.contains_key(THEME) {
+                        let parts = parts.to_mut();
+                        if let Some(value) = parts.remove(THEME) {
+                            basic_prop.set_from_str_slot(THEME, &value, basic_state, part);
+                        }
+                    } else {
+                        // 如果没有theme，则使用组件的theme
+                        basic_prop.sync_slot(basic_state, part);
+                    }
+                    // 处理其他
+                    for (k, v) in parts.iter() {
+                        basic_prop.set_from_str_slot(&k, &v, basic_state, part);
+                    }
+
+                    for (state, props) in states_vec.iter_mut() {
+                        
+                        map.get(&state).map(|state_map| {
+                            dbg!(state, state_map);
+                            // let mut diff_props = state_map.get(&part).map_or_else(
+                            //     || part_props.clone(),
+                            //     |apply_props| apply_props.diff(&part_props),
+                            // );
+
+                            // // remove theme
+                            // if diff_props.contains_key(THEME) {
+                            //     if let Some(value) = diff_props.remove(THEME) {
+                            //         props.set_from_str_slot(THEME, &value, *state, part);
+                            //     } else {
+                            //         // if no theme, use self.theme
+                            //         props.sync_slot(*state, part);
+                            //     }
+                            // }
+                            // // set from str
+                            // for (k, v) in diff_props.iter() {
+                            //     props.set_from_str_slot(&k, &v, *state, part);
+                            // }
+
+                            // 由于不知道state_map的深度，所以我们得一层层往里，直到最后一层为Apply::Value
+                        });
+                    }
+                }
+            }
+        }
     }
 }
 

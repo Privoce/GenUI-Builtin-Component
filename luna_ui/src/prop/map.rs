@@ -281,17 +281,17 @@ where
     S: Hash + Eq + Copy + Into<IS>,
     PT: Part<State = IS>,
 {
-    fn set_map<'m, C, P, LP, PP, NF, IF>(
+    fn set_map<'m, C, SS, LP, PP, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
-        prefixs: P,
+        states: SS,
         part_props: PP,
         next_or: NF,
         insert: IF,
     ) where
         C: Component,
-        P: IntoIterator<Item = LiveId>,
+        SS: IntoIterator<Item = LiveId>,
         LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)>,
         PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
@@ -352,17 +352,17 @@ where
         cross_map
     }
 
-    fn set_map<'m, C, P, LP, PP, NF, IF>(
+    fn set_map<'m, C, SS, LP, PP, NF, IF>(
         component: &mut C,
         nodes: &[LiveNode],
         index: usize,
-        prefixs: P,
+        states: SS,
         part_props: PP,
         next_or: NF,
         insert: IF,
     ) where
         C: Component,
-        P: IntoIterator<Item = LiveId>,
+        SS: IntoIterator<Item = LiveId>,
         LP: IntoIterator<Item = &'m (LiveId, LivePropsValue)>,
         PP: IntoIterator<Item = (PT, LP)> + Copy,
         NF: FnOnce(&mut C) -> (),
@@ -373,18 +373,18 @@ where
             next_or(component);
         }
 
-        for prefix in prefixs {
+        for state in states {
             let mut slots = HashMap::new();
             for (part, live_props) in part_props {
                 let mut applys = Applys::new();
                 let live_part = part.to_live_id();
                 // let mut slot_props = HashMap::new();
-                for (state, fields) in live_props {
+                for (key, fields) in live_props {
                     let mut paths = vec![
                         live_id!(prop).as_field(),
-                        prefix.as_field(),
-                        live_part.as_field(),
                         state.as_field(),
+                        live_part.as_field(),
+                        key.as_field(),
                     ];
                     fields.build_paths_and_insert(&mut paths, &mut |paths| {
                         // 返回一个Applys，因为我们无法在创建时知道这个Applys的深度
@@ -393,7 +393,7 @@ where
                 }
                 slots.insert(part, applys);
             }
-            insert(prefix, component, slots);
+            insert(state, component, slots);
         }
     }
     fn sync<'p, P, SS, PS>(
@@ -428,7 +428,9 @@ where
                     }
 
                     for (state, props) in states_vec.iter_mut() {
+                        
                         self.get(&state).map(|state_map| {
+                            
                             // let mut diff_props = state_map.get(&part).map_or_else(
                             //     || part_props.clone(),
                             //     |apply_props| apply_props.diff(&part_props),
@@ -729,18 +731,18 @@ pub fn insert_map(
 }
 
 /// 构建Applys，由于无法在外部知道这个Applys的深度，所以在这个方法里实际上就要对Applys进行构建(变更/增加节点)
-/// 关键点在于paths, 我们知道paths的前两层是固定的[prop, state]，后续的层级会根据组件的不同而变化
+/// 关键点在于paths, 我们知道paths的前3层是固定的[prop, state, part]，后续的层级会根据组件的不同而变化
 pub fn build_applys(
     nodes: &[LiveNode],
     index: usize,
     applys: &mut Applys,
     paths: &Vec<LiveProp>,
 ) -> () {
-    // 去除前2层的paths
-    let splited_paths = paths[2..].to_vec();
-    // 和insert_map类似来获取最终的节点值，但需要从第三层开始进行扩展, 首先保证splited_paths的长度大于等于2，因为最小的情况都需要有值的KV
+    // 去除前3层的paths
+    let splited_paths = paths[3..].to_vec();
+    // 和insert_map类似来获取最终的节点值，但需要从第三层开始进行扩展, 首先保证splited_paths的长度大于等于1，因为最小的情况都需要有值的KV
     // 为空了说明没有足够的层级，这一般是不可能的，除非是错误的路径，这里直接不处理
-    if splited_paths.len() >= 2 {
+    if splited_paths.len() >= 1 {
         if let Some(i) = nodes.child_by_path(index, paths) {
             let live_node = &nodes[i];
             // 接下来进行层级扩展
