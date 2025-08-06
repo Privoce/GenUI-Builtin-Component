@@ -69,3 +69,56 @@ macro_rules! component {
         )*
     };
 }
+
+#[macro_export]
+macro_rules! component_part {
+    ($part: ident {
+        $(
+            $field: ident => $live_id: tt => $slot_str: ident
+        ),*
+    }, $state: ident) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum $part {
+            $(
+                $field
+            ),*
+        }
+
+        impl Part for $part {
+            type State = $state;
+            fn to_live_id(&self) -> LiveId {
+                match self {
+                    $(
+                        $part::$field => live_id!($live_id),
+                    )*
+                }
+            }
+        }
+
+        impl std::str::FromStr for $part {
+            type Err = crate::error::Error;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $(
+                        $slot_str => Ok($part::$field),
+                    )*
+                    _ => Err(crate::error::Error::InvalidPart {
+                        from: s.to_string(),
+                        to: stringify!($part).to_string(),
+                    }),
+                }
+            }
+        }
+
+        impl std::fmt::Display for $part {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str(match self {
+                    $(
+                        $part::$field => $slot_str,
+                    )*
+                })
+            }
+        }
+    };
+}

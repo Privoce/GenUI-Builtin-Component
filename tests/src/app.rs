@@ -95,25 +95,25 @@ live_design! {
                     //         }
                     //     }
 
-                    //     lb = <GLabel>{
-                    //         text: "Hello World!",
-                    //         mode: Bold
-                    //         prop: {
-                    //             basic: {
-                    //                 font_size: 24.0,
-                    //             }
-                    //         }
-                    //     }
-                    //     lb2 = <GLabel>{
-                    //         text: "Hello World! hello",
-                    //         mode: Bold
-                    //         disabled: true,
-                    //         prop: {
-                    //             basic: {
-                    //                 font_size: 24.0,
-                    //             }
-                    //         }
-                    //     }
+                        // lb = <GLabel>{
+                        //     text: "Hello World!",
+                        //     mode: Bold
+                        //     prop: {
+                        //         basic: {
+                        //             font_size: 24.0,
+                        //         }
+                        //     }
+                        // }
+                        // lb2 = <GLabel>{
+                        //     text: "Hello World! hello",
+                        //     mode: Bold
+                        //     disabled: true,
+                        //     prop: {
+                        //         basic: {
+                        //             font_size: 24.0,
+                        //         }
+                        //     }
+                        // }
 
 
 
@@ -167,25 +167,25 @@ live_design! {
                     //     <GRadio>{
                     //         active: true,
                     //     }
-                    //     <GRadio> {
-                    //         prop: {
-                    //             basic: {
-                    //                 container: {
-                    //                     background_visible: true,
-                    //                 },
-                    //                 radio: {
-                    //                     theme: Primary,
-                    //                     mode: Tick,
+                        <GRadio> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        background_visible: true,
+                                    },
+                                    radio: {
+                                        theme: Primary,
+                                        mode: Tick,
 
-                    //                 }
-                    //             }
-                    //         },
-                    //         extra: {
-                    //              <GLabel> {
-                    //                 text: "Radio Tick"
-                    //             }
-                    //         }
-                    //     }
+                                    }
+                                }
+                            },
+                            extra: {
+                                 <GLabel> {
+                                    text: "Radio Tick"
+                                }
+                            }
+                        }
                     // }
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
@@ -345,40 +345,40 @@ live_design! {
                     // <GToolTip> {
                     //     <GButton> {}
                     // }
-                    <GTabbarItem> {
-                        prop: {
-                            basic: {
-                                icon: {
-                                    svg: {
-                                        theme: Error,
-                                    },
-                                    container: {
-                                        background_visible: true,
-                                        theme: Info,
-                                        margin: {
-                                            top: 10.0
-                                        }
-                                    }
-                                },
-                                text: {
-                                    font_size: 24.0,
-                                }
-                            }
-                        }
-                        icon: <GSvg> {
-                            prop: {
-                                basic: {
-                                    svg: {
-                                        theme: Primary
-                                    }
-                                }
-                            }
-                            src: dep("crate://self/resources/wind.svg"),
-                        }
-                        text: <GLabel> {
-                            text: "Wind"
-                        }
-                    }
+                    // <GTabbarItem> {
+                    //     prop: {
+                    //         basic: {
+                    //             icon: {
+                    //                 svg: {
+                    //                     theme: Error,
+                    //                 },
+                    //                 container: {
+                    //                     background_visible: true,
+                    //                     theme: Info,
+                    //                     margin: {
+                    //                         top: 10.0
+                    //                     }
+                    //                 }
+                    //             },
+                    //             text: {
+                    //                 font_size: 24.0,
+                    //             }
+                    //         }
+                    //     }
+                    //     icon: <GSvg> {
+                    //         prop: {
+                    //             basic: {
+                    //                 svg: {
+                    //                     theme: Primary
+                    //                 }
+                    //             }
+                    //         }
+                    //         src: dep("crate://self/resources/wind.svg"),
+                    //     }
+                    //     text: <GLabel> {
+                    //         text: "Wind"
+                    //     }
+                    // }
                 }
             }
         }

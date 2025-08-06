@@ -11,6 +11,10 @@ pub enum Error {
     /// can not load theme style file
     ThemeStyleFileLoad(String),
     ThemeStyleParse(String),
+    InvalidPart{
+        from: String,
+        to: String
+    }
 }
 
 impl std::error::Error for Error {}
@@ -32,6 +36,9 @@ impl Display for Error {
             }
             Error::ThemeStyleParse(e) => {
                 f.write_fmt(format_args!("Cannot parse theme style file: {}", e))
+            }
+            Error::InvalidPart { from, to } => {
+                f.write_fmt(format_args!("Invalid part conversion from {} to {}", from, to))
             }
         }
     }

@@ -1,13 +1,10 @@
 use crate::{
-    component_state,
-    components::{
+    component_part, component_state, components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, RADIO, SIZE,
@@ -15,10 +12,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 use makepad_widgets::*;
 use toml_edit::{Item, Value};
@@ -129,16 +123,17 @@ impl SlotBasicProp for RadioBasicProp {
     type Part = RadioPart;
 
     fn set_from_str_slot(
-        &mut self,
-        key: &str,
-        value: &LiveValue,
-        state: Self::State,
-        part: Self::Part,
-    ) -> () {
+            &mut self,
+            key: &str,
+            value: &crate::prop::Applys,
+            state: Self::State,
+            part: Self::Part,
+        ) -> () {
+            dbg!(key, value);
         match part {
-            RadioPart::Container => self.container.set_from_str(key, value, state.into()),
-            RadioPart::Radio => self.radio.set_from_str(key, value, state),
-            RadioPart::Extra => self.extra.set_from_str(key, value, state.into()),
+            RadioPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            RadioPart::Radio => self.radio.set_from_str(key, &value.into(), state),
+            RadioPart::Extra => self.extra.set_from_str(key, &value.into(), state.into()),
         }
     }
 
@@ -561,7 +556,6 @@ impl From<RadioState> for LabelState {
     fn from(value: RadioState) -> Self {
         match value {
             RadioState::Basic | RadioState::Hover | RadioState::Active => LabelState::Basic,
-
             RadioState::Disabled => LabelState::Disabled,
         }
     }
@@ -588,20 +582,28 @@ impl From<ViewState> for RadioState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum RadioPart {
-    Container,
-    Radio,
-    Extra,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum RadioPart {
+//     Container,
+//     Radio,
+//     Extra,
+// }
 
-impl Part for RadioPart {
-    type State = RadioState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            RadioPart::Container => live_id!(container),
-            RadioPart::Radio => live_id!(radio),
-            RadioPart::Extra => live_id!(extra),
-        }
-    }
+// impl Part for RadioPart {
+//     type State = RadioState;
+//     fn to_live_id(&self) -> LiveId {
+//         match self {
+//             RadioPart::Container => live_id!(container),
+//             RadioPart::Radio => live_id!(radio),
+//             RadioPart::Extra => live_id!(extra),
+//         }
+//     }
+// }
+
+component_part!{
+    RadioPart {
+        Container => container => CONTAINER,
+        Radio => radio => RADIO,
+        Extra => extra => EXTRA
+    }, RadioState
 }

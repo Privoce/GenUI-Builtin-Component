@@ -1,21 +1,17 @@
+use std::{fmt::Display, str::FromStr};
+
 use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_state,
-    components::{
+    component_part, component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, prop::{
         manuel::{BASIC, BODY, CONTAINER, FOOTER, HEADER, HOVER},
-        ApplySlotMapImpl, ApplyStateMapImpl,
-    },
-    themes::{Color, Theme},
-    try_from_toml_item,
-    utils::get_from_itable,
+        ApplySlotMapImpl, ApplyStateMapImpl, Applys,
+    }, themes::{Color, Theme}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -172,17 +168,17 @@ impl SlotBasicProp for CardBasicProp {
     type Part = CardPart;
 
     fn set_from_str_slot(
-        &mut self,
-        key: &str,
-        value: &LiveValue,
-        state: Self::State,
-        part: Self::Part,
-    ) -> () {
+            &mut self,
+            key: &str,
+            value: &Applys,
+            state: Self::State,
+            part: Self::Part,
+        ) -> () {
         match part {
-            CardPart::Container => self.container.set_from_str(key, value, state.into()),
-            CardPart::Header => self.header.set_from_str(key, value, state.into()),
-            CardPart::Body => self.body.set_from_str(key, value, state.into()),
-            CardPart::Footer => self.footer.set_from_str(key, value, state.into()),
+            CardPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            CardPart::Header => self.header.set_from_str(key, &value.into(), state.into()),
+            CardPart::Body => self.body.set_from_str(key, &value.into(), state.into()),
+            CardPart::Footer => self.footer.set_from_str(key, &value.into(), state.into()),
         }
     }
 
@@ -300,23 +296,11 @@ impl From<ViewState> for CardState {
     }
 }
 
-/// Represents the different parts of a card component.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum CardPart {
-    Container,
-    Header,
-    Body,
-    Footer,
-}
-
-impl Part for CardPart {
-    type State = ViewState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            CardPart::Container => live_id!(container),
-            CardPart::Header => live_id!(header),
-            CardPart::Body => live_id!(body),
-            CardPart::Footer => live_id!(footer),
-        }
-    }
+component_part!{
+    CardPart {
+        Container => container => CONTAINER,
+        Header => header => HEADER,
+        Body => body => BODY,
+        Footer => footer => FOOTER
+    }, CardState
 }

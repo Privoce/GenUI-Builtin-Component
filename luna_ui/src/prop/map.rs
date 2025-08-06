@@ -3,19 +3,25 @@ use crate::{
         live_props::LivePropsValue,
         traits::{BasicProp, Component, Part, SlotBasicProp},
     },
+    error::Error,
     prop::manuel::THEME,
     themes::Theme,
 };
 use makepad_widgets::{
-    live_id, makepad_vector::path, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp,
-    LiveValue,
+    live_id, LiveId, LiveIdAsProp, LiveNode, LiveNodeSliceApi, LiveProp, LiveValue,
 };
-use std::{borrow::Cow, collections::HashMap, hash::Hash};
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+    fmt::{Debug, Display},
+    hash::Hash,
+    str::FromStr,
+};
 
 /// PropMap is a mapping from a property name to a LiveValue, used for storing properties in components
 pub type PropMap = HashMap<String, LiveValue>;
 /// SlotMap need to use in Component which has slots, like: Card (header, body, footer), etc.
-pub type SlotMap<P> = HashMap<P, PropMap>;
+pub type SlotMap<P> = HashMap<P, Applys>;
 /// ApplyMap is a mapping from a state to a LiveValue, used for applying properties in animations or props
 /// means: if in Button, use ApplyMap<ButtonState>
 pub type ApplyStateMap<K> = HashMap<K, PropMap>;
@@ -40,11 +46,101 @@ pub enum Applys {
     Deep(HashMap<String, Applys>),
 }
 
+impl Default for Applys {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ApplyMapImpl for Applys {
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+    {
+        match (self, other.into()) {
+            (Applys::Deep(map1), Applys::Deep(map2)) => {
+                for (key, value) in map2 {
+                    map1.entry(key).or_insert(value);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+impl<P> ApplySlotMergeImpl<P> for Applys
+where
+    P: Display,
+{
+    fn merge_slot(&mut self, other: SlotMap<P>) -> () {
+        if let Applys::Deep(map) = self {
+            for (k, v) in other {
+                map.entry(k.to_string()).or_insert(v);
+            }
+        } else {
+            panic!("Cannot merge a SlotMap into a non-Deep Applys");
+        }
+    }
+}
+
+impl From<&Applys> for LiveValue {
+    fn from(value: &Applys) -> Self {
+        match value {
+            Applys::Value(live_value) => live_value.clone(),
+            Applys::Deep(map) => {
+                dbg!(map);
+                panic!("Cannot convert a Deep Applys to LiveValue directly, expected Value");
+            }
+        }
+    }
+}
+
+impl From<&Applys> for PropMap {
+    fn from(value: &Applys) -> Self {
+        match value {
+            Applys::Value(_) => {
+                panic!("Cannot convert a Value Applys to PropMap directly, expected Deep");
+            }
+            Applys::Deep(hash_map) => hash_map
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v.into()))
+                .collect(),
+        }
+    }
+}
+
 impl Applys {
     /// 创建一个最简单的Applys
     pub fn new() -> Self {
         Applys::Deep(HashMap::new())
     }
+    pub fn is_value(&self) -> bool {
+        matches!(self, Applys::Value(_))
+    }
+    pub fn is_deep(&self) -> bool {
+        matches!(self, Applys::Deep(_))
+    }
+    pub fn key_to_parts<PT>(&self) -> Option<Vec<PT>>
+    where
+        PT: Part,
+    {
+        match self {
+            Applys::Value(live_value) => None,
+            Applys::Deep(hash_map) => {
+                let mut parts = Vec::new();
+                hash_map.keys().for_each(|key| {
+                    if let Ok(part) = key.parse::<PT>() {
+                        parts.push(part);
+                    }
+                });
+                if parts.is_empty() {
+                    return None;
+                }
+                return Some(parts);
+            }
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         match self {
             Applys::Value(_) => false,
@@ -77,12 +173,73 @@ impl Applys {
             }
         }
     }
+    pub fn contains_key(&self, key: &str) -> bool {
+        match self {
+            Applys::Value(_) => false,
+            Applys::Deep(map) => map.contains_key(key),
+        }
+    }
+
+    pub fn extend(&mut self, other: Self) {
+        match (self, other) {
+            (Applys::Deep(map1), Applys::Deep(map2)) => {
+                map1.extend(map2);
+            }
+            _ => {}
+        }
+    }
+    pub fn iter(&self) -> impl Iterator<Item = (&String, &Applys)> {
+        match self {
+            Applys::Value(_) => panic!("Cannot iterate over a Value Applys"),
+            Applys::Deep(map) => map.iter(),
+        }
+    }
+
+    pub fn entry(&mut self, key: String) -> &mut Applys {
+        match self {
+            Applys::Value(_) => panic!("Cannot insert into a Value Applys"),
+            Applys::Deep(map) => map.entry(key).or_insert(Applys::new()),
+        }
+    }
+
+    pub fn remove(&mut self, key: &str) -> Option<Applys> {
+        match self {
+            Applys::Value(_) => panic!("Cannot remove from a Value Applys"),
+            Applys::Deep(map) => map.remove(key),
+        }
+    }
+
+    pub fn diff(&self, other: &Self) -> Option<Self> {
+        match (self, other) {
+            (Applys::Value(v1), Applys::Value(v2)) => {
+                if v1 == v2 {
+                    None
+                } else {
+                    Some(Applys::Value(v1.clone()))
+                }
+            }
+            (Applys::Deep(map1), Applys::Deep(map2)) => {
+                todo!()
+            }
+            _ => Some(self.clone()),
+        }
+    }
 }
 
 pub trait ApplyMapImpl {
     /// ## merge
     /// merge other with self, if the key exists in self, it will ignore
-    fn merge(&mut self, other: Self) -> ();
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+        Self: Sized;
+}
+
+pub trait ApplySlotMergeImpl<P>
+where
+    P: Display,
+{
+    fn merge_slot(&mut self, other: SlotMap<P>) -> ();
 }
 
 pub trait PropMapImpl: ApplyMapImpl {
@@ -272,24 +429,26 @@ where
 
                     for (state, props) in states_vec.iter_mut() {
                         self.get(&state).map(|state_map| {
-                            let mut diff_props = state_map.get(&part).map_or_else(
-                                || part_props.clone(),
-                                |apply_props| apply_props.diff(&part_props),
-                            );
+                            // let mut diff_props = state_map.get(&part).map_or_else(
+                            //     || part_props.clone(),
+                            //     |apply_props| apply_props.diff(&part_props),
+                            // );
 
-                            // remove theme
-                            if diff_props.contains_key(THEME) {
-                                if let Some(value) = diff_props.remove(THEME) {
-                                    props.set_from_str_slot(THEME, &value, *state, part);
-                                } else {
-                                    // if no theme, use self.theme
-                                    props.sync_slot(*state, part);
-                                }
-                            }
-                            // set from str
-                            for (k, v) in diff_props.iter() {
-                                props.set_from_str_slot(&k, &v, *state, part);
-                            }
+                            // // remove theme
+                            // if diff_props.contains_key(THEME) {
+                            //     if let Some(value) = diff_props.remove(THEME) {
+                            //         props.set_from_str_slot(THEME, &value, *state, part);
+                            //     } else {
+                            //         // if no theme, use self.theme
+                            //         props.sync_slot(*state, part);
+                            //     }
+                            // }
+                            // // set from str
+                            // for (k, v) in diff_props.iter() {
+                            //     props.set_from_str_slot(&k, &v, *state, part);
+                            // }
+
+                            // 由于不知道state_map的深度，所以我们得一层层往里，直到最后一层为Apply::Value
                         });
                     }
                 }
@@ -298,24 +457,149 @@ where
     }
 }
 
+impl<P> ApplySlotMergeImpl<P> for PropMap
+where
+    P: Display,
+{
+    fn merge_slot(&mut self, other: SlotMap<P>) -> () {
+        for (k, v) in other {
+            match v {
+                Applys::Value(live_value) => {
+                    self.entry(k.to_string()).or_insert(live_value);
+                }
+                Applys::Deep(_) => {
+                    panic!("Cannot merge a deep Applys into a PropMap, expected Value");
+                }
+            }
+        }
+    }
+}
+
+impl ApplyMapImpl for PropMap {
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+    {
+        for (k, v) in other.into() {
+            self.entry(k).or_insert(v);
+        }
+    }
+}
+
+// impl<S> ApplySlotMergeImpl<S> for ApplyStateMap<S>
+// where
+//     S: Hash + Eq + Copy + Display,
+// {
+//     fn merge_slot(&mut self, other: SlotMap<S>) -> () {
+//         for (k, v) in other {
+//             match v {
+//                 Applys::Value(live_value) => {
+//                     self.entry(k).or_default().insert(k.to_string(), live_value);
+//                 },
+//                 Applys::Deep(hash_map) => {
+
+//                 },
+//             }
+//         }
+//     }
+// }
+
 impl<S> ApplyMapImpl for ApplyStateMap<S>
 where
     S: Hash + Eq + Copy,
 {
-    fn merge(&mut self, other: Self) -> () {
-        for (state, props) in other {
-            self.entry(state).or_default().merge(props);
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+    {
+        for (state, props) in other.into() {
+            self.entry(state).or_insert(props);
         }
     }
 }
+
+impl<S> ApplySlotMergeImpl<S> for SlotMap<S>
+where
+    S: Hash + Eq + Copy + Display,
+{
+    fn merge_slot(&mut self, other: SlotMap<S>) -> () {
+        for (k, v) in other {
+            // self.entry(k).or_default().merge_slot(v.into());
+            match v {
+                Applys::Value(live_value) => {
+                    self.entry(k).or_default().merge(Applys::Value(live_value));
+                }
+                Applys::Deep(hash_map) => {
+                    self.entry(k).or_default().merge_slot(hash_map.into());
+                }
+            }
+        }
+    }
+}
+
+impl<S> ApplyMapImpl for SlotMap<S>
+where
+    S: Hash + Eq + Copy,
+{
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+    {
+        for (k, v) in other.into() {
+            <Applys as ApplyMapImpl>::merge::<Applys>(&mut self.entry(k).or_default(), v);
+        }
+    }
+}
+
+impl<S, IS, PT> ApplySlotMergeImpl<S> for ApplySlotMap<S, PT>
+where
+    S: Hash + Eq + Copy + Into<IS> + Display,
+    PT: Part<State = IS>,
+{
+    fn merge_slot(&mut self, other: SlotMap<S>) -> () {
+        for (k, v) in other {
+            match v {
+                Applys::Value(live_value) => {
+                    self.entry(k).or_default().merge(Applys::Value(live_value));
+                }
+                Applys::Deep(hash_map) => {
+                    self.entry(k)
+                        .or_default()
+                        .merge_slot(Applys::Deep(hash_map).into());
+                }
+            }
+        }
+    }
+}
+
 impl<S, IS, PT> ApplyMapImpl for ApplySlotMap<S, PT>
 where
     S: Hash + Eq + Copy + Into<IS>,
     PT: Part<State = IS>,
 {
-    fn merge(&mut self, other: Self) -> () {
-        for (state, slots) in other {
+    fn merge<O>(&mut self, other: O) -> ()
+    where
+        O: Into<Self>,
+    {
+        for (state, slots) in other.into() {
             self.entry(state).or_default().merge(slots);
+        }
+    }
+}
+
+impl<P, IS> From<Applys> for SlotMap<P>
+where
+    P: Part<State = IS> + FromStr<Err = Error> + Display,
+{
+    fn from(value: Applys) -> Self {
+        match value {
+            Applys::Value(_) => {
+                panic!("Cannot convert a Value Applys to SlotMap directly, expected Deep");
+            }
+            Applys::Deep(hash_map) => hash_map
+                .into_iter()
+                .map(|(k, v)| (k.parse::<P>().unwrap(), v.into()))
+                .collect(),
         }
     }
 }
@@ -432,14 +716,6 @@ impl PropMapImpl for PropMap {
     }
 }
 
-impl ApplyMapImpl for PropMap {
-    fn merge(&mut self, other: Self) -> () {
-        for (k, v) in other {
-            self.entry(k).or_insert(v);
-        }
-    }
-}
-
 pub fn insert_map(
     nodes: &[LiveNode],
     index: usize,
@@ -491,8 +767,8 @@ pub fn build_applys(
                             // 说明当前不是最终的值节点，需要继续深入
                             node.entry(prop_key.to_string()).or_insert(Applys::new());
                         }
-                    }else{
-                       *applys = Applys::Value(live_node.value.clone());
+                    } else {
+                        *applys = Applys::Value(live_node.value.clone());
                     }
                 }
             }
@@ -542,6 +818,7 @@ mod test {
             ("c".to_string(), LiveValue::Float64(3.0)),
         ]);
         a_map.merge(b_map);
+
         dbg!(a_map);
     }
 }

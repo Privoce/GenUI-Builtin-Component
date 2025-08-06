@@ -1,5 +1,5 @@
 use crate::{
-    component_state,
+    component_part, component_state,
     components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
@@ -135,14 +135,17 @@ impl SlotBasicProp for CheckboxBasicProp {
     fn set_from_str_slot(
         &mut self,
         key: &str,
-        value: &LiveValue,
+        value: &crate::prop::Applys,
         state: Self::State,
         part: Self::Part,
     ) -> () {
         match part {
-            CheckboxPart::Container => self.container.set_from_str(key, value, state.into()),
-            CheckboxPart::Checkbox => self.checkbox.set_from_str(key, value, state),
-            CheckboxPart::Extra => self.extra.set_from_str(key, value, state.into()),
+            CheckboxPart::Container => {
+                self.container
+                    .set_from_str(key, &value.into(), state.into())
+            }
+            CheckboxPart::Checkbox => self.checkbox.set_from_str(key, &value.into(), state),
+            CheckboxPart::Extra => self.extra.set_from_str(key, &value.into(), state.into()),
         }
     }
 
@@ -594,20 +597,28 @@ impl From<ViewState> for CheckboxState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum CheckboxPart {
-    Container,
-    Checkbox,
-    Extra,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum CheckboxPart {
+//     Container,
+//     Checkbox,
+//     Extra,
+// }
 
-impl Part for CheckboxPart {
-    type State = CheckboxState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            CheckboxPart::Container => live_id!(container),
-            CheckboxPart::Checkbox => live_id!(checkbox),
-            CheckboxPart::Extra => live_id!(extra),
-        }
-    }
+// impl Part for CheckboxPart {
+//     type State = CheckboxState;
+//     fn to_live_id(&self) -> LiveId {
+//         match self {
+//             CheckboxPart::Container => live_id!(container),
+//             CheckboxPart::Checkbox => live_id!(checkbox),
+//             CheckboxPart::Extra => live_id!(extra),
+//         }
+//     }
+// }
+
+component_part! {
+    CheckboxPart {
+        Container => container => CONTAINER,
+        Checkbox => checkbox => CHECKBOX,
+        Extra => extra => EXTRA
+    }, CheckboxState
 }

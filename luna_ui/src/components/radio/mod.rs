@@ -2,6 +2,8 @@ mod event;
 pub mod group;
 mod prop;
 
+use std::collections::HashMap;
+
 pub use event::*;
 pub use prop::*;
 
@@ -12,14 +14,14 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        view::{GView, ViewBasicProp, ViewState},
     },
     error::Error,
     event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, PropMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::{draw_radio::DrawRadio, draw_view::DrawView},
@@ -356,7 +358,11 @@ impl Component for GRadio {
         let mut crossed_map = self.apply_slot_map.cross();
         for (part, slot) in [(RadioPart::Extra, &mut self.extra)] {
             crossed_map.remove(&part).map(|map| {
-                let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
+                let map = map
+                    .into_iter()
+                    .map(|(k, v)| (k.into(), PropMap::from(&v)))
+                    .collect::<HashMap<ViewState, PropMap>>();
+
                 slot.apply_state_map.merge(map);
             });
 

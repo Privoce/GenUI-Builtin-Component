@@ -1,6 +1,7 @@
 use std::{
     fmt::{Debug, Display},
     hash::Hash,
+    str::FromStr,
 };
 
 use makepad_widgets::{
@@ -13,9 +14,10 @@ use crate::{
         lifecycle::LifeCycle,
         live_props::{LiveProps, LivePropsValue},
     },
+    error::Error,
     prop::{
-        insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, Position,
-        PropMap, SlotMap,
+        insert_map, ApplySlotMap, ApplySlotMapImpl, ApplyStateMap, ApplyStateMapImpl, Applys,
+        Position, PropMap, SlotMap,
     },
     themes::Theme,
 };
@@ -200,7 +202,7 @@ where
     }
 }
 
-pub trait Part: Hash + Eq + Copy {
+pub trait Part: Hash + Eq + Copy + FromStr<Err = Error> + Display + Debug {
     type State;
     fn to_live_id(&self) -> LiveId;
 }
@@ -304,10 +306,13 @@ pub trait BasicProp: Default + Debug {
 pub trait SlotBasicProp: BasicProp {
     type Part: Part;
 
+    /// value: 当涉及到更深的层级时就会含有一个Some(Applys)，这个Applys只会是Applys::Deep且层级至少为2
+    /// 此时说明当前组件下需要设置属性值的属性部分依然需要调用`set_from_str_slot`来处理
+    /// 那么其中的part就需要从Applys中获取来进行转换（可能含有多个part），见`Applys::key_to_parts()`
     fn set_from_str_slot(
         &mut self,
         key: &str,
-        value: &LiveValue,
+        value: &Applys,
         state: Self::State,
         part: Self::Part,
     ) -> ();

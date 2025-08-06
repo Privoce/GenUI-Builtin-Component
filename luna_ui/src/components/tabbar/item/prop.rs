@@ -135,7 +135,7 @@ impl SlotBasicProp for TabbarItemBasicProp {
     ) -> () {
         match part {
             TabbarItemPart::Container => self.container.set_from_str(key, value, state.into()),
-            TabbarItemPart::Icon => self.icon.set_from_str(key, value, state.into()),
+            TabbarItemPart::Icon => self.icon.set_from_str_slot(key, value, state.into(), part),
             TabbarItemPart::Text => self.text.set_from_str(key, value, state.into()),
         }
     }

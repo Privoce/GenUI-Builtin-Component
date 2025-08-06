@@ -24,7 +24,7 @@ pub mod switch;
 pub mod tag;
 pub mod view;
 // pub mod router;
-pub mod tabbar;
+// pub mod tabbar;
 pub mod menu;
 pub mod live_props;
 pub mod lifecycle;
@@ -226,7 +226,7 @@ live_design! {
         popup: <GTooltipContainer> {}
     }
 
-    pub GTabbarItem = <GTabbarItemBase> {}
+    // pub GTabbarItem = <GTabbarItemBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -245,7 +245,7 @@ pub fn components_register(cx: &mut Cx) {
     popup::live_design(cx);
     popup::container::live_design(cx);
     drop_down::live_design(cx);
-    tabbar::item::live_design(cx);
+    // tabbar::item::live_design(cx);
 }
 
 component! {

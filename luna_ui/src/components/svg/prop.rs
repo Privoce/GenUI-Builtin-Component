@@ -1,8 +1,10 @@
+use std::fmt::Display;
+
 use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state,
+    component_part, component_state,
     components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
@@ -136,13 +138,13 @@ impl SlotBasicProp for SvgBasicProp {
     fn set_from_str_slot(
         &mut self,
         key: &str,
-        value: &LiveValue,
+        value: &crate::prop::Applys,
         state: Self::State,
         part: Self::Part,
     ) -> () {
         match part {
-            SvgPart::Container => self.container.set_from_str(key, value, state.into()),
-            SvgPart::Svg => self.svg.set_from_str(key, value, state),
+            SvgPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            SvgPart::Svg => self.svg.set_from_str(key, &value.into(), state),
         }
     }
 
@@ -368,7 +370,8 @@ impl BasicProp for SvgPartProp {
                     live_id!(bottom),
                     live_id!(left),
                     live_id!(right),
-                ]).into(),
+                ])
+                .into(),
             ),
             (live_id!(cursor), None.into()),
             (live_id!(height), None.into()),
@@ -477,18 +480,30 @@ impl From<SvgState> for ViewState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum SvgPart {
-    Container,
-    Svg,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum SvgPart {
+//     Container,
+//     Svg,
+// }
 
-impl Part for SvgPart {
-    type State = SvgState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            SvgPart::Container => live_id!(container),
-            SvgPart::Svg => live_id!(svg),
-        }
-    }
+// impl Part for SvgPart {
+//     type State = SvgState;
+//     fn to_live_id(&self) -> LiveId {
+//         match self {
+//             SvgPart::Container => live_id!(container),
+//             SvgPart::Svg => live_id!(svg),
+//         }
+//     }
+// }
+
+// impl Display for SvgPart {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+//     }
+// }
+component_part! {
+    SvgPart {
+        Container => container => CONTAINER,
+        Svg => svg => SVG
+    } , SvgState
 }

@@ -339,7 +339,7 @@ impl Component for GCard {
             (CardPart::Footer, &mut self.footer),
         ] {
             crossed_map.remove(&part).map(|map| {
-                slot.apply_state_map.merge(map);
+                // slot.apply_state_map.merge_slot(map);
             });
 
             slot.prop.sync(&slot.apply_state_map);
@@ -463,7 +463,7 @@ impl Component for GCard {
     lifecycle!();
 }
 
-impl SlotComponent<ViewState> for GCard {
+impl SlotComponent<CardState> for GCard {
     type Part = CardPart;
 }
 
