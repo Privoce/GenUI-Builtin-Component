@@ -209,19 +209,35 @@ impl Applys {
         }
     }
 
+    /// 计算两个Applys之间的差异返回一个新Applys，进行diff只会是同类型，也就是Deep和Deep｜Value和Value
+    /// - 实际上Value和Value不存在这种情况
+    /// - Deep和Deep的情况则是：self中如果没有other的key，那么就保留，如果有则需要比较值，值相同则去除，只保留值不同的
     pub fn diff(&self, other: &Self) -> Option<Self> {
         match (self, other) {
-            (Applys::Value(v1), Applys::Value(v2)) => {
-                if v1 == v2 {
-                    None
+            (Applys::Value(lv), Applys::Value(rv)) => {
+                if lv == rv {
+                    None // 值相同，去除
                 } else {
-                    Some(Applys::Value(v1.clone()))
+                    Some(Applys::Value(lv.clone())) // 值不同，保留自己
                 }
             }
-            (Applys::Deep(map1), Applys::Deep(map2)) => {
-                todo!()
+            (Applys::Deep(lmap), Applys::Deep(rmap)) => {
+                let filtered = lmap
+                    .iter()
+                    .filter_map(|(k, lv)| match rmap.get(k) {
+                        Some(rv) => lv.diff(rv).map(|v| (k.clone(), v)),
+                        None => Some((k.clone(), lv.clone())),
+                    })
+                    .chain(
+                        rmap.iter()
+                            .filter(|(k, _)| !lmap.contains_key(*k))
+                            .map(|(k, v)| (k.clone(), v.clone())),
+                    )
+                    .collect::<HashMap<String, Applys>>();
+
+                (!filtered.is_empty()).then_some(Applys::Deep(filtered))
             }
-            _ => Some(self.clone()),
+            _ => panic!("Cannot diff between Value and Deep Applys"),
         }
     }
 }
@@ -428,9 +444,8 @@ where
                     }
 
                     for (state, props) in states_vec.iter_mut() {
-                        
                         self.get(&state).map(|state_map| {
-                            
+
                             // let mut diff_props = state_map.get(&part).map_or_else(
                             //     || part_props.clone(),
                             //     |apply_props| apply_props.diff(&part_props),
@@ -781,6 +796,40 @@ pub fn build_applys(
 #[cfg(test)]
 mod test {
     use super::*;
+    #[test]
+    fn test_applys_diff(){
+        let a = Applys::Deep(HashMap::from([
+            ("a".to_string(), Applys::Value(LiveValue::Float64(1.0))),
+            ("b".to_string(), Applys::Value(LiveValue::Float64(2.0))),
+            ("c".to_string(), Applys::Value(LiveValue::Float64(3.0))),
+        ]));
+        let b = Applys::Deep(HashMap::from([
+            ("a".to_string(), Applys::Value(LiveValue::Float64(1.0))),
+            ("b".to_string(), Applys::Value(LiveValue::Float64(2.0))),
+            ("c".to_string(), Applys::Value(LiveValue::Float64(5.0))),
+            ("d".to_string(), Applys::Value(LiveValue::Float64(4.0))),
+        ]));
+        let diff = a.diff(&b);
+        dbg!(diff);
+    }
+
+    #[test]
+    fn test_prop_map_diff() {
+        let a_map = PropMap::from([
+            ("a".to_string(), LiveValue::Float64(1.0)),
+            ("b".to_string(), LiveValue::Float64(2.0)),
+            ("c".to_string(), LiveValue::Float64(3.0)),
+        ]);
+        let b_map = PropMap::from([
+            ("a".to_string(), LiveValue::Float64(1.0)),
+            ("b".to_string(), LiveValue::Float64(2.0)),
+            ("c".to_string(), LiveValue::Float64(5.0)),
+            ("d".to_string(), LiveValue::Float64(4.0)),
+        ]);
+        let diff_map = a_map.diff(&b_map);
+        dbg!(diff_map);
+    }
+
     #[test]
     fn test_merge() {
         let mut a_map = super::ApplyStateMap::<i32>::from([

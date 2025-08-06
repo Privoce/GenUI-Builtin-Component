@@ -178,6 +178,11 @@ live_design! {
                                         mode: Tick,
 
                                     }
+                                },
+                                hover: {
+                                    radio: {
+                                        theme: Warning,
+                                    }
                                 }
                             },
                             extra: {

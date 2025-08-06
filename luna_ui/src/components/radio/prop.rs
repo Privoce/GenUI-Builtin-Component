@@ -1,12 +1,15 @@
 use std::borrow::Cow;
 
 use crate::{
-    component_part, component_state, components::{
+    component_part, component_state,
+    components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    }, error::Error, prop::{
+    },
+    error::Error,
+    prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, RADIO, SIZE,
@@ -14,7 +17,10 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
-    }, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    },
+    themes::{Color, Theme, TomlValueTo},
+    try_from_toml_item,
+    utils::get_from_itable,
 };
 use makepad_widgets::*;
 use toml_edit::{Item, Value};
@@ -60,18 +66,16 @@ impl SlotProp for RadioProp {
         let basic_prop = &mut self.basic;
         let basic_state = RadioState::Basic;
         let states = [
-                (RadioState::Hover, &mut self.hover),
-                (RadioState::Active, &mut self.active),
-                (RadioState::Disabled, &mut self.disabled),
-            ];
+            (RadioState::Hover, &mut self.hover),
+            (RadioState::Active, &mut self.active),
+            (RadioState::Disabled, &mut self.disabled),
+        ];
 
         let parts = [RadioPart::Container, RadioPart::Radio, RadioPart::Extra];
         if let Some(basic_props) = map.get(&RadioState::Basic) {
-            dbg!(basic_props);
             let mut states_vec: Vec<_> = states.into_iter().collect();
             for part in parts {
                 if let Some(part_props) = basic_props.get(&part) {
-                    dbg!(part, part_props);
                     let mut parts = Cow::Borrowed(part_props);
                     if parts.contains_key(THEME) {
                         let parts = parts.to_mut();
@@ -88,29 +92,25 @@ impl SlotProp for RadioProp {
                     }
 
                     for (state, props) in states_vec.iter_mut() {
-                        
                         map.get(&state).map(|state_map| {
-                            dbg!(state, state_map);
-                            // let mut diff_props = state_map.get(&part).map_or_else(
-                            //     || part_props.clone(),
-                            //     |apply_props| apply_props.diff(&part_props),
-                            // );
-
-                            // // remove theme
-                            // if diff_props.contains_key(THEME) {
-                            //     if let Some(value) = diff_props.remove(THEME) {
-                            //         props.set_from_str_slot(THEME, &value, *state, part);
-                            //     } else {
-                            //         // if no theme, use self.theme
-                            //         props.sync_slot(*state, part);
-                            //     }
-                            // }
-                            // // set from str
-                            // for (k, v) in diff_props.iter() {
-                            //     props.set_from_str_slot(&k, &v, *state, part);
-                            // }
-
-                            // 由于不知道state_map的深度，所以我们得一层层往里，直到最后一层为Apply::Value
+                            if let Some(mut diff_props) = state_map.get(&part).map_or_else(
+                                || Some(part_props.clone()),
+                                |apply_props| apply_props.diff(&part_props),
+                            ) {
+                                // remove theme
+                                if diff_props.contains_key(THEME) {
+                                    if let Some(value) = diff_props.remove(THEME) {
+                                        props.set_from_str_slot(THEME, &value, *state, part);
+                                    } else {
+                                        // if no theme, use self.theme
+                                        props.sync_slot(*state, part);
+                                    }
+                                }
+                                // set from str
+                                for (k, v) in diff_props.iter() {
+                                    props.set_from_str_slot(&k, &v, *state, part);
+                                }
+                            }
                         });
                     }
                 }
@@ -184,15 +184,16 @@ impl SlotBasicProp for RadioBasicProp {
     type Part = RadioPart;
 
     fn set_from_str_slot(
-            &mut self,
-            key: &str,
-            value: &crate::prop::Applys,
-            state: Self::State,
-            part: Self::Part,
-        ) -> () {
-            dbg!(key, value);
+        &mut self,
+        key: &str,
+        value: &crate::prop::Applys,
+        state: Self::State,
+        part: Self::Part,
+    ) -> () {
         match part {
-            RadioPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            RadioPart::Container => self
+                .container
+                .set_from_str(key, &value.into(), state.into()),
             RadioPart::Radio => self.radio.set_from_str(key, &value.into(), state),
             RadioPart::Extra => self.extra.set_from_str(key, &value.into(), state.into()),
         }
@@ -661,7 +662,7 @@ impl From<ViewState> for RadioState {
 //     }
 // }
 
-component_part!{
+component_part! {
     RadioPart {
         Container => container => CONTAINER,
         Radio => radio => RADIO,
