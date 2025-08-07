@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use crate::{
     component_part, component_state,
     components::{
@@ -9,6 +7,7 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
+    get_get_mut,
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
@@ -18,6 +17,7 @@ use crate::{
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
     },
+    state_colors,
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable,
@@ -53,69 +53,16 @@ impl SlotProp for RadioProp {
     type Part = RadioPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
-        // map.sync(
-        //     &mut self.basic,
-        //     RadioState::Basic,
-        //     [
-        //         (RadioState::Hover, &mut self.hover),
-        //         (RadioState::Active, &mut self.active),
-        //         (RadioState::Disabled, &mut self.disabled),
-        //     ],
-        //     [RadioPart::Container, RadioPart::Radio, RadioPart::Extra],
-        // );
-        let basic_prop = &mut self.basic;
-        let basic_state = RadioState::Basic;
-        let states = [
-            (RadioState::Hover, &mut self.hover),
-            (RadioState::Active, &mut self.active),
-            (RadioState::Disabled, &mut self.disabled),
-        ];
-
-        let parts = [RadioPart::Container, RadioPart::Radio, RadioPart::Extra];
-        if let Some(basic_props) = map.get(&RadioState::Basic) {
-            let mut states_vec: Vec<_> = states.into_iter().collect();
-            for part in parts {
-                if let Some(part_props) = basic_props.get(&part) {
-                    let mut parts = Cow::Borrowed(part_props);
-                    if parts.contains_key(THEME) {
-                        let parts = parts.to_mut();
-                        if let Some(value) = parts.remove(THEME) {
-                            basic_prop.set_from_str_slot(THEME, &value, basic_state, part);
-                        }
-                    } else {
-                        // 如果没有theme，则使用组件的theme
-                        basic_prop.sync_slot(basic_state, part);
-                    }
-                    // 处理其他
-                    for (k, v) in parts.iter() {
-                        basic_prop.set_from_str_slot(&k, &v, basic_state, part);
-                    }
-
-                    for (state, props) in states_vec.iter_mut() {
-                        map.get(&state).map(|state_map| {
-                            if let Some(mut diff_props) = state_map.get(&part).map_or_else(
-                                || Some(part_props.clone()),
-                                |apply_props| apply_props.diff(&part_props),
-                            ) {
-                                // remove theme
-                                if diff_props.contains_key(THEME) {
-                                    if let Some(value) = diff_props.remove(THEME) {
-                                        props.set_from_str_slot(THEME, &value, *state, part);
-                                    } else {
-                                        // if no theme, use self.theme
-                                        props.sync_slot(*state, part);
-                                    }
-                                }
-                                // set from str
-                                for (k, v) in diff_props.iter() {
-                                    props.set_from_str_slot(&k, &v, *state, part);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        }
+        map.sync(
+            &mut self.basic,
+            RadioState::Basic,
+            [
+                (RadioState::Hover, &mut self.hover),
+                (RadioState::Active, &mut self.active),
+                (RadioState::Disabled, &mut self.disabled),
+            ],
+            [RadioPart::Container, RadioPart::Radio, RadioPart::Extra],
+        );
     }
 }
 
@@ -124,22 +71,11 @@ impl Prop for RadioProp {
 
     type Basic = RadioBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            RadioState::Basic => &self.basic,
-            RadioState::Hover => &self.hover,
-            RadioState::Active => &self.active,
-            RadioState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            RadioState::Basic => &mut self.basic,
-            RadioState::Hover => &mut self.hover,
-            RadioState::Active => &mut self.active,
-            RadioState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        RadioState::Basic => basic,
+        RadioState::Hover => hover,
+        RadioState::Active => active,
+        RadioState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -446,46 +382,12 @@ impl BasicProp for RadioPartProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, stroke_level, border_level) = match state {
-            RadioState::Basic => (200, 200, 400),
-            RadioState::Hover => (200, 200, 400),
-            RadioState::Active => (500, 200, 500),
-            RadioState::Disabled => (100, 100, 300),
-        };
-
-        match theme {
-            Theme::Dark => (
-                Theme::Dark.color(bg_level),
-                Theme::Dark.color(stroke_level),
-                Theme::Dark.color(border_level),
-            ),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(stroke_level),
-                Theme::Primary.color(border_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(stroke_level),
-                Theme::Error.color(border_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(stroke_level),
-                Theme::Warning.color(border_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(stroke_level),
-                Theme::Success.color(border_level),
-            ),
-            Theme::Info => (
-                Theme::Info.color(bg_level),
-                Theme::Info.color(stroke_level),
-                Theme::Info.color(border_level),
-            ),
-        }
+    state_colors! {
+        (bg_level, stroke_level, border_level),
+        RadioState::Basic => (200, 200, 400),
+        RadioState::Hover => (200, 200, 400),
+        RadioState::Active => (500, 200, 500),
+        RadioState::Disabled => (100, 100, 300)
     }
 
     fn len() -> usize {
@@ -643,24 +545,6 @@ impl From<ViewState> for RadioState {
         }
     }
 }
-
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum RadioPart {
-//     Container,
-//     Radio,
-//     Extra,
-// }
-
-// impl Part for RadioPart {
-//     type State = RadioState;
-//     fn to_live_id(&self) -> LiveId {
-//         match self {
-//             RadioPart::Container => live_id!(container),
-//             RadioPart::Radio => live_id!(radio),
-//             RadioPart::Extra => live_id!(extra),
-//         }
-//     }
-// }
 
 component_part! {
     RadioPart {

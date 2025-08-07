@@ -445,27 +445,24 @@ where
 
                     for (state, props) in states_vec.iter_mut() {
                         self.get(&state).map(|state_map| {
-
-                            // let mut diff_props = state_map.get(&part).map_or_else(
-                            //     || part_props.clone(),
-                            //     |apply_props| apply_props.diff(&part_props),
-                            // );
-
-                            // // remove theme
-                            // if diff_props.contains_key(THEME) {
-                            //     if let Some(value) = diff_props.remove(THEME) {
-                            //         props.set_from_str_slot(THEME, &value, *state, part);
-                            //     } else {
-                            //         // if no theme, use self.theme
-                            //         props.sync_slot(*state, part);
-                            //     }
-                            // }
-                            // // set from str
-                            // for (k, v) in diff_props.iter() {
-                            //     props.set_from_str_slot(&k, &v, *state, part);
-                            // }
-
-                            // 由于不知道state_map的深度，所以我们得一层层往里，直到最后一层为Apply::Value
+                            if let Some(mut diff_props) = state_map.get(&part).map_or_else(
+                                || Some(part_props.clone()),
+                                |apply_props| apply_props.diff(&part_props),
+                            ) {
+                                // remove theme
+                                if diff_props.contains_key(THEME) {
+                                    if let Some(value) = diff_props.remove(THEME) {
+                                        props.set_from_str_slot(THEME, &value, *state, part);
+                                    } else {
+                                        // if no theme, use self.theme
+                                        props.sync_slot(*state, part);
+                                    }
+                                }
+                                // set from str
+                                for (k, v) in diff_props.iter() {
+                                    props.set_from_str_slot(&k, &v, *state, part);
+                                }
+                            }
                         });
                     }
                 }

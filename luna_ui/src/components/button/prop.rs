@@ -9,7 +9,7 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
-    getter_setter_prop,
+    get_get_mut, getter_setter_prop,
     prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
@@ -19,6 +19,7 @@ use crate::{
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
     },
+    state_colors,
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable,
@@ -46,22 +47,11 @@ impl Prop for ButtonProp {
         ButtonBasicProp::len() * 4 // basic, hover, pressed, disabled
     }
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            ButtonState::Basic => &self.basic,
-            ButtonState::Hover => &self.hover,
-            ButtonState::Pressed => &self.pressed,
-            ButtonState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            ButtonState::Basic => &mut self.basic,
-            ButtonState::Hover => &mut self.hover,
-            ButtonState::Pressed => &mut self.pressed,
-            ButtonState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        ButtonState::Basic => basic,
+        ButtonState::Hover => hover,
+        ButtonState::Pressed => pressed,
+        ButtonState::Disabled => disabled
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -327,46 +317,12 @@ impl BasicProp for ButtonBasicProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, border_level, shadow_level) = match state {
-            ButtonState::Basic => (500, 500, 400),
-            ButtonState::Hover => (400, 400, 300),
-            ButtonState::Pressed => (600, 600, 500),
-            ButtonState::Disabled => (300, 300, 200),
-        };
-
-        match theme {
-            Theme::Dark => (
-                Theme::Dark.color(bg_level),
-                Theme::Dark.color(border_level),
-                Theme::Dark.color(shadow_level),
-            ),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(border_level),
-                Theme::Primary.color(shadow_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(border_level),
-                Theme::Error.color(shadow_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(border_level),
-                Theme::Warning.color(shadow_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(border_level),
-                Theme::Success.color(shadow_level),
-            ),
-            Theme::Info => (
-                Theme::Info.color(bg_level),
-                Theme::Info.color(border_level),
-                Theme::Info.color(shadow_level),
-            ),
-        }
+    state_colors! {
+        (bg_level, border_level, shadow_level),
+        ButtonState::Basic => (500, 500, 400),
+        ButtonState::Hover => (400, 400, 300),
+        ButtonState::Pressed => (600, 600, 500),
+        ButtonState::Disabled => (300, 300, 200)
     }
 
     fn live_props() -> LiveProps {
