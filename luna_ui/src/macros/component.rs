@@ -70,6 +70,18 @@ macro_rules! component {
     };
 }
 
+/// ## Component Part
+/// This macro generates an enum for component parts, which can be used to identify different parts of a component.
+/// ## Usage
+/// ```rust
+/// component_part!{
+///     TabbarItemPart {
+///         Icon => icon => ICON,
+///         Text => text => TEXT,
+///         Container => container => CONTAINER
+///     }, TabbarItemState
+/// }
+/// ```
 #[macro_export]
 macro_rules! component_part {
     ($part: ident {

@@ -125,7 +125,7 @@ impl Applys {
         PT: Part,
     {
         match self {
-            Applys::Value(live_value) => None,
+            Applys::Value(_) => None,
             Applys::Deep(hash_map) => {
                 let mut parts = Vec::new();
                 hash_map.keys().for_each(|key| {
@@ -147,32 +147,7 @@ impl Applys {
             Applys::Deep(map) => map.is_empty(),
         }
     }
-    /// 访问并修改某个节点，level表示深度
-    pub fn visit_level(&mut self, level: usize) -> Option<&mut Applys> {
-        let mut current_level = 0_usize;
-        if level == 0 {
-            return Some(self);
-        } else {
-            if let Applys::Deep(map) = self {
-                for apply in map.values_mut() {
-                    if current_level == level {
-                        return Some(apply);
-                    }
-                    if let Some(apply) = apply.visit_level(level - 1) {
-                        return Some(apply);
-                    }
-                    current_level += 1;
-                }
-                return None;
-            }
-            // 如果是Value节点，说明没有更深的层级了
-            if level == current_level {
-                return Some(self);
-            } else {
-                return None;
-            }
-        }
-    }
+
     pub fn contains_key(&self, key: &str) -> bool {
         match self {
             Applys::Value(_) => false,
@@ -732,42 +707,56 @@ pub fn build_applys(
     applys: &mut Applys,
     paths: &Vec<LiveProp>,
 ) -> () {
-    // 去除前3层的paths
-    let splited_paths = paths[3..].to_vec();
+    // 去除前3层的paths [prop, state, part]
     // 和insert_map类似来获取最终的节点值，但需要从第三层开始进行扩展, 首先保证splited_paths的长度大于等于1，因为最小的情况都需要有值的KV
     // 为空了说明没有足够的层级，这一般是不可能的，除非是错误的路径，这里直接不处理
-    if splited_paths.len() >= 1 {
-        if let Some(i) = nodes.child_by_path(index, paths) {
-            let live_node = &nodes[i];
-            // 接下来进行层级扩展
-            let splited_paths_len = splited_paths.len();
-            for (i, LiveProp(prop_key, ..)) in splited_paths.iter().enumerate() {
-                if let Some(applys) = applys.visit_level(i) {
-                    if let Applys::Deep(node) = applys {
-                        // Applys一定是深层的，检查是否已经有这个prop_key
-                        // 同时需要根据当前是否为splited_paths的最后一个元素来决定是否需要继续深入
-                        if splited_paths_len - 1 == i {
-                            // 说明当前为最终的值节点, 需要确定是否已经有这个prop_key，如果有需要确定是否是Value节点
-                            node.entry(prop_key.to_string())
-                                .and_modify(|applys| {
-                                    if let Applys::Value(value) = applys {
-                                        // 如果已经有这个prop_key，说明是重复的值节点, 暂时使用新值替换旧值 (待优化，可能无需替换)
-                                        *value = live_node.value.clone();
-                                    } else {
-                                        // 如果不是Value节点，说明是在上一层创建的Deep节点，需要转为Value节点
-                                        *applys = Applys::Value(live_node.value.clone());
-                                    }
-                                })
-                                .or_insert(Applys::Value(live_node.value.clone()));
-                        } else {
-                            // 说明当前不是最终的值节点，需要继续深入
-                            node.entry(prop_key.to_string()).or_insert(Applys::new());
-                        }
-                    } else {
-                        *applys = Applys::Value(live_node.value.clone());
-                    }
+    let splited_paths = paths[3..].to_vec();
+
+    if splited_paths.is_empty() {
+        return;
+    }
+
+    if let Some(i) = nodes.child_by_path(index, paths) {
+        let live_node = &nodes[i];
+        insert_value_at_path(applys, &splited_paths, live_node.value.clone());
+    }
+}
+
+fn insert_value_at_path(applys: &mut Applys, paths: &[LiveProp], value: LiveValue) {
+    if paths.is_empty() {
+        return;
+    }
+
+    // 确保根节点是 Deep 类型
+    match applys {
+        Applys::Value(_) => *applys = Applys::new(),
+        Applys::Deep(_) => {}
+    }
+
+    let mut current = applys;
+
+    // 遍历路径，为每一层创建必要的结构
+    for (i, LiveProp(prop_key, ..)) in paths.iter().enumerate() {
+        let key = prop_key.to_string();
+        let is_last = i == paths.len() - 1;
+
+        if let Applys::Deep(map) = current {
+            if is_last {
+                // 最后一个键，设置值
+                map.insert(key, Applys::Value(value.clone()));
+                break;
+            } else {
+                // 中间键，确保有 Deep 结构继续向下
+                current = map.entry(key).or_insert_with(|| Applys::new());
+
+                // 确保当前节点是 Deep 类型，以便继续嵌套
+                if let Applys::Value(_) = current {
+                    *current = Applys::new();
                 }
             }
+        } else {
+            // 这不应该发生，但为了安全起见
+            break;
         }
     }
 }

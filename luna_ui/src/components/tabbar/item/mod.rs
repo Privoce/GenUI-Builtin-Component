@@ -1,11 +1,13 @@
 mod prop;
 
+use std::collections::HashMap;
+
 use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
     components::{
-        label::{GLabel, LabelBasicProp},
+        label::{GLabel, LabelBasicProp, LabelState},
         lifecycle::LifeCycle,
         svg::{GSvg, SvgBasicProp, SvgState},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
@@ -16,7 +18,7 @@ use crate::{
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, PropMap, SlotDrawer,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -250,16 +252,9 @@ impl LiveHook for GTabbarItem {
                 (TabbarItemPart::Text, &LabelBasicProp::live_props()),
                 (TabbarItemPart::Container, &ViewBasicProp::live_props()),
             ],
-            |_| {
-            //     dbg!([
-            //     (TabbarItemPart::Icon, &SvgBasicProp::live_props()),
-            //     (TabbarItemPart::Text, &LabelBasicProp::live_props()),
-            //     (TabbarItemPart::Container, &ViewBasicProp::live_props()),
-            // ]);
-            },
+            |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
-                    dbg!(&applys);
                     component
                         .apply_slot_map
                         .insert(TabbarItemState::Basic, applys);
@@ -354,20 +349,23 @@ impl Component for GTabbarItem {
             return;
         }
         let mut crossed_map = self.apply_slot_map.cross();
-        dbg!(&self.apply_slot_map);
+
         // let mut icon_slot_map = self.apply_slot_map.iter().map(|(k, v)| {
         //     let icon_part_map = v.get(&TabbarItemPart::Icon).cloned().unwrap_or_default();
 
         //     (SvgState::from(*k),)
         // });
-        // dbg!(&self.apply_slot_map);
+
         // crossed_map.remove(&TabbarItemPart::Icon).map(|map| {
         //     // let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
         //     self.icon.apply_slot_map.merge(map);
         // });
 
         crossed_map.remove(&TabbarItemPart::Text).map(|map| {
-            let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
+            let map = map
+                .into_iter()
+                .map(|(k, v)| (k.into(), (&v).into()))
+                .collect::<HashMap<LabelState, PropMap>>();
             self.text.apply_state_map.merge(map);
         });
 
@@ -393,7 +391,8 @@ impl Component for GTabbarItem {
             let hover_prop = self.prop.get(TabbarItemState::Hover);
             let active_prop = self.prop.get(TabbarItemState::Active);
             let disabled_prop = self.prop.get(TabbarItemState::Disabled);
-            let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) = (None, None, None, None);
+            let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
+                (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[

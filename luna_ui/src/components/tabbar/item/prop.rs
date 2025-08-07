@@ -2,9 +2,13 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_state,
+    component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState}, live_props::LiveProps, svg::{SvgBasicProp, SvgPart, SvgState}, traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp}, view::{ViewBasicProp, ViewState}
+        label::{LabelBasicProp, LabelState},
+        live_props::LiveProps,
+        svg::{SvgBasicProp, SvgPart, SvgState},
+        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
+        view::{ViewBasicProp, ViewState},
     },
     error::Error,
     prop::{
@@ -129,14 +133,17 @@ impl SlotBasicProp for TabbarItemBasicProp {
     fn set_from_str_slot(
         &mut self,
         key: &str,
-        value: &LiveValue,
+        value: &crate::prop::Applys,
         state: Self::State,
         part: Self::Part,
     ) -> () {
         match part {
-            TabbarItemPart::Container => self.container.set_from_str(key, value, state.into()),
-            TabbarItemPart::Icon => self.icon.set_from_str_slot(key, value, state.into(), part),
-            TabbarItemPart::Text => self.text.set_from_str(key, value, state.into()),
+            TabbarItemPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            TabbarItemPart::Icon => {
+                // self.icon.set_from_str_slot(key, value, state.into(), part)
+                dbg!(key, part, value);
+            },
+            TabbarItemPart::Text => self.text.set_from_str(key, &value.into(), state.into()),
         }
     }
 
@@ -146,7 +153,7 @@ impl SlotBasicProp for TabbarItemBasicProp {
             TabbarItemPart::Icon => {
                 self.icon.sync_slot(state.into(), SvgPart::Svg);
                 self.icon.sync_slot(state.into(), SvgPart::Container);
-            },
+            }
             TabbarItemPart::Text => self.text.sync(state.into()),
         }
     }
@@ -323,20 +330,28 @@ impl From<TabbarItemState> for LabelState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TabbarItemPart {
-    Icon,
-    Text,
-    Container,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum TabbarItemPart {
+//     Icon,
+//     Text,
+//     Container,
+// }
 
-impl Part for TabbarItemPart {
-    type State = TabbarItemState;
-    fn to_live_id(&self) -> LiveId {
-        match self {
-            TabbarItemPart::Container => live_id!(container),
-            TabbarItemPart::Icon => live_id!(icon),
-            TabbarItemPart::Text => live_id!(text),
-        }
-    }
+// impl Part for TabbarItemPart {
+//     type State = TabbarItemState;
+//     fn to_live_id(&self) -> LiveId {
+//         match self {
+//             TabbarItemPart::Container => live_id!(container),
+//             TabbarItemPart::Icon => live_id!(icon),
+//             TabbarItemPart::Text => live_id!(text),
+//         }
+//     }
+// }
+
+component_part! {
+    TabbarItemPart {
+        Icon => icon => ICON,
+        Text => text => TEXT,
+        Container => container => CONTAINER
+    }, TabbarItemState
 }
