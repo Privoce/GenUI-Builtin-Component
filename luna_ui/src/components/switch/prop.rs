@@ -1,11 +1,8 @@
 use crate::{
-    component_state,
-    components::{
+    component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, get_get_mut, prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE,
@@ -13,10 +10,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 use makepad_widgets::*;
 use toml_edit::Item;
@@ -53,24 +47,12 @@ impl Prop for SwitchProp {
 
     type Basic = SwitchBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            SwitchState::Basic => &self.basic,
-            SwitchState::HoverBasic => &self.hover_basic,
-            SwitchState::HoverActive => &self.hover_active,
-            SwitchState::Active => &self.active,
-            SwitchState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            SwitchState::Basic => &mut self.basic,
-            SwitchState::HoverBasic => &mut self.hover_basic,
-            SwitchState::HoverActive => &mut self.hover_active,
-            SwitchState::Active => &mut self.active,
-            SwitchState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        SwitchState::Basic => basic,
+        SwitchState::HoverBasic => hover_basic,
+        SwitchState::HoverActive => hover_active,
+        SwitchState::Active => active,
+        SwitchState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -235,47 +217,13 @@ impl BasicProp for SwitchBasicProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, stroke_level, border_level) = match state {
-            SwitchState::Basic => (200, 400, 400),
-            SwitchState::HoverBasic => (100, 300, 500),
-            SwitchState::HoverActive => (500, 300, 500),
-            SwitchState::Active => (600, 400, 500),
-            SwitchState::Disabled => (100, 200, 300),
-        };
-
-        match theme {
-            Theme::Dark => (
-                Theme::Dark.color(bg_level),
-                Theme::Dark.color(stroke_level),
-                Theme::Dark.color(border_level),
-            ),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(stroke_level),
-                Theme::Primary.color(border_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(stroke_level),
-                Theme::Error.color(border_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(stroke_level),
-                Theme::Warning.color(border_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(stroke_level),
-                Theme::Success.color(border_level),
-            ),
-            Theme::Info => (
-                Theme::Info.color(bg_level),
-                Theme::Info.color(stroke_level),
-                Theme::Info.color(border_level),
-            ),
-        }
+    state_colors! {
+        (bg_level, stroke_level, border_level),
+        SwitchState::Basic => (200, 400, 400),
+        SwitchState::HoverBasic => (100, 300, 500),
+        SwitchState::HoverActive => (500, 300, 500),
+        SwitchState::Active => (600, 400, 500),
+        SwitchState::Disabled => (100, 200, 300)
     }
 
     fn len() -> usize {

@@ -162,7 +162,7 @@ impl BasicProp for RadioBasicProp {
     }
 
     fn len() -> usize {
-        3 * (RadioPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len())
+        RadioPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len()
     }
 
     fn set_from_str(

@@ -471,23 +471,24 @@ impl Component for GImage {
         self.prop = prop.clone();
     }
 
-    fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        // temp do not use
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        // only image do not need merge ------------------------------
         // let prop = self.prop.get(self.state);
-        // self.draw_button.merge(&prop.into());
-        // self.lazy_create_image_cache(cx);
-        // match self.src.clone() {
-        //     Src::None => {}
-        //     Src::Live(live_dependency) => {
-        //         if !live_dependency.as_str().is_empty() {
-        //             let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
-        //         }
-        //     }
-        //     _ => {
-        //         let src = self.src.to_string();
-        //         let _ = self.load(cx, &src);
-        //     }
-        // }
+        // self.draw_img.merge(&prop.into());
+        // -----------------------------------------------------------
+        self.lazy_create_image_cache(cx);
+        match self.src.clone() {
+            Src::None => {}
+            Src::Live(live_dependency) => {
+                if !live_dependency.as_str().is_empty() {
+                    let _ = self.load_image_dep_by_path(cx, live_dependency.as_str(), 0);
+                }
+            }
+            _ => {
+                let src = self.src.to_string();
+                let _ = self.load(cx, &src);
+            }
+        }
 
         Ok(())
     }

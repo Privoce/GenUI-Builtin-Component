@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
@@ -11,14 +9,16 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
+    get_get_mut,
     prop::{
         manuel::{
             ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CONTAINER, CURSOR, DISABLED, HEIGHT, HOVER,
             MARGIN, PRESSED, SVG, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
-        ApplySlotMapImpl, ApplyStateMapImpl,
+        ApplySlotMapImpl,
     },
+    state_color,
     themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable,
@@ -42,41 +42,22 @@ impl Prop for SvgProp {
 
     type Basic = SvgBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            SvgState::Basic => &self.basic,
-            SvgState::Hover => &self.hover,
-            SvgState::Pressed => &self.pressed,
-            SvgState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            SvgState::Basic => &mut self.basic,
-            SvgState::Hover => &mut self.hover,
-            SvgState::Pressed => &mut self.pressed,
-            SvgState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        SvgState::Basic => basic,
+        SvgState::Hover => hover,
+        SvgState::Pressed => pressed,
+        SvgState::Disabled => disabled
     }
 
     fn len() -> usize {
         4 * SvgBasicProp::len()
     }
 
-    fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
+    fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        map.sync(
-            &mut self.basic,
-            SvgState::Basic,
-            [
-                (SvgState::Hover, &mut self.hover),
-                (SvgState::Pressed, &mut self.pressed),
-                (SvgState::Disabled, &mut self.disabled),
-            ],
-        );
+        ()
     }
 }
 
@@ -143,7 +124,9 @@ impl SlotBasicProp for SvgBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            SvgPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            SvgPart::Container => self
+                .container
+                .set_from_str(key, &value.into(), state.into()),
             SvgPart::Svg => self.svg.set_from_str(key, &value.into(), state),
         }
     }
@@ -306,22 +289,12 @@ impl BasicProp for SvgPartProp {
         }
     }
 
-    fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        let color_level = match state {
-            SvgState::Basic => 500,
-            SvgState::Hover => 400,
-            SvgState::Pressed => 600,
-            SvgState::Disabled => 300,
-        };
-
-        match theme {
-            Theme::Dark => Theme::Dark.color(color_level),
-            Theme::Primary => Theme::Primary.color(color_level),
-            Theme::Error => Theme::Error.color(color_level),
-            Theme::Warning => Theme::Warning.color(color_level),
-            Theme::Success => Theme::Success.color(color_level),
-            Theme::Info => Theme::Info.color(color_level),
-        }
+    state_color! {
+        (color_level),
+        SvgState::Basic => (500),
+        SvgState::Hover => (400),
+        SvgState::Pressed => (600),
+        SvgState::Disabled => (300)
     }
 
     fn len() -> usize {
@@ -480,27 +453,6 @@ impl From<SvgState> for ViewState {
     }
 }
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum SvgPart {
-//     Container,
-//     Svg,
-// }
-
-// impl Part for SvgPart {
-//     type State = SvgState;
-//     fn to_live_id(&self) -> LiveId {
-//         match self {
-//             SvgPart::Container => live_id!(container),
-//             SvgPart::Svg => live_id!(svg),
-//         }
-//     }
-// }
-
-// impl Display for SvgPart {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-
-//     }
-// }
 component_part! {
     SvgPart {
         Container => container => CONTAINER,

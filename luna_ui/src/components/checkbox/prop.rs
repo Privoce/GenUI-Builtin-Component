@@ -1,13 +1,10 @@
 use crate::{
-    component_part, component_state,
-    components::{
+    component_part, component_state, components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, get_get_mut, prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_WIDTH, CHECKBOX, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, SIZE,
@@ -15,10 +12,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 use makepad_widgets::*;
 use toml_edit::{Item, Value};
@@ -73,22 +67,11 @@ impl Prop for CheckboxProp {
 
     type Basic = CheckboxBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            CheckboxState::Basic => &self.basic,
-            CheckboxState::Hover => &self.hover,
-            CheckboxState::Active => &self.active,
-            CheckboxState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            CheckboxState::Basic => &mut self.basic,
-            CheckboxState::Hover => &mut self.hover,
-            CheckboxState::Active => &mut self.active,
-            CheckboxState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        CheckboxState::Basic => basic,
+        CheckboxState::Hover => hover,
+        CheckboxState::Active => active,
+        CheckboxState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -396,46 +379,12 @@ impl BasicProp for CheckboxPartProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, stroke_level, border_level) = match state {
-            CheckboxState::Basic => (200, 200, 400),
-            CheckboxState::Hover => (200, 200, 400),
-            CheckboxState::Active => (500, 200, 500),
-            CheckboxState::Disabled => (100, 100, 300),
-        };
-
-        match theme {
-            Theme::Dark => (
-                Theme::Dark.color(bg_level),
-                Theme::Dark.color(stroke_level),
-                Theme::Dark.color(border_level),
-            ),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(stroke_level),
-                Theme::Primary.color(border_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(stroke_level),
-                Theme::Error.color(border_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(stroke_level),
-                Theme::Warning.color(border_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(stroke_level),
-                Theme::Success.color(border_level),
-            ),
-            Theme::Info => (
-                Theme::Info.color(bg_level),
-                Theme::Info.color(stroke_level),
-                Theme::Info.color(border_level),
-            ),
-        }
+    state_colors! {
+        (bg_level, stroke_level, border_level),
+        CheckboxState::Basic => (200, 200, 400),
+        CheckboxState::Hover => (200, 200, 400),
+        CheckboxState::Active => (500, 200, 500),
+        CheckboxState::Disabled => (100, 100, 300)
     }
 
     fn len() -> usize {
@@ -597,23 +546,6 @@ impl From<ViewState> for CheckboxState {
     }
 }
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum CheckboxPart {
-//     Container,
-//     Checkbox,
-//     Extra,
-// }
-
-// impl Part for CheckboxPart {
-//     type State = CheckboxState;
-//     fn to_live_id(&self) -> LiveId {
-//         match self {
-//             CheckboxPart::Container => live_id!(container),
-//             CheckboxPart::Checkbox => live_id!(checkbox),
-//             CheckboxPart::Extra => live_id!(extra),
-//         }
-//     }
-// }
 
 component_part! {
     CheckboxPart {

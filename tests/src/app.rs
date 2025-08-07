@@ -47,7 +47,7 @@ live_design! {
                     // <GView> {
                     //     prop: {
                     //         basic: {
-                    //             theme: Primary,
+                    //             theme: Info,
                     //             height: 200.0,
                     //             width: 200.0,
                     //             background_visible: true,
@@ -125,13 +125,13 @@ live_design! {
                     //                 height: 200.0,
                     //                 width: 200.0,
                     //                 background_visible: true,
-                                    
+
                     //             },
                     //             header: {
                     //                 border_width: 2.0,
                     //                 border_color: #00f,
                     //                 background_visible: true,
-                    //             }
+                    //             },
                     //             footer: {
                     //                 theme: Error,
                     //                 height: 40.0,
@@ -167,31 +167,31 @@ live_design! {
                     //     <GRadio>{
                     //         active: true,
                     //     }
-                        <GRadio> {
-                            prop: {
-                                basic: {
-                                    container: {
-                                        background_visible: true,
-                                        theme: Info,
-                                    },
-                                    radio: {
-                                        theme: Primary,
-                                        mode: Tick,
+                    //     <GRadio> {
+                    //         prop: {
+                    //             basic: {
+                    //                 container: {
+                    //                     background_visible: true,
+                    //                     theme: Info,
+                    //                 },
+                    //                 radio: {
+                    //                     theme: Primary,
+                    //                     mode: Tick,
 
-                                    }
-                                },
-                                hover: {
-                                    radio: {
-                                        theme: Warning,
-                                    }
-                                }
-                            },
-                            extra: {
-                                 <GLabel> {
-                                    text: "Radio Tick"
-                                }
-                            }
-                        }
+                    //                 }
+                    //             },
+                    //             hover: {
+                    //                 radio: {
+                    //                     theme: Warning,
+                    //                 }
+                    //             }
+                    //         },
+                    //         extra: {
+                    //              <GLabel> {
+                    //                 text: "Radio Tick"
+                    //             }
+                    //         }
+                    //     }
                     // }
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
@@ -281,7 +281,7 @@ live_design! {
                     //             svg: {height: 36.0, width: 36.0},
                     //         }
                     //     },
-                    //     disabled: true, 
+                    //     disabled: true,
                     //     src: dep("crate://self/resources/rain.svg"),
                     // }
                     // <GImage> {

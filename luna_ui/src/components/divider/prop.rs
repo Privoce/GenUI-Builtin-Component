@@ -2,23 +2,18 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_state,
-    components::{
+    component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
         view::ViewBasicProp,
-    },
-    error::Error,
-    prop::{
+    }, error::Error, get_get_mut, prop::{
         manuel::{
             ABS_POS, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_RADIUS,
             CURSOR, HEIGHT, MARGIN, SHADOW_COLOR, SHADOW_OFFSET, SPREAD_RADIUS, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    utils::{get_from_itable, get_from_table},
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -33,16 +28,8 @@ impl Prop for DividerProp {
 
     type Basic = DividerBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            DividerState::Basic => &self.basic,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            DividerState::Basic => &mut self.basic,
-        }
+    get_get_mut! {
+        DividerState::Basic => basic
     }
 
     fn len() -> usize {
@@ -65,23 +52,10 @@ impl Default for DividerProp {
     }
 }
 
-impl TryFrom<&Item> for DividerProp {
-    type Error = Error;
-
-    fn try_from(value: &Item) -> Result<Self, Self::Error> {
-        let table = value.as_table().ok_or(Error::ThemeStyleParse(
-            "[components.divider] should be a table".to_string(),
-        ))?;
-
-        let basic = get_from_table(
-            table,
-            BASIC,
-            || Ok(DividerBasicProp::default()),
-            |item| (item, DividerState::Basic).try_into(),
-        )?;
-
-        Ok(Self { basic })
-    }
+try_from_toml_item! {
+    DividerProp {
+        basic => BASIC, DividerBasicProp::default(), |v| (v, DividerState::Basic).try_into()
+    }, "[component.divider] should be a table"
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -144,32 +118,10 @@ impl BasicProp for DividerBasicProp {
             abs_pos: None,
         }
     }
-
-    fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, shadow_level) = match state {
-            DividerState::Basic => (500, 400),
-        };
-
-        match theme {
-            Theme::Dark => (Theme::Dark.color(bg_level), Theme::Dark.color(shadow_level)),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(shadow_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(shadow_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(shadow_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(shadow_level),
-            ),
-            Theme::Info => (Theme::Info.color(bg_level), Theme::Info.color(shadow_level)),
-        }
+    
+    state_colors! {
+        (bg_level, shadow_level),
+        DividerState::Basic => (500, 400)
     }
 
     fn len() -> usize {

@@ -170,6 +170,34 @@ macro_rules! state_colors {
     };
 }
 
+#[macro_export]
+macro_rules! state_color {
+    (
+        ($level: ident),
+        $($state: path => ($level_number: expr)),*
+    ) => {
+        fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
+            let $level = match state {
+                $(
+                    $state => (
+                        $level_number
+                    ),
+                )*
+
+            };
+
+            match theme {
+                Theme::Dark => Theme::Dark.color($level),
+                Theme::Primary => Theme::Primary.color($level),
+                Theme::Error => Theme::Error.color($level),
+                Theme::Warning => Theme::Warning.color($level),
+                Theme::Success => Theme::Success.color($level),
+                Theme::Info => Theme::Info.color($level),
+            }
+        }
+    };
+}
+
 /// ## generate `get` and `get_mut` fn in `Prop` trait
 /// ### usage
 /// ```

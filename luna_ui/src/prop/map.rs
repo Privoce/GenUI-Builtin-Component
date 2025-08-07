@@ -500,24 +500,6 @@ impl ApplyMapImpl for PropMap {
     }
 }
 
-// impl<S> ApplySlotMergeImpl<S> for ApplyStateMap<S>
-// where
-//     S: Hash + Eq + Copy + Display,
-// {
-//     fn merge_slot(&mut self, other: SlotMap<S>) -> () {
-//         for (k, v) in other {
-//             match v {
-//                 Applys::Value(live_value) => {
-//                     self.entry(k).or_default().insert(k.to_string(), live_value);
-//                 },
-//                 Applys::Deep(hash_map) => {
-
-//                 },
-//             }
-//         }
-//     }
-// }
-
 impl<S> ApplyMapImpl for ApplyStateMap<S>
 where
     S: Hash + Eq + Copy,
@@ -527,7 +509,7 @@ where
         O: Into<Self>,
     {
         for (state, props) in other.into() {
-            self.entry(state).or_insert(props);
+            self.entry(state).or_default().merge(props);
         }
     }
 }
@@ -794,7 +776,7 @@ pub fn build_applys(
 mod test {
     use super::*;
     #[test]
-    fn test_applys_diff(){
+    fn test_applys_diff() {
         let a = Applys::Deep(HashMap::from([
             ("a".to_string(), Applys::Value(LiveValue::Float64(1.0))),
             ("b".to_string(), Applys::Value(LiveValue::Float64(2.0))),
@@ -867,6 +849,32 @@ mod test {
         ]);
         a_map.merge(b_map);
 
+        dbg!(a_map);
+    }
+
+    #[test]
+    fn different_between_merge_or_insert() {
+        let mut a_map = HashMap::from([
+            //     (
+            //     "a".to_string(),
+            //     HashMap::from([("a1".to_string(), "1".to_string())]),
+            // ),
+            (
+                "b".to_string(),
+                HashMap::from([("b1".to_string(), "2".to_string())]),
+            ),
+        ]);
+
+        let mut merge_map = a_map.clone();
+        merge_map
+            .entry("a".to_string())
+            .or_default()
+            .entry("a1".to_string())
+            .or_insert("0".to_string());
+        dbg!(merge_map);
+        a_map
+            .entry("a".to_string())
+            .or_insert(HashMap::from([("a1".to_string(), "0".to_string())]));
         dbg!(a_map);
     }
 }

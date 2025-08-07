@@ -2,23 +2,17 @@ use makepad_widgets::{image_cache::ImageFit, *};
 use toml_edit::Item;
 
 use crate::{
-    component_state,
-    components::{
+    component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, get_get_mut, prop::{
         manuel::{
             ABS_POS, BASIC, CURSOR, FIT, HEIGHT, LOADING, MARGIN, MIN_HEIGHT, MIN_WIDTH, WIDTH,
             WIDTH_SCALE,
         },
         traits::{FromLiveValue, NewFrom},
         ApplyStateMapImpl,
-    },
-    themes::{Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, themes::{Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -51,18 +45,9 @@ impl Prop for ImageProp {
 
     type Basic = ImageBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            ImageState::Basic => &self.basic,
-            ImageState::Loading => &self.loading,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            ImageState::Basic => &mut self.basic,
-            ImageState::Loading => &mut self.loading,
-        }
+    get_get_mut! {
+        ImageState::Basic => basic,
+        ImageState::Loading => loading
     }
 
     fn len() -> usize {

@@ -1,6 +1,8 @@
 mod event;
 mod prop;
 
+use std::collections::HashMap;
+
 pub use event::*;
 pub use prop::*;
 
@@ -19,7 +21,7 @@ use crate::{
     prop::{
         manuel::{BASIC, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, PropMap, SlotDrawer,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -339,7 +341,12 @@ impl Component for GCard {
             (CardPart::Footer, &mut self.footer),
         ] {
             crossed_map.remove(&part).map(|map| {
-                // slot.apply_state_map.merge_slot(map);
+                let map = map
+                    .into_iter()
+                    .map(|(k, v)| (k.into(), PropMap::from(&v)))
+                    .collect::<HashMap<ViewState, PropMap>>();
+
+                slot.apply_state_map.merge(map);
             });
 
             slot.prop.sync(&slot.apply_state_map);

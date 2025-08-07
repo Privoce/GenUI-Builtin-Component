@@ -107,7 +107,6 @@ impl LiveHook for GDivider {
                         .apply_state_map
                         .insert(DividerState::Basic, applys);
                 }
-
                 _ => {}
             },
         );

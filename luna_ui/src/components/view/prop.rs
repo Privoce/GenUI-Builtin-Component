@@ -2,14 +2,10 @@ use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state,
-    components::{
+    component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    },
-    error::Error,
-    getter_setter_prop,
-    prop::{
+    }, error::Error, get_get_mut, getter_setter_prop, prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
@@ -18,10 +14,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    },
-    themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -52,22 +45,11 @@ impl Prop for ViewProp {
     type State = ViewState;
     type Basic = ViewBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            ViewState::Basic => &self.basic,
-            ViewState::Hover => &self.hover,
-            ViewState::Pressed => &self.pressed,
-            ViewState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            ViewState::Basic => &mut self.basic,
-            ViewState::Hover => &mut self.hover,
-            ViewState::Pressed => &mut self.pressed,
-            ViewState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        ViewState::Basic => basic,
+        ViewState::Hover => hover,
+        ViewState::Pressed => pressed,
+        ViewState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -287,47 +269,14 @@ impl BasicProp for ViewBasicProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let (bg_level, border_level, shadow_level) = match state {
-            ViewState::Basic => (500, 500, 400),
-            ViewState::Hover => (400, 400, 300),
-            ViewState::Pressed => (600, 600, 500),
-            ViewState::Disabled => (300, 300, 200),
-        };
-
-        match theme {
-            Theme::Dark => (
-                Theme::Dark.color(bg_level),
-                Theme::Dark.color(border_level),
-                Theme::Dark.color(shadow_level),
-            ),
-            Theme::Primary => (
-                Theme::Primary.color(bg_level),
-                Theme::Primary.color(border_level),
-                Theme::Primary.color(shadow_level),
-            ),
-            Theme::Error => (
-                Theme::Error.color(bg_level),
-                Theme::Error.color(border_level),
-                Theme::Error.color(shadow_level),
-            ),
-            Theme::Warning => (
-                Theme::Warning.color(bg_level),
-                Theme::Warning.color(border_level),
-                Theme::Warning.color(shadow_level),
-            ),
-            Theme::Success => (
-                Theme::Success.color(bg_level),
-                Theme::Success.color(border_level),
-                Theme::Success.color(shadow_level),
-            ),
-            Theme::Info => (
-                Theme::Info.color(bg_level),
-                Theme::Info.color(border_level),
-                Theme::Info.color(shadow_level),
-            ),
-        }
+    state_colors! {
+        (bg_level, border_level, shadow_level),
+        ViewState::Basic => (500, 500, 400),
+        ViewState::Hover => (400, 400, 300),
+        ViewState::Pressed => (600, 600, 500),
+        ViewState::Disabled => (300, 300, 200)
     }
+
     fn live_props() -> LiveProps {
         vec![
             (live_id!(theme), None.into()),
