@@ -227,6 +227,8 @@ live_design! {
     }
 
     pub GTabbarItem = <GTabbarItemBase> {}
+
+    pub GTag = <GTagBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -246,6 +248,7 @@ pub fn components_register(cx: &mut Cx) {
     popup::container::live_design(cx);
     drop_down::live_design(cx);
     tabbar::item::live_design(cx);
+    tag::live_design(cx);
 }
 
 component! {

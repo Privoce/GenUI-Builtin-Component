@@ -13,10 +13,6 @@ live_design! {
 pub struct DrawSvg {
     #[deref]
     pub draw_super: DrawIcon,
-    #[live]
-    pub hover: f32,
-    #[live]
-    pub pressed: f32,
 }
 
 impl DrawSvg {

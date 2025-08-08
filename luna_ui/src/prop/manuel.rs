@@ -60,6 +60,7 @@ pub const FOOTER: &str = "footer";
 pub const CONTAINER: &str = "container";
 pub const ICON: &str = "icon";
 pub const TEXT: &str = "text";
+pub const CLOSE: &str = "close";
 // --- component -------------------------------------------------
 pub const LABEL: &str = "label";
 pub const VIEW: &str = "view";

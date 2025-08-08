@@ -42,4 +42,5 @@ pub struct ComponentAnInit {
     svg: bool,
     image: bool,
     tabbar_item: bool,
+    tag: bool,
 }

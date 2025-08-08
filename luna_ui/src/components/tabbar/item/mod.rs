@@ -1,7 +1,5 @@
 mod prop;
 
-use std::collections::HashMap;
-
 use makepad_widgets::*;
 pub use prop::*;
 
@@ -9,14 +7,17 @@ use crate::{
     components::{
         label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
-        svg::{GSvg, SvgBasicProp, SvgState},
+        svg::{GSvg, SvgBasicProp},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
     },
     error::Error,
     lifecycle, play_animation,
     prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, Applys, DeferWalks, SlotDrawer, ToSlotMap, ToStateMap
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
+        traits::ToFloat,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer,
+        ToSlotMap, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -336,7 +337,7 @@ impl Component for GTabbarItem {
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
-        if !self.animation_open || self.disabled {
+        if !self.animation_open {
             return;
         }
         self.switch_state(state);
@@ -428,7 +429,7 @@ impl Component for GTabbarItem {
                 nodes: draw_container = {
                     basic_index => {
                         background_color => basic_prop.container.background_color,
-                        border_color =>basic_prop.container.border_color,
+                        border_color => basic_prop.container.border_color,
                         border_radius => basic_prop.container.border_radius,
                         border_width =>(basic_prop.container.border_width as f64),
                         shadow_color => basic_prop.container.shadow_color,
