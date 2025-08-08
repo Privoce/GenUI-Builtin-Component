@@ -4,17 +4,11 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Prop},
-    },
-    error::Error,
-    getter, getter_setter_ref, lifecycle,
-    prop::{
+    }, error::Error, getter, getter_setter_ref, lifecycle, prop::{
         manuel::{BASIC, DISABLED},
         traits::ToColor,
         ApplyStateMap,
-    },
-    pure_after_apply, set_index, set_scope_path, setter,
-    themes::{Conf, Theme},
-    visible,
+    }, pure_after_apply, set_index, set_scope_path, setter, sync, themes::{Conf, Theme}, visible
 };
 
 mod prop;
@@ -111,7 +105,7 @@ impl WidgetNode for GLabel {
 }
 
 impl Widget for GLabel {
-    fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
@@ -133,6 +127,7 @@ impl Widget for GLabel {
         self.draw_text
             .draw_walk(cx, walk, Align::default(), self.text.as_ref());
         cx.end_turtle_with_area(&mut self.area);
+        self.set_scope_path(&scope.path);
         DrawStep::done()
     }
 
@@ -228,12 +223,11 @@ impl Component for GLabel {
     fn set_animation(&mut self, _cx: &mut Cx) -> () {
         ()
     }
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
+    fn focus_sync(&mut self) -> () {
         self.prop.sync(&self.apply_state_map);
     }
+
+    sync!();
     set_index!();
     lifecycle!();
     set_scope_path!();

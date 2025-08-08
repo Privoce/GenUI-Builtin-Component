@@ -15,8 +15,7 @@ use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
 use crate::themes::Conf;
 use crate::{
-    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, visible,
-    ComponentAnInit,
+    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, sync, visible, ComponentAnInit
 };
 use makepad_widgets::*;
 use std::path::{Path, PathBuf};
@@ -509,11 +508,7 @@ impl Component for GImage {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
-        // sync state if is not Basic
+    fn focus_sync(&mut self) -> () {
         self.prop.sync(&self.apply_state_map);
     }
 
@@ -521,6 +516,7 @@ impl Component for GImage {
         ()
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

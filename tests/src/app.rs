@@ -62,6 +62,7 @@ live_design! {
                     //         prop: {
                     //             basic: {
                     //                 theme: Error,
+                    //                 abs_pos: vec2(0.0, 1.0),
                     //             }
                     //             hover: {
                     //                 theme: Primary,
@@ -69,9 +70,9 @@ live_design! {
                     //             disabled: {
                     //                 theme: Info,
                     //                 padding: {
-                    //                     top: 20.0,
+                    //                     top: 10.0,
                     //                     bottom: 20.0,
-                    //                     left: 20.0,
+                    //                     left: 10.0,
                     //                     right: 20.0,
                     //                 }
                     //             }
@@ -362,7 +363,10 @@ live_design! {
                                         background_visible: true,
                                         theme: Info,
                                         margin: {
-                                            top: 10.0
+                                            top: 10.0,
+                                            right: 10.0
+                                            left: 10.0,
+                                            bottom: 10.0,
                                         }
                                     }
                                 },
@@ -372,19 +376,20 @@ live_design! {
                             }
                         }
                         icon: <GSvg> {
-                            prop: {
-                                basic: {
-                                    svg: {
-                                        theme: Primary
-                                    }
-                                }
-                            }
+                            // prop: {
+                            //     basic: {
+                            //         svg: {
+                            //             theme: Primary
+                            //         }
+                            //     }
+                            // }
                             src: dep("crate://self/resources/wind.svg"),
                         }
                         text: <GLabel> {
                             text: "Wind"
                         }
                     }
+
                 }
             }
         }

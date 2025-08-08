@@ -92,3 +92,12 @@ pub const HORIZONTAL: &str = "Horizontal";
 pub const BIGGEST: &str = "Biggest";
 pub const SMALLEST: &str = "Smallest";
 pub const STRETCH: &str = "Stretch";
+// --- values -------------------------------------------------
+pub const TOP: &str = "top";
+pub const RIGHT: &str = "right";
+pub const BOTTOM: &str = "bottom";
+pub const LEFT: &str = "left";
+pub const X: &str = "x";
+pub const Y: &str = "y";
+pub const Z: &str = "z";
+pub const W: &str = "w";

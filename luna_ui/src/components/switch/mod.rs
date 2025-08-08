@@ -7,22 +7,14 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw,
-    components::{
+    active_event, animation_open_then_redraw, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    },
-    error::Error,
-    event_option, lifecycle, play_animation,
-    prop::{
+    }, error::Error, event_option, lifecycle, play_animation, prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER_ACTIVE, HOVER_BASIC},
         traits::ToFloat,
         ApplyStateMap,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::draw_switch::DrawSwitch,
-    themes::Conf,
-    visible, ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_switch::DrawSwitch, sync, themes::Conf, visible, ComponentAnInit
 };
 
 live_design! {
@@ -341,10 +333,7 @@ impl Component for GSwitch {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
+    fn focus_sync(&mut self) -> () {
         self.prop.sync(&self.apply_state_map);
     }
 
@@ -541,6 +530,7 @@ impl Component for GSwitch {
         }
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

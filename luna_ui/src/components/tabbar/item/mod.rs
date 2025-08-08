@@ -7,7 +7,7 @@ pub use prop::*;
 
 use crate::{
     components::{
-        label::{GLabel, LabelBasicProp, LabelState},
+        label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
         svg::{GSvg, SvgBasicProp, SvgState},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
@@ -16,12 +16,11 @@ use crate::{
     error::Error,
     lifecycle, play_animation,
     prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
-        traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, PropMap, SlotDrawer,
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER}, traits::ToFloat, ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, Applys, DeferWalks, SlotDrawer, ToSlotMap, ToStateMap
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
+    sync,
     themes::Conf,
     visible, ComponentAnInit,
 };
@@ -344,29 +343,17 @@ impl Component for GTabbarItem {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
+    fn focus_sync(&mut self) -> () {
         let mut crossed_map = self.apply_slot_map.cross();
 
-        // let mut icon_slot_map = self.apply_slot_map.iter().map(|(k, v)| {
-        //     let icon_part_map = v.get(&TabbarItemPart::Icon).cloned().unwrap_or_default();
-
-        //     (SvgState::from(*k),)
-        // });
-
-        // crossed_map.remove(&TabbarItemPart::Icon).map(|map| {
-        //     // let map = map.into_iter().map(|(k, v)| (k.into(), v)).collect();
-        //     self.icon.apply_slot_map.merge(map);
-        // });
+        crossed_map.remove(&TabbarItemPart::Icon).map(|map| {
+            self.icon.apply_slot_map.merge_slot(map.to_slot());
+            self.icon.focus_sync();
+        });
 
         crossed_map.remove(&TabbarItemPart::Text).map(|map| {
-            let map = map
-                .into_iter()
-                .map(|(k, v)| (k.into(), (&v).into()))
-                .collect::<HashMap<LabelState, PropMap>>();
-            self.text.apply_state_map.merge(map);
+            self.text.apply_state_map.merge(map.to_state());
+            self.text.focus_sync();
         });
 
         self.prop.sync_slot(&self.apply_slot_map);
@@ -540,6 +527,7 @@ impl Component for GTabbarItem {
         }
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

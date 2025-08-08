@@ -2,8 +2,6 @@ mod event;
 pub mod group;
 mod prop;
 
-use std::collections::HashMap;
-
 pub use event::*;
 pub use prop::*;
 
@@ -14,17 +12,18 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp, ViewState},
+        view::{GView, ViewBasicProp},
     },
     error::Error,
     event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, PropMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::{draw_radio::DrawRadio, draw_view::DrawView},
+    sync,
     themes::Conf,
     visible, ComponentAnInit,
 };
@@ -351,22 +350,13 @@ impl Component for GRadio {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
+    fn focus_sync(&mut self) -> () {
         let mut crossed_map = self.apply_slot_map.cross();
         for (part, slot) in [(RadioPart::Extra, &mut self.extra)] {
             crossed_map.remove(&part).map(|map| {
-                let map = map
-                    .into_iter()
-                    .map(|(k, v)| (k.into(), PropMap::from(&v)))
-                    .collect::<HashMap<ViewState, PropMap>>();
-
-                slot.apply_state_map.merge(map);
+                slot.apply_state_map.merge(map.to_state());
             });
-
-            slot.prop.sync(&slot.apply_state_map);
+            slot.focus_sync();
         }
 
         // sync state if is not Basic
@@ -596,6 +586,7 @@ impl Component for GRadio {
         }
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

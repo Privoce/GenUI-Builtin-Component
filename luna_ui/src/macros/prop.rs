@@ -250,3 +250,16 @@ macro_rules! get_get_mut {
         }
     };
 }
+
+#[macro_export]
+macro_rules! sync {
+    () => {
+        fn sync(&mut self) -> () {
+            if !self.sync {
+                return;
+            }
+
+            self.focus_sync();
+        }
+    };
+}

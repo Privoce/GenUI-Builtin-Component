@@ -5,28 +5,15 @@ pub use event::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw,
-    components::{
+    active_event, animation_open_then_redraw, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
-    },
-    error::Error,
-    event_option, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle,
-    makepad_derive_widget::*,
-    makepad_draw::*,
-    play_animation,
-    prop::{
+    }, error::Error, event_option, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, makepad_derive_widget::*, makepad_draw::*, play_animation, prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
         ApplySlotMap,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::{draw_svg::DrawSvg, draw_view::DrawView},
-    themes::Conf,
-    visible,
-    widget::*,
-    ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::{draw_svg::DrawSvg, draw_view::DrawView}, sync, themes::Conf, visible, widget::*, ComponentAnInit
 };
 
 live_design! {
@@ -313,10 +300,7 @@ impl Component for GSvg {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
+    fn focus_sync(&mut self) -> () {
         self.prop.sync_slot(&self.apply_slot_map);
     }
 
@@ -514,6 +498,7 @@ impl Component for GSvg {
         }
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

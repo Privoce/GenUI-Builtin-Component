@@ -76,8 +76,8 @@ where
                     state.as_field(),
                 ];
 
-                fields.build_paths_and_insert(&mut paths, &mut |paths| {
-                    insert_map(nodes, index, &mut applys, paths);
+                fields.build_paths_and_insert(&mut paths, &mut |paths, deep_fields| {
+                    insert_map(nodes, index, &mut applys, paths, deep_fields);
                 });
             }
             insert(prefix, self, applys);
@@ -172,6 +172,8 @@ where
     /// ## sync component properties
     /// do before render component
     fn sync(&mut self) -> ();
+    /// ## focus do sync fn again
+    fn focus_sync(&mut self) -> ();
     fn set_animation(&mut self, cx: &mut Cx) -> ();
     fn lifecycle(&self) -> LifeCycle;
     fn set_index(&mut self, index: usize) -> ();

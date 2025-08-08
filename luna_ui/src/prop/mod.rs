@@ -8,6 +8,7 @@ mod mode;
 mod direction;
 mod src;
 mod route;
+mod prop_converter;
 
 pub use map::*;
 pub use radius::Radius;

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use makepad_widgets::*;
 use toml_edit::Item;
 
@@ -138,11 +140,18 @@ impl SlotBasicProp for TabbarItemBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            TabbarItemPart::Container => self.container.set_from_str(key, &value.into(), state.into()),
+            TabbarItemPart::Container => {
+                self.container
+                    .set_from_str(key, &value.into(), state.into())
+            }
             TabbarItemPart::Icon => {
-                // self.icon.set_from_str_slot(key, value, state.into(), part)
-                dbg!(key, part, value);
-            },
+                // if is slot, key is part, value is key + value
+                let icon_part = SvgPart::from_str(key).unwrap();
+                for (key, value) in value.as_kvs() {
+                    self.icon
+                        .set_from_str_slot(key, value, state.into(), icon_part);
+                }
+            }
             TabbarItemPart::Text => self.text.set_from_str(key, &value.into(), state.into()),
         }
     }

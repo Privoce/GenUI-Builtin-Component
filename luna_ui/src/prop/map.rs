@@ -4,7 +4,7 @@ use crate::{
         traits::{BasicProp, Component, Part, SlotBasicProp},
     },
     error::Error,
-    prop::manuel::THEME,
+    prop::{manuel::THEME, prop_converter::PropVecConverter},
     themes::Theme,
 };
 use makepad_widgets::{
@@ -87,9 +87,8 @@ impl From<&Applys> for LiveValue {
     fn from(value: &Applys) -> Self {
         match value {
             Applys::Value(live_value) => live_value.clone(),
-            Applys::Deep(map) => {
-                dbg!(map);
-                panic!("Cannot convert a Deep Applys to LiveValue directly, expected Value");
+            Applys::Deep(_map) => {
+                unreachable!("Cannot convert a Deep Applys to LiveValue directly, expected Value");
             }
         }
     }
@@ -102,8 +101,8 @@ impl From<&Applys> for PropMap {
                 panic!("Cannot convert a Value Applys to PropMap directly, expected Deep");
             }
             Applys::Deep(hash_map) => hash_map
-                .into_iter()
-                .map(|(k, v)| (k.to_string(), v.into()))
+                .iter()
+                .map(|(k, v)| (k.to_string(), LiveValue::from(v)))
                 .collect(),
         }
     }
@@ -213,6 +212,13 @@ impl Applys {
                 (!filtered.is_empty()).then_some(Applys::Deep(filtered))
             }
             _ => panic!("Cannot diff between Value and Deep Applys"),
+        }
+    }
+
+    pub fn as_kvs(&self) -> impl Iterator<Item = (&str, &Applys)> {
+        match self {
+            Applys::Deep(map) => map.iter().map(|(k, v)| (k.as_str(), v)),
+            _ => panic!("Cannot convert a Value Applys to key-value pairs, expected Deep"),
         }
     }
 }
@@ -377,9 +383,9 @@ where
                         live_part.as_field(),
                         key.as_field(),
                     ];
-                    fields.build_paths_and_insert(&mut paths, &mut |paths| {
+                    fields.build_paths_and_insert(&mut paths, &mut |paths, deep_fields| {
                         // 返回一个Applys，因为我们无法在创建时知道这个Applys的深度
-                        build_applys(nodes, index, &mut applys, paths)
+                        build_applys(nodes, index, &mut applys, paths, deep_fields);
                     });
                 }
                 slots.insert(part, applys);
@@ -655,8 +661,8 @@ where
                     prefix.as_field(),
                     state.as_field(),
                 ];
-                fields.build_paths_and_insert(&mut paths, &mut |paths| {
-                    insert_map(nodes, index, &mut applys, paths);
+                fields.build_paths_and_insert(&mut paths, &mut |paths, deep_fields| {
+                    insert_map(nodes, index, &mut applys, paths, deep_fields);
                 });
             }
             insert(prefix, component, applys);
@@ -692,10 +698,33 @@ pub fn insert_map(
     index: usize,
     applys: &mut HashMap<String, LiveValue>,
     paths: &Vec<LiveProp>,
+    deep_fields: Option<&Vec<LiveId>>,
 ) {
     if let Some(i) = nodes.child_by_path(index, paths) {
         let node = &nodes[i];
-        applys.insert(node.id.to_string(), node.value.clone());
+        if let Some(deep_fields) = deep_fields {
+            // 深度字段需要查找当前node的id是否在deep_fields中，如果在，那么实际上应该以父paths作为key，将值类型处理为Vec2/Vec4
+            if deep_fields.contains(&node.id) {
+                let father_prop = paths
+                    .get(paths.len() - 2)
+                    .expect("Expected at least one path element for father path");
+                let father_key = father_prop.0.to_string();
+                // 构建一个prop converter, 他可以告诉我们应该如何处理这个深度属性
+                let converter = PropVecConverter::new(&father_key, node.id, node.value.clone());
+                // 没有则添加，有则修改
+                applys
+                    .entry(father_key)
+                    .and_modify(|v| {
+                        *v = converter.value(Some(v.clone()));
+                    })
+                    .or_insert(converter.value(None));
+                return;
+            } else {
+                panic!("Deep field not found in deep_fields");
+            }
+        } else {
+            applys.insert(node.id.to_string(), node.value.clone());
+        }
     }
 }
 
@@ -706,6 +735,7 @@ pub fn build_applys(
     index: usize,
     applys: &mut Applys,
     paths: &Vec<LiveProp>,
+    deep_fields: Option<&Vec<LiveId>>,
 ) -> () {
     // 去除前3层的paths [prop, state, part]
     // 和insert_map类似来获取最终的节点值，但需要从第三层开始进行扩展, 首先保证splited_paths的长度大于等于1，因为最小的情况都需要有值的KV
@@ -717,12 +747,16 @@ pub fn build_applys(
     }
 
     if let Some(i) = nodes.child_by_path(index, paths) {
-        let live_node = &nodes[i];
-        insert_value_at_path(applys, &splited_paths, live_node.value.clone());
+        insert_value_at_path(applys, &splited_paths, &nodes[i], deep_fields);
     }
 }
 
-fn insert_value_at_path(applys: &mut Applys, paths: &[LiveProp], value: LiveValue) {
+fn insert_value_at_path(
+    applys: &mut Applys,
+    paths: &[LiveProp],
+    node: &LiveNode,
+    deep_fields: Option<&Vec<LiveId>>,
+) {
     if paths.is_empty() {
         return;
     }
@@ -743,9 +777,29 @@ fn insert_value_at_path(applys: &mut Applys, paths: &[LiveProp], value: LiveValu
         if let Applys::Deep(map) = current {
             if is_last {
                 // 最后一个键，设置值
-                map.insert(key, Applys::Value(value.clone()));
+                map.insert(key, Applys::Value(node.value.clone()));
                 break;
             } else {
+                // 处理需要深度属性的情况
+                if let Some(deep_fields) = deep_fields {
+                    if deep_fields.contains(&node.id) {
+                        let father_prop = paths.get(paths.len() - 2).unwrap();
+                        let father_key = father_prop.0.to_string();
+                        if father_key == key {
+                            let converter =
+                                PropVecConverter::new(&father_key, node.id, node.value.clone());
+                            map.entry(father_key)
+                                .and_modify(|v| {
+                                    *v = Applys::Value(
+                                        converter.value(Some(LiveValue::from(&v.clone()))),
+                                    );
+                                })
+                                .or_insert(Applys::Value(converter.value(None)));
+                            return;
+                        }
+                    }
+                }
+
                 // 中间键，确保有 Deep 结构继续向下
                 current = map.entry(key).or_insert_with(|| Applys::new());
 
@@ -758,6 +812,56 @@ fn insert_value_at_path(applys: &mut Applys, paths: &[LiveProp], value: LiveValu
             // 这不应该发生，但为了安全起见
             break;
         }
+    }
+}
+
+pub trait ToStateMap<S>
+where
+    S: Hash + Eq + Copy,
+{
+    fn to_state(self) -> HashMap<S, PropMap>;
+}
+
+impl<K, S> ToStateMap<S> for HashMap<K, Applys>
+where
+    K: Into<S> + Hash + Eq + Copy,
+    S: Hash + Eq + Copy,
+{
+    fn to_state(self) -> HashMap<S, PropMap> {
+        self.into_iter()
+            .filter_map(|(k, v)| {
+                if v.is_empty() {
+                    None
+                } else {
+                    Some((k.into(), PropMap::from(&v)))
+                }
+            })
+            .collect()
+    }
+}
+
+pub trait ToSlotMap<S>
+where
+    S: Hash + Eq + Copy,
+{
+    fn to_slot(self) -> HashMap<S, Applys>;
+}
+
+impl<K, S> ToSlotMap<S> for HashMap<K, Applys>
+where
+    K: Into<S> + Hash + Eq + Copy,
+    S: Hash + Eq + Copy,
+{
+    fn to_slot(self) -> HashMap<S, Applys> {
+        self.into_iter()
+            .filter_map(|(k, v)| {
+                if v.is_empty() {
+                    None
+                }else{
+                    Some((k.into(), v))
+                }
+            })
+            .collect()
     }
 }
 

@@ -1,8 +1,6 @@
 mod event;
 mod prop;
 
-use std::collections::HashMap;
-
 pub use event::*;
 pub use prop::*;
 
@@ -21,10 +19,11 @@ use crate::{
     prop::{
         manuel::{BASIC, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, PropMap, SlotDrawer,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
+    sync,
     themes::Conf,
     visible, ComponentAnInit,
 };
@@ -328,12 +327,7 @@ impl Component for GCard {
         self.set_animation(cx);
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
-
-        // do merge to slot
+    fn focus_sync(&mut self) -> () {
         let mut crossed_map = self.apply_slot_map.cross();
         for (part, slot) in [
             (CardPart::Header, &mut self.header),
@@ -341,15 +335,10 @@ impl Component for GCard {
             (CardPart::Footer, &mut self.footer),
         ] {
             crossed_map.remove(&part).map(|map| {
-                let map = map
-                    .into_iter()
-                    .map(|(k, v)| (k.into(), PropMap::from(&v)))
-                    .collect::<HashMap<ViewState, PropMap>>();
-
-                slot.apply_state_map.merge(map);
+                slot.apply_state_map.merge(map.to_state());
             });
 
-            slot.prop.sync(&slot.apply_state_map);
+            slot.focus_sync();
         }
 
         // sync state if is not Basic
@@ -464,6 +453,7 @@ impl Component for GCard {
         }
     }
 
+    sync!();
     play_animation!();
     set_scope_path!();
     set_index!();

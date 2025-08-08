@@ -7,13 +7,7 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    },
-    error::Error,
-    lifecycle,
-    prop::{manuel::BASIC, ApplyStateMap},
-    pure_after_apply, set_index, set_scope_path,
-    shader::draw_view::DrawView,
-    themes::Conf, visible,
+    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::Conf, visible
 };
 
 live_design! {
@@ -142,11 +136,7 @@ impl Component for GDivider {
         ()
     }
 
-    fn sync(&mut self) -> () {
-        if !self.sync {
-            return;
-        }
-        // sync state if is not Basic
+    fn focus_sync(&mut self) -> () {
         self.prop.sync(&self.apply_state_map);
     }
 
@@ -157,6 +147,8 @@ impl Component for GDivider {
     fn play_animation(&mut self, _cx: &mut Cx, _state: &[LiveId; 2]) -> () {
         ()
     }
+    
+    sync!();
     set_scope_path!();
     set_index!();
     lifecycle!();

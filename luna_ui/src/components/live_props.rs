@@ -23,10 +23,13 @@ impl LivePropsValue {
         matches!(self, LivePropsValue::Slot(_))
     }
 
+    /// 构建路径并插入到给定的路径列表中
+    /// - 在insert函数中，路径会被处理，第二个参数为该路径是否为深度路径
+    /// - 深度路径：在这里并不是指Slot，而是指基础应用类型的属性的值是Some的情况，例如: Margin, Padding等
     pub fn build_paths_and_insert(
         &self,
         paths: &mut Vec<LiveProp>,
-        insert: &mut dyn FnMut(&Vec<LiveProp>),
+        insert: &mut dyn FnMut(&Vec<LiveProp>, Option<&Vec<LiveId>>),
     ) -> () {
         match self {
             LivePropsValue::Basic(fields) => {
@@ -35,10 +38,10 @@ impl LivePropsValue {
                         // 需要使用临时量来处理，因为field是需要push一个insert一个的
                         let mut tmp_paths = paths.clone();
                         tmp_paths.push(field.as_field());
-                        insert(&tmp_paths);
+                        insert(&tmp_paths, Some(fields));
                     }
                 } else {
-                    insert(paths);
+                    insert(paths, None);
                 }
             }
             LivePropsValue::Slot(items) => {
@@ -47,7 +50,6 @@ impl LivePropsValue {
                     // value需要依据类型来处理, 递归调用
                     value.build_paths_and_insert(paths, insert);
                     paths.pop();
-                    
                 }
             }
         }
