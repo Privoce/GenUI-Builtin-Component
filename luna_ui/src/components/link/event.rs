@@ -1,5 +1,6 @@
 use makepad_widgets::*;
 
+#[derive(Clone, Debug, DefaultNone)]
 pub enum LinkEvent {
     HoverIn(LinkHoverIn),
     HoverOut(LinkHoverOut),

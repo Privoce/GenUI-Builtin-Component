@@ -44,20 +44,20 @@ live_design! {
                     draw_bg: {
                         color: #000,
                     }
-                    <GView> {
-                        prop: {
-                            basic: {
-                                theme: Info,
-                                height: 200.0,
-                                width: 200.0,
-                                background_visible: true,
-                            }
-                            hover: {
-                                theme: Warning,
-                            }
-                        },
-                        animation_open: true
-                    }
+                    // <GView> {
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Info,
+                    //             height: 200.0,
+                    //             width: 200.0,
+                    //             background_visible: true,
+                    //         }
+                    //         hover: {
+                    //             theme: Warning,
+                    //         }
+                    //     },
+                    //     animation_open: true
+                    // }
                     // <GButton>{
                     //         prop: {
                     //             basic: {
@@ -394,27 +394,19 @@ live_design! {
                     //         text: "tag"
                     //     }
                     // }
-                    <GLabel> {
-                        text: "Click me! I am a link"
-                        prop: {
-                            basic: {
-                                font_size: 24.0,
-                            }
-                        }
-                    }
-                    <GLink>{
-                        prop: {
-                            basic: {
-                                theme: Primary,
-                                font_size: 24.0,
-                                background_visible: true,
-                            }
-                        },
-                        draw_text: {
-                            color: #00f,
-                        }
-                        text: "Click me! I am a link",
-                    }
+                    // <GLink>{
+                    //     prop: {
+                    //         basic: {
+                    //             theme: Primary,
+                    //             font_size: 24.0,
+                    //             background_visible: true,
+                    //         }
+                    //     },
+                    //     draw_text: {
+                    //         color: #00f,
+                    //     }
+                    //     text: "Click me! I am a link",
+                    // }
                     
                 }
             }

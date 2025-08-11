@@ -10,7 +10,9 @@ use crate::{
     error::Error,
     get_get_mut, getter_setter_prop,
     prop::{
-        manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME}, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplyStateMapImpl, PropMapImpl
+        manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ApplyStateMapImpl,
     },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
     try_from_toml_item,
@@ -59,23 +61,6 @@ impl Prop for LabelProp {
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        // if let Some(basic_props) = map.get(&LabelState::Basic) {
-        //     let props = basic_props.clone();
-        //     // in label, do not need to handle theme
-        //     self.basic.sync(LabelState::Basic);
-        //     for (k, v) in &props {
-        //         self.basic.set_from_str(k, v, LabelState::Basic);
-        //     }
-        //     // disabled
-        //     let disabled_props = map
-        //         .get(&LabelState::Disabled)
-        //         .map_or_else(|| props, |apply_props| apply_props.diff(basic_props));
-
-        //     self.disabled.sync(LabelState::Disabled);
-        //     for (k, v) in &disabled_props {
-        //         self.disabled.set_from_str(k, v, LabelState::Disabled);
-        //     }
-        // }
         map.sync(
             &mut self.basic,
             LabelState::Basic,

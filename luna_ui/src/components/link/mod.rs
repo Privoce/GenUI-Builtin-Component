@@ -135,6 +135,8 @@ pub struct GLink {
     pub animation_spread: bool,
     #[live(true)]
     pub event_open: bool,
+    #[live]
+    pub grab_key_focus: bool,
 }
 
 impl WidgetNode for GLink {

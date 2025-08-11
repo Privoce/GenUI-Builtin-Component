@@ -4,15 +4,17 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
+    active_event, animation_open_then_redraw,
     components::{
         label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
         svg::{GSvg, SvgBasicProp},
+        tabbar::{TabbarItemClicked, TabbarItemEvent, TabbarItemHoverIn, TabbarItemHoverOut},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
     },
     error::Error,
-    lifecycle, play_animation,
+    event_option, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
@@ -116,6 +118,8 @@ pub struct GTabbarItem {
     defer_walks: DeferWalks,
     #[rust]
     pub state: TabbarItemState,
+    #[live]
+    pub value: String,
 }
 
 impl WidgetNode for GTabbarItem {
@@ -195,40 +199,6 @@ impl Widget for GTabbarItem {
         } else {
             self.handle_widget_event(cx, event, hit, area);
         }
-        // default_handle_animation!(self, cx, event);
-
-        // match event.hits(cx, self.area()) {
-        //     Hit::FingerDown(_) => {
-        //         if self.grab_key_focus {
-        //             cx.set_key_focus(self.area());
-        //         }
-        //         if !self.active {
-        //             // self.play_animation(cx, id!(hover.focus));
-        //             self.animate_focus_on(cx);
-        //         }
-        //     }
-        //     Hit::FingerHoverIn(e) => {
-        //         let _ = set_cursor(cx, self.cursor.as_ref());
-        //         if !self.active {
-        //             self.play_animation(cx, id!(hover.on));
-        //             self.active_hover_in(cx, e);
-        //         }
-        //     }
-        //     Hit::FingerHoverOut(_) => {
-        //         if !self.active {
-        //             self.play_animation(cx, id!(hover.off));
-        //         }
-        //     }
-        //     Hit::FingerUp(e) => {
-        //         if e.is_over {
-        //             if !self.active {
-        //                 self.active(cx);
-        //                 self.active_clicked(cx, e);
-        //             }
-        //         }
-        //     }
-        //     _ => (),
-        // }
     }
 }
 
@@ -318,7 +288,52 @@ impl Component for GTabbarItem {
         Ok(())
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {}
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+        animation_open_then_redraw!(self, cx, event);
+        match hit {
+            Hit::FingerDown(_) => {
+                if self.grab_key_focus {
+                    cx.set_key_focus(area);
+                }
+            }
+            Hit::FingerHoverIn(e) => {
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                if !self.active {
+                    self.switch_state_with_animation(cx, TabbarItemState::Hover);
+                    self.play_animation(cx, id!(hover.on));
+                }
+                self.active_hover_in(cx, e);
+            }
+            Hit::FingerHoverOut(e) => {
+                if !self.active {
+                    self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                    self.play_animation(cx, id!(hover.off));
+                }
+                self.active_hover_out(cx, e);
+            }
+            Hit::FingerUp(e) => {
+                if e.is_over {
+                    if e.has_hovers() {
+                        let (state_an, state) = if self.active {
+                            (id!(hover.off), TabbarItemState::Basic)
+                        } else {
+                            (id!(hover.active), TabbarItemState::Active)
+                        };
+                        self.active = !self.active;
+                        self.switch_state_with_animation(cx, state);
+                        self.play_animation(cx, state_an);
+                    } else {
+                        self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                        self.play_animation(cx, id!(hover.off));
+                    }
+                    self.active_clicked(cx, Some(e));
+                } else {
+                    self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                }
+            }
+            _ => {}
+        }
+    }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
         match hit {
@@ -533,4 +548,45 @@ impl Component for GTabbarItem {
     set_scope_path!();
     set_index!();
     lifecycle!();
+}
+
+impl GTabbarItem {
+    active_event! {
+        active_hover_in: TabbarItemEvent::HoverIn |meta: FingerHoverEvent| => TabbarItemHoverIn { meta },
+        active_hover_out: TabbarItemEvent::HoverOut |meta: FingerHoverEvent| => TabbarItemHoverOut { meta }
+    }
+    event_option! {
+        hover_in: TabbarItemEvent::HoverIn => TabbarItemHoverIn,
+        hover_out: TabbarItemEvent::HoverOut => TabbarItemHoverOut,
+        clicked: TabbarItemEvent::Clicked => TabbarItemClicked
+    }
+    pub fn active_clicked(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    TabbarItemEvent::Clicked(TabbarItemClicked {
+                        active: self.active,
+                        value: self.value.to_string(),
+                        meta,
+                    }),
+                );
+            });
+        }
+    }
+    pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
+        self.active = active;
+        let (state, hover_id) = match (active, init) {
+            (true, false) => (TabbarItemState::Active, Some(id!(hover.active))),
+            (true, true) => (TabbarItemState::Active, None),
+            (false, true) => (TabbarItemState::Basic, None),
+            (false, false) => (TabbarItemState::Basic, Some(id!(hover.off))),
+        };
+        self.switch_state(state);
+        if let Some(hover_id) = hover_id {
+            self.play_animation(cx, hover_id);
+        }
+        self.active_clicked(cx, None);
+    }
 }
