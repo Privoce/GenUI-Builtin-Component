@@ -12,6 +12,9 @@ pub const BACKGROUND_VISIBLE: &str = "background_visible";
 pub const BORDER_COLOR: &str = "border_color";
 pub const BORDER_WIDTH: &str = "border_width";
 pub const BORDER_RADIUS: &str = "border_radius";
+pub const UNDERLINE_COLOR: &str = "underline_color";
+pub const UNDERLINE_WIDTH: &str = "underline_width";
+pub const UNDERLINE_VISIBLE: &str = "underline_visible";
 // --- shadow ----------------------------------------------------
 pub const SHADOW_COLOR: &str = "shadow_color";
 pub const SPREAD_RADIUS: &str = "spread_radius";

@@ -10,83 +10,86 @@ use crate::{
     error::Error,
     get_get_mut, getter_setter_prop,
     prop::{
-        manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME}, traits::{FromLiveColor, FromLiveValue, NewFrom}, ApplyStateMapImpl, PropMapImpl
+        manuel::{
+            BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, HOVER, LINE_SPACING, MARGIN, PADDING, PRESSED,
+            THEME, UNDERLINE_COLOR, UNDERLINE_VISIBLE, UNDERLINE_WIDTH,
+        },
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ApplyStateMapImpl,
     },
-    themes::{Color, ColorFontConf, Theme, TomlValueTo},
+    state_colors,
+    themes::{Color, Theme, TomlValueTo},
     try_from_toml_item,
     utils::get_from_itable as get,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
 #[live_ignore]
-pub struct LabelProp {
-    #[live(LabelBasicProp::default())]
-    pub basic: LabelBasicProp,
-    #[live(LabelBasicProp::from_state(Theme::default(), LabelState::Disabled))]
-    pub disabled: LabelBasicProp,
+pub struct LinkProp {
+    #[live(LinkBasicProp::default())]
+    pub basic: LinkBasicProp,
+    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Hover))]
+    pub hover: LinkBasicProp,
+    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Pressed))]
+    pub pressed: LinkBasicProp,
+    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Disabled))]
+    pub disabled: LinkBasicProp,
 }
 
-impl Default for LabelProp {
+impl Default for LinkProp {
     fn default() -> Self {
         Self {
-            basic: LabelBasicProp::default(),
-            disabled: LabelBasicProp::default(),
+            basic: LinkBasicProp::default(),
+            hover: LinkBasicProp::from_state(Theme::default(), LinkState::Hover),
+            pressed: LinkBasicProp::from_state(Theme::default(), LinkState::Pressed),
+            disabled: LinkBasicProp::from_state(Theme::default(), LinkState::Disabled),
         }
     }
 }
 
 try_from_toml_item! {
-    LabelProp {
-        basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
-        disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
-    }, "[component.label] should be a table"
+    LinkProp {
+        basic => BASIC, LinkBasicProp::default(), |v| (v, LinkState::Basic).try_into(),
+        hover => HOVER, LinkBasicProp::from_state(Theme::default(), LinkState::Hover), |v| (v, LinkState::Hover).try_into(),
+        pressed => PRESSED, LinkBasicProp::from_state(Theme::default(), LinkState::Pressed), |v| (v, LinkState::Pressed).try_into(),
+        disabled => DISABLED, LinkBasicProp::from_state(Theme::default(), LinkState::Disabled), |v| (v, LinkState::Disabled).try_into()
+    }, "[component.link] should be a table"
 }
 
-impl Prop for LabelProp {
-    type State = LabelState;
-    type Basic = LabelBasicProp;
-
-    fn len() -> usize {
-        2 * LabelBasicProp::len()
-    }
+impl Prop for LinkProp {
+    type State = LinkState;
+    type Basic = LinkBasicProp;
 
     get_get_mut! {
-        LabelState::Basic => basic,
-        LabelState::Disabled => disabled
+        LinkState::Basic => basic,
+        LinkState::Hover => hover,
+        LinkState::Pressed => pressed,
+        LinkState::Disabled => disabled
+    }
+
+    fn len() -> usize {
+        2 * LinkBasicProp::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
     where
         Self::State: Eq + std::hash::Hash + Copy,
     {
-        // if let Some(basic_props) = map.get(&LabelState::Basic) {
-        //     let props = basic_props.clone();
-        //     // in label, do not need to handle theme
-        //     self.basic.sync(LabelState::Basic);
-        //     for (k, v) in &props {
-        //         self.basic.set_from_str(k, v, LabelState::Basic);
-        //     }
-        //     // disabled
-        //     let disabled_props = map
-        //         .get(&LabelState::Disabled)
-        //         .map_or_else(|| props, |apply_props| apply_props.diff(basic_props));
-
-        //     self.disabled.sync(LabelState::Disabled);
-        //     for (k, v) in &disabled_props {
-        //         self.disabled.set_from_str(k, v, LabelState::Disabled);
-        //     }
-        // }
         map.sync(
             &mut self.basic,
-            LabelState::Basic,
-            [(LabelState::Disabled, &mut self.disabled)],
+            LinkState::Basic,
+            [
+                (LinkState::Hover, &mut self.hover),
+                (LinkState::Pressed, &mut self.pressed),
+                (LinkState::Disabled, &mut self.disabled),
+            ],
         );
     }
 }
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct LabelBasicProp {
+pub struct LinkBasicProp {
     #[live]
     pub theme: Theme,
     #[live]
@@ -99,19 +102,23 @@ pub struct LabelBasicProp {
     pub margin: Margin,
     #[live(Padding::from_f64(0.0))]
     pub padding: Padding,
-    // #[live]
-    // pub align: Align,
+    #[live]
+    pub underline_visible: bool,
+    #[live]
+    pub underline_color: Vec4,
+    #[live(1.0)]
+    pub underline_width: f32,
     #[live(Flow::RightWrap)]
     pub flow: Flow,
 }
 
-impl Default for LabelBasicProp {
+impl Default for LinkBasicProp {
     fn default() -> Self {
-        Self::from_state(Theme::default(), LabelState::Basic)
+        Self::from_state(Theme::default(), LinkState::Basic)
     }
 }
 
-impl LabelBasicProp {
+impl LinkBasicProp {
     getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_color, set_color: color -> Vec4,
@@ -123,18 +130,18 @@ impl LabelBasicProp {
     }
 }
 
-impl BasicProp for LabelBasicProp {
-    type State = LabelState;
-    type Colors = Color;
+impl BasicProp for LinkBasicProp {
+    type State = LinkState;
+    type Colors = (Color, Color);
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue, _state: Self::State) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
             THEME => {
                 self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
             }
             COLOR => {
-                self.color = Vec4::from_live_color(value)
-                    .unwrap_or(ColorFontConf::from_key("primary").into());
+                let (color, _) = Self::state_colors(self.theme, state);
+                self.color = Vec4::from_live_color(value).unwrap_or(color.into());
             }
             FONT_SIZE => {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);
@@ -151,24 +158,40 @@ impl BasicProp for LabelBasicProp {
             FLOW => {
                 self.flow = Flow::from_live_value(value).unwrap_or(Flow::RightWrap);
             }
+            UNDERLINE_COLOR => {
+                let (_, underline_color) = Self::state_colors(self.theme, state);
+                self.underline_color =
+                    Vec4::from_live_color(value).unwrap_or(underline_color.into());
+            }
+            UNDERLINE_VISIBLE => {
+                self.underline_visible = bool::from_live_value(value).unwrap_or(true);
+            }
+            UNDERLINE_WIDTH => {
+                self.underline_width = f32::from_live_value(value).unwrap_or(1.0);
+            }
             _ => {}
         }
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        self.color = Self::state_colors(Theme::default(), state).into();
+        let (color, underline_color) = Self::state_colors(Theme::default(), state);
+        self.color = color.into();
+        self.underline_color = underline_color.into();
     }
 
     fn len() -> usize {
-        7
+        10
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let color = Self::state_colors(theme, state);
+        let (color, underline_color) = Self::state_colors(theme, state);
 
         Self {
             theme,
             color: color.into(),
+            underline_color: underline_color.into(),
+            underline_width: 1.0,
+            underline_visible: true,
             font_size: 12.0,
             line_spacing: 1.2,
             margin: Margin::from_f64(0.0),
@@ -177,11 +200,12 @@ impl BasicProp for LabelBasicProp {
         }
     }
 
-    fn state_colors(_theme: Theme, state: Self::State) -> Self::Colors {
-        match state {
-            LabelState::Basic => ColorFontConf::from_key("primary"),
-            LabelState::Disabled => ColorFontConf::from_key("disabled"),
-        }
+    state_colors! {
+        (color_level, underline_level),
+        LinkState::Basic => (400, 400),
+        LinkState::Hover => (300, 300),
+        LinkState::Pressed => (500, 500),
+        LinkState::Disabled => (200, 200)
     }
 
     fn live_props() -> LiveProps {
@@ -233,37 +257,37 @@ impl BasicProp for LabelBasicProp {
     }
 }
 
-impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
+impl TryFrom<(&Item, LinkState)> for LinkBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Item, LabelState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Item, LinkState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LabelProp should be a inline table".to_string(),
+            "LinkProp should be a inline table".to_string(),
         ))?;
 
         (inline_table, state).try_into()
     }
 }
 
-impl TryFrom<(&Value, LabelState)> for LabelBasicProp {
+impl TryFrom<(&Value, LinkState)> for LinkBasicProp {
     type Error = Error;
 
-    fn try_from((value, state): (&Value, LabelState)) -> Result<Self, Self::Error> {
+    fn try_from((value, state): (&Value, LinkState)) -> Result<Self, Self::Error> {
         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LabelProp should be a inline table".to_string(),
+            "LinkProp should be a inline table".to_string(),
         ))?;
 
         (inline_table, state).try_into()
     }
 }
 
-impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
+impl TryFrom<(&InlineTable, LinkState)> for LinkBasicProp {
     type Error = Error;
 
-    fn try_from((inline_table, state): (&InlineTable, LabelState)) -> Result<Self, Self::Error> {
+    fn try_from((inline_table, state): (&InlineTable, LinkState)) -> Result<Self, Self::Error> {
         let theme = Theme::default();
         let theme = get(inline_table, THEME, || Ok(theme), |value| value.try_into())?;
-        let color = Self::state_colors(theme, state);
+        let (color, underline_color) = Self::state_colors(theme, state);
         let color = get(inline_table, COLOR, || Ok(color), |value| value.try_into())?.into();
         let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
         let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.2), |item| item.to_f32())?;
@@ -293,6 +317,28 @@ impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
             |item| item.to_flow(),
         )?;
 
+        let underline_visible = get(
+            inline_table,
+            UNDERLINE_VISIBLE,
+            || Ok(true),
+            |item| item.to_bool(),
+        )?;
+
+        let underline_width = get(
+            inline_table,
+            UNDERLINE_WIDTH,
+            || Ok(1.0),
+            |item| item.to_f32(),
+        )?;
+
+        let underline_color = get(
+            inline_table,
+            UNDERLINE_COLOR,
+            || Ok(underline_color),
+            |value| value.try_into(),
+        )?
+        .into();
+
         Ok(Self {
             theme,
             color,
@@ -301,31 +347,25 @@ impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
             margin,
             padding,
             flow,
+            underline_visible,
+            underline_color,
+            underline_width,
         })
     }
 }
 
 component_state! {
-    LabelState {
+    LinkState {
         Basic => BASIC,
+        Hover => HOVER,
+        Pressed => PRESSED,
         Disabled => DISABLED
     },
-    _ => LabelState::Basic
+    _ => LinkState::Basic
 }
 
-impl ComponentState for LabelState {
+impl ComponentState for LinkState {
     fn is_disabled(&self) -> bool {
-        matches!(self, LabelState::Disabled)
+        matches!(self, LinkState::Disabled)
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Live, LiveHook, Default)]
-#[live_ignore]
-pub enum FontMode {
-    #[pick]
-    #[default]
-    Regular,
-    Bold,
-    Italic,
-    BoldItalic,
 }

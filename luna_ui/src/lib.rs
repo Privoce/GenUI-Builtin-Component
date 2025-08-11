@@ -43,4 +43,5 @@ pub struct ComponentAnInit {
     image: bool,
     tabbar_item: bool,
     tag: bool,
+    link: bool,
 }

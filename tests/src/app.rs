@@ -389,11 +389,11 @@ live_design! {
                     //         text: "Wind"
                     //     }
                     // }
-                    <GTag> {
-                        text: <GLabel>{
-                            text: "tag"
-                        }
-                    }
+                    // <GTag> {
+                    //     text: <GLabel>{
+                    //         text: "tag"
+                    //     }
+                    // }
 
                 }
             }
