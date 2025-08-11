@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::shader::draw_view::DrawView;
+use crate::{components::link::LinkBasicProp, prop::traits::ToFloat, shader::draw_view::DrawView};
 
 live_design! {
     use link::shaders::*;
@@ -42,6 +42,14 @@ live_design! {
                     }
                 }
             }
+            // - [draw underline] -----------------------------------------------------------------
+            if self.underline_visible == 1.0 {
+                let offset = self.underline_width + 1.0;
+                sdf.move_to(0., self.rect_size.y - offset);
+                sdf.line_to(self.rect_size.x, self.rect_size.y - offset);
+                sdf.stroke(self.underline_color, self.underline_width);
+                sdf.close_path();
+            }
 
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
@@ -66,14 +74,6 @@ live_design! {
                 sdf.stroke(self.border_color, border_width);
             }
 
-            // - [draw underline] -----------------------------------------------------------------
-            if self.underline_visible == 1.0 {
-                let offset = self.underline_width;
-                sdf.move_to(0., self.rect_size.y - offset);
-                sdf.line_to(self.rect_size.x, self.rect_size.y - offset);
-                sdf.stroke(self.underline_color, self.underline_width);
-            }
-
             return sdf.result;
         }
     }
@@ -90,4 +90,24 @@ pub struct DrawLink {
     pub underline_color: Vec4,
     #[live(1.0)]
     pub underline_width: f32,
+}
+
+impl DrawLink {
+    pub fn merge(&mut self, other: &LinkBasicProp) {
+        self.underline_color = other.underline_color;
+        self.underline_visible = other.underline_visible.to_f32();
+        self.underline_width = other.underline_width;
+        self.background_color = other.background_color;
+        self.border_color = other.border_color;
+        self.border_width = other.border_width;
+        self.border_radius = other.border_radius.into();
+        self.shadow_color = other.shadow_color.into();
+        self.spread_radius = other.spread_radius;
+        self.blur_radius = other.blur_radius;
+        self.shadow_offset = other.shadow_offset;
+        self.background_visible = other.background_visible.to_f32();
+        self.rotation = other.rotation;
+        self.scale = other.scale;
+        // self.draw_super.merge(&other.into());
+    }
 }

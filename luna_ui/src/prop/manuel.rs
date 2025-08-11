@@ -82,6 +82,7 @@ pub const POPUP_CONTAINER: &str = "popup_container";
 pub const TABBAR_ITEM: &str = "tabbar_item";
 pub const MENU: &str = "menu";
 pub const TABBAR: &str = "tabbar";
+pub const LINK: &str = "link";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";
