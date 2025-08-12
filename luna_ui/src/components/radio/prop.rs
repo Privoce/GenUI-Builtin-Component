@@ -361,7 +361,7 @@ impl BasicProp for RadioPartProp {
     type Colors = (Color, Color, Color);
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (backgroud_color, stroke_color, border_color) = Self::state_colors(theme, state);
+        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
@@ -370,7 +370,7 @@ impl BasicProp for RadioPartProp {
         Self {
             theme,
             size: 16.0,
-            background_color: backgroud_color.into(),
+            background_color: background_color.into(),
             stroke_color: stroke_color.into(),
             border_color: border_color.into(),
             background_visible: true,

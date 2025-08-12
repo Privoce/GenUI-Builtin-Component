@@ -1,17 +1,25 @@
 pub mod event;
 pub mod page;
+mod prop;
+mod schema;
 
-
-use crate::{
-    components::view::GViewWidgetExt,
-    shader::manual::RouterIndicatorMode,
-    utils::{HeapLiveIdPathExp, LiveIdExp},
-};
 use event::RouterEvent;
 use makepad_widgets::*;
 use page::GPageWidgetRefExt;
+pub use prop::*;
+// use types::{NavMode, PageType, RouterStack, RouterStackItem};
 
-use types::{NavMode, PageType, RouterStack, RouterStackItem};
+use crate::{
+    components::{
+        lifecycle::LifeCycle,
+        router::schema::{PageType, RouterStack, RouterStackItem},
+        traits::Component, view::GViewWidgetExt,
+    },
+    error::Error,
+    inherits_view_widget_node, lifecycle, play_animation,
+    prop::{traits::{HeapLiveIdPathExp, LiveIdExp}, NavMode, RouterIndicatorMode},
+    set_index, set_scope_path, sync,
+};
 
 use super::{
     tabbar::GTabbarWidgetExt,
@@ -19,12 +27,12 @@ use super::{
 };
 
 live_design! {
-    link gen_base;
+    link genui_basic;
 
     pub GRouterBase = {{GRouter}}{}
 }
 
-#[derive(Live, Widget)]
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GRouter {
     #[deref]
     pub deref_widget: GView,
@@ -52,6 +60,8 @@ pub struct GRouter {
 
 impl LiveHook for GRouter {}
 
+inherits_view_widget_node!(GRouter);
+
 impl Widget for GRouter {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         // self.scope_path = scope.path.clone();
@@ -67,6 +77,47 @@ impl Widget for GRouter {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         self.deref_widget.handle_event(cx, event, scope);
     }
+}
+
+impl Component for GRouter {
+    type Error = Error;
+
+    type State = RouterState;
+
+    fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
+        self.deref_widget.merge_conf_prop(cx);
+    }
+
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        self.deref_widget.render(cx)
+    }
+
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+        ()
+    }
+
+    fn switch_state(&mut self, state: Self::State) -> () {
+        self.state = state.into();
+    }
+
+    fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
+        self.deref_widget
+            .switch_state_with_animation(cx, state.into());
+    }
+
+    fn focus_sync(&mut self) -> () {
+        self.deref_widget.focus_sync();
+    }
+
+    fn set_animation(&mut self, cx: &mut Cx) -> () {
+        self.deref_widget.set_animation(cx);
+    }
+
+    sync!();
+    play_animation!();
+    lifecycle!();
+    set_index!();
+    set_scope_path!();
 }
 
 impl GRouter {
@@ -106,7 +157,7 @@ impl GRouter {
             self.gtabbar(bind_id.as_slice())
                 .borrow_mut()
                 .map(|mut tabbar| {
-                    tabbar.set_selected(cx, index);
+                    tabbar.set_active(cx, index);
                     return Some(());
                 });
         }
@@ -459,38 +510,38 @@ impl GRouter {
     }
 }
 
-impl GRouterRef {
-    pub fn nav_to(&self, cx: &mut Cx, path: &[LiveId]) {
-        self.borrow_mut().map(|mut router| {
-            router.nav_to(cx, path);
-        });
-    }
-    pub fn nav_back(&self, cx: &mut Cx) {
-        self.borrow_mut().map(|mut router| {
-            router.nav_back(cx);
-        });
-    }
-    pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
-        self.borrow_mut().map(|mut router| {
-            router.handle_nav_events(cx, actions);
-        });
-    }
-}
+// impl GRouterRef {
+//     pub fn nav_to(&self, cx: &mut Cx, path: &[LiveId]) {
+//         self.borrow_mut().map(|mut router| {
+//             router.nav_to(cx, path);
+//         });
+//     }
+//     pub fn nav_back(&self, cx: &mut Cx) {
+//         self.borrow_mut().map(|mut router| {
+//             router.nav_back(cx);
+//         });
+//     }
+//     pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
+//         self.borrow_mut().map(|mut router| {
+//             router.handle_nav_events(cx, actions);
+//         });
+//     }
+// }
 
-#[macro_export]
-macro_rules! nav_to {
-    (
-        $path: tt, $cx: expr, $uid: expr, $scope: expr
-    ) => {
-        gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
-    };
-}
+// #[macro_export]
+// macro_rules! nav_to {
+//     (
+//         $path: tt, $cx: expr, $uid: expr, $scope: expr
+//     ) => {
+//         gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
+//     };
+// }
 
-#[macro_export]
-macro_rules! nav_back {
-    (
-        $cx: expr, $uid: expr, $scope: expr
-    ) => {
-        gen_components::GRouter::nav_back_path($cx, $uid, $scope);
-    };
-}
+// #[macro_export]
+// macro_rules! nav_back {
+//     (
+//         $cx: expr, $uid: expr, $scope: expr
+//     ) => {
+//         gen_components::GRouter::nav_back_path($cx, $uid, $scope);
+//     };
+// }

@@ -1,4 +1,4 @@
-use makepad_widgets::{MouseCursor};
+use makepad_widgets::MouseCursor;
 
 use crate::prop::traits::FromLiveValue;
 
@@ -7,16 +7,16 @@ use super::ToCursor;
 impl ToCursor for MouseCursor {
     fn from_str(s: &str) -> Self {
         match s {
-            "default" => MouseCursor::Default,
-            "hand" => MouseCursor::Hand,
-            "text" => MouseCursor::Text,
-            "move" => MouseCursor::Move,
-            "wait" => MouseCursor::Wait,
-            "help" => MouseCursor::Help,
-            "not-allowed" => MouseCursor::NotAllowed,
-            "crosshair" => MouseCursor::Crosshair,
-            "grab" => MouseCursor::Grab,
-            "grabbing" => MouseCursor::Grabbing,
+            "default" | "Default" => MouseCursor::Default,
+            "hand" | "Hand" => MouseCursor::Hand,
+            "text" | "Text" => MouseCursor::Text,
+            "move" | "Move" => MouseCursor::Move,
+            "wait" | "Wait" => MouseCursor::Wait,
+            "help" | "Help" => MouseCursor::Help,
+            "not-allowed" | "NotAllowed" => MouseCursor::NotAllowed,
+            "crosshair" | "Crosshair" => MouseCursor::Crosshair,
+            "grab" | "Grab" => MouseCursor::Grab,
+            "grabbing" | "Grabbing" => MouseCursor::Grabbing,
             _ => MouseCursor::Default,
         }
     }

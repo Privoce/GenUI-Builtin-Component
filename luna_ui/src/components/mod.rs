@@ -2,7 +2,9 @@ use makepad_widgets::*;
 
 use crate::{
     component,
-    components::{button::GButton, card::GCard, label::GLabel, radio::GRadio, svg::GSvg, view::GView},
+    components::{
+        button::GButton, card::GCard, label::GLabel, radio::GRadio, svg::GSvg, view::GView,
+    },
 };
 
 pub mod button;
@@ -14,21 +16,21 @@ pub mod divider;
 pub mod drop_down;
 pub mod image;
 pub mod label;
+pub mod lifecycle;
 pub mod link;
+pub mod live_props;
 pub mod loading;
+pub mod menu;
 pub mod popup;
 pub mod radio;
+pub mod router;
 pub mod select;
 pub mod svg;
 pub mod switch;
-pub mod tag;
-pub mod view;
-// pub mod router;
 pub mod tabbar;
-pub mod menu;
-pub mod live_props;
-pub mod lifecycle;
+pub mod tag;
 pub mod traits;
+pub mod view;
 
 use traits::Component;
 
@@ -45,6 +47,26 @@ live_design! {
     pub GView = <GViewBase>{
         animation_open: false,
         event_open: false,
+    }
+
+    pub GHLayout = <GView> {
+        prop: {
+            basic: {
+                height: Fill,
+                width: Fill,
+                flow: Right,
+            }
+        }
+    }
+
+    pub GVLayout = <GView> {
+        prop: {
+            basic: {
+                height: Fill,
+                width: Fill,
+                flow: Down,
+            }
+        }
     }
 
     pub GButton = <GButtonBase>{
@@ -237,6 +259,71 @@ live_design! {
     pub GTag = <GTagBase> {}
 
     pub GLink = <GLinkBase> {}
+
+    pub GPage = <GPageBase> {}
+
+    pub GNavPage = <GPage> {
+        header = <GView> {
+            prop: {
+                basic: {
+                    height: Fit,
+                    width: Fill,
+                    flow: Right,
+                    background_visible: false,
+                    border_radius: {left: 0.0, top: 0.0, right: 0.0, bottom: 0.0},
+                    margin: {left: 0.0, top: 0.0, right: 0.0, bottom: 0.0},
+                    padding: {left: 0.0, top: 0.0, right: 0.0, bottom: 0.0},
+                }
+            }
+            back_icon = <GSvg> {
+                prop: {
+                    basic: {
+                        svg: {
+                            height: 18.0,
+                            width: Fit,
+                        },
+                        container: {
+                            height: 24.0,
+                            width: 24.0,
+                            cursor: Hand
+                        }
+                    }
+                }
+                src: dep("crate://self/resources/icons/svg/left.svg")
+            }
+            title_wrap = <GView> {
+                prop: {
+                    basic: {
+                        height: 24.0,
+                        width: Fill,
+                        margin: {left: 0.0, top: 0.0, right: 8.0, bottom: 0.0},
+                        align: {x: 0.5, y: 0.5},
+                        padding: {left: 0.0, top: 0.0, right: 8.0, bottom: 0.0},
+                    }
+                },
+                title = <GLabel> {
+                    text: "Page Title",
+                    mode: Bold
+                }
+            }
+            extra_icon = <GSvg> {
+                prop: {
+                    basic: {
+                        svg: {
+                            height: 18.0,
+                            width: Fit,
+                        },
+                        container: {
+                            height: 24.0,
+                            width: 24.0,
+                            cursor: Hand
+                        }
+                    }
+                }
+                src: dep("crate://self/resources/icons/svg/more.svg")
+            }
+        }
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -260,6 +347,7 @@ pub fn components_register(cx: &mut Cx) {
     // tabbar::virt::live_design(cx); TODO: not compeleted yet
     tag::live_design(cx);
     link::live_design(cx);
+    router::page::live_design(cx);
 }
 
 component! {

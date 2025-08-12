@@ -38,6 +38,12 @@ macro_rules! inherits_view_livehook {
         fn after_update_from_doc(&mut self, cx: &mut Cx) {
             self.deref_widget.after_update_from_doc(cx);
         }
+        fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+            self.deref_widget.after_apply_from_doc(cx);
+        }
+        fn after_new_from_doc(&mut self, cx: &mut Cx) {
+            self.deref_widget.after_new_from_doc(cx);
+        }
         fn apply_value_instance(
             &mut self,
             cx: &mut Cx,

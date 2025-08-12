@@ -27,6 +27,7 @@ macro_rules! active_event{
     };
 }
 
+/// ```
 /// impl GBreadCrumbItem {
 ///     event_option!{
 ///         clicked : GBreadCrumbItemEvent => GBreadCrumbEventItemParam,

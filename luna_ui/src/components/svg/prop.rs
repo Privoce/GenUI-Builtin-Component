@@ -101,9 +101,9 @@ try_from_toml_item! {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct SvgBasicProp {
-    #[live]
+    #[live(SvgPartProp::default())]
     pub svg: SvgPartProp,
-    #[live]
+    #[live(Self::default_container(Theme::default(), SvgState::Basic))]
     pub container: ViewBasicProp,
 }
 
@@ -124,9 +124,10 @@ impl SlotBasicProp for SvgBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            SvgPart::Container => self
-                .container
-                .set_from_str(key, &value.into(), state.into()),
+            SvgPart::Container => {
+                self.container
+                    .set_from_str(key, &value.into(), state.into());
+            }
             SvgPart::Svg => self.svg.set_from_str(key, &value.into(), state),
         }
     }
@@ -239,6 +240,8 @@ impl SvgBasicProp {
         container.set_width(Size::Fit);
         container.set_height(Size::Fit);
         container.set_background_visible(false);
+        container.set_padding(Padding::from_f64(0.0));
+        container.set_margin(Margin::from_f64(0.0));
         container
     }
     pub fn default_svg(theme: Theme, state: SvgState) -> SvgPartProp {

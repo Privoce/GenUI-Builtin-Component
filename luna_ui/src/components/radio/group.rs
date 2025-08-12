@@ -90,12 +90,6 @@ impl LiveHook for GRadioGroup {
             self.find_active();
         }
     }
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_apply_from_doc(cx);
-    }
-    fn after_new_from_doc(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_new_from_doc(cx);
-    }
     inherits_view_livehook!();
 }
 

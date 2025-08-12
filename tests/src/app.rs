@@ -266,23 +266,34 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    // <GSvg> {
+                    // <GView>{
                     //     prop: {
                     //         basic: {
-                    //             container: {background_visible: true, theme: Primary}
-                    //             svg: {height: 36.0, width: 36.0},
+                    //             height: 100.0,
+                    //             width: 100.0,
+                    //             background_visible: true,
+                    //             align: {x: 0.5, y: 0.5},
+                    //             theme: Error,
                     //         }
                     //     }
-                    //     src: dep("crate://self/resources/heavy.svg"),
+                    //     <GSvg> {
+                    //         prop: {
+                    //             basic: {
+                    //                 container: {background_visible: true, theme: Primary}
+                    //                 svg: {height: 36.0, width: 36.0},
+                    //             }
+                    //         }
+                    //         src: dep("crate://self/resources/heavy.svg"),
+                    //     }
                     // }
                     // <GSvg> {
                     //     prop: {
                     //         basic: {
-                    //             container: {background_visible: true, theme: Primary}
+                    //             container: {background_visible: true, theme: Primary, cursor: Hand}
                     //             svg: {height: 36.0, width: 36.0},
                     //         }
                     //     },
-                    //     disabled: true,
+                    //     // disabled: true,
                     //     src: dep("crate://self/resources/rain.svg"),
                     // }
                     // <GImage> {
@@ -454,6 +465,17 @@ live_design! {
                     //         }
                     //     ]
                     // }
+                    <GNavPage> {
+                        prop: {
+                            basic: {
+                                height: 300.0,
+                                width: 300.0,
+                                background_visible: true,
+                                theme: Info,
+                            }
+                        }
+                        <GButton>{}
+                    }
                 }
             }
         }

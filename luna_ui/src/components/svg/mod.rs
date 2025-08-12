@@ -11,7 +11,7 @@ use crate::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
-    }, error::Error, event_option, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, makepad_derive_widget::*, makepad_draw::*, play_animation, prop::{
+    }, error::Error, event_option, event_option_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, makepad_derive_widget::*, makepad_draw::*, play_animation, prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
         ApplySlotMap,
@@ -159,12 +159,13 @@ impl WidgetNode for GSvg {
     }
 
     fn area(&self) -> Area {
-        self.draw_svg.area
+        self.draw_svg_container.area
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
         let _ = self.render(cx);
         self.draw_svg.redraw(cx);
+        self.draw_svg_container.redraw(cx);
     }
 
     fn state(&self) -> String {
@@ -253,8 +254,8 @@ impl Component for GSvg {
                 hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
                 self.switch_state_with_animation(cx, SvgState::Hover);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
                 hit_hover_in!(self, cx, e);
             }
             Hit::FingerHoverOut(e) => {
@@ -300,6 +301,7 @@ impl Component for GSvg {
         }
         self.switch_state(state);
         self.set_animation(cx);
+        self.redraw(cx);
     }
 
     fn focus_sync(&mut self) -> () {
@@ -521,5 +523,15 @@ impl GSvg {
         finger_up: SvgEvent::FingerUp => SvgFingerUp,
         finger_down: SvgEvent::FingerDown => SvgFingerDown,
         clicked: SvgEvent::Clicked => SvgClicked
+    }
+}
+
+impl GSvgRef {
+    event_option_ref!{
+        hover_in => SvgHoverIn,
+        hover_out => SvgHoverOut,
+        finger_up => SvgFingerUp,
+        finger_down => SvgFingerDown,
+        clicked => SvgClicked
     }
 }

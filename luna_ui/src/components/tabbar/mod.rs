@@ -1,18 +1,18 @@
 mod event;
-mod prop;
 pub mod item;
+mod prop;
 // pub mod virt;
 mod schema;
 
-pub use schema::*;
-pub use prop::*;
-use item::*;
-pub use event::*;
 use crate::{
-    components::{ view::GView},
-    inherits_view_livehook, inherits_view_widget_node,
+    components::view::GView, event_option, event_option_ref, inherits_view_livehook,
+    inherits_view_widget_node,
 };
+pub use event::*;
+use item::*;
 use makepad_widgets::*;
+pub use prop::*;
+pub use schema::*;
 
 live_design! {
     link genui_basic;
@@ -98,12 +98,6 @@ impl LiveHook for GTabbar {
             self.find_active();
         }
     }
-    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_apply_from_doc(cx);
-    }
-    fn after_new_from_doc(&mut self, cx: &mut Cx) {
-        self.deref_widget.after_new_from_doc(cx);
-    }
     inherits_view_livehook!();
 }
 
@@ -162,5 +156,17 @@ impl GTabbar {
                     panic!("GTabbar only allows GTabbarItem as child!")
                 }
             });
+    }
+}
+
+impl GTabbar {
+    event_option! {
+        changed: TabbarEvent::Changed => TabbarChanged
+    }
+}
+
+impl GTabbarRef {
+    event_option_ref! {
+        changed => TabbarChanged
     }
 }

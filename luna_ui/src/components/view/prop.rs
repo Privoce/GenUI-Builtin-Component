@@ -108,7 +108,7 @@ pub struct ViewBasicProp {
     pub rotation: f32,
     #[live(1.0)]
     pub scale: f32,
-    #[live(Padding::from_f64(6.0))]
+    #[live(Padding::from_f64(12.0))]
     pub padding: Padding,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
@@ -185,7 +185,7 @@ impl BasicProp for ViewBasicProp {
                 self.scale = f32::from_live_value(value).unwrap_or(1.0);
             }
             PADDING => {
-                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(6.0));
+                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(12.0));
             }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
@@ -255,7 +255,7 @@ impl BasicProp for ViewBasicProp {
             background_visible: false,
             rotation: 0.0,
             scale: 1.0,
-            padding: Padding::from_f64(6.0),
+            padding: Padding::from_f64(12.0),
             margin: Margin::from_f64(0.0),
             clip_x: false,
             clip_y: false,
@@ -445,7 +445,7 @@ impl TryFrom<(&InlineTable, ViewState)> for ViewBasicProp {
 
         let rotation = get_from_itable(inline_table, ROTATION, || Ok(0.0), |v| v.to_f32())?;
         let scale = get_from_itable(inline_table, SCALE, || Ok(1.0), |v| v.to_f32())?;
-        let padding = Padding::from_f64(6.0);
+        let padding = Padding::from_f64(12.0);
         let padding = get_from_itable(
             inline_table,
             PADDING,

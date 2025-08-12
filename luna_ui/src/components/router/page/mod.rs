@@ -1,28 +1,32 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::{icon::GIconWidgetExt, view::GView},
-    utils::LiveIdExp,
+    components::{
+         router::event::RouterEvent, svg::GSvgWidgetExt, traits::Prop, view::GView,
+    },
+    inherits_view_livehook, inherits_view_widget_node,
 };
 
-use super::{event::GRouterEvent, GRouter};
-
 live_design! {
-    link gen_base;
+    link genui_basic;
 
     pub GPageBase = {{GPage}}{}
 }
 
-#[derive(Live, Widget)]
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GPage {
     #[deref]
     pub deref_widget: GView,
 }
 
+inherits_view_widget_node!(GPage);
+
 impl LiveHook for GPage {
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
     }
+
+    inherits_view_livehook!();
 }
 
 impl Widget for GPage {
@@ -34,34 +38,25 @@ impl Widget for GPage {
 
         for action in &actions {
             if let Some(action) = action.as_widget_action() {
-                match action.cast::<GRouterEvent>() {
-                    GRouterEvent::NavTo(path) => {
-                        GRouter::nav_to_path(cx, self.widget_uid(), scope, path.as_slice());
+                match action.cast::<RouterEvent>() {
+                    RouterEvent::NavTo(path) => {
+                        // GRouter::nav_to_path(cx, self.widget_uid(), scope, path.as_slice());
                     }
-                    GRouterEvent::NavBack(_) => {
-                        GRouter::nav_back_path(cx, self.widget_uid(), scope);
+                    RouterEvent::NavBack(_) => {
+                        // GRouter::nav_back_path(cx, self.widget_uid(), scope);
                     }
-                    GRouterEvent::None => (),
+                    RouterEvent::None => (),
                 }
             }
         }
 
-        if self.gicon(id!(back_wrap.back)).clicked(&actions).is_some() {
+        if self.gsvg(id!(back_icon)).clicked(&actions).is_some() {
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
-                GRouterEvent::NavBack(scope.path.clone().last()),
+                RouterEvent::NavBack(scope.path.clone().last()),
             );
         }
-    }
-}
-
-impl GPage {
-    pub fn redraw(&mut self, cx: &mut Cx) {
-        self.deref_widget.redraw(cx);
-    }
-    pub fn render(&mut self, cx: &mut Cx) -> Result<(), Box<dyn std::error::Error>> {
-        self.deref_widget.render(cx)
     }
 }
 

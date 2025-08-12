@@ -134,7 +134,7 @@ pub struct GView {
     #[rust]
     pub lifecycle: LifeCycle,
     #[rust]
-    index: usize,
+    pub index: usize,
     #[live(true)]
     pub sync: bool,
     #[rust]
