@@ -228,6 +228,12 @@ live_design! {
 
     pub GTabbarItem = <GTabbarItemBase> {}
 
+    pub GTabbar = <GTabbarBase> {}
+
+    // pub GVTabbar = <GVTabbarBase> {
+    //     item: <GTabbarItem> {}
+    // }
+
     pub GTag = <GTagBase> {}
 
     pub GLink = <GLinkBase> {}
@@ -249,7 +255,9 @@ pub fn components_register(cx: &mut Cx) {
     popup::live_design(cx);
     popup::container::live_design(cx);
     drop_down::live_design(cx);
+    tabbar::live_design(cx);
     tabbar::item::live_design(cx);
+    // tabbar::virt::live_design(cx); TODO: not compeleted yet
     tag::live_design(cx);
     link::live_design(cx);
 }

@@ -26,16 +26,17 @@ pub struct TabbarItemClicked {
 }
 
 #[derive(Debug, Clone, DefaultNone)]
-pub enum TabbarItemGroupEvent {
-    Changed(TabbarItemChanged),
+pub enum TabbarEvent {
+    Changed(TabbarChanged),
     None,
 }
 
+
 #[derive(Clone, Debug)]
-pub struct TabbarItemChanged {
+pub struct TabbarChanged {
     pub meta: Option<FingerUpEvent>,
-    /// The index of the active checkbox
-    pub index: Vec<i32>,
-    /// The value of the active checkbox.
-    pub value: Vec<String>,
+    /// The index of the active radio.
+    pub index: i32,
+    /// The value of the active radio.
+    pub value: Option<String>,
 }

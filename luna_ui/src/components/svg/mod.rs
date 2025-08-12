@@ -1,8 +1,10 @@
 mod event;
 mod prop;
+mod schema;
 
 pub use event::*;
 pub use prop::*;
+pub use schema::*;
 
 use crate::{
     active_event, animation_open_then_redraw, components::{

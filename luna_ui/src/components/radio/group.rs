@@ -1,4 +1,4 @@
-use super::event::{RadioChanged, RadioGroupEvent};
+use super::event::{RadioGroupChanged, RadioGroupEvent};
 use crate::{
     components::{radio::GRadioWidgetRefExt, view::GView},
     inherits_view_livehook, inherits_view_widget_node,
@@ -71,7 +71,7 @@ impl Widget for GRadioGroup {
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
-                RadioGroupEvent::Changed(RadioChanged {
+                RadioGroupEvent::Changed(RadioGroupChanged {
                     meta: active_event,
                     value: active_value,
                     index: active_index.unwrap() as i32,

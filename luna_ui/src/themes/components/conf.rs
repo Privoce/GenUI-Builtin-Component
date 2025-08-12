@@ -11,11 +11,12 @@ use crate::components::radio::RadioProp;
 use crate::components::svg::SvgProp;
 use crate::components::switch::SwitchProp;
 use crate::components::tabbar::item::TabbarItemProp;
+use crate::components::tabbar::TabbarProp;
 use crate::components::tag::TagProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
 use crate::prop::manuel::{
-    BUTTON, CARD, CHECKBOX, DIVIDER, IMAGE, LABEL, POPUP, POPUP_CONTAINER, RADIO, SVG, SWITCH, TABBAR_ITEM, TAG, VIEW, LINK,
+    BUTTON, CARD, CHECKBOX, DIVIDER, IMAGE, LABEL, LINK, POPUP, POPUP_CONTAINER, RADIO, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW
 };
 use crate::try_from_toml_item;
 
@@ -33,6 +34,7 @@ pub struct ComponentsConf {
     pub image: ImageProp,
     pub popup: PopupProp,
     pub popup_container: PopupContainerProp,
+    pub tabbar: TabbarProp,
     pub tabbar_item: TabbarItemProp,
     pub tag: TagProp,
     pub link: LinkProp
@@ -52,6 +54,7 @@ try_from_toml_item! {
         image => IMAGE, ImageProp::default(), |item| item.try_into(),
         popup => POPUP, PopupProp::default(), |item| item.try_into(),
         popup_container => POPUP_CONTAINER, PopupContainerProp::default(), |item| item.try_into(),
+        tabbar => TABBAR, TabbarProp::default(), |item| item.try_into(),
         tabbar_item => TABBAR_ITEM, TabbarItemProp::default(), |item| item.try_into(),
         tag => TAG, TagProp::default(), |item| item.try_into(),
         link => LINK, LinkProp::default(), |item| item.try_into()

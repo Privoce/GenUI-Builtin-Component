@@ -1,175 +1,166 @@
 mod event;
+mod prop;
 pub mod item;
+// pub mod virt;
+mod schema;
 
-
+pub use schema::*;
+pub use prop::*;
 use item::*;
 pub use event::*;
+use crate::{
+    components::{ view::GView},
+    inherits_view_livehook, inherits_view_widget_node,
+};
+use makepad_widgets::*;
 
-// use makepad_widgets::*;
+live_design! {
+    link genui_basic;
 
-// use crate::{default_handle_animation, event_option, ref_event_option, set_event};
+    pub GTabbarBase = {{GTabbar}} {
+        prop: {
+            basic: {
+                height: Fit,
+                width: Fit,
+                flow: Right,
+                align: {
+                    x: 0.5,
+                    y: 0.5,
+                },
+                spacing: 8.0,
+                background_visible: false,
+            }
+        }
+    }
+}
 
-// use super::view::GView;
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
+pub struct GTabbar {
+    #[deref]
+    pub deref_widget: GView,
+    #[live]
+    pub active: Option<String>,
+}
 
-// live_design! {
-//     link gen_base;
+inherits_view_widget_node!(GTabbar);
 
-//     pub GTabbarBase = {{GTabbar}}{
-//         height: 42.0,
-//         width: Fill,
-//         align: {
-//             x: 0.5,
-//             y: 0.5,
-//         },
-//         spacing: 0.0,
-//         padding: {
-//             left: 8.0,
-//             right: 8.0
-//         },
-//         border_radius: 0.0,
-//     }
-// }
+impl Widget for GTabbar {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        self.deref_widget.draw_walk(cx, scope, walk)
+    }
+    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
+        if !self.visible() {
+            return;
+        }
+        if self.animator_handle_event(cx, event).must_redraw() {
+            self.redraw(cx);
+        };
+        let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
 
-// #[derive(Live, Widget)]
-// pub struct GTabbar {
-//     #[deref]
-//     pub deref_widget: GView,
-//     #[live(-1)]
-//     pub selected: i32,
-// }
+        let mut active_index = None;
+        let mut active_value = None;
+        let mut active_event = None;
+        for (index, (_id, child)) in self.children.iter().enumerate() {
+            let _ = child.as_gtabbar_item().borrow().map(|radio| {
+                if let Some(param) = radio.clicked(&actions) {
+                    if param.active && active_index.is_none() && active_event.is_none() {
+                        active_value.replace(param.value);
+                        active_index = Some(index);
+                        active_event = param.meta;
+                    }
+                }
+            });
+            if active_index.is_some() {
+                break;
+            }
+        }
+        if active_index.is_some() && active_value.is_some() {
+            let _ = self.toggle(cx, active_value.clone(), false);
+            cx.widget_action(
+                self.widget_uid(),
+                &scope.path,
+                TabbarEvent::Changed(TabbarChanged {
+                    meta: active_event,
+                    value: active_value,
+                    index: active_index.unwrap() as i32,
+                }),
+            );
+        }
+    }
+}
 
-// impl Widget for GTabbar {
-//     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-//         let _ = self.deref_widget.draw_walk(cx, scope, walk);
-//         DrawStep::done()
-//     }
-//     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-//         default_handle_animation!(self, cx, event);
-//         let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
-//         let _ = self.item_action(cx, scope, &actions).map(|_| {
-//             return;
-//         });
-//     }
-// }
+impl LiveHook for GTabbar {
+    fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.deref_widget.after_apply(cx, apply, index, nodes);
+        if let Some(active) = self.active.as_ref() {
+            self.set_active(cx, Some(active.to_string()));
+        } else {
+            self.find_active();
+        }
+    }
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_apply_from_doc(cx);
+    }
+    fn after_new_from_doc(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_new_from_doc(cx);
+    }
+    inherits_view_livehook!();
+}
 
-// impl LiveHook for GTabbar {
-//     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-//         self.deref_widget.after_apply(cx, apply, index, nodes);
-//     }
-//     fn after_apply_from_doc(&mut self, cx: &mut Cx) {
-//         if self.selected < 0 {
-//             let _ = self.find_selected(cx);
-//         } else {
-//             self.set_selected(cx, self.selected as usize);
-//         }
-//     }
-// }
+impl GTabbar {
+    pub fn find_active(&mut self) -> () {
+        if self.active.is_some() {
+            return;
+        }
 
-// impl GTabbar {
-//     event_option! {
-//         changed: GTabbarEvent::Changed => GTabbarEventParam
-//     }
-//     fn item_action(&mut self, cx: &mut Cx, scope: &mut Scope, actions: &Actions) -> Option<()> {
-//         let mut flag = false;
-//         let mut selected = 0;
-//         let mut e = None;
-//         // try only do less to control event loop
-//         for (index, (_id, child)) in self.children.iter().enumerate() {
-//             let _ = child.as_gtabbar_item().borrow().map(|item| {
-//                 if let Some(param) = item.clicked(&actions) {
-//                     if param.value {
-//                         if (index as i32).ne(&self.selected) {
-//                             selected = index;
-//                             flag = true;
-//                         } else {
-//                             flag = false;
-//                         }
-//                         e.replace(param.e);
-//                     }
-//                 }
-//             });
-//             // if flag is true break to stop
-//             if flag {
-//                 break;
-//             }
-//         }
-//         if flag {
-//             self.set_selected(cx, selected);
-//             self.redraw(cx);
-//             cx.widget_action(
-//                 self.widget_uid(),
-//                 &scope.path,
-//                 GTabbarEvent::Changed(GTabbarEventParam {
-//                     selected,
-//                     e: e.unwrap(),
-//                 }),
-//             );
-//             Some(())
-//         } else {
-//             None
-//         }
-//     }
-//     pub fn set_selected(&mut self, cx: &mut Cx, selected: usize) -> () {
-//         self.selected = selected as i32;
+        let mut active_value = None;
+        self.children
+            .iter()
+            .enumerate()
+            .for_each(|(index, (_id, child))| {
+                if let Some(mut child) = child.as_gtabbar_item().borrow_mut() {
+                    // 判断tabbar的value是否为空，如果是就按照iter的index设置
+                    if child.value.is_empty() {
+                        child.value = index.to_string();
+                    }
+                    if child.active && active_value.is_none() {
+                        active_value.replace(child.value.to_string());
+                    } else if child.active && active_value.is_some() {
+                        panic!(
+                            "GTabbar can only have one active GTabbarItem, but found multiple: {}",
+                            child.value
+                        );
+                    }
+                } else {
+                    panic!("GTabbar only allows GTabbarItem as child!");
+                }
+            });
 
-//         // loop all gtabbar_item child and let selected == false except self.selected is true
-//         self.children
-//             .iter_mut()
-//             .enumerate()
-//             .for_each(|(index, (_id, child))| {
-//                 if let Some(mut child) = child.as_gtabbar_item().borrow_mut() {
-//                     child.toggle(cx, index == selected);
-//                 } else {
-//                     panic!("GTabbar only allows Gtabbar_item as child!");
-//                 }
-//             });
-//     }
-//     fn find_selected(&mut self, cx: &mut Cx) -> () {
-//         let mut flag = true;
-//         let mut selected = 0;
-//         let _ = self
-//             .children
-//             .iter()
-//             .map(|(_id, child)| {
-//                 if let Some(child) = child.as_gtabbar_item().borrow() {
-//                     child.selected
-//                 } else {
-//                     panic!("GTabbar only allows tabbar_item as child!");
-//                 }
-//             })
-//             .enumerate()
-//             .for_each(|(index, is_selected)| {
-//                 if is_selected && flag {
-//                     selected = index;
-//                     flag = false;
-//                 } else if is_selected && !flag {
-//                     panic!(
-//                         "In GTabbar only allows one tabbar_item be selected! The Second is: {}",
-//                         index
-//                     );
-//                 }
-//             });
+        if let Some(active_value) = active_value {
+            self.active.replace(active_value);
+        }
+    }
+    /// if active is not set(None) in the group: find the active radio in the group
+    /// else: set the active radio depending on the value of `active`
+    pub fn set_active(&mut self, cx: &mut Cx, active_value: Option<String>) -> () {
+        self.toggle(cx, active_value, true);
+    }
+    pub fn toggle(&mut self, cx: &mut Cx, active_value: Option<String>, init: bool) -> () {
+        self.active = active_value;
 
-//         if !flag {
-//             self.selected = selected as i32;
-//         } else {
-//             // here means no tabbar_item is selected
-//             self.set_selected(cx, 0);
-//         }
-//     }
-//     pub fn redraw(&mut self, cx: &mut Cx) -> () {
-//         self.deref_widget.redraw(cx);
-//     }
-// }
-
-// impl GTabbarRef {
-//     ref_event_option! {
-//         changed => GTabbarEventParam
-//     }
-// }
-
-// impl GTabbarSet {
-//     set_event! {
-//         changed => GTabbarEventParam
-//     }
-// }
+        self.children
+            .iter()
+            .enumerate()
+            .for_each(|(index, (_id, child))| {
+                if let Some(mut child) = child.as_gtabbar_item().borrow_mut() {
+                    if child.value.is_empty() {
+                        child.value = index.to_string();
+                    }
+                    let active = child.value.eq(self.active.as_ref().unwrap());
+                    child.toggle(cx, active, init);
+                } else {
+                    panic!("GTabbar only allows GTabbarItem as child!")
+                }
+            });
+    }
+}

@@ -27,12 +27,12 @@ pub struct CheckboxClicked {
 
 #[derive(Debug, Clone, DefaultNone)]
 pub enum CheckboxGroupEvent {
-    Changed(CheckboxChanged),
+    Changed(CheckboxGroupChanged),
     None,
 }
 
 #[derive(Clone, Debug)]
-pub struct CheckboxChanged {
+pub struct CheckboxGroupChanged {
     pub meta: Option<FingerUpEvent>,
     /// The index of the active checkbox
     pub index: Vec<i32>,

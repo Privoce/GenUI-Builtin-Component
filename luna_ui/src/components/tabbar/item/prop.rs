@@ -339,24 +339,6 @@ impl From<TabbarItemState> for LabelState {
     }
 }
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum TabbarItemPart {
-//     Icon,
-//     Text,
-//     Container,
-// }
-
-// impl Part for TabbarItemPart {
-//     type State = TabbarItemState;
-//     fn to_live_id(&self) -> LiveId {
-//         match self {
-//             TabbarItemPart::Container => live_id!(container),
-//             TabbarItemPart::Icon => live_id!(icon),
-//             TabbarItemPart::Text => live_id!(text),
-//         }
-//     }
-// }
-
 component_part! {
     TabbarItemPart {
         Icon => icon => ICON,

@@ -407,7 +407,53 @@ live_design! {
                     //     }
                     //     text: "Click me! I am a link",
                     // }
-                    
+                    // <GTabbar> {
+                    //     <GTabbarItem> {
+                    //         value: "wind",
+                    //         icon: <GSvg> {
+                    //             prop: {
+                    //                 basic: {
+                    //                     svg: {
+                    //                         theme: Error,
+                    //                     },
+                    //                 }
+                    //             }
+                    //             src: dep("crate://self/resources/wind.svg"),
+                    //         }
+                    //         text: <GLabel> {
+                    //             text: "Wind"
+                    //         }
+                    //     }
+                    //     <GTabbarItem> {
+                    //         value: "heavy",
+                    //         icon: <GSvg> {
+                    //             src: dep("crate://self/resources/heavy.svg"),
+                    //         }
+                    //         text: <GLabel> {
+                    //             text: "Heavy"
+                    //         }
+                    //     }
+                    // }
+                    // <GVTabbar>{
+                    //     items: [
+                    //         {
+                    //             value: "wind",
+                    //             text: "Wind",
+                    //             icon: {
+                    //                 src: dep("crate://self/resources/wind.svg"),
+                    //             },
+                    //             prop: {
+                    //                 basic: {
+                    //                     icon: {
+                    //                         svg: {
+                    //                             theme: Primary
+                    //                         }
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }
+                    //     ]
+                    // }
                 }
             }
         }

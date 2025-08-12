@@ -27,12 +27,12 @@ pub struct RadioClicked {
 
 #[derive(Debug, Clone, DefaultNone)]
 pub enum RadioGroupEvent {
-    Changed(RadioChanged),
+    Changed(RadioGroupChanged),
     None,
 }
 
 #[derive(Clone, Debug)]
-pub struct RadioChanged {
+pub struct RadioGroupChanged {
     pub meta: Option<FingerUpEvent>,
     /// The index of the active radio.
     pub index: i32,

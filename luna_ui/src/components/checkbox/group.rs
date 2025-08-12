@@ -1,4 +1,4 @@
-use super::event::{CheckboxChanged, CheckboxGroupEvent};
+use super::event::{CheckboxGroupChanged, CheckboxGroupEvent};
 use crate::{
     components::{checkbox::GCheckboxWidgetRefExt, view::GView},
     visible,
@@ -98,7 +98,7 @@ impl Widget for GCheckboxGroup {
             cx.widget_action(
                 self.widget_uid(),
                 &scope.path,
-                CheckboxGroupEvent::Changed(CheckboxChanged {
+                CheckboxGroupEvent::Changed(CheckboxGroupChanged {
                     meta: active_event,
                     value: active_values.unwrap(),
                     index: active_indexs.unwrap(),
