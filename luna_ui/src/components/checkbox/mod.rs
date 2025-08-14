@@ -174,13 +174,12 @@ impl WidgetNode for GCheckbox {
 }
 
 impl Widget for GCheckbox {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if self.visible {
             let state = self.state;
             let prop = self.prop.get(state);
 
-            self.draw_container
-                .begin(cx, prop.container.walk(), prop.container.layout());
+            self.draw_container.begin(cx, walk, prop.container.layout());
             self.draw_checkbox
                 .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
             self.draw_checkbox.end(cx);

@@ -4,23 +4,17 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_part, component_state,
-    components::{
+    component_part, component_state, components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
         svg::{SvgBasicProp, SvgPart, SvgState},
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    prop::{
+    }, error::Error, get_get_mut, prop::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, HOVER, ICON, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl,
-    },
-    themes::Theme,
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, themes::Theme, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -82,22 +76,11 @@ impl Prop for TabbarItemProp {
 
     type Basic = TabbarItemBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            TabbarItemState::Basic => &self.basic,
-            TabbarItemState::Hover => &self.hover,
-            TabbarItemState::Active => &self.active,
-            TabbarItemState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            TabbarItemState::Basic => &mut self.basic,
-            TabbarItemState::Hover => &mut self.hover,
-            TabbarItemState::Active => &mut self.active,
-            TabbarItemState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        TabbarItemState::Basic => basic,
+        TabbarItemState::Hover => hover,
+        TabbarItemState::Active => active,
+        TabbarItemState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -115,11 +98,11 @@ impl Prop for TabbarItemProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct TabbarItemBasicProp {
-    #[live]
+    #[live(SvgBasicProp::default())]
     pub icon: SvgBasicProp,
-    #[live]
+    #[live(Self::default_text(Theme::default(), TabbarItemState::Basic))]
     pub text: LabelBasicProp,
-    #[live]
+    #[live(Self::default_container(Theme::default(), TabbarItemState::Basic))]
     pub container: ViewBasicProp,
 }
 
@@ -266,8 +249,8 @@ impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicProp {
 impl TabbarItemBasicProp {
     pub fn default_container(theme: Theme, state: TabbarItemState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
-        container.height = Size::Fit;
-        container.width = Size::Fit;
+        container.height = Size::Fill;
+        container.width = Size::Fill;
         container.align = Align::from_f64(0.5);
         container.background_visible = true;
         container

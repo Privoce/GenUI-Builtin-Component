@@ -6,14 +6,24 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, area_ref, components::{
+    active_event, animation_open_then_redraw, area, area_ref,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    }, error::Error, event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
+    },
+    error::Error,
+    event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
+    hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::{ToColor, ToFloat},
         ApplyStateMap, Radius,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, sync, themes::{Conf, Theme}, visible, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    sync,
+    themes::{Conf, Theme},
+    visible, ComponentAnInit,
 };
 
 live_design! {
@@ -123,7 +133,7 @@ impl WidgetNode for GButton {
     }
 
     fn area(&self) -> Area {
-        self.draw_button.area()
+        self.draw_button.area
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
@@ -146,14 +156,14 @@ impl WidgetNode for GButton {
 }
 
 impl Widget for GButton {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
 
         let state = self.state;
         let prop = self.prop.get(state);
-        let _ = self.draw_button.begin(cx, prop.walk(), prop.layout());
+        let _ = self.draw_button.begin(cx, walk, prop.layout());
 
         if self.slot.visible() {
             let slot_walk = self.slot.walk(cx);

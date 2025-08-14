@@ -20,15 +20,17 @@ live_design! {
     pub GTabbarBase = {{GTabbar}} {
         prop: {
             basic: {
-                height: Fit,
-                width: Fit,
+                height: 60.0,
+                width: Fill,
                 flow: Right,
                 align: {
                     x: 0.5,
                     y: 0.5,
                 },
                 spacing: 8.0,
-                background_visible: false,
+                background_visible: true,
+                theme: Primary,
+                border_radius: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
             }
         }
     }

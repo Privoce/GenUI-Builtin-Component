@@ -195,14 +195,26 @@ live_design! {
                     //         }
                     //     }
                     // }
+                    //
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
+                    //     prop: {
+                    //         basic: {
+                    //             width: 300.0,
+                    //             flow: Right
+                    //         }
+                    //     }
                     //     <GCheckbox>{
                     //         prop: {
                     //             basic: {
                     //                 checkbox: {
                     //                     theme: Warning,
                     //                     mode: Cross,
+                    //                 },
+                    //                 container: {
+                    //                     width: Fill,
+                    //                     background_visible: true,
+                    //                     theme: Error,
                     //                 }
                     //             }
                     //         },
@@ -214,6 +226,15 @@ live_design! {
                     //         }
                     //     }
                     //     <GCheckbox>{
+                    //         prop: {
+                    //             basic: {
+                    //                 container: {
+                    //                     width: Fill,
+                    //                     background_visible: true,
+                    //                     theme: Primary,
+                    //                 }
+                    //             }
+                    //         },
                     //         value: "tea",
                     //         extra: {
                     //             <GLabel>{
@@ -222,6 +243,15 @@ live_design! {
                     //         }
                     //     }
                     //     <GCheckbox>{
+                    //         prop: {
+                    //             basic: {
+                    //                 container: {
+                    //                     width: Fill,
+                    //                     background_visible: true,
+                    //                     theme: Info,
+                    //                 }
+                    //             }
+                    //         },
                     //         value: "milk",
                     //         extra: {
                     //             <GLabel>{
@@ -419,6 +449,70 @@ live_design! {
                     //     }
                     //     text: "Click me! I am a link",
                     // }
+                    // <GView> {
+                    //     prop: {
+                    //         basic: {
+                    //             height: Fill,
+                    //             width: Fill,
+                    //             background_visible: true,
+                    //             theme: Primary,
+                    //             flow: Right
+                    //         }
+                    //     }
+                    //     // <GView> {
+                    //     //     prop: {
+                    //     //         basic: {
+                    //     //             height: Fill,
+                    //     //             width: Fill,
+                    //     //             background_visible: true,
+                    //     //             theme: Info,
+                    //     //         }
+                    //     //     }
+                    //     // }
+                    //     // <GView> {
+                    //     //     prop: {
+                    //     //         basic: {
+                    //     //             height: Fill,
+                    //     //             width: Fill,
+                    //     //             background_visible: true,
+                    //     //             theme: Error,
+                    //     //         }
+                    //     //     }
+                    //     // }
+                    //     <GTabbarItem> {
+                    //         value: "wind",
+                    //         icon: <GSvg> {
+                    //             prop: {
+                    //                 basic: {
+                    //                     svg: {
+                    //                         theme: Error,
+                    //                     },
+                    //                 }
+                    //             }
+                    //             src: dep("crate://self/resources/wind.svg"),
+                    //         }
+                    //         text: <GLabel> {
+                    //             text: "Wind"
+                    //         }
+                    //     }
+                    //     <GTabbarItem> {
+                    //         value: "wind",
+                    //         icon: <GSvg> {
+                    //             prop: {
+                    //                 basic: {
+                    //                     svg: {
+                    //                         theme: Error,
+                    //                     },
+                    //                 }
+                    //             }
+                    //             src: dep("crate://self/resources/wind.svg"),
+                    //         }
+                    //         text: <GLabel> {
+                    //             text: "Wind"
+                    //         }
+                    //     }
+                    // }
+
                     // <GTabbar> {
                     //     <GTabbarItem> {
                     //         value: "wind",
@@ -477,8 +571,8 @@ live_design! {
                     //     }
                     //     <GButton>{}
                     // }
-                    body = <HomePage> {}
-                    
+                    // body = <HomePage> {}
+
                 }
             }
         }

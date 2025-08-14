@@ -10,6 +10,7 @@ live_design! {
     use link::widgets::*;
     use link::gen_ui::*;
     use crate::views::basic::view::*;
+    use crate::views::basic::button::*;
 
     pub HomePage = {{HomePage}} {
         <GVLayout> {
@@ -17,6 +18,27 @@ live_design! {
                 bar_pages = {
                     view_page = <GBarPage> {
                         <ViewPage>{}
+                    }
+                    button_page = <GBarPage> {
+                        <ButtonPage>{}
+                    }
+                    tabbar = <GTabbar>{
+                        <GTabbarItem>{
+                            icon: {
+                                src: dep("crate://self/resources/wind.svg"),
+                            }
+                            text: {
+                                text: "Config"
+                            }
+                        }
+                        <GTabbarItem>{
+                            icon: {
+                                 src: dep("crate://self/resources/heavy.svg"),
+                            }
+                            text: {
+                                text: "All"
+                            }
+                        }
                     }
                 }
             }
@@ -46,7 +68,7 @@ impl Widget for HomePage {
             let router = self.grouter(id!(app_router));
             router.borrow_mut().map(|mut router| {
                 router
-                    .init(ids!(view_page), None, None)
+                    .init(ids!(view_page, button_page), None, None)
                     .active(id!(view_page))
                     .build(cx);
             });

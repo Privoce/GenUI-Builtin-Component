@@ -166,7 +166,7 @@ impl WidgetNode for GCard {
 }
 
 impl Widget for GCard {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
@@ -176,7 +176,7 @@ impl Widget for GCard {
 
         let _ = self.draw_card.begin(
             cx,
-            prop.walk(),
+            walk,
             Layout {
                 clip_x: false,
                 clip_y: false,

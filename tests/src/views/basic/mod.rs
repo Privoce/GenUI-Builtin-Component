@@ -7,5 +7,5 @@ pub mod svg;
 
 pub fn register(cx: &mut Cx) {
     view::live_design(cx);
-    
+    button::live_design(cx);
 }

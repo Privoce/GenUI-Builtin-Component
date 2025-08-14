@@ -114,7 +114,7 @@ pub struct TabbarBasicProp {
     pub align: Align,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
-    #[live(Flow::Down)]
+    #[live(Flow::Right)]
     pub flow: Flow,
     #[live(6.0)]
     pub spacing: f64,
@@ -202,7 +202,7 @@ impl BasicProp for TabbarBasicProp {
                 self.cursor = MouseCursor::from_live_value(value).unwrap_or(cursor);
             }
             FLOW => {
-                self.flow = Flow::from_live_value(value).unwrap_or(Flow::Down);
+                self.flow = Flow::from_live_value(value).unwrap_or(Flow::Right);
             }
             SPACING => {
                 self.spacing = f64::from_live_value(value).unwrap_or(6.0);
@@ -255,7 +255,7 @@ impl BasicProp for TabbarBasicProp {
             clip_y: false,
             align: Align::default(),
             cursor,
-            flow: Flow::Down,
+            flow: Flow::Right,
             spacing: 6.0,
             height: Size::Fill,
             width: Size::Fill,
