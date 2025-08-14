@@ -12,10 +12,11 @@ use makepad_widgets::*;
 
 live_design! {
     use link::theme::*;
-    use link::luna_ui::*;
+    use link::gen_ui::*;
     use link::shaders::*;
     use link::widgets::*;
     use crate::an::*;
+    use crate::views::home::*;
 
     Post = <View> {
         width: Fill, height: Fit,
@@ -465,17 +466,19 @@ live_design! {
                     //         }
                     //     ]
                     // }
-                    <GNavPage> {
-                        prop: {
-                            basic: {
-                                height: 300.0,
-                                width: 300.0,
-                                background_visible: true,
-                                theme: Info,
-                            }
-                        }
-                        <GButton>{}
-                    }
+                    // <GNavPage> {
+                    //     prop: {
+                    //         basic: {
+                    //             height: 300.0,
+                    //             width: 300.0,
+                    //             background_visible: true,
+                    //             theme: Info,
+                    //         }
+                    //     }
+                    //     <GButton>{}
+                    // }
+                    body = <HomePage> {}
+                    
                 }
             }
         }
@@ -497,6 +500,7 @@ impl LiveRegister for App {
         crate::makepad_widgets::live_design(cx);
         crate::an::live_design(cx);
         crate::luna_ui::live_design(cx);
+        crate::views::register(cx);
     }
 }
 

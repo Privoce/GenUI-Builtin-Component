@@ -35,7 +35,7 @@ pub mod view;
 use traits::Component;
 
 live_design! {
-    link luna_ui;
+    link gen_ui;
 
     // use link::luna_theme::*;
     use link::shaders::*;
@@ -324,6 +324,40 @@ live_design! {
             }
         }
     }
+    pub GBarPage = <GView> {
+        prop: {
+            basic: {
+                height: Fill,
+                width: Fill,
+                flow: Down
+            }
+        }
+    }
+    
+    pub GRouter = <GRouterBase> {
+        bar_pages = <GView>{
+            prop: {
+                basic: {
+                    height: Fill,
+                    width: Fill,
+                    border_radius: {left: 0.0, top: 0.0, right: 0.0, bottom: 0.0},
+                    background_visible: false,
+                    flow: Down,
+                }
+            }
+        }
+        nav_pages = <GView>{
+            prop: {
+                basic: {
+                    height: Fill,
+                    width: Fill,
+                    border_radius: {left: 0.0, top: 0.0, right: 0.0, bottom: 0.0},
+                    background_visible: false,
+                    flow: Down,
+                }
+            }
+        }
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -348,6 +382,7 @@ pub fn components_register(cx: &mut Cx) {
     tag::live_design(cx);
     link::live_design(cx);
     router::page::live_design(cx);
+    router::live_design(cx);
 }
 
 component! {

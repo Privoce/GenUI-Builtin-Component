@@ -133,17 +133,17 @@ impl GRouter {
     }
 
     pub fn indicator_nav_to(&mut self, cx: &mut Cx, actions: &Actions) -> Option<()> {
-        let mut selected = None;
+        let mut active = None;
         if let RouterIndicatorMode::Bind(bind_id) = self.mode {
             self.gtabbar(bind_id.as_slice()).borrow().map(|tabbar| {
                 if let Some(e) = tabbar.changed(actions) {
-                    selected.replace(e.selected);
+                    active.replace(e.index as usize);
                 }
             });
         }
-        if let Some(selected) = selected {
+        if let Some(active) = active {
             // call nav to
-            let path = self.bar_pages[selected].last();
+            let path = self.bar_pages[active].last();
             self.nav_to(cx, &[path]);
             Some(())
         } else {
@@ -157,7 +157,7 @@ impl GRouter {
             self.gtabbar(bind_id.as_slice())
                 .borrow_mut()
                 .map(|mut tabbar| {
-                    tabbar.set_active(cx, index);
+                    tabbar.set_active_index(cx, index);
                     return Some(());
                 });
         }
@@ -510,38 +510,38 @@ impl GRouter {
     }
 }
 
-// impl GRouterRef {
-//     pub fn nav_to(&self, cx: &mut Cx, path: &[LiveId]) {
-//         self.borrow_mut().map(|mut router| {
-//             router.nav_to(cx, path);
-//         });
-//     }
-//     pub fn nav_back(&self, cx: &mut Cx) {
-//         self.borrow_mut().map(|mut router| {
-//             router.nav_back(cx);
-//         });
-//     }
-//     pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
-//         self.borrow_mut().map(|mut router| {
-//             router.handle_nav_events(cx, actions);
-//         });
-//     }
-// }
+impl GRouterRef {
+    pub fn nav_to(&self, cx: &mut Cx, path: &[LiveId]) {
+        self.borrow_mut().map(|mut router| {
+            router.nav_to(cx, path);
+        });
+    }
+    pub fn nav_back(&self, cx: &mut Cx) {
+        self.borrow_mut().map(|mut router| {
+            router.nav_back(cx);
+        });
+    }
+    pub fn handle_nav_events(&self, cx: &mut Cx, actions: &Actions) {
+        self.borrow_mut().map(|mut router| {
+            router.handle_nav_events(cx, actions);
+        });
+    }
+}
 
-// #[macro_export]
-// macro_rules! nav_to {
-//     (
-//         $path: tt, $cx: expr, $uid: expr, $scope: expr
-//     ) => {
-//         gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
-//     };
-// }
+#[macro_export]
+macro_rules! nav_to {
+    (
+        $path: tt, $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_to_path($cx, $uid, $scope, id!($path));
+    };
+}
 
-// #[macro_export]
-// macro_rules! nav_back {
-//     (
-//         $cx: expr, $uid: expr, $scope: expr
-//     ) => {
-//         gen_components::GRouter::nav_back_path($cx, $uid, $scope);
-//     };
-// }
+#[macro_export]
+macro_rules! nav_back {
+    (
+        $cx: expr, $uid: expr, $scope: expr
+    ) => {
+        gen_components::GRouter::nav_back_path($cx, $uid, $scope);
+    };
+}

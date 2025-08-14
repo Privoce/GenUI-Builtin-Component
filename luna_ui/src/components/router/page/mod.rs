@@ -2,9 +2,9 @@ use makepad_widgets::*;
 
 use crate::{
     components::{
-         router::event::RouterEvent, svg::GSvgWidgetExt, traits::Prop, view::GView,
+         router::{event::RouterEvent, GRouter}, svg::GSvgWidgetExt, traits::Prop, view::GView,
     },
-    inherits_view_livehook, inherits_view_widget_node,
+    inherits_view_livehook, inherits_view_widget_node, prop::traits::LiveIdExp,
 };
 
 live_design! {
@@ -40,10 +40,10 @@ impl Widget for GPage {
             if let Some(action) = action.as_widget_action() {
                 match action.cast::<RouterEvent>() {
                     RouterEvent::NavTo(path) => {
-                        // GRouter::nav_to_path(cx, self.widget_uid(), scope, path.as_slice());
+                        GRouter::nav_to_path(cx, self.widget_uid(), scope, path.as_slice());
                     }
                     RouterEvent::NavBack(_) => {
-                        // GRouter::nav_back_path(cx, self.widget_uid(), scope);
+                        GRouter::nav_back_path(cx, self.widget_uid(), scope);
                     }
                     RouterEvent::None => (),
                 }

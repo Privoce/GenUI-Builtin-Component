@@ -73,11 +73,14 @@ live_design! {
 
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
+            let total_shadow_size = self.spread_radius + self.blur_radius;
+            
+            // 使用calculated位置而不是原始rect_size
             sdf.box_all(
-                self.border_inset.x + border_width,
-                self.border_inset.y + border_width,
-                self.rect_size.x - (self.border_inset.x + self.border_inset.z + border_width * 2.0),
-                self.rect_size.y - (self.border_inset.y + self.border_inset.w + border_width * 2.0),
+                self.sdf_rect_pos.x,
+                self.sdf_rect_pos.y,
+                self.sdf_rect_size.x,
+                self.sdf_rect_size.y,
                 self.border_radius.x,
                 self.border_radius.y,
                 self.border_radius.z,

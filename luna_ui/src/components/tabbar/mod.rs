@@ -157,6 +157,27 @@ impl GTabbar {
                 }
             });
     }
+    pub fn set_active_index(&mut self, cx: &mut Cx, index: usize) -> () {
+        let mut active_value = None;
+        self.children
+            .iter()
+            .enumerate()
+            .for_each(|(i, (_id, child))| {
+                if let Some(mut child) = child.as_gtabbar_item().borrow_mut() {
+                    let active = i == index;
+                    if active {
+                        active_value.replace(child.value.to_string());
+                    }
+                    child.toggle(cx, active, false);
+                } else {
+                    panic!("GTabbar only allows GTabbarItem as child!")
+                }
+            });
+
+        if let Some(active_value) = active_value {
+            self.active.replace(active_value);
+        }
+    }
 }
 
 impl GTabbar {
