@@ -180,14 +180,14 @@ impl Widget for GLink {
         }
 
         let prop = self.prop.get(self.state);
-        self.draw_link.begin(cx, prop.walk(), prop.layout());
+        self.draw_link.begin(cx, walk, prop.layout());
         // // here we need to check if the text is empty, if so we need to set it to a space
         // // or the text draw will not work(seems like lazy drawtext bug)
         // let _ = self.text.as_ref().is_empty().then(|| {
         //     let _ = self.set_text(cx, " ");
         // });
         self.draw_text
-            .draw_walk(cx, walk, Align::default(), self.text.as_ref());
+            .draw_walk(cx, prop.walk(), Align::default(), self.text.as_ref());
         // cx.end_turtle_with_area(&mut self.area);
         self.draw_link.end(cx);
         self.set_scope_path(&scope.path);

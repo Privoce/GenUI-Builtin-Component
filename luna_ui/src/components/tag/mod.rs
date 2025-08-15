@@ -362,7 +362,7 @@ impl Component for GTag {
             let disabled_prop = self.prop.get(TagState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
-            
+
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
@@ -518,14 +518,12 @@ impl Component for GTag {
 }
 
 impl Widget for GTag {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible() {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
-        let _ = self
-            .draw_tag
-            .begin(cx, prop.container.walk(), prop.container.layout());
+        let _ = self.draw_tag.begin(cx, walk, prop.container.layout());
         let _ = SlotDrawer::new(
             [
                 (live_id!(icon), (&mut self.icon).into()),
@@ -557,4 +555,3 @@ impl Widget for GTag {
         }
     }
 }
-

@@ -151,12 +151,12 @@ impl WidgetNode for GSwitch {
 }
 
 impl Widget for GSwitch {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if self.visible {
             let state = self.state;
             let prop = self.prop.get(state);
 
-            self.draw_switch.begin(cx, prop.walk(), prop.layout());
+            self.draw_switch.begin(cx, walk, prop.layout());
             self.draw_switch.end(cx);
         }
 

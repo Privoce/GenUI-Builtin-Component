@@ -7,15 +7,30 @@ pub use prop::*;
 pub use schema::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, components::{
+    active_event, animation_open_then_redraw,
+    components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::ViewBasicProp,
-    }, error::Error, event_option, event_option_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle, makepad_derive_widget::*, makepad_draw::*, play_animation, prop::{
+    },
+    error::Error,
+    event_option, event_option_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out,
+    lifecycle,
+    makepad_derive_widget::*,
+    makepad_draw::*,
+    play_animation,
+    prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
         ApplySlotMap,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::{draw_svg::DrawSvg, draw_view::DrawView}, sync, themes::Conf, visible, widget::*, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::{draw_svg::DrawSvg, draw_view::DrawView},
+    sync,
+    themes::Conf,
+    visible,
+    widget::*,
+    ComponentAnInit,
 };
 
 live_design! {
@@ -130,13 +145,13 @@ impl Widget for GSvg {
         }
     }
 
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
         self.draw_svg_container
-            .begin(cx, prop.container.walk(), prop.container.layout());
+            .begin(cx, walk, prop.container.layout());
         self.draw_svg.draw_walk(cx, prop.svg.walk());
         self.draw_svg_container.end(cx);
         self.set_scope_path(&scope.path);
@@ -527,7 +542,7 @@ impl GSvg {
 }
 
 impl GSvgRef {
-    event_option_ref!{
+    event_option_ref! {
         hover_in => SvgHoverIn,
         hover_out => SvgHoverOut,
         finger_up => SvgFingerUp,

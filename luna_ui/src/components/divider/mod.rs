@@ -41,9 +41,12 @@ pub struct GDivider {
 }
 
 impl Widget for GDivider {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        if !self.visible {
+            return DrawStep::done();
+        }
         let prop = self.prop.get(self.state);
-        self.draw_divider.begin(cx, prop.walk(), prop.layout());
+        self.draw_divider.begin(cx, walk, prop.layout());
         self.draw_divider.end(cx);
         self.set_scope_path(&scope.path);
         DrawStep::done()

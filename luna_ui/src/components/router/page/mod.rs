@@ -2,7 +2,7 @@ use makepad_widgets::*;
 
 use crate::{
     components::{
-         router::{event::RouterEvent, GRouter}, svg::GSvgWidgetExt, traits::Prop, view::GView,
+         router::{event::RouterEvent, GRouter}, svg::GSvgWidgetExt, view::GView,
     },
     inherits_view_livehook, inherits_view_widget_node, prop::traits::LiveIdExp,
 };

@@ -11,7 +11,6 @@ pub mod button;
 pub mod card;
 pub mod checkbox;
 pub mod collapse;
-pub mod dialog;
 pub mod divider;
 pub mod drop_down;
 pub mod image;

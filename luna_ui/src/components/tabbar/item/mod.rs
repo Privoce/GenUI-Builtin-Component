@@ -166,12 +166,12 @@ impl WidgetNode for GTabbarItem {
 }
 
 impl Widget for GTabbarItem {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible() {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
-        let _ = self.draw_item.begin(cx, prop.walk(), prop.layout());
+        let _ = self.draw_item.begin(cx, walk, prop.layout());
         let _ = SlotDrawer::new(
             [
                 (live_id!(icon), (&mut self.icon).into()),
