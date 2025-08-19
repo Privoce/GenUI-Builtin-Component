@@ -30,8 +30,8 @@ pub struct MenuItemProp {
     pub basic: MenuItemBasicProp,
     #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover))]
     pub hover: MenuItemBasicProp,
-    #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Pressed))]
-    pub pressed: MenuItemBasicProp,
+    #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active))]
+    pub active: MenuItemBasicProp,
     #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled))]
     pub disabled: MenuItemBasicProp,
 }
@@ -44,7 +44,7 @@ impl Prop for MenuItemProp {
     get_get_mut! {
         MenuItemState::Basic => basic,
         MenuItemState::Hover => hover,
-        MenuItemState::Pressed => pressed,
+        MenuItemState::Active => active,
         MenuItemState::Disabled => disabled
     }
 
@@ -69,7 +69,7 @@ impl SlotProp for MenuItemProp {
             MenuItemState::Basic,
             [
                 (MenuItemState::Hover, &mut self.hover),
-                (MenuItemState::Pressed, &mut self.pressed),
+                (MenuItemState::Active, &mut self.active),
                 (MenuItemState::Disabled, &mut self.disabled),
             ],
             [
@@ -86,7 +86,7 @@ try_from_toml_item! {
     MenuItemProp {
         basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
         hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
-        pressed => PRESSED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Pressed), |v| (v, MenuItemState::Pressed).try_into(),
+        active => PRESSED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
         disabled => DISABLED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
     }, "[component.menu_item] should be a table"
 }
@@ -96,7 +96,7 @@ impl Default for MenuItemProp {
         Self {
             basic: MenuItemBasicProp::default(),
             hover: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover),
-            pressed: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Pressed),
+            active: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active),
             disabled: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled),
         }
     }
@@ -267,8 +267,10 @@ impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicProp {
 impl MenuItemBasicProp {
     pub fn default_container(theme: Theme, state: MenuItemState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
-        container.set_height(Size::Fixed(40.0));
+        container.set_height(Size::Fit);
         container.set_width(Size::Fill);
+        container.set_background_visible(true);
+        container.set_flow(Flow::Right);
         container
     }
     pub fn default_icon(theme: Theme, state: MenuItemState) -> SvgBasicProp {
@@ -292,7 +294,7 @@ component_state! {
     MenuItemState {
         Basic => BASIC,
         Hover => HOVER,
-        Pressed => PRESSED,
+        Active => PRESSED,
         Disabled => DISABLED
     }, _ => MenuItemState::Basic
 }
@@ -308,7 +310,7 @@ impl From<MenuItemState> for ViewState {
         match value {
             MenuItemState::Basic => ViewState::Basic,
             MenuItemState::Hover => ViewState::Hover,
-            MenuItemState::Pressed => ViewState::Pressed,
+            MenuItemState::Active => ViewState::Pressed,
             MenuItemState::Disabled => ViewState::Disabled,
         }
     }
@@ -319,7 +321,7 @@ impl From<ViewState> for MenuItemState {
         match value {
             ViewState::Basic => MenuItemState::Basic,
             ViewState::Hover => MenuItemState::Hover,
-            ViewState::Pressed => MenuItemState::Pressed,
+            ViewState::Pressed => MenuItemState::Active,
             ViewState::Disabled => MenuItemState::Disabled,
         }
     }
@@ -330,7 +332,7 @@ impl From<MenuItemState> for SvgState {
         match value {
             MenuItemState::Basic => SvgState::Basic,
             MenuItemState::Hover => SvgState::Hover,
-            MenuItemState::Pressed => SvgState::Pressed,
+            MenuItemState::Active => SvgState::Pressed,
             MenuItemState::Disabled => SvgState::Disabled,
         }
     }
@@ -339,7 +341,7 @@ impl From<MenuItemState> for SvgState {
 impl From<MenuItemState> for LabelState {
     fn from(value: MenuItemState) -> Self {
         match value {
-            MenuItemState::Basic | MenuItemState::Hover | MenuItemState::Pressed => {
+            MenuItemState::Basic | MenuItemState::Hover | MenuItemState::Active => {
                 LabelState::Basic
             }
             MenuItemState::Disabled => LabelState::Disabled,

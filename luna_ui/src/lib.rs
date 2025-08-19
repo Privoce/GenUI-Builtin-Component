@@ -44,4 +44,5 @@ pub struct ComponentAnInit {
     tabbar_item: bool,
     tag: bool,
     link: bool,
+    menu_item: bool
 }

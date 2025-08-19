@@ -357,6 +357,12 @@ live_design! {
             }
         }
     }
+
+    pub GMenuItem = <GMenuItemBase> {
+        text: <GLabel> {
+            text: "Menu Item"
+        }
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -382,6 +388,7 @@ pub fn components_register(cx: &mut Cx) {
     link::live_design(cx);
     router::page::live_design(cx);
     router::live_design(cx);
+    menu::item::live_design(cx);
 }
 
 component! {

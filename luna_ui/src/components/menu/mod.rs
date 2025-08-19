@@ -1,5 +1,5 @@
 mod prop;
-mod item;
+pub mod item;
 mod event;
 
 use makepad_widgets::*;

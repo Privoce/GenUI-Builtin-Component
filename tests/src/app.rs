@@ -572,7 +572,9 @@ live_design! {
                     //     <GButton>{}
                     // }
                     // body = <HomePage> {}
-
+                    <GMenuItem> {
+                        
+                    }
                 }
             }
         }
