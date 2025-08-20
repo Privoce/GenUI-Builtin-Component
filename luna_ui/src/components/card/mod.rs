@@ -142,7 +142,7 @@ impl WidgetNode for GCard {
 
     fn redraw(&mut self, cx: &mut Cx) {
         let _ = self.render(cx);
-
+        self.draw_card.redraw(cx);
         for (visible, slot) in [
             (self.header.visible, &mut self.header),
             (self.body.visible, &mut self.body),

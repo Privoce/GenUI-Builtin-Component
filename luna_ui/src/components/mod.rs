@@ -363,6 +363,8 @@ live_design! {
             text: "Menu Item"
         }
     }
+
+    pub GCollapse = <GCollapseBase> {}
 }
 
 pub fn components_register(cx: &mut Cx) {
@@ -389,6 +391,7 @@ pub fn components_register(cx: &mut Cx) {
     router::page::live_design(cx);
     router::live_design(cx);
     menu::item::live_design(cx);
+    collapse::live_design(cx);
 }
 
 component! {

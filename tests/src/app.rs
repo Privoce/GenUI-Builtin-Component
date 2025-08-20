@@ -572,8 +572,29 @@ live_design! {
                     //     <GButton>{}
                     // }
                     // body = <HomePage> {}
-                    <GMenuItem> {
+                    // <GMenuItem> {
                         
+                    // }
+                    <GCollapse> {
+                        prop: {
+                            basic: {
+                                container: {
+                                    background_color: #fff,
+                                    background_visible: true
+                                }
+                            }
+                        }
+                        header: <GView> {
+                            
+                            <GLabel> {
+                                text: "Collapse Header"
+                            }
+                        }
+                        body: <GView> {
+                            <GLabel> {
+                                text: "Collapse Body"
+                            }
+                        }
                     }
                 }
             }

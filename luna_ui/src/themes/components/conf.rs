@@ -1,6 +1,7 @@
 use crate::components::button::ButtonProp;
 use crate::components::card::CardProp;
 use crate::components::checkbox::CheckboxProp;
+use crate::components::collapse::CollapseProp;
 use crate::components::divider::DividerProp;
 use crate::components::image::ImageProp;
 use crate::components::label::LabelProp;
@@ -17,7 +18,7 @@ use crate::components::tag::TagProp;
 use crate::components::view::ViewProp;
 use crate::error::Error;
 use crate::prop::manuel::{
-    BUTTON, CARD, CHECKBOX, DIVIDER, IMAGE, LABEL, LINK, MENU_ITEM, POPUP, POPUP_CONTAINER, RADIO, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW
+    BUTTON, CARD, CHECKBOX, COLLAPSE, DIVIDER, IMAGE, LABEL, LINK, MENU_ITEM, POPUP, POPUP_CONTAINER, RADIO, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW
 };
 use crate::try_from_toml_item;
 
@@ -40,6 +41,7 @@ pub struct ComponentsConf {
     pub tag: TagProp,
     pub link: LinkProp,
     pub menu_item: MenuItemProp,
+    pub collapse: CollapseProp,
 }
 
 try_from_toml_item! {
@@ -60,6 +62,7 @@ try_from_toml_item! {
         tabbar_item => TABBAR_ITEM, TabbarItemProp::default(), |item| item.try_into(),
         tag => TAG, TagProp::default(), |item| item.try_into(),
         link => LINK, LinkProp::default(), |item| item.try_into(),
-        menu_item => MENU_ITEM, MenuItemProp::default(), |item| item.try_into()
+        menu_item => MENU_ITEM, MenuItemProp::default(), |item| item.try_into(),
+        collapse => COLLAPSE, CollapseProp::default(), |item| item.try_into()
     }, "[components] should be a table"
 }

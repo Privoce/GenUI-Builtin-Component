@@ -71,6 +71,7 @@ pub const BUTTON: &str = "button";
 pub const CARD: &str = "card";
 pub const RADIO: &str = "radio";
 pub const EXTRA: &str = "extra";
+pub const ITEMS: &str = "items";
 pub const CHECKBOX: &str = "checkbox";
 pub const SWITCH: &str = "switch";
 pub const DIVIDER: &str = "divider";
@@ -84,6 +85,7 @@ pub const MENU: &str = "menu";
 pub const TABBAR: &str = "tabbar";
 pub const LINK: &str = "link";
 pub const MENU_ITEM: &str = "menu_item";
+pub const COLLAPSE: &str = "collapse";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";
 pub const ROUND: &str = "Round";

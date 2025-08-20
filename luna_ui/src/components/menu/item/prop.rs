@@ -278,9 +278,7 @@ impl MenuItemBasicProp {
         icon
     }
     pub fn default_text(theme: Theme, state: MenuItemState) -> LabelBasicProp {
-        let mut text = LabelBasicProp::from_state(theme, state.into());
-
-        text
+        LabelBasicProp::from_state(theme, state.into())
     }
     pub fn default_extra(theme: Theme, state: MenuItemState) -> ViewBasicProp {
         let mut extra = ViewBasicProp::from_state(theme, state.into());
