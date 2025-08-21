@@ -15,7 +15,7 @@ use crate::{
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, PRESSED, TEXT},
+        manuel::{BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, ACTIVE, TEXT},
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
@@ -86,7 +86,7 @@ try_from_toml_item! {
     MenuItemProp {
         basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
         hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
-        active => PRESSED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
+        active => ACTIVE, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
         disabled => DISABLED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
     }, "[component.menu_item] should be a table"
 }
@@ -271,6 +271,7 @@ impl MenuItemBasicProp {
         container.set_width(Size::Fill);
         container.set_background_visible(true);
         container.set_flow(Flow::Right);
+        container.set_cursor(MouseCursor::Hand);
         container
     }
     pub fn default_icon(theme: Theme, state: MenuItemState) -> SvgBasicProp {
@@ -283,7 +284,7 @@ impl MenuItemBasicProp {
     pub fn default_extra(theme: Theme, state: MenuItemState) -> ViewBasicProp {
         let mut extra = ViewBasicProp::from_state(theme, state.into());
         extra.set_height(Size::Fill);
-        extra.set_width(Size::Fill);
+        extra.set_width(Size::Fit);
         extra
     }
 }
@@ -292,7 +293,7 @@ component_state! {
     MenuItemState {
         Basic => BASIC,
         Hover => HOVER,
-        Active => PRESSED,
+        Active => ACTIVE,
         Disabled => DISABLED
     }, _ => MenuItemState::Basic
 }

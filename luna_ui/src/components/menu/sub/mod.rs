@@ -1,21 +1,23 @@
 mod prop;
 
+pub use prop::*;
+
+use makepad_widgets::*;
+
 use crate::{
-    active_event, animation_open_then_redraw,
+    active_event, area,
     components::{
-        label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
-        menu::event::{SubMenuChanged, SubMenuEvent},
-        svg::{GSvg, SvgBasicProp},
+        menu::event::{SubMenuChanged, SubMenuEvent, SubMenuHoverIn, SubMenuHoverOut},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
     },
     error::Error,
-    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    event_option, lifecycle, play_animation,
     prop::{
-        manuel::{BASIC, DISABLED, HOVER, PRESSED},
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer, ToSlotMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, Position4, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -23,8 +25,6 @@ use crate::{
     themes::Conf,
     visible, ComponentAnInit,
 };
-use makepad_widgets::*;
-pub use prop::*;
 
 live_design! {
     link genui_basic;
@@ -32,41 +32,24 @@ live_design! {
 
     pub GSubMenuBase = {{GSubMenu}}{
         animator: {
-            hover = {
-                default: off,
-
+            active = {
+                default: off
                 off = {
-                    from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
+                    from: {all: Forward {duration: (AN_DURATION)}}
+                    ease: ExpDecay {d1: 0.96, d2: 0.97}
+                    redraw: true
                     apply: {
-                        draw_item: <AN_DRAW_VIEW> {}
+                        draw_sub_menu: <AN_DRAW_VIEW> {},
+                        fold: [{time: 0.0, value: 1.0}, {time: 1.0, value: 0.0}]
                     }
                 }
-
                 on = {
-                    from: {
-                        all: Forward {duration: (AN_DURATION),},
-                        active: Forward {duration: (AN_DURATION)},
-                    },
-                    ease: InOutQuad,
+                    from: {all: Forward {duration: (AN_DURATION)}}
+                    ease: ExpDecay {d1: 0.98, d2: 0.95}
+                    redraw: true
                     apply: {
-                       draw_item: <AN_DRAW_VIEW> {}
-                    }
-                }
-
-                active = {
-                    from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
-                    apply: {
-                        draw_item: <AN_DRAW_VIEW> {}
-                    }
-                }
-
-                disabled = {
-                    from: {all: Forward {duration: (AN_DURATION)}},
-                    ease: InOutQuad,
-                    apply: {
-                        draw_item: <AN_DRAW_VIEW> {}
+                        draw_sub_menu: <AN_DRAW_VIEW> {},
+                        fold: [{time: 0.0, value: 0.0}, {time: 1.0, value: 1.0}]
                     }
                 }
             }
@@ -78,32 +61,28 @@ live_design! {
 pub struct GSubMenu {
     #[live]
     pub prop: SubMenuProp,
-    // --- visible -------------------
+    #[live]
+    pub header: GView,
+    #[live]
+    pub body: GView,
+    #[live]
+    pub draw_sub_menu: DrawView,
+    #[live]
+    pub active: bool,
+    #[live]
+    pub value: String,
+    #[live]
+    pub fold: f64,
     #[live(true)]
     pub visible: bool,
-    // --- others -------------------
     #[live]
     pub disabled: bool,
-    #[live]
-    pub grab_key_focus: bool,
-    #[live(true)]
-    pub event_open: bool,
-    #[rust]
-    pub scope_path: Option<HeapLiveIdPath>,
-    #[rust]
-    pub apply_slot_map: ApplySlotMap<SubMenuState, SubMenuPart>,
-    // --- draw ----------------------
-    #[live]
-    pub icon: GSvg,
-    #[live]
-    pub text: GLabel,
-    #[live]
-    pub extra: GView,
-    #[live]
-    pub draw_item: DrawView,
     // --- animator ----------------
     #[live(true)]
     pub animation_open: bool,
+    // use animation counter to prevent multiple animations
+    #[rust(true)]
+    animation_counter: bool,
     #[animator]
     pub animator: Animator,
     #[live(true)]
@@ -118,50 +97,132 @@ pub struct GSubMenu {
     #[rust]
     pub state: SubMenuState,
     #[rust]
-    defer_walks: DeferWalks,
-    #[live]
-    pub active: Option<String>,
-    #[live]
-    pub value: String,
+    pub draw_state: DrawStateWrap<DrawSubMenuState>,
+    #[live(true)]
+    pub grab_key_focus: bool,
+    #[live(true)]
+    pub event_open: bool,
+    #[rust]
+    pub scope_path: Option<HeapLiveIdPath>,
+    #[rust]
+    pub apply_slot_map: ApplySlotMap<SubMenuState, SubMenuPart>,
+}
+
+impl Widget for GSubMenu {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        if !self.visible {
+            return DrawStep::done();
+        }
+        let prop = self.prop.get_mut(self.state);
+        self.fold = self.active.to_f64();
+        let body_walk = self.body.walk(cx);
+        let header_walk = self.header.walk(cx);
+
+        self.draw_sub_menu.begin(cx, walk, prop.layout());
+
+        if self.draw_state.begin(cx, DrawSubMenuState::DrawHeader) {
+            if self.header.visible {
+                let _ = self.header.draw_walk(cx, scope, header_walk);
+            }
+            self.draw_state.set(DrawSubMenuState::DrawBody);
+        }
+
+        if let Some(DrawSubMenuState::DrawBody) = self.draw_state.get() {
+            if self.fold == 1.0 {
+                self.animator_play(cx, id!(active.on));
+                let _ = self.body.draw_walk(cx, scope, body_walk);
+            } else {
+                self.animator_play(cx, id!(active.off));
+            }
+        }
+        self.draw_sub_menu.end(cx);
+        DrawStep::done()
+    }
+    fn handle_event_with(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        scope: &mut Scope,
+        sweep_area: Area,
+    ) {
+        if !self.visible {
+            return;
+        }
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().sub_menu = true;
+        let hit = event.hits(cx, sweep_area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, sweep_area);
+            if self.active {
+                self.body.handle_event(cx, event, scope);
+            }
+        }
+    }
+    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
+        if !self.visible {
+            return;
+        }
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().sub_menu = true;
+        let area = self.area_header();
+        let hit = event.hits(cx, area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, area);
+            if self.active {
+                self.body.handle_event(cx, event, scope);
+            }
+        }
+    }
 }
 
 impl WidgetNode for GSubMenu {
     fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
-        for (_, child) in &self.extra.children {
-            let x = child.uid_to_widget(uid);
-            if !x.is_empty() {
-                return x;
+        for slot in [&self.header, &self.body] {
+            for (_, child) in slot.children.iter() {
+                let x = child.uid_to_widget(uid);
+                if !x.is_empty() {
+                    return x;
+                }
             }
         }
         WidgetRef::empty()
     }
 
     fn find_widgets(&self, path: &[LiveId], cached: WidgetCache, results: &mut WidgetSet) {
-        for (_, child) in &self.extra.children {
-            child.find_widgets(path, cached, results);
+        for slot in [&self.header, &self.body] {
+            for (_, child) in &slot.children {
+                child.find_widgets(path, cached, results);
+            }
         }
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.state);
-        prop.walk()
+        prop.container.walk()
     }
 
     fn area(&self) -> Area {
-        self.draw_item.area
+        if self.active {
+            self.draw_sub_menu.area
+        } else {
+            self.area_header()
+        }
     }
 
     fn redraw(&mut self, cx: &mut Cx) {
         let _ = self.render(cx);
-        self.draw_item.redraw(cx);
-        if self.icon.visible {
-            self.icon.redraw(cx);
-        }
-        if self.text.visible {
-            self.text.redraw(cx);
-        }
-        if self.extra.visible {
-            self.extra.redraw(cx);
+        self.draw_sub_menu.redraw(cx);
+        for (visible, slot) in [
+            (self.header.visible, &mut self.header),
+            (self.body.visible, &mut self.body),
+        ] {
+            if visible {
+                slot.redraw(cx);
+            }
         }
     }
 
@@ -176,77 +237,26 @@ impl WidgetNode for GSubMenu {
     visible!();
 }
 
-impl Widget for GSubMenu {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        if !self.visible {
-            return DrawStep::done();
-        }
-
-        let state = self.state;
-        let prop = self.prop.get(state);
-
-        let _ = self.draw_item.begin(cx, walk, prop.layout());
-
-        let _ = SlotDrawer::new(
-            [
-                (live_id!(icon), (&mut self.icon).into()),
-                (live_id!(text), (&mut self.text).into()),
-                (live_id!(extra), (&mut self.extra).into()),
-            ],
-            &mut self.defer_walks,
-        )
-        .draw_walk(cx, scope);
-
-        self.draw_item.end(cx);
-        self.set_scope_path(&scope.path);
-        DrawStep::done()
-    }
-
-    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        if !self.visible {
-            return;
-        }
-
-        self.set_animation(cx);
-        cx.global::<ComponentAnInit>().menu_item = true;
-
-        // handle slot events
-        let mut is_slot_hover = false;
-        self.icon.handle_event(cx, event, scope);
-        self.text.handle_event(cx, event, scope);
-        self.extra.handle_event(cx, event, scope);
-        // let super_state: SubMenuState = self.icon.state.into();
-
-        if is_slot_hover {
-            self.switch_state_with_animation(cx, SubMenuState::Hover);
-        } else {
-            self.switch_state_with_animation(cx, SubMenuState::Basic);
-        }
-
-        let area = self.area();
-        let hit = event.hits(cx, area);
-        self.handle_widget_event(cx, event, hit, area);
-    }
-}
-
 impl LiveHook for GSubMenu {
     pure_after_apply!();
-
     fn after_new_before_apply(&mut self, cx: &mut Cx) {
         self.merge_conf_prop(cx);
     }
-
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         let live_props = ViewBasicProp::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
-            [live_id!(basic), live_id!(hover)],
+            [
+                live_id!(basic),
+                live_id!(hover),
+                live_id!(active),
+                live_id!(disabled),
+            ],
             [
                 (SubMenuPart::Container, &live_props),
-                (SubMenuPart::Icon, &SvgBasicProp::live_props()),
-                (SubMenuPart::Text, &LabelBasicProp::live_props()),
-                (SubMenuPart::Extra, &live_props),
+                (SubMenuPart::Header, &live_props),
+                (SubMenuPart::Body, &live_props),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -256,7 +266,7 @@ impl LiveHook for GSubMenu {
                 HOVER => {
                     component.apply_slot_map.insert(SubMenuState::Hover, applys);
                 }
-                PRESSED => {
+                ACTIVE => {
                     component
                         .apply_slot_map
                         .insert(SubMenuState::Active, applys);
@@ -272,6 +282,40 @@ impl LiveHook for GSubMenu {
     }
 }
 
+impl GSubMenu {
+    active_event! {
+        active_hover_in: SubMenuEvent::HoverIn |meta: FingerHoverEvent| => SubMenuHoverIn {meta},
+        active_hover_out: SubMenuEvent::HoverOut |meta: FingerHoverEvent| => SubMenuHoverOut {meta}
+    }
+    pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    SubMenuEvent::Changed(SubMenuChanged {
+                        meta,
+                        active: self.active,
+                        value: self.value.to_string(),
+                    }),
+                );
+            });
+        }
+    }
+    event_option! {
+        hover_in: SubMenuEvent::HoverIn => SubMenuHoverIn,
+        hover_out: SubMenuEvent::HoverOut => SubMenuHoverOut
+    }
+    area! {
+        area_header, header,
+        area_body, body
+    }
+}
+
+impl SlotComponent<SubMenuState> for GSubMenu {
+    type Part = SubMenuPart;
+}
+
 impl Component for GSubMenu {
     type Error = Error;
 
@@ -280,73 +324,32 @@ impl Component for GSubMenu {
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let prop = &cx.global::<Conf>().components.sub_menu;
         self.prop = prop.clone();
-        self.icon.prop.basic = self.prop.basic.icon;
-        self.icon.prop.hover = self.prop.hover.icon;
-        self.icon.prop.pressed = self.prop.active.icon;
-        self.icon.prop.disabled = self.prop.disabled.icon;
-        self.text.prop.basic = self.prop.basic.text;
-        self.text.prop.disabled = self.prop.disabled.text;
-        self.extra.prop.basic = self.prop.basic.extra;
-        self.extra.prop.hover = self.prop.hover.extra;
-        self.extra.prop.pressed = self.prop.active.extra;
-        self.extra.prop.disabled = self.prop.disabled.extra;
+        self.header.prop.basic = self.prop.basic.header;
+        self.header.prop.hover = self.prop.hover.header;
+        self.header.prop.pressed = self.prop.active.header;
+        self.header.prop.disabled = self.prop.disabled.header;
+        self.body.prop.basic = self.prop.basic.body;
+        self.body.prop.hover = self.prop.hover.body;
+        self.body.prop.pressed = self.prop.active.body;
+        self.body.prop.disabled = self.prop.disabled.body;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
-        let state = if self.disabled {
-            SubMenuState::Disabled
+        if self.disabled {
+            self.switch_state(SubMenuState::Disabled);
         } else {
             if self.active {
-                SubMenuState::Active
+                self.switch_state(SubMenuState::Active);
             } else {
-                SubMenuState::Basic
-            }
-        };
-        self.switch_state(state);
-        let prop = self.prop.get(self.state);
-        self.draw_item.merge(&prop.container);
-        let _ = self.icon.render(cx)?;
-        let _ = self.text.render(cx)?;
-        let _ = self.extra.render(cx)?;
-        Ok(())
-    }
-
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-        animation_open_then_redraw!(self, cx, event);
-        if !self.active {
-            match hit {
-                Hit::FingerDown(_) => {
-                    if self.grab_key_focus {
-                        cx.set_key_focus(area);
-                    }
-                }
-                Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.state).container.cursor);
-                    self.switch_state_with_animation(cx, SubMenuState::Hover);
-                    hit_hover_in!(self, cx, e);
-                }
-                Hit::FingerHoverOut(e) => {
-                    self.switch_state_with_animation(cx, SubMenuState::Basic);
-                    hit_hover_out!(self, cx, e);
-                }
-                Hit::FingerUp(e) => {
-                    if e.is_over {
-                        if e.has_hovers() {
-                            self.active = true;
-                            self.switch_state_with_animation(cx, SubMenuState::Active);
-                            self.play_animation(cx, id!(hover.active));
-                        } else {
-                            self.switch_state_with_animation(cx, SubMenuState::Basic);
-                            self.play_animation(cx, id!(hover.off));
-                        }
-                        self.active_clicked(cx, Some(e));
-                    } else {
-                        self.switch_state_with_animation(cx, SubMenuState::Basic);
-                    }
-                }
-                _ => {}
+                self.switch_state(SubMenuState::Basic);
             }
         }
+        let state = self.state;
+        let prop = self.prop.get(state);
+        self.draw_sub_menu.merge(&prop.container);
+        let _ = self.header.render(cx)?;
+        let _ = self.body.render(cx)?;
+        Ok(())
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
@@ -358,12 +361,51 @@ impl Component for GSubMenu {
             _ => {}
         }
     }
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+        if !self.animation_open && self.animation_counter {
+            if self.animator_handle_event(cx, event).must_redraw() {
+                if self.animator.is_track_animating(cx, id!(active)) {
+                    self.area().redraw(cx);
+                    self.animation_counter = !self.animation_counter;
+                }
+            }
+        }
+
+        match hit {
+            Hit::FingerDown(_) => {
+                if self.grab_key_focus {
+                    cx.set_key_focus(area);
+                }
+            }
+            Hit::FingerHoverIn(meta) => {
+                cx.set_cursor(self.prop.get(self.state).header.cursor);
+                self.switch_state_with_animation(cx, SubMenuState::Hover);
+                self.active_hover_in(cx, meta);
+            }
+            Hit::FingerHoverOut(meta) => {
+                self.switch_state_with_animation(cx, SubMenuState::Basic);
+                self.active_hover_out(cx, meta);
+            }
+            Hit::FingerUp(meta) => {
+                self.active = !self.active;
+                self.fold = self.active.to_f32() as f64;
+                if self.active {
+                    self.switch_state_with_animation(cx, SubMenuState::Active);
+                    self.animator_play(cx, id!(active.on));
+                } else {
+                    self.switch_state_with_animation(cx, SubMenuState::Basic);
+                    self.animator_play(cx, id!(active.off));
+                }
+                self.active_changed(cx, Some(meta));
+                self.animation_counter = true;
+            }
+            _ => {}
+        }
+    }
 
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
-        self.icon.switch_state(state.into());
-        self.text.switch_state(state.into());
-        self.extra.switch_state(state.into());
+        self.header.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
@@ -372,22 +414,27 @@ impl Component for GSubMenu {
         }
         self.switch_state(state);
         self.set_animation(cx);
+        self.redraw(cx);
     }
 
     fn focus_sync(&mut self) -> () {
         let mut crossed_map = self.apply_slot_map.cross();
-        crossed_map.remove(&SubMenuPart::Icon).map(|map| {
-            self.icon.apply_slot_map.merge_slot(map.to_slot());
-            self.icon.focus_sync();
-        });
+        for (part, slot) in [
+            (SubMenuPart::Header, &mut self.header),
+            (SubMenuPart::Body, &mut self.body),
+        ] {
+            crossed_map.remove(&part).map(|map| {
+                slot.apply_state_map.merge(map.to_state());
+            });
+            slot.focus_sync();
+        }
 
         // sync state if is not Basic
         self.prop.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
-        let init_global = cx.global::<ComponentAnInit>().menu_item;
-
+        let init_global = cx.global::<ComponentAnInit>().sub_menu;
         let live_ptr = match self.animator.live_ptr {
             Some(ptr) => ptr.file_id.0,
             None => return,
@@ -398,7 +445,6 @@ impl Component for GSubMenu {
             Some(lf) => lf,
             None => return,
         };
-
         let nodes = &mut live_file.expanded.nodes;
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
@@ -454,7 +500,7 @@ impl Component for GSubMenu {
             }
 
             set_animation! {
-                nodes: draw_item = {
+                nodes: draw_sub_menu = {
                     basic_index => {
                         background_color => basic_prop.container.background_color,
                         border_color =>basic_prop.container.border_color,
@@ -539,7 +585,7 @@ impl Component for GSubMenu {
                 ),
             };
             set_animation! {
-                nodes: draw_item = {
+                nodes: draw_sub_menu = {
                     index => {
                         background_color => prop.container.background_color,
                         border_color => prop.container.border_color,
@@ -563,47 +609,8 @@ impl Component for GSubMenu {
     lifecycle!();
 }
 
-impl SlotComponent<SubMenuState> for GSubMenu {
-    type Part = SubMenuPart;
-}
-
-impl GSubMenu {
-    // active_event! {
-    //     active_hover_in: SubMenuEvent::HoverIn |meta: FingerHoverEvent| => SubMenuHoverIn { meta },
-    //     active_hover_out: SubMenuEvent::HoverOut |meta: FingerHoverEvent| => SubMenuHoverOut { meta }
-    // }
-    // event_option! {
-    //     hover_in: SubMenuEvent::HoverIn => SubMenuHoverIn,
-    //     hover_out: SubMenuEvent::HoverOut => SubMenuHoverOut,
-    //     clicked: SubMenuEvent::Clicked => SubMenuClicked
-    // }
-    pub fn active_clicked(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
-        if self.event_open {
-            self.scope_path.as_ref().map(|path| {
-                cx.widget_action(
-                    self.widget_uid(),
-                    path,
-                    SubMenuEvent::Changed(SubMenuChanged {
-                        active: self.active,
-                        value: self.value.to_string(),
-                        meta,
-                    }),
-                );
-            });
-        }
-    }
-    pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
-        self.active = active;
-        let (state, hover_id) = match (active, init) {
-            (true, false) => (SubMenuState::Active, Some(id!(hover.active))),
-            (true, true) => (SubMenuState::Active, None),
-            (false, true) => (SubMenuState::Basic, None),
-            (false, false) => (SubMenuState::Basic, Some(id!(hover.off))),
-        };
-        self.switch_state(state);
-        if let Some(hover_id) = hover_id {
-            self.play_animation(cx, hover_id);
-        }
-        self.active_clicked(cx, None);
-    }
+#[derive(Clone, Copy)]
+pub enum DrawSubMenuState {
+    DrawHeader,
+    DrawBody,
 }

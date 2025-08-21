@@ -1,21 +1,20 @@
-use std::str::FromStr;
-
 use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
     component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
+        label::LabelState,
         live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
+        svg::SvgState,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, ITEMS, PRESSED, TEXT},
+        manuel::{BASIC, BODY, CONTAINER, DISABLED, HEADER, HOVER, PRESSED},
+        traits::NewFrom,
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
@@ -74,10 +73,8 @@ impl SlotProp for SubMenuProp {
             ],
             [
                 SubMenuPart::Container,
-                SubMenuPart::Icon,
-                SubMenuPart::Text,
-                SubMenuPart::Extra,
-                SubMenuPart::Items,
+                SubMenuPart::Header,
+                SubMenuPart::Body,
             ],
         );
     }
@@ -108,14 +105,10 @@ impl Default for SubMenuProp {
 pub struct SubMenuBasicProp {
     #[live(SubMenuBasicProp::default_container(Theme::default(), SubMenuState::Basic))]
     pub container: ViewBasicProp,
-    #[live(SubMenuBasicProp::default_icon(Theme::default(), SubMenuState::Basic))]
-    pub icon: SvgBasicProp,
-    #[live(SubMenuBasicProp::default_text(Theme::default(), SubMenuState::Basic))]
-    pub text: LabelBasicProp,
-    #[live(SubMenuBasicProp::default_extra(Theme::default(), SubMenuState::Basic))]
-    pub extra: ViewBasicProp,
-    #[live(SubMenuBasicProp::default_items(Theme::default(), SubMenuState::Basic))]
-    pub items: ViewBasicProp,
+    #[live(SubMenuBasicProp::default_header(Theme::default(), SubMenuState::Basic))]
+    pub header: ViewBasicProp,
+    #[live(SubMenuBasicProp::default_body(Theme::default(), SubMenuState::Basic))]
+    pub body: ViewBasicProp,
 }
 
 impl BasicProp for SubMenuBasicProp {
@@ -126,10 +119,8 @@ impl BasicProp for SubMenuBasicProp {
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
             container: Self::default_container(theme, state),
-            icon: Self::default_icon(theme, state),
-            text: Self::default_text(theme, state),
-            extra: Self::default_extra(theme, state),
-            items: Self::default_items(theme, state),
+            header: Self::default_header(theme, state),
+            body: Self::default_body(theme, state),
         }
     }
 
@@ -138,7 +129,7 @@ impl BasicProp for SubMenuBasicProp {
     }
 
     fn len() -> usize {
-        0
+        3 * ViewBasicProp::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -146,10 +137,8 @@ impl BasicProp for SubMenuBasicProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        self.icon.sync(state.into());
-        self.text.sync(state.into());
-        self.extra.sync(state.into());
-        self.items.sync(state.into());
+        self.header.sync(state.into());
+        self.body.sync(state.into());
     }
 
     fn live_props() -> LiveProps {
@@ -157,8 +146,6 @@ impl BasicProp for SubMenuBasicProp {
             (live_id!(container), ViewBasicProp::live_props().into()),
             (live_id!(header), ViewBasicProp::live_props().into()),
             (live_id!(body), ViewBasicProp::live_props().into()),
-            (live_id!(footer), ViewBasicProp::live_props().into()),
-            (live_id!(items), ViewBasicProp::live_props().into()),
         ]
     }
 
@@ -181,25 +168,12 @@ impl SlotBasicProp for SubMenuBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            SubMenuPart::Container => {
-                self.container
-                    .set_from_str(key, &value.into(), state.into())
-            }
-            SubMenuPart::Icon => {
-                let icon_part = SvgPart::from_str(key).unwrap();
-                for (key, value) in value.as_kvs() {
-                    self.icon
-                        .set_from_str_slot(key, value, state.into(), icon_part);
-                }
-            }
-            SubMenuPart::Text => {
-                self.text.set_from_str(key, &value.into(), state.into());
-            }
-            SubMenuPart::Extra => {
-                self.extra.set_from_str(key, &value.into(), state.into());
-            }
-            SubMenuPart::Items => {
-                self.items.set_from_str(key, &value.into(), state.into());
+            SubMenuPart::Container => self
+                .container
+                .set_from_str(key, &value.into(), state.into()),
+            SubMenuPart::Header => self.header.set_from_str(key, &value.into(), state.into()),
+            SubMenuPart::Body => {
+                self.body.set_from_str(key, &value.into(), state.into());
             }
         }
     }
@@ -207,13 +181,8 @@ impl SlotBasicProp for SubMenuBasicProp {
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
         match part {
             SubMenuPart::Container => self.container.sync(state.into()),
-            SubMenuPart::Icon => {
-                self.icon.sync_slot(state.into(), SvgPart::Svg);
-                self.icon.sync_slot(state.into(), SvgPart::Container);
-            }
-            SubMenuPart::Text => self.text.sync(state.into()),
-            SubMenuPart::Extra => self.extra.sync(state.into()),
-            SubMenuPart::Items => self.items.sync(state.into()),
+            SubMenuPart::Header => self.header.sync(state.into()),
+            SubMenuPart::Body => self.body.sync(state.into()),
         }
     }
 }
@@ -235,49 +204,28 @@ impl TryFrom<(&Item, SubMenuState)> for SubMenuBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || {
-                Ok(SubMenuBasicProp::default_container(
-                    Theme::default(),
-                    state,
-                ))
-            },
+            || Ok(SubMenuBasicProp::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
-        let icon = get_from_itable(
+        let header = get_from_itable(
             inline_table,
-            ICON,
-            || Ok(SubMenuBasicProp::default_icon(Theme::default(), state)),
-            |v| (v, SvgState::from(state)).try_into(),
-        )?;
-
-        let text = get_from_itable(
-            inline_table,
-            TEXT,
-            || Ok(SubMenuBasicProp::default_text(Theme::default(), state)),
-            |v| (v, LabelState::from(state)).try_into(),
-        )?;
-
-        let extra = get_from_itable(
-            inline_table,
-            EXTRA,
-            || Ok(SubMenuBasicProp::default_extra(Theme::default(), state)),
+            HEADER,
+            || Ok(SubMenuBasicProp::default_header(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
-        let items = get_from_itable(
+        let body = get_from_itable(
             inline_table,
-            ITEMS,
-            || Ok(SubMenuBasicProp::default_items(Theme::default(), state)),
+            BODY,
+            || Ok(SubMenuBasicProp::default_body(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         Ok(Self {
             container,
-            icon,
-            text,
-            extra,
-            items,
+            header,
+            body,
         })
     }
 }
@@ -288,28 +236,30 @@ impl SubMenuBasicProp {
         container.set_height(Size::Fit);
         container.set_width(Size::Fill);
         container.set_background_visible(true);
-        container.set_flow(Flow::Right);
+        container.set_flow(Flow::Down);
+        container.set_margin(Margin::from_f64(0.0));
+        container.set_padding(Padding::from_f64(0.0));
+        container.set_spacing(0.0);
         container
     }
-    pub fn default_icon(theme: Theme, state: SubMenuState) -> SvgBasicProp {
-        let icon = SvgBasicProp::from_state(theme, state.into());
-        icon
+    pub fn default_header(theme: Theme, state: SubMenuState) -> ViewBasicProp {
+        let mut header = ViewBasicProp::from_state(theme, state.into());
+        header.set_height(Size::Fixed(42.0));
+        header.set_width(Size::Fill);
+        header.set_background_visible(true);
+        header.set_cursor(MouseCursor::Hand);
+        header.set_flow(Flow::Right);
+        header.set_margin(Margin::from_f64(0.0));
+        header
     }
-    pub fn default_text(theme: Theme, state: SubMenuState) -> LabelBasicProp {
-        LabelBasicProp::from_state(theme, state.into())
-    }
-    pub fn default_extra(theme: Theme, state: SubMenuState) -> ViewBasicProp {
-        let mut extra = ViewBasicProp::from_state(theme, state.into());
-        extra.set_height(Size::Fill);
-        extra.set_width(Size::Fill);
-        extra
-    }
-    pub fn default_items(theme: Theme, state: SubMenuState) -> ViewBasicProp {
-        let mut items = ViewBasicProp::from_state(theme, state.into());
-        items.set_height(Size::Fit);
-        items.set_width(Size::Fill);
-        items.set_flow(Flow::Down);
-        items
+    pub fn default_body(theme: Theme, state: SubMenuState) -> ViewBasicProp {
+        let mut body = ViewBasicProp::from_state(theme, state.into());
+        body.set_height(Size::Fit);
+        body.set_width(Size::Fill);
+        body.set_background_visible(true);
+        body.set_margin(Margin::from_f64(0.0));
+        body.set_flow(Flow::Down);
+        body
     }
 }
 
@@ -364,9 +314,7 @@ impl From<SubMenuState> for SvgState {
 impl From<SubMenuState> for LabelState {
     fn from(value: SubMenuState) -> Self {
         match value {
-            SubMenuState::Basic | SubMenuState::Hover | SubMenuState::Active => {
-                LabelState::Basic
-            }
+            SubMenuState::Basic | SubMenuState::Hover | SubMenuState::Active => LabelState::Basic,
             SubMenuState::Disabled => LabelState::Disabled,
         }
     }
@@ -375,9 +323,7 @@ impl From<SubMenuState> for LabelState {
 component_part! {
     SubMenuPart {
         Container => container => CONTAINER,
-        Icon => icon => ICON,
-        Text => text => TEXT,
-        Extra => extra => EXTRA,
-        Items => items => ITEMS
+        Header => header => HEADER,
+        Body => body => BODY
     }, SubMenuState
 }

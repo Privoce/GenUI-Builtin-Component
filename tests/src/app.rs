@@ -572,53 +572,75 @@ live_design! {
                     //     <GButton>{}
                     // }
                     // body = <HomePage> {}
-                    // <GMenuItem> {
-                        
-                    // }
-                    <GCollapse> {
-                        prop: {
-                            basic: {
-                                container: {
-                                    background_color: #fff,
-                                    background_visible: true
-                                }
-                            }
-                        },
-                        active: true,
-                        position: Top,
-                        header: <GView> {
+
+                    // <GCollapse> {
+                    //     prop: {
+                    //         basic: {
+                    //             container: {
+                    //                 background_color: #fff,
+                    //                 background_visible: true
+                    //             }
+                    //         }
+                    //     },
+                    //     active: true,
+                    //     position: Top,
+                    //     header: <GView> {
                             
-                            <GLabel> {
-                                text: "Collapse Header"
+                    //         <GLabel> {
+                    //             text: "Collapse Header"
+                    //         }
+                    //     }
+                    //     body: <GView> {
+                    //         <GLabel> {
+                    //             text: "Collapse Body"
+                    //         }
+                    //     }
+                    // }
+                    // <GCollapse> {
+                    //     prop: {
+                    //         basic: {
+                    //             header: {
+                    //                 width: 200.0,
+                    //             },
+                    //             body: {
+                    //                 height: 300.0,
+                    //             }
+                    //         }
+                    //     },
+                    //     position: Right,
+                    //     active: true,
+                    //     header: <GView> {
+                    //         <GLabel> {
+                    //             text: "Collapse Header"
+                    //         }
+                    //     }
+                    //     body: <GView> {
+                    //         <GLabel> {
+                    //             text: "Collapse Body"
+                    //         }
+                    //     }
+                    // }
+                    <GMenuItem> {
+                        text: <GLabel> {
+                            text: "Menu item"
+                        }    
+                    }
+                    <GSubMenu>{
+                        header: <GView> {
+                            <GLabel>{
+                                text: "Sub Menu",
                             }
                         }
                         body: <GView> {
-                            <GLabel> {
-                                text: "Collapse Body"
-                            }
-                        }
-                    }
-                    <GCollapse> {
-                        prop: {
-                            basic: {
-                                header: {
-                                    width: 200.0,
-                                },
-                                body: {
-                                    height: 300.0,
+                            <GMenuItem> {
+                                text: <GLabel>{
+                                    text: "Sub Menu Item 1",
                                 }
                             }
-                        },
-                        position: Right,
-                        active: true,
-                        header: <GView> {
-                            <GLabel> {
-                                text: "Collapse Header"
-                            }
-                        }
-                        body: <GView> {
-                            <GLabel> {
-                                text: "Collapse Body"
+                            <GMenuItem> {
+                                text: <GLabel>{
+                                    text: "Sub Menu Item 2",
+                                }
                             }
                         }
                     }

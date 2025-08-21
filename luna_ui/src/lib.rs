@@ -46,4 +46,5 @@ pub struct ComponentAnInit {
     link: bool,
     menu_item: bool,
     collapse: bool,
+    sub_menu: bool,
 }
