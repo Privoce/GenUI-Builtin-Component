@@ -1,4 +1,4 @@
-use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent};
+use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent, LiveId};
 
 #[derive(Clone, Debug, DefaultNone)]
 pub enum MenuItemEvent {
@@ -27,17 +27,28 @@ pub struct MenuItemClicked {
 
 #[derive(Debug, Clone, DefaultNone)]
 pub enum MenuEvent {
+    HoverIn(MenuHoverIn),
+    HoverOut(MenuHoverOut),
     Changed(MenuChanged),
     None,
 }
 
 #[derive(Clone, Debug)]
+pub struct MenuHoverIn {
+    pub meta: FingerHoverEvent,
+}
+
+#[derive(Clone, Debug)]
+pub struct MenuHoverOut {
+    pub meta: FingerHoverEvent,
+}
+
+#[derive(Clone, Debug)]
 pub struct MenuChanged {
     pub meta: Option<FingerUpEvent>,
-    /// The index of the active
-    pub index: i32,
     /// The value of the active
     pub value: Option<String>,
+    pub id: LiveId,
 }
 
 #[derive(Debug, Clone, DefaultNone)]

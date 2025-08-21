@@ -17,7 +17,7 @@ use crate::{
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
-        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, Position4, ToStateMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_view::DrawView,
@@ -282,35 +282,6 @@ impl LiveHook for GSubMenu {
     }
 }
 
-impl GSubMenu {
-    active_event! {
-        active_hover_in: SubMenuEvent::HoverIn |meta: FingerHoverEvent| => SubMenuHoverIn {meta},
-        active_hover_out: SubMenuEvent::HoverOut |meta: FingerHoverEvent| => SubMenuHoverOut {meta}
-    }
-    pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
-        if self.event_open {
-            self.scope_path.as_ref().map(|path| {
-                cx.widget_action(
-                    self.widget_uid(),
-                    path,
-                    SubMenuEvent::Changed(SubMenuChanged {
-                        meta,
-                        active: self.active,
-                        value: self.value.to_string(),
-                    }),
-                );
-            });
-        }
-    }
-    event_option! {
-        hover_in: SubMenuEvent::HoverIn => SubMenuHoverIn,
-        hover_out: SubMenuEvent::HoverOut => SubMenuHoverOut
-    }
-    area! {
-        area_header, header,
-        area_body, body
-    }
-}
 
 impl SlotComponent<SubMenuState> for GSubMenu {
     type Part = SubMenuPart;
@@ -608,6 +579,38 @@ impl Component for GSubMenu {
     set_index!();
     lifecycle!();
 }
+
+impl GSubMenu {
+    active_event! {
+        active_hover_in: SubMenuEvent::HoverIn |meta: FingerHoverEvent| => SubMenuHoverIn {meta},
+        active_hover_out: SubMenuEvent::HoverOut |meta: FingerHoverEvent| => SubMenuHoverOut {meta}
+    }
+    pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    SubMenuEvent::Changed(SubMenuChanged {
+                        meta,
+                        active: self.active,
+                        value: self.value.to_string(),
+                    }),
+                );
+            });
+        }
+    }
+    event_option! {
+        hover_in: SubMenuEvent::HoverIn => SubMenuHoverIn,
+        hover_out: SubMenuEvent::HoverOut => SubMenuHoverOut,
+        changed: SubMenuEvent::Changed => SubMenuChanged
+    }
+    area! {
+        area_header, header,
+        area_body, body
+    }
+}
+
 
 #[derive(Clone, Copy)]
 pub enum DrawSubMenuState {

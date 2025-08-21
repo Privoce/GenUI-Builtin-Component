@@ -366,6 +366,8 @@ live_design! {
 
     pub GSubMenu = <GSubMenuBase> {}
 
+    pub GMenu = <GMenuBase> {}
+
     pub GCollapse = <GCollapseBase> {}
 }
 
@@ -394,6 +396,7 @@ pub fn components_register(cx: &mut Cx) {
     router::live_design(cx);
     menu::item::live_design(cx);
     menu::sub::live_design(cx);
+    menu::live_design(cx);
     collapse::live_design(cx);
 }
 

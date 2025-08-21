@@ -620,30 +620,64 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GMenuItem> {
-                        text: <GLabel> {
-                            text: "Menu item"
-                        }    
-                    }
-                    <GSubMenu>{
-                        header: <GView> {
-                            <GLabel>{
-                                text: "Sub Menu",
-                            }
-                        }
-                        body: <GView> {
-                            <GMenuItem> {
-                                text: <GLabel>{
-                                    text: "Sub Menu Item 1",
-                                }
-                            }
-                            <GMenuItem> {
-                                text: <GLabel>{
-                                    text: "Sub Menu Item 2",
-                                }
-                            }
-                        }
-                    }
+                    // <GMenuItem> {
+                    //     text: <GLabel> {
+                    //         text: "Menu item"
+                    //     }    
+                    // }
+                    // <GSubMenu>{
+                    //     header: <GView> {
+                    //         <GLabel>{
+                    //             text: "Sub Menu",
+                    //         }
+                    //     }
+                    //     body: <GView> {
+                    //         <GMenuItem> {
+                    //             text: <GLabel>{
+                    //                 text: "Sub Menu Item 1",
+                    //             }
+                    //         }
+                    //         <GMenuItem> {
+                    //             text: <GLabel>{
+                    //                 text: "Sub Menu Item 2",
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    // <GSubMenu>{
+                    //     header: <GView> {
+                    //         <GLabel>{
+                    //             text: "Sub Menu",
+                    //         }
+                    //     }
+                    //     body: <GView> {
+                    //         <GMenuItem> {
+                    //             text: <GLabel>{
+                    //                 text: "Sub Menu Item 1-1",
+                    //             }
+                    //         }
+                    //         <GSubMenu>{
+                    //             header: <GView> {
+                    //                 <GLabel>{
+                    //                     text: "Sub Menu",
+                    //                 }
+                    //             }
+                    //             body: <GView> {
+                    //                 <GMenuItem> {
+                    //                     text: <GLabel>{
+                    //                         text: "Sub Menu Item 2-1",
+                    //                     }
+                    //                 }
+                    //                 <GMenuItem> {
+                    //                     text: <GLabel>{
+                    //                         text: "Sub Menu Item 2-2",
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    <GMenu>{}
                 }
             }
         }
