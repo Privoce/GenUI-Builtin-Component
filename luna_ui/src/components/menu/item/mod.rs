@@ -1,17 +1,30 @@
 mod prop;
 
-use makepad_widgets::*;
-pub use prop::*;
 use crate::{
-    active_event, animation_open_then_redraw, components::{
-        label::{GLabel, LabelBasicProp}, lifecycle::LifeCycle, menu::event::{MenuItemClicked, MenuItemEvent, MenuItemHoverIn, MenuItemHoverOut}, svg::{GSvg, SvgBasicProp, SvgState}, traits::{BasicProp, Component, Prop, SlotComponent, SlotProp}, view::{GView, ViewBasicProp}
-    }, error::Error, event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
+    active_event, animation_open_then_redraw,
+    components::{
+        label::{GLabel, LabelBasicProp},
+        lifecycle::LifeCycle,
+        menu::event::{MenuItemClicked, MenuItemEvent, MenuItemHoverIn, MenuItemHoverOut},
+        svg::{GSvg, SvgBasicProp},
+        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
+        view::{GView, ViewBasicProp},
+    },
+    error::Error,
+    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
-        ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, ApplyStateMap, DeferWalks, SlotDrawer,
-        ToSlotMap,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::Conf, visible, ComponentAnInit
+        ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer, ToSlotMap,
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path,
+    shader::draw_view::DrawView,
+    sync,
+    themes::Conf,
+    visible, ComponentAnInit,
 };
+use makepad_widgets::*;
+pub use prop::*;
 
 live_design! {
     link genui_basic;
@@ -109,7 +122,7 @@ pub struct GMenuItem {
     #[live]
     pub active: bool,
     #[live]
-    pub value: String
+    pub value: String,
 }
 
 impl WidgetNode for GMenuItem {
@@ -492,7 +505,6 @@ impl Component for GMenuItem {
                     }
                 }
             }
-
         } else {
             let state = self.state;
             let prop = self.prop.get(state);

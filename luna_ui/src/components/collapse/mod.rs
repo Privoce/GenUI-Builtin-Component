@@ -7,14 +7,14 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area,
+    active_event, area,
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
     },
     error::Error,
-    event_option, hit_hover_in, lifecycle, play_animation,
+    event_option, lifecycle, play_animation,
     prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
@@ -157,8 +157,6 @@ impl Widget for GCollapse {
                         }
                     }
                 }
-
-                cx.begin_turtle(walk, prop.layout());
             } else {
                 match self.position {
                     Position4::Left | Position4::Right => {
@@ -167,20 +165,13 @@ impl Widget for GCollapse {
                         }
                     }
                     Position4::Top | Position4::Bottom => {
-                        if !walk.height.is_fixed() {
-                            walk.height = Size::Fill;
-                        }
+                        // if !walk.height.is_fixed() {
+                        //     walk.height = Size::Fill;
+                        // }
                     }
                 }
-
-                // // if is active, walk should be Fill
-                // let walk = if walk.height.is_fixed() {
-                //     walk
-                // } else {
-                //     Walk::fill()
-                // };
-                cx.begin_turtle(walk, prop.layout());
             }
+            cx.begin_turtle(walk, prop.layout());
         }
 
         for (index, _) in steps.iter().enumerate() {
@@ -236,109 +227,44 @@ impl Widget for GCollapse {
         }
         DrawStep::done()
     }
-    // fn handle_event_with(
-    //     &mut self,
-    //     cx: &mut Cx,
-    //     event: &Event,
-    //     scope: &mut Scope,
-    //     sweep_area: Area,
-    // ) {
-    //     let uid = self.widget_uid();
-    //     if !self.animation_open && self.animation_counter {
-    //         if self.animator_handle_event(cx, event).must_redraw() {
-    //             if self.animator.is_track_animating(cx, id!(open)) {
-    //                 self.area.redraw(cx);
-    //                 self.animation_counter = !self.animation_counter;
-    //             }
-    //         }
-    //     }
-
-    //     match event.hits(cx, self.area_header()) {
-    //         Hit::FingerDown(_) => {
-    //             if self.grab_key_focus {
-    //                 cx.set_key_focus(sweep_area);
-    //             }
-    //         }
-    //         Hit::FingerHoverIn(f_in) => {
-    //             cx.set_cursor(self.prop.get(self.state).container.cursor);
-    //             // cx.widget_action(uid, &scope.path, CollapseEvent::HoverIn);
-    //         }
-    //         Hit::FingerHoverOut(f_out) => {
-    //             // cx.widget_action(uid, &scope.path, CollapseEvent::HoverOut(f_out.clone()));
-    //         }
-    //         Hit::FingerUp(f_up) => {
-    //             self.active = !self.active;
-    //             self.fold = self.active.to_f32() as f64;
-
-    //             if self.active {
-    //                 self.animator_play(cx, id!(open.on));
-    //                 cx.widget_action(uid, &scope.path, CollapseEvent::Opened(f_up.clone()));
-    //             } else {
-    //                 self.animator_play(cx, id!(active.off));
-    //                 cx.widget_action(uid, &scope.path, CollapseEvent::Closed(f_up.clone()));
-    //             }
-    //             self.animation_counter = !self.animation_counter;
-    //         }
-    //         _ => {}
-    //     }
-
-    //     if self.active {
-    //         self.body.handle_event(cx, event, scope);
-    //     }
-    // }
+    fn handle_event_with(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        scope: &mut Scope,
+        sweep_area: Area,
+    ) {
+        if !self.visible {
+            return;
+        }
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().collapse = true;
+        let hit = event.hits(cx, sweep_area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, sweep_area);
+            if self.active {
+                self.body.handle_event(cx, event, scope);
+            }
+        }
+    }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        let uid = self.widget_uid();
-        if !self.animation_open && self.animation_counter {
-            if self.animator_handle_event(cx, event).must_redraw() {
-                if self.animator.is_track_animating(cx, id!(active)) {
-                    self.area.redraw(cx);
-                    self.animation_counter = !self.animation_counter;
-                }
+        if !self.visible {
+            return;
+        }
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().collapse = true;
+        let area = self.area_header();
+        let hit = event.hits(cx, area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            self.handle_widget_event(cx, event, hit, area);
+            if self.active {
+                self.body.handle_event(cx, event, scope);
             }
         }
-
-        match event.hits(cx, self.area_header()) {
-            Hit::FingerDown(_) => {
-                if self.grab_key_focus {
-                    cx.set_key_focus(self.area());
-                }
-            }
-            Hit::FingerHoverIn(meta) => {
-                self.active_hover_in(cx, meta);
-            }
-            Hit::FingerHoverOut(meta) => {
-                self.active_hover_out(cx, meta);
-            }
-            Hit::FingerUp(meta) => {
-                self.active = !self.active;
-                self.fold = self.active.to_f32() as f64;
-
-                if self.active {
-                    self.animator_play(cx, id!(active.on));
-                } else {
-                    self.animator_play(cx, id!(active.off));
-                }
-                self.active_changed(cx, Some(meta));
-                self.animation_counter = true;
-            }
-            _ => {}
-        }
-
-        if self.active {
-            self.body.handle_event(cx, event, scope);
-        }
-
-        // self.header.handle_event(cx, event, scope);
-        // if let Event::Actions(actions) = event {
-        //     match actions
-        //         .find_widget_action(self.header.widget(id!(fold_button)).widget_uid())
-        //         .cast()
-        //     {
-        //         FoldButtonAction::Opening => self.animator_play(cx, id!(open.on)),
-        //         FoldButtonAction::Closing => self.animator_play(cx, id!(open.off)),
-        //         _ => (),
-        //     }
-        // }
     }
 }
 
@@ -524,46 +450,46 @@ impl Component for GCollapse {
         }
     }
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-        ()
-    }
+        if !self.animation_open && self.animation_counter {
+            if self.animator_handle_event(cx, event).must_redraw() {
+                if self.animator.is_track_animating(cx, id!(active)) {
+                    self.area.redraw(cx);
+                    self.animation_counter = !self.animation_counter;
+                }
+            }
+        }
 
-    // fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-    //     animation_open_then_redraw!(self, cx, event);
-    //     if !self.active {
-    //         match hit {
-    //             Hit::FingerDown(_) => {
-    //                 if self.grab_key_focus {
-    //                     cx.set_key_focus(area);
-    //                 }
-    //             }
-    //             Hit::FingerHoverIn(e) => {
-    //                 cx.set_cursor(self.prop.get(self.state).container.cursor);
-    //                 self.switch_state_with_animation(cx, CollapseState::Hover);
-    //                 hit_hover_in!(self, cx, e);
-    //             }
-    //             Hit::FingerHoverOut(e) => {
-    //                 self.switch_state_with_animation(cx, CollapseState::Basic);
-    //                 hit_hover_out!(self, cx, e);
-    //             }
-    //             Hit::FingerUp(e) => {
-    //                 if e.is_over {
-    //                     if e.has_hovers() {
-    //                         self.active = true;
-    //                         self.switch_state_with_animation(cx, CollapseState::Active);
-    //                         self.play_animation(cx, id!(hover.active));
-    //                     } else {
-    //                         self.switch_state_with_animation(cx, CollapseState::Basic);
-    //                         self.play_animation(cx, id!(hover.off));
-    //                     }
-    //                     self.active_clicked(cx, Some(e));
-    //                 } else {
-    //                     self.switch_state_with_animation(cx, CollapseState::Basic);
-    //                 }
-    //             }
-    //             _ => {}
-    //         }
-    //     }
-    // }
+        match hit {
+            Hit::FingerDown(_) => {
+                if self.grab_key_focus {
+                    cx.set_key_focus(area);
+                }
+            }
+            Hit::FingerHoverIn(meta) => {
+                cx.set_cursor(self.prop.get(self.state).header.cursor);
+                self.switch_state_with_animation(cx, CollapseState::Hover);
+                self.active_hover_in(cx, meta);
+            }
+            Hit::FingerHoverOut(meta) => {
+                self.switch_state_with_animation(cx, CollapseState::Basic);
+                self.active_hover_out(cx, meta);
+            }
+            Hit::FingerUp(meta) => {
+                self.active = !self.active;
+                self.fold = self.active.to_f32() as f64;
+                if self.active {
+                    self.switch_state_with_animation(cx, CollapseState::Active);
+                    self.animator_play(cx, id!(active.on));
+                } else {
+                    self.switch_state_with_animation(cx, CollapseState::Basic);
+                    self.animator_play(cx, id!(active.off));
+                }
+                self.active_changed(cx, Some(meta));
+                self.animation_counter = true;
+            }
+            _ => {}
+        }
+    }
 
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
@@ -576,6 +502,7 @@ impl Component for GCollapse {
         }
         self.switch_state(state);
         self.set_animation(cx);
+        self.redraw(cx);
     }
 
     fn focus_sync(&mut self) -> () {

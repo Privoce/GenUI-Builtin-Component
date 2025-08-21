@@ -1,21 +1,20 @@
-use std::str::FromStr;
-
 use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
     component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
+        label::LabelState,
         live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
+        svg::SvgState,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{BASIC, BODY, CONTAINER, DISABLED, EXTRA, HEADER, HOVER, ICON, PRESSED, TEXT},
+        manuel::{BASIC, BODY, CONTAINER, DISABLED, HEADER, HOVER, PRESSED},
+        traits::NewFrom,
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
@@ -243,7 +242,9 @@ impl CollapseBasicProp {
         container.set_height(Size::Fit);
         container.set_width(Size::Fill);
         container.set_background_visible(true);
-        container.set_flow(Flow::Right);
+        container.set_flow(Flow::Down);
+        container.set_margin(Margin::from_f64(0.0));
+        container.set_spacing(0.0);
         container
     }
     pub fn default_header(theme: Theme, state: CollapseState) -> ViewBasicProp {
@@ -260,7 +261,8 @@ impl CollapseBasicProp {
         body.set_height(Size::Fit);
         body.set_width(Size::Fill);
         body.set_background_visible(true);
-        body.set_flow(Flow::Right);
+        body.set_margin(Margin::from_f64(0.0));
+        body.set_flow(Flow::Down);
         body
     }
 }

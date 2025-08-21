@@ -85,6 +85,7 @@ pub const MENU: &str = "menu";
 pub const TABBAR: &str = "tabbar";
 pub const LINK: &str = "link";
 pub const MENU_ITEM: &str = "menu_item";
+pub const SUB_MENU: &str = "sub_menu";
 pub const COLLAPSE: &str = "collapse";
 // --- mode ------------------------------------------------------
 pub const MODE: &str = "mode";

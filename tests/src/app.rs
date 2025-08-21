@@ -583,9 +583,35 @@ live_design! {
                                     background_visible: true
                                 }
                             }
-                        }
+                        },
+                        active: true,
+                        position: Top,
                         header: <GView> {
                             
+                            <GLabel> {
+                                text: "Collapse Header"
+                            }
+                        }
+                        body: <GView> {
+                            <GLabel> {
+                                text: "Collapse Body"
+                            }
+                        }
+                    }
+                    <GCollapse> {
+                        prop: {
+                            basic: {
+                                header: {
+                                    width: 200.0,
+                                },
+                                body: {
+                                    height: 300.0,
+                                }
+                            }
+                        },
+                        position: Right,
+                        active: true,
+                        header: <GView> {
                             <GLabel> {
                                 text: "Collapse Header"
                             }

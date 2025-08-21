@@ -1,6 +1,6 @@
 mod prop;
 pub mod item;
-// pub mod sub;
+pub mod sub;
 mod event;
 
 use makepad_widgets::*;

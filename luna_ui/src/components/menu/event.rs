@@ -1,4 +1,4 @@
-use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent};
+use makepad_widgets::{ActionDefaultRef, DefaultNone, FingerHoverEvent, FingerUpEvent, LiveId};
 
 #[derive(Clone, Debug, DefaultNone)]
 pub enum MenuItemEvent {
@@ -31,12 +31,24 @@ pub enum MenuEvent {
     None,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct MenuChanged {
     pub meta: Option<FingerUpEvent>,
-    /// The index of the active radio.
+    /// The index of the active
     pub index: i32,
-    /// The value of the active radio.
+    /// The value of the active
     pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, DefaultNone)]
+pub enum SubMenuEvent {
+    Changed(SubMenuChanged),
+    None,
+}
+
+#[derive(Debug, Clone)]
+pub struct SubMenuChanged {
+    pub active: Option<Vec<String>>,
+    pub id: LiveId,
+    pub meta: Option<FingerUpEvent>,
 }
