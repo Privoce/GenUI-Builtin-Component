@@ -176,59 +176,6 @@ impl Widget for GMenu {
     }
 
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        fn nested_action(
-            child: &WidgetRef,
-            cx: &mut Cx,
-            item_modes: &mut Vec<MenuItemMode>,
-            active: &mut Option<MenuActionType>,
-            index_chain: &Vec<usize>,
-            actions: &Vec<Box<dyn ActionTrait>>,
-        ) {
-            if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                let mut sub_menu_mode = vec![];
-                // 递归查找子菜单项
-                for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
-                    let mut index_chain = index_chain.clone();
-                    index_chain.push(sub_index);
-                    if let Some(e) = child.changed(actions) {
-                        active.replace(MenuActionType::SubMenu(e));
-                    } else {
-                        nested_action(
-                            sub_child,
-                            cx,
-                            &mut sub_menu_mode,
-                            active,
-                            &index_chain,
-                            actions,
-                        );
-                    }
-                }
-                item_modes.push(MenuItemMode::SubMenu {
-                    active: child.active,
-                    value: child.value.to_string(),
-                    items: sub_menu_mode,
-                });
-            } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                item_modes.push(MenuItemMode::MenuItem {
-                    value: child.value.to_string(),
-                    active: child.active,
-                });
-                if active.is_none() {
-                    if let Some(e) = child.clicked(actions) {
-                        active.replace(MenuActionType::MenuItem(e));
-                    }
-                }
-            } else {
-                panic!("GMenu only allows GMenuItem or GSubMenu as child!");
-            }
-        }
-
         if !self.visible {
             return;
         }
@@ -472,56 +419,18 @@ impl GMenu {
     /// 1. 如果active为None，表示不激活任何菜单项，需要将所有GMenuItem的active设置为false
     /// 2. 如果active为Some(value), 我们可以通过active知道是哪个菜单项被激活，不同的是SubMenu虽然也能被激活但只是展开状态，而MenuItem则是真正激活态
     pub fn set_active(&mut self, cx: &mut Cx, active: Option<String>) {
-        fn nested_set(
-            cx: &mut Cx,
-            child: &WidgetRef,
-            item_modes: &mut Vec<MenuItemMode>,
-            active: &Option<String>,
-            index_chain: &Vec<usize>,
-        ) {
-            if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                if let Some(active) = active {
-                    let active = child.value.eq(active);
-                    let _ = child.set_active(cx, active);
-                }
-                let mut sub_menu_mode = vec![];
-                for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
-                    let mut index_chain = index_chain.clone();
-                    index_chain.push(sub_index);
-                    nested_set(cx, sub_child, &mut sub_menu_mode, active, &index_chain);
-                }
-                item_modes.push(MenuItemMode::SubMenu {
-                    active: child.active,
-                    value: child.value.to_string(),
-                    items: sub_menu_mode,
-                });
-            } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                if let Some(active) = active {
-                    let active = child.value.eq(active);
-                    let _ = child.set_active(cx, active);
-                } else {
-                    let _ = child.set_active(cx, false);
-                }
-                item_modes.push(MenuItemMode::MenuItem {
-                    value: child.value.to_string(),
-                    active: child.active,
-                });
-            } else {
-                panic!("GMenu only allows GMenuItem or GSubMenu as child!");
-            }
-        }
-
         self.item_modes.clear();
         // update children
         for (index, (_id, child)) in self.body.children.iter().enumerate() {
             let index_chain = vec![index];
-            nested_set(cx, child, &mut self.item_modes, &active, &index_chain);
+            handle_nested(
+                cx,
+                child,
+                &self.active,
+                &index_chain,
+                &mut self.item_modes,
+                false,
+            );
         }
 
         // cover active
@@ -529,39 +438,10 @@ impl GMenu {
     }
     // 在设置过self.active后，调用此函数，确保self.active的菜单项被激活
     pub fn set_target_active(&mut self, cx: &mut Cx) {
-        fn nested_set(
-            child: &WidgetRef,
-            cx: &mut Cx,
-            active: &Option<String>,
-            index_chain: &Vec<usize>,
-        ) {
-            if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
-                    let mut index_chain = index_chain.clone();
-                    index_chain.push(sub_index);
-                    nested_set(sub_child, cx, active, &index_chain);
-                }
-            } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
-                if child.value.is_empty() {
-                    child.generate_value(&index_chain);
-                }
-                if let Some(active) = active {
-                    let active = child.value.eq(active);
-                    let _ = child.set_active(cx, active);
-                } else {
-                    let _ = child.set_active(cx, false);
-                }
-            } else {
-                panic!("GMenu only allows GMenuItem or GSubMenu as child!");
-            }
-        }
-
         for (index, (_id, child)) in self.body.children.iter().enumerate() {
             let index_chain = vec![index];
-            nested_set(child, cx, &self.active, &index_chain);
+            // nested_set(child, cx, &self.active, &index_chain);
+            handle_nested(cx, child, &self.active, &index_chain, &mut vec![], true);
         }
     }
 }
@@ -577,4 +457,116 @@ impl GMenuRef {
         area_footer
     }
     getter_setter_ref! {}
+}
+
+fn handle_nested(
+    cx: &mut Cx,
+    child: &WidgetRef,
+    active: &Option<String>,
+    index_chain: &Vec<usize>,
+    item_modes: &mut Vec<MenuItemMode>,
+    is_action: bool,
+) {
+    if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
+        if child.value.is_empty() {
+            child.generate_value(&index_chain);
+        }
+        if !is_action {
+            if let Some(active) = active {
+                let active = child.value.eq(active);
+                let _ = child.set_active(cx, active);
+            }
+        }
+        let mut sub_menu_mode = vec![];
+        for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
+            let mut index_chain = index_chain.clone();
+            index_chain.push(sub_index);
+            handle_nested(
+                cx,
+                sub_child,
+                active,
+                &index_chain,
+                &mut sub_menu_mode,
+                is_action,
+            );
+        }
+        if !is_action {
+            item_modes.push(MenuItemMode::SubMenu {
+                active: child.active,
+                value: child.value.to_string(),
+                items: sub_menu_mode,
+            });
+        }
+    } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
+        if child.value.is_empty() {
+            child.generate_value(&index_chain);
+        }
+        if let Some(active) = active {
+            let active = child.value.eq(active);
+            let _ = child.set_active(cx, active);
+        } else {
+            let _ = child.set_active(cx, false);
+        }
+        if !is_action {
+            item_modes.push(MenuItemMode::MenuItem {
+                value: child.value.to_string(),
+                active: child.active,
+            });
+        }
+    } else {
+        panic!("GMenu only allows GMenuItem or GSubMenu as child!");
+    }
+}
+
+fn nested_action(
+    child: &WidgetRef,
+    cx: &mut Cx,
+    item_modes: &mut Vec<MenuItemMode>,
+    active: &mut Option<MenuActionType>,
+    index_chain: &Vec<usize>,
+    actions: &Vec<Box<dyn ActionTrait>>,
+) {
+    if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
+        if child.value.is_empty() {
+            child.generate_value(&index_chain);
+        }
+        let mut sub_menu_mode = vec![];
+        // 递归查找子菜单项
+        for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
+            let mut index_chain = index_chain.clone();
+            index_chain.push(sub_index);
+            if let Some(e) = child.changed(actions) {
+                active.replace(MenuActionType::SubMenu(e));
+            } else {
+                nested_action(
+                    sub_child,
+                    cx,
+                    &mut sub_menu_mode,
+                    active,
+                    &index_chain,
+                    actions,
+                );
+            }
+        }
+        item_modes.push(MenuItemMode::SubMenu {
+            active: child.active,
+            value: child.value.to_string(),
+            items: sub_menu_mode,
+        });
+    } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
+        if child.value.is_empty() {
+            child.generate_value(&index_chain);
+        }
+        item_modes.push(MenuItemMode::MenuItem {
+            value: child.value.to_string(),
+            active: child.active,
+        });
+        if active.is_none() {
+            if let Some(e) = child.clicked(actions) {
+                active.replace(MenuActionType::MenuItem(e));
+            }
+        }
+    } else {
+        panic!("GMenu only allows GMenuItem or GSubMenu as child!");
+    }
 }
