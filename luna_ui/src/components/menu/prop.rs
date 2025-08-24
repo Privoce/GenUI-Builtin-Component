@@ -12,6 +12,7 @@ use crate::{
     get_get_mut,
     prop::{
         manuel::{BASIC, BODY, CONTAINER, FOOTER, HEADER},
+        traits::NewFrom,
         ApplySlotMapImpl, ApplyStateMapImpl, Applys,
     },
     themes::{Color, Theme},
@@ -238,12 +239,15 @@ impl MenuBasicProp {
         container.set_width(Size::Fixed(300.0));
         container.set_height(Size::Fill);
         container.set_background_visible(true);
+        container.set_clip_y(true);
+        container.set_clip_x(true);
         container
     }
     pub fn default_body(theme: Theme, state: MenuState) -> ViewBasicProp {
         let mut body = Self::default_container(theme, state);
         body.set_height(Size::Fill);
         body.set_width(Size::Fill);
+        body.set_padding(Padding::from_f64(0.0));
         body
     }
 }

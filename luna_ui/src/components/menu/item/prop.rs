@@ -15,8 +15,7 @@ use crate::{
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, ACTIVE, TEXT},
-        ApplySlotMapImpl, Applys,
+        manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, TEXT}, traits::NewFrom, ApplySlotMapImpl, Applys
     },
     themes::{Color, Theme},
     try_from_toml_item,
@@ -272,6 +271,7 @@ impl MenuItemBasicProp {
         container.set_background_visible(true);
         container.set_flow(Flow::Right);
         container.set_cursor(MouseCursor::Hand);
+        container.set_margin(Margin::from_f64(0.0));
         container
     }
     pub fn default_icon(theme: Theme, state: MenuItemState) -> SvgBasicProp {

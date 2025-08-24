@@ -307,6 +307,7 @@ impl WidgetNode for GView {
     fn redraw(&mut self, cx: &mut Cx) {
         let _ = self.render(cx);
         self.area.redraw(cx);
+        self.draw_view.redraw(cx);
         for (_, child) in &mut self.children {
             child.redraw(cx);
         }

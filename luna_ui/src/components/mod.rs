@@ -37,11 +37,14 @@ live_design! {
     link gen_ui;
 
     // use link::luna_theme::*;
+    use link::widgets::*;
     use link::shaders::*;
     use link::genui_basic::*;
     use link::theme::*;
 
     pub GLabel = <GLabelBase>{}
+
+    pub GScrollBars = <ScrollBars>{}
 
     pub GView = <GViewBase>{
         animation_open: false,
@@ -332,7 +335,7 @@ live_design! {
             }
         }
     }
-    
+
     pub GRouter = <GRouterBase> {
         bar_pages = <GView>{
             prop: {
@@ -359,14 +362,33 @@ live_design! {
     }
 
     pub GMenuItem = <GMenuItemBase> {
+        icon: <GSvg> {
+            visible: false
+        }
         text: <GLabel> {
             text: "Menu Item"
         }
     }
 
-    pub GSubMenu = <GSubMenuBase> {}
+    pub GSubMenu = <GSubMenuBase> {
+        header: <GView> {
+             <GLabel>{
+                text: "Sub Menu",
+            }
+        }
+        body: <GView> {}
+    }
 
-    pub GMenu = <GMenuBase> {}
+    pub GMenu = <GMenuBase> {
+        header: <GView> {
+            <GLabel>{
+                text: "Sub Menu 0",
+            }
+        }
+        body: <GView>{
+            scroll_bars: <GScrollBars> {}
+        }
+    }
 
     pub GCollapse = <GCollapseBase> {}
 }

@@ -716,57 +716,142 @@ live_design! {
                     //     }
                     // }
 
-                    <GMenu>{
-                        header: <GView> {
-                            <GLabel>{
-                                text: "Menu Header",
-                            }
-                        },
-                        body: <GView> {
-                            <GSubMenu>{
-                                header: <GView> {
-                                    <GLabel>{
-                                        text: "Sub Menu",
+                    <GHLayout> {
+                        // <GView> {
+                        //     prop: {
+                        //         basic: {
+                        //             background_visible: true,
+                        //             height: 200.0,
+                        //             clip_y: true
+                        //         }
+                        //     }
+                        //     scroll_bars: <GScrollBars> {
+                        //         show_scroll_y: true
+                        //     }
+                        //     <GView> {
+                        //         prop: {
+                        //             basic: {
+                        //                 background_visible: true,
+                        //                 height: 300.0,
+                        //                 width: 60.0,
+                        //                 theme: Primary,
+                        //             }
+                        //         }
+                        //     }
+                        // }
+                        // <GMenu>{
+                        //     header: <GView> {
+                        //         <GLabel>{
+                        //             text: "Menu Header",
+                        //         }
+                        //     },
+                        //     body: <GView> {
+                        //         <GSubMenu>{
+                        //             body: {
+                        //                 <GMenuItem> {
+                        //                     text: <GLabel>{
+                        //                         text: "Sub Menu Item 0-0",
+                        //                     }
+                        //                 }
+                        //                 <GSubMenu>{
+                        //                     header: <GView> {
+                        //                         <GLabel>{
+                        //                             text: "Sub Menu",
+                        //                         }
+                        //                     }
+                        //                     body: <GView> {
+                        //                         <GMenuItem> {
+                        //                             text: <GLabel>{
+                        //                                 text: "Sub Menu Item 0-1-0",
+                        //                             }
+                        //                         }
+                        //                         <GMenuItem> {
+                        //                             text: <GLabel>{
+                        //                                 text: "Sub Menu Item 0-1-1",
+                        //                             }
+                        //                         }
+                        //                     }
+                        //                 }
+                        //             }
+                        //         }
+                        //         <GMenuItem> {
+                        //             text: <GLabel>{
+                        //                 text: "Sub Menu Item 1",
+                        //             }
+                        //         }
+                        //     },
+                        //     footer: <GView>{
+                        //         prop: {
+                        //             basic: {
+                        //                 background_visible: true,
+                        //                 theme: Primary,
+                        //                 // width: Fill
+                        //             }
+                        //         }
+                        //         <GLabel> {
+                        //             text: "Menu Footer"
+                        //         }
+                        //     }
+                        // }
+                        <GMenuItem> {
+                                    text: <GLabel>{
+                                        text: "Sub Menu Item 1",
                                     }
                                 }
-                                body: <GView> {
-                                    <GMenuItem> {
-                                        text: <GLabel>{
-                                            text: "Sub Menu Item 1-1",
-                                        }
-                                    }
-                                    <GSubMenu>{
-                                        header: <GView> {
-                                            <GLabel>{
-                                                text: "Sub Menu",
+                        <GMenu>{
+                            active: "sub_active",
+                            header: <GView> {
+                                <GLabel>{
+                                    text: "Menu Header",
+                                }
+                            },
+                            body: <GView> {
+                                <GSubMenu>{
+                                    body: {
+                                        <GMenuItem> {
+                                            text: <GLabel>{
+                                                text: "Sub Menu Item 0-0",
                                             }
                                         }
-                                        body: <GView> {
-                                            <GMenuItem> {
-                                                text: <GLabel>{
-                                                    text: "Sub Menu Item 2-1",
+                                        <GSubMenu>{
+                                            header: <GView> {
+                                                <GLabel>{
+                                                    text: "Sub Menu",
                                                 }
                                             }
-                                            <GMenuItem> {
-                                                text: <GLabel>{
-                                                    text: "Sub Menu Item 2-2",
+                                            body: <GView> {
+                                                <GMenuItem> {
+                                                    text: <GLabel>{
+                                                        text: "Sub Menu Item 0-1-0",
+                                                    }
+                                                }
+                                                <GMenuItem> {
+                                                    value: "sub_active",
+                                                    text: <GLabel>{
+                                                        text: "Sub Menu Item 0-1-1",
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        },
-                        footer: <GView>{
-                            prop: {
-                                basic: {
-                                    background_visible: true,
-                                    theme: Primary,
-                                    // width: Fill
+                                <GMenuItem> {
+                                    text: <GLabel>{
+                                        text: "Sub Menu Item 1",
+                                    }
                                 }
-                            }
-                            <GLabel> {
-                                text: "Menu Footer"
+                            },
+                            footer: <GView>{
+                                prop: {
+                                    basic: {
+                                        background_visible: true,
+                                        theme: Primary,
+                                        // width: Fill
+                                    }
+                                }
+                                <GLabel> {
+                                    text: "Menu Footer"
+                                }
                             }
                         }
                     }

@@ -599,6 +599,15 @@ impl GSubMenu {
         area_header, header,
         area_body, body
     }
+    pub fn generate_value(&mut self, index_chain: &Vec<usize>) {
+        if self.value.is_empty() {
+            self.value = index_chain
+                .iter()
+                .map(|i| i.to_string())
+                .collect::<Vec<String>>()
+                .join("_")
+        }
+    }
     getter! {
         GSubMenu {
             get_active(bool) {|c| {c.active}}

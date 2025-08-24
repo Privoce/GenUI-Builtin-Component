@@ -15,7 +15,8 @@ use crate::{
     prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
-        ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer, ToSlotMap,
+        ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer,
+        ToSlotMap, ToStateMap,
     },
     pure_after_apply, set_animation, set_index, set_scope_path, setter,
     shader::draw_view::DrawView,
@@ -211,7 +212,7 @@ impl Widget for GMenuItem {
         cx.global::<ComponentAnInit>().menu_item = true;
 
         // handle slot events
-        let mut is_slot_hover = false;
+        let is_slot_hover = false;
         self.icon.handle_event(cx, event, scope);
         self.text.handle_event(cx, event, scope);
         self.extra.handle_event(cx, event, scope);
@@ -383,6 +384,14 @@ impl Component for GMenuItem {
         crossed_map.remove(&MenuItemPart::Icon).map(|map| {
             self.icon.apply_slot_map.merge_slot(map.to_slot());
             self.icon.focus_sync();
+        });
+        crossed_map.remove(&MenuItemPart::Text).map(|map| {
+            self.text.apply_state_map.merge(map.to_state());
+            self.text.focus_sync();
+        });
+        crossed_map.remove(&MenuItemPart::Extra).map(|map| {
+            self.extra.apply_state_map.merge(map.to_state());
+            self.extra.focus_sync();
         });
 
         // sync state if is not Basic
