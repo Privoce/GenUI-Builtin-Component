@@ -13,11 +13,15 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         router::schema::{PageType, RouterStack, RouterStackItem},
-        traits::Component, view::GViewWidgetExt,
+        traits::Component,
+        view::GViewWidgetExt,
     },
     error::Error,
     inherits_view_widget_node, lifecycle, play_animation,
-    prop::{traits::{HeapLiveIdPathExp, LiveIdExp}, NavMode, RouterIndicatorMode},
+    prop::{
+        traits::{HeapLiveIdPathExp, LiveIdExp},
+        NavMode, RouterIndicatorMode,
+    },
     set_index, set_scope_path, sync,
 };
 
@@ -195,10 +199,6 @@ impl GRouter {
                                     } else {
                                         child.visible = false;
                                     }
-                                    // child.render(cx);
-                                    if let Err(e) = child.render(cx) {
-                                        error!("Page::Bar render error: {:?}", e);
-                                    }
                                 });
                             }
                         }
@@ -212,9 +212,6 @@ impl GRouter {
                                         child.visible = true;
                                     } else {
                                         child.visible = false;
-                                    }
-                                    if let Err(e) = child.render(cx) {
-                                        error!("Page::Nav render error: {:?}", e);
                                     }
                                 });
                             }
@@ -460,14 +457,13 @@ impl GRouter {
     }
     /// ## Finish Router Build
     pub fn build(&mut self, cx: &mut Cx) -> () {
-        if self.active_page.as_ref().is_none() {
+        if let Some(active_page) = self.active_page.clone().as_ref() {
+            // do set visible page
+            let _ = self.set_visible_page(cx, active_page);
+        } else {
             // do get_visible_page and set as active_page
             self.get_visible_page()
                 .map(|page| self.active_page.replace(page));
-        } else {
-            // do set visible page
-            let active = self.active_page.clone().unwrap();
-            let _ = self.set_visible_page(cx, &active);
         }
     }
     pub fn ty(&mut self, ty: PageType) -> &mut Self {

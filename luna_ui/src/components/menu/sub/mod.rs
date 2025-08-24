@@ -28,7 +28,6 @@ live_design! {
                 off = {
                     from: {all: Forward {duration: (AN_DURATION)}}
                     ease: ExpDecay {d1: 0.96, d2: 0.97}
-                    redraw: true
                     apply: {
                         draw_sub_menu: <AN_DRAW_VIEW> {},
                         fold: [{time: 0.0, value: 1.0}, {time: 1.0, value: 0.0}]
@@ -37,7 +36,6 @@ live_design! {
                 on = {
                     from: {all: Forward {duration: (AN_DURATION)}}
                     ease: ExpDecay {d1: 0.98, d2: 0.95}
-                    redraw: true
                     apply: {
                         draw_sub_menu: <AN_DRAW_VIEW> {},
                         fold: [{time: 0.0, value: 0.0}, {time: 1.0, value: 1.0}]

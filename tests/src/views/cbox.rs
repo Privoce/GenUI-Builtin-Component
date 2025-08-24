@@ -37,7 +37,8 @@ impl Widget for CBox {
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        let _ = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
+        // let _ = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
+        self.deref_widget.handle_event(cx, event, scope)
     }
 }
 

@@ -333,7 +333,8 @@ live_design! {
                 width: Fill,
                 flow: Down
             }
-        }
+        },
+        visible: false
     }
 
     pub GRouter = <GRouterBase> {
@@ -372,7 +373,7 @@ live_design! {
 
     pub GSubMenu = <GSubMenuBase> {
         header: <GView> {
-             <GLabel>{
+            <GLabel>{
                 text: "Sub Menu",
             }
         }
@@ -381,8 +382,9 @@ live_design! {
 
     pub GMenu = <GMenuBase> {
         header: <GView> {
+            visible: false,
             <GLabel>{
-                text: "Sub Menu 0",
+                text: "Menu Header",
             }
         }
         body: <GView>{

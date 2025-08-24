@@ -350,9 +350,24 @@ impl GMenu {
         active_hover_in: MenuEvent::HoverIn |meta: FingerHoverEvent| => MenuHoverIn { meta },
         active_hover_out: MenuEvent::HoverOut |meta: FingerHoverEvent| => MenuHoverOut { meta }
     }
+    pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
+        if self.event_open {
+            self.scope_path.as_ref().map(|path| {
+                cx.widget_action(
+                    self.widget_uid(),
+                    path,
+                    MenuEvent::Changed(MenuChanged {
+                        meta,
+                        active: self.active.clone(),
+                    }),
+                );
+            });
+        }
+    }
     event_option! {
         hover_in: MenuEvent::HoverIn => MenuHoverIn,
-        hover_out: MenuEvent::HoverOut => MenuHoverOut
+        hover_out: MenuEvent::HoverOut => MenuHoverOut,
+        changed: MenuEvent::Changed => MenuChanged
     }
     area! {
         area_header, header,
@@ -449,7 +464,8 @@ impl GMenu {
 impl GMenuRef {
     event_option_ref! {
         hover_in => MenuHoverIn,
-        hover_out => MenuHoverOut
+        hover_out => MenuHoverOut,
+        changed => MenuChanged
     }
     area_ref! {
         area_header,

@@ -384,7 +384,6 @@ impl Widget for GView {
                 self.set_scope_path(&scope.path);
                 return DrawStep::done();
             }
-
             self.defer_walks.clear();
 
             match self.optimize {

@@ -1,5 +1,10 @@
 use luna_ui::{
-    components::{lifecycle::LifeCycle, router::GRouterWidgetExt, view::GView},
+    components::{
+        lifecycle::LifeCycle,
+        menu::{GMenuWidgetExt, MenuChanged},
+        router::GRouterWidgetExt,
+        view::{GView, GViewWidgetExt},
+    },
     inherits_view_livehook, inherits_view_widget_node,
 };
 use makepad_widgets::*;
@@ -13,6 +18,38 @@ live_design! {
     use crate::views::basic::button::*;
 
     pub HomePage = {{HomePage}} {
+        prop: {
+            basic: {
+                flow: Right,
+                padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+            }
+        }
+        menu = <GMenu> {
+            active: "tab_view",
+            body: {
+                <GSubMenu> {
+                    header: {
+                        <GLabel> {
+                            text: "Basic Components"
+                        }
+                    },
+                    body: {
+                        <GMenuItem> {
+                            text: {
+                                text: "View"
+                            },
+                            value: "tab_view"
+                        }
+                        <GMenuItem> {
+                            text: {
+                                text: "Button"
+                            },
+                            value: "tab_button"
+                        }
+                    }
+                }
+            }
+        }
         <GVLayout> {
             app_router = <GRouter> {
                 bar_pages = {
@@ -22,24 +59,24 @@ live_design! {
                     button_page = <GBarPage> {
                         <ButtonPage>{}
                     }
-                    tabbar = <GTabbar>{
-                        <GTabbarItem>{
-                            icon: {
-                                src: dep("crate://self/resources/wind.svg"),
-                            }
-                            text: {
-                                text: "Config"
-                            }
-                        }
-                        <GTabbarItem>{
-                            icon: {
-                                 src: dep("crate://self/resources/heavy.svg"),
-                            }
-                            text: {
-                                text: "All"
-                            }
-                        }
-                    }
+                    // tabbar = <GTabbar>{
+                    //     <GTabbarItem>{
+                    //         icon: {
+                    //             src: dep("crate://self/resources/wind.svg"),
+                    //         }
+                    //         text: {
+                    //             text: "Config"
+                    //         }
+                    //     }
+                    //     <GTabbarItem>{
+                    //         icon: {
+                    //              src: dep("crate://self/resources/heavy.svg"),
+                    //         }
+                    //         text: {
+                    //             text: "All"
+                    //         }
+                    //     }
+                    // }
                 }
             }
         }
@@ -72,12 +109,38 @@ impl Widget for HomePage {
                     .active(id!(view_page))
                     .build(cx);
             });
+            self.lifecycle.next();
         }
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        // let _ = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
+        // let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
+        // self.deref_widget.handle_event(cx, event, scope);
+        self.match_event(cx, event);
         self.deref_widget.handle_event(cx, event, scope);
+    }
+}
+
+impl MatchEvent for HomePage {
+    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
+        let router = self.grouter(id!(app_router));
+        if let Some(MenuChanged { meta, active }) = self.gmenu(id!(menu)).changed(actions) {
+            if let Some(active) = active {
+                match active.as_str() {
+                    "tab_view" => {
+                        router.nav_to(cx, id!(view_page));
+                    }
+                    "tab_button" => {
+                        router.nav_to(cx, id!(button_page));
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        router.borrow_mut().map(|mut route| {
+            route.handle_nav_events(cx, &actions);
+        });
     }
 }
 

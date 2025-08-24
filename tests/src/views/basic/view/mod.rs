@@ -184,7 +184,7 @@ impl Widget for ViewPage {
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         self.match_event(cx, event);
-        self.deref_widget.handle_event(cx, event, scope)
+        self.deref_widget.handle_event(cx, event, scope);
     }
 }
 
