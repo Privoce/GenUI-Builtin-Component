@@ -677,7 +677,99 @@ live_design! {
                     //         }
                     //     }
                     // }
-                    <GMenu>{}
+
+                    // <GMenu>{
+                    //     body: <GView> {
+                    //         <GSubMenu>{
+                    //             header: <GView> {
+                    //                 <GLabel>{
+                    //                     text: "Sub Menu",
+                    //                 }
+                    //             }
+                    //             body: <GView> {
+                    //                 <GMenuItem> {
+                    //                     text: <GLabel>{
+                    //                         text: "Sub Menu Item 1-1",
+                    //                     }
+                    //                 }
+                    //                 <GSubMenu>{
+                    //                     header: <GView> {
+                    //                         <GLabel>{
+                    //                             text: "Sub Menu",
+                    //                         }
+                    //                     }
+                    //                     body: <GView> {
+                    //                         <GMenuItem> {
+                    //                             text: <GLabel>{
+                    //                                 text: "Sub Menu Item 2-1",
+                    //                             }
+                    //                         }
+                    //                         <GMenuItem> {
+                    //                             text: <GLabel>{
+                    //                                 text: "Sub Menu Item 2-2",
+                    //                             }
+                    //                         }
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    <GMenu>{
+                        header: <GView> {
+                            <GLabel>{
+                                text: "Menu Header",
+                            }
+                        },
+                        body: <GView> {
+                            <GSubMenu>{
+                                header: <GView> {
+                                    <GLabel>{
+                                        text: "Sub Menu",
+                                    }
+                                }
+                                body: <GView> {
+                                    <GMenuItem> {
+                                        text: <GLabel>{
+                                            text: "Sub Menu Item 1-1",
+                                        }
+                                    }
+                                    <GSubMenu>{
+                                        header: <GView> {
+                                            <GLabel>{
+                                                text: "Sub Menu",
+                                            }
+                                        }
+                                        body: <GView> {
+                                            <GMenuItem> {
+                                                text: <GLabel>{
+                                                    text: "Sub Menu Item 2-1",
+                                                }
+                                            }
+                                            <GMenuItem> {
+                                                text: <GLabel>{
+                                                    text: "Sub Menu Item 2-2",
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        footer: <GView>{
+                            prop: {
+                                basic: {
+                                    background_visible: true,
+                                    theme: Primary,
+                                    // width: Fill
+                                }
+                            }
+                            <GLabel> {
+                                text: "Menu Footer"
+                            }
+                        }
+                    }
                 }
             }
         }
