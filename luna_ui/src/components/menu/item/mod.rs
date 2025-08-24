@@ -11,13 +11,13 @@ use crate::{
         view::{GView, ViewBasicProp},
     },
     error::Error,
-    event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
+    event_option, getter, hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
         traits::ToFloat,
         ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer, ToSlotMap,
     },
-    pure_after_apply, set_animation, set_index, set_scope_path,
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
     shader::draw_view::DrawView,
     sync,
     themes::Conf,
@@ -609,5 +609,24 @@ impl GMenuItem {
             self.play_animation(cx, hover_id);
         }
         self.active_clicked(cx, None);
+    }
+    pub fn generate_value(&mut self, index_chain: &Vec<usize>) {
+        if self.value.is_empty() {
+            self.value = index_chain
+                .iter()
+                .map(|i| i.to_string())
+                .collect::<Vec<String>>()
+                .join("_")
+        }
+    }
+    getter! {
+        GMenuItem {
+            get_active(bool) {|c| {c.active}}
+        }
+    }
+    setter! {
+        GMenuItem {
+            set_active(active: bool) {|c, cx| {c.active = active; c.redraw(cx); Ok(())}}
+        }
     }
 }

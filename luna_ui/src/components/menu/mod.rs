@@ -11,7 +11,10 @@ use crate::{
     active_event, area, area_ref,
     components::{
         lifecycle::LifeCycle,
-        menu::{item::GMenuItemWidgetRefExt, sub::GSubMenuWidgetRefExt},
+        menu::{
+            item::GMenuItemWidgetRefExt,
+            sub::{GSubMenu, GSubMenuWidgetRefExt},
+        },
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
     },
@@ -204,7 +207,7 @@ impl Widget for GMenu {
                             }
                         });
                     }
-                    MenuItemMode::MenuItem(_) => {
+                    MenuItemMode::MenuItem { .. } => {
                         child.as_gmenu_item().borrow().map(|item| {
                             if let Some(e) = item.clicked(&actions) {
                                 if e.active {
@@ -222,17 +225,18 @@ impl Widget for GMenu {
                 }
             }
             if let Some((id, e)) = update {
-                self.fresh_selected(cx);
+                // self.fresh_selected(cx);
 
-                cx.widget_action(
-                    self.widget_uid(),
-                    &scope.path,
-                    MenuEvent::Changed(MenuChanged {
-                        meta: e,
-                        id,
-                        value: self.active.clone()
-                    }),
-                );
+                // cx.widget_action(
+                //     self.widget_uid(),
+                //     &scope.path,
+                //     MenuEvent::Changed(MenuChanged {
+                //         meta: e,
+                //         id,
+                //         value: self.active.clone()
+                //     }),
+                // );
+                dbg!(&self.active);
             }
         }
 
@@ -253,7 +257,7 @@ impl LiveHook for GMenu {
         self.merge_conf_prop(cx);
     }
 
-    fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+    fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         let live_props = ViewBasicProp::live_props();
         self.set_apply_slot_map(
             nodes,
@@ -273,6 +277,13 @@ impl LiveHook for GMenu {
                 _ => {}
             },
         );
+        // if active is some -> set active or find
+        if let Some(active) = self.active.as_ref() {
+            self.set_active(cx, Some(active.to_string()));
+        } else {
+            self.find_active();
+            dbg!(&self.item_modes);
+        }
     }
 }
 
@@ -361,52 +372,107 @@ impl GMenu {
         area_body, body,
         area_footer, footer
     }
-    pub fn fresh_selected(&mut self, cx: &mut Cx) {
-        // let all children unselected
-        for (_index, ((_, child), item_mode)) in self
-            .body
-            .children
-            .iter()
-            .zip(self.item_modes.iter())
-            .enumerate()
-        {
-            match item_mode {
-                MenuItemMode::SubMenu(_) => {
-                    child.as_gsub_menu().borrow_mut().map(|mut sub_menu| {
-                        sub_menu.clear_selected(cx);
-                    });
+    /// 从body.children中查找激活的菜单项(MenuItem)
+    /// 1. 在body的children中只能存在GSubMenu和GMenuItem，出现其他类型panic!
+    /// 2. 激活的菜单项只能是GMenuItem
+    /// 3. 如果没有激活的菜单项，返回None，也无需强制指定，将设置权交给使用者/GRouter
+    /// 4. 如果有多个激活的菜单项，只会返回第一个
+    /// 5. find时确定self.item_mode结构
+    /// 6. 若使用者没有制定node的value，则按照索引进行指定，例如第3个subMenu中的第2个MenuItem，则value为"2_1" 2: 3的索引，1: 2的索引
+    pub fn find_active(&mut self) {
+        fn nested_find(
+            child: &WidgetRef,
+            item_modes: &mut Vec<MenuItemMode>,
+            active: &mut Option<bool>,
+            index_chain: &Vec<usize>,
+        ) -> () {
+            if let Some(child) = child.as_gsub_menu().borrow() {
+                let mut sub_menu_mode = vec![];
+                // 递归查找子菜单项
+                for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
+                    let mut index_chain = index_chain.clone();
+                    index_chain.push(sub_index);
+                    nested_find(sub_child, &mut sub_menu_mode, active, &index_chain);
                 }
-                MenuItemMode::MenuItem(_) => {
-                    child.as_gmenu_item().borrow_mut().map(|mut item| {
-                        item.clear_selected(cx);
-                    });
+                item_modes.push(MenuItemMode::SubMenu(sub_menu_mode));
+            } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
+                if child.value.is_empty() {
+                    child.generate_value(&index_chain);
                 }
-            }
-        }
-        // then if selected is not None, set the selected item
-        if let Some(selected) = self.selected.as_ref() {
-            MenuItemMode::find_node(&mut self.body.children, selected, &mut |item| {
-                item.as_gmenu_item().borrow_mut().map(|mut item| {
-                    item.selected = true;
-                    item.render(cx);
+                item_modes.push(MenuItemMode::MenuItem {
+                    value: child.value.to_string(),
+                    active: child.active,
                 });
-            });
-        }
-    }
-    pub fn find_selected(&mut self) {
-        for (_, child) in self.body.children.iter() {
-            if let Some(child) = child.as_gmenu_item().borrow() {
-                self.item_modes.push(MenuItemMode::MenuItem(child.selected));
-            } else if let Some(child) = child.as_gsub_menu().borrow() {
-                self.item_modes
-                    .push(MenuItemMode::SubMenu(child.item_modes.clone()));
+                if child.active && active.is_none() {
+                    active.replace(true);
+                }
             } else {
                 panic!("GMenu only allows GMenuItem or GSubMenu as child!");
             }
         }
-        self.selected = MenuItemMode::selected(&self.item_modes);
+
+        let mut active = None;
+        if self.body.visible {
+            for (index, (_id, child)) in self.body.children.iter().enumerate() {
+                let index_chain = vec![index];
+                nested_find(child, &mut self.item_modes, &mut active, &index_chain);
+            }
+        }
     }
 
+    pub fn set_active(&mut self, cx: &mut Cx, active: Option<String>) {
+        // cover active
+        self.active = active;
+
+        // update children
+        for (index, (id, child)) in self.body.children.iter().enumerate() {}
+    }
+
+    // pub fn set_active(&mut self, cx: &mut Cx) {
+    //     // let all children unselected
+    //     for (_index, ((_, child), item_mode)) in self
+    //         .body
+    //         .children
+    //         .iter()
+    //         .zip(self.item_modes.iter())
+    //         .enumerate()
+    //     {
+    //         match item_mode {
+    //             MenuItemMode::SubMenu(_) => {
+    //                 child.as_gsub_menu().borrow_mut().map(|mut sub_menu| {
+    //                     sub_menu.set_active(cx, false);
+    //                 });
+    //             }
+    //             MenuItemMode::MenuItem(_) => {
+    //                 child.as_gmenu_item().borrow_mut().map(|mut item| {
+    //                     item.set_active(cx, false);
+    //                 });
+    //             }
+    //         }
+    //     }
+    //     // then if selected is not None, set the selected item
+    //     if let Some(selected) = self.active.as_ref() {
+    //         MenuItemMode::find_node(&mut self.body.children, selected, &mut |item| {
+    //             item.as_gmenu_item().borrow_mut().map(|mut item| {
+    //                 item.selected = true;
+    //                 item.render(cx);
+    //             });
+    //         });
+    //     }
+    // }
+    // pub fn find_selected(&mut self) {
+    //     for (_, child) in self.body.children.iter() {
+    //         if let Some(child) = child.as_gmenu_item().borrow() {
+    //             self.item_modes.push(MenuItemMode::MenuItem(child.selected));
+    //         } else if let Some(child) = child.as_gsub_menu().borrow() {
+    //             self.item_modes
+    //                 .push(MenuItemMode::SubMenu(child.item_modes.clone()));
+    //         } else {
+    //             panic!("GMenu only allows GMenuItem or GSubMenu as child!");
+    //         }
+    //     }
+    //     self.selected = MenuItemMode::selected(&self.item_modes);
+    // }
 }
 
 impl GMenuRef {

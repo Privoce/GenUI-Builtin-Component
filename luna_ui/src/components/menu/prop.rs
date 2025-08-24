@@ -225,7 +225,8 @@ impl TryFrom<(&Item, MenuState)> for MenuBasicProp {
 impl MenuBasicProp {
     pub fn default_header(theme: Theme, state: MenuState) -> ViewBasicProp {
         let mut header = Self::default_container(theme, state);
-        header.set_height(Size::Fixed(32.0));
+        header.set_height(Size::Fit);
+        header.set_width(Size::Fill);
         header
     }
     pub fn default_footer(theme: Theme, state: MenuState) -> ViewBasicProp {
@@ -234,11 +235,15 @@ impl MenuBasicProp {
     pub fn default_container(theme: Theme, state: MenuState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
         container.set_cursor(Default::default());
+        container.set_width(Size::Fixed(300.0));
+        container.set_height(Size::Fill);
+        container.set_background_visible(true);
         container
     }
     pub fn default_body(theme: Theme, state: MenuState) -> ViewBasicProp {
         let mut body = Self::default_container(theme, state);
         body.set_height(Size::Fill);
+        body.set_width(Size::Fill);
         body
     }
 }

@@ -5,25 +5,16 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, area,
-    components::{
+    active_event, area, components::{
         lifecycle::LifeCycle,
         menu::event::{SubMenuChanged, SubMenuEvent, SubMenuHoverIn, SubMenuHoverOut},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
-    },
-    error::Error,
-    event_option, lifecycle, play_animation,
-    prop::{
+    }, error::Error, event_option, getter, lifecycle, play_animation, prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ToStateMap,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::draw_view::DrawView,
-    sync,
-    themes::Conf,
-    visible, ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, sync, themes::Conf, visible, ComponentAnInit
 };
 
 live_design! {
@@ -281,7 +272,6 @@ impl LiveHook for GSubMenu {
         );
     }
 }
-
 
 impl SlotComponent<SubMenuState> for GSubMenu {
     type Part = SubMenuPart;
@@ -609,8 +599,17 @@ impl GSubMenu {
         area_header, header,
         area_body, body
     }
+    getter! {
+        GSubMenu {
+            get_active(bool) {|c| {c.active}}
+        }
+    }
+    setter! {
+        GSubMenu {
+            set_active(active: bool) {|c, cx| {c.active = active; c.redraw(cx); Ok(())}}
+        }
+    }
 }
-
 
 #[derive(Clone, Copy)]
 pub enum DrawSubMenuState {
