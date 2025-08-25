@@ -25,9 +25,32 @@ live_design! {
             }
         }
         menu = <GMenu> {
+            prop: {
+                basic: {
+                    container: {
+                        theme: Primary,
+                    },
+                    body: {
+                        theme: Primary,
+                    }
+                }
+            },
             active: "tab_view",
             body: {
                 <GSubMenu> {
+                    prop: {
+                        basic: {
+                            container: {
+                                theme: Primary,
+                            },
+                            header: {
+                                theme: Primary,
+                            },
+                            body: {
+                                theme: Primary,
+                            }
+                        }
+                    },
                     header: {
                         <GLabel> {
                             text: "Basic Components"
@@ -35,12 +58,26 @@ live_design! {
                     },
                     body: {
                         <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
                             text: {
                                 text: "View"
                             },
                             value: "tab_view"
                         }
                         <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
                             text: {
                                 text: "Button"
                             },

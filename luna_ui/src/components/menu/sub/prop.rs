@@ -13,7 +13,7 @@ use crate::{
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{BASIC, BODY, CONTAINER, DISABLED, HEADER, HOVER, PRESSED},
+        manuel::{ACTIVE, BASIC, BODY, CONTAINER, DISABLED, HEADER},
         traits::NewFrom,
         ApplySlotMapImpl, Applys,
     },
@@ -27,8 +27,6 @@ use crate::{
 pub struct SubMenuProp {
     #[live(SubMenuBasicProp::default())]
     pub basic: SubMenuBasicProp,
-    #[live(SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Hover))]
-    pub hover: SubMenuBasicProp,
     #[live(SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active))]
     pub active: SubMenuBasicProp,
     #[live(SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled))]
@@ -42,7 +40,6 @@ impl Prop for SubMenuProp {
 
     get_get_mut! {
         SubMenuState::Basic => basic,
-        SubMenuState::Hover => hover,
         SubMenuState::Active => active,
         SubMenuState::Disabled => disabled
     }
@@ -67,7 +64,6 @@ impl SlotProp for SubMenuProp {
             &mut self.basic,
             SubMenuState::Basic,
             [
-                (SubMenuState::Hover, &mut self.hover),
                 (SubMenuState::Active, &mut self.active),
                 (SubMenuState::Disabled, &mut self.disabled),
             ],
@@ -83,17 +79,15 @@ impl SlotProp for SubMenuProp {
 try_from_toml_item! {
     SubMenuProp {
         basic => BASIC, SubMenuBasicProp::default(), |v| (v, SubMenuState::Basic).try_into(),
-        hover => HOVER, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Hover), |v| (v, SubMenuState::Hover).try_into(),
-        active => PRESSED, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
+        active => ACTIVE, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
         disabled => DISABLED, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled), |v| (v, SubMenuState::Disabled).try_into()
-    }, "[component.menu_item] should be a table"
+    }, "[component.sub_menu] should be a table"
 }
 
 impl Default for SubMenuProp {
     fn default() -> Self {
         Self {
             basic: SubMenuBasicProp::default(),
-            hover: SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Hover),
             active: SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active),
             disabled: SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled),
         }
@@ -266,8 +260,7 @@ impl SubMenuBasicProp {
 component_state! {
     SubMenuState {
         Basic => BASIC,
-        Hover => HOVER,
-        Active => PRESSED,
+        Active => ACTIVE,
         Disabled => DISABLED
     }, _ => SubMenuState::Basic
 }
@@ -282,7 +275,6 @@ impl From<SubMenuState> for ViewState {
     fn from(value: SubMenuState) -> Self {
         match value {
             SubMenuState::Basic => ViewState::Basic,
-            SubMenuState::Hover => ViewState::Hover,
             SubMenuState::Active => ViewState::Pressed,
             SubMenuState::Disabled => ViewState::Disabled,
         }
@@ -293,9 +285,9 @@ impl From<ViewState> for SubMenuState {
     fn from(value: ViewState) -> Self {
         match value {
             ViewState::Basic => SubMenuState::Basic,
-            ViewState::Hover => SubMenuState::Hover,
             ViewState::Pressed => SubMenuState::Active,
             ViewState::Disabled => SubMenuState::Disabled,
+            ViewState::Hover => SubMenuState::Basic,
         }
     }
 }
@@ -304,7 +296,6 @@ impl From<SubMenuState> for SvgState {
     fn from(value: SubMenuState) -> Self {
         match value {
             SubMenuState::Basic => SvgState::Basic,
-            SubMenuState::Hover => SvgState::Hover,
             SubMenuState::Active => SvgState::Pressed,
             SubMenuState::Disabled => SvgState::Disabled,
         }
@@ -314,7 +305,7 @@ impl From<SubMenuState> for SvgState {
 impl From<SubMenuState> for LabelState {
     fn from(value: SubMenuState) -> Self {
         match value {
-            SubMenuState::Basic | SubMenuState::Hover | SubMenuState::Active => LabelState::Basic,
+            SubMenuState::Basic | SubMenuState::Active => LabelState::Basic,
             SubMenuState::Disabled => LabelState::Disabled,
         }
     }

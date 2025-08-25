@@ -15,7 +15,9 @@ use crate::{
     error::Error,
     get_get_mut,
     prop::{
-        manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, TEXT}, traits::NewFrom, ApplySlotMapImpl, Applys
+        manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, TEXT},
+        traits::NewFrom,
+        ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
     try_from_toml_item,

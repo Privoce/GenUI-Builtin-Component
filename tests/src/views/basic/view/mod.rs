@@ -91,6 +91,31 @@ live_design! {
                         text: "Disabled"
                     }
                 }
+                <GView> {
+                    prop: {
+                        basic: {
+                            height: 100.0,
+                            width: 100.0,
+                            background_visible: true,
+                            theme: Warning,
+                            clip_y: true
+                        }
+                    },
+                    <GLabel> {
+                        text: "Scroll"
+                    }
+                    <GView> {
+                        prop: {
+                            basic: {
+                                height: 200.0,
+                                width: 20.0,
+                                background_visible: true,
+                                theme: Primary,
+                            }
+                        },
+                    }
+                    
+                }
             }
             desc = {
                 text: "Basic View Component"

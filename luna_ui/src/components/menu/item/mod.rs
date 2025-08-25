@@ -13,7 +13,7 @@ use crate::{
     error::Error,
     event_option, getter, hit_hover_in, hit_hover_out, lifecycle, play_animation,
     prop::{
-        manuel::{BASIC, DISABLED, HOVER, PRESSED},
+        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer,
         ToSlotMap, ToStateMap,
@@ -47,7 +47,6 @@ live_design! {
                 on = {
                     from: {
                         all: Forward {duration: (AN_DURATION),},
-                        active: Forward {duration: (AN_DURATION)},
                     },
                     ease: InOutQuad,
                     apply: {
@@ -242,7 +241,7 @@ impl LiveHook for GMenuItem {
         self.set_apply_slot_map(
             nodes,
             index,
-            [live_id!(basic), live_id!(hover)],
+            [live_id!(basic), live_id!(hover), live_id!(active), live_id!(disabled)],
             [
                 (MenuItemPart::Container, &live_props),
                 (MenuItemPart::Icon, &SvgBasicProp::live_props()),
@@ -261,7 +260,7 @@ impl LiveHook for GMenuItem {
                         .apply_slot_map
                         .insert(MenuItemState::Hover, applys);
                 }
-                PRESSED => {
+                ACTIVE => {
                     component
                         .apply_slot_map
                         .insert(MenuItemState::Active, applys);

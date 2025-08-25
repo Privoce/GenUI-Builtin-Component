@@ -5,16 +5,25 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, area, components::{
+    area,
+    components::{
         lifecycle::LifeCycle,
-        menu::event::{SubMenuChanged, SubMenuEvent, SubMenuHoverIn, SubMenuHoverOut},
+        menu::event::{SubMenuChanged, SubMenuEvent},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
-    }, error::Error, event_option, getter, lifecycle, play_animation, prop::{
-        manuel::{ACTIVE, BASIC, DISABLED, HOVER},
+    },
+    error::Error,
+    event_option, getter, lifecycle, play_animation,
+    prop::{
+        manuel::{ACTIVE, BASIC, DISABLED},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ToStateMap,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, setter, shader::draw_view::DrawView, sync, themes::Conf, visible, ComponentAnInit
+    },
+    pure_after_apply, set_animation, set_index, set_scope_path, setter,
+    shader::draw_view::DrawView,
+    sync,
+    themes::Conf,
+    visible, ComponentAnInit,
 };
 
 live_design! {
@@ -39,6 +48,14 @@ live_design! {
                     apply: {
                         draw_sub_menu: <AN_DRAW_VIEW> {},
                         fold: [{time: 0.0, value: 0.0}, {time: 1.0, value: 1.0}]
+                    }
+                }
+                disabled = {
+                    from: {all: Forward {duration: (AN_DURATION)}}
+                    ease: InOutQuad,
+                    apply: {
+                        draw_sub_menu: <AN_DRAW_VIEW> {},
+                        fold: [{time: 0.0, value: 1.0}, {time: 1.0, value: 0.0}]
                     }
                 }
             }
@@ -236,12 +253,7 @@ impl LiveHook for GSubMenu {
         self.set_apply_slot_map(
             nodes,
             index,
-            [
-                live_id!(basic),
-                live_id!(hover),
-                live_id!(active),
-                live_id!(disabled),
-            ],
+            [live_id!(basic), live_id!(active), live_id!(disabled)],
             [
                 (SubMenuPart::Container, &live_props),
                 (SubMenuPart::Header, &live_props),
@@ -251,9 +263,6 @@ impl LiveHook for GSubMenu {
             |prefix, component, applys| match prefix.to_string().as_str() {
                 BASIC => {
                     component.apply_slot_map.insert(SubMenuState::Basic, applys);
-                }
-                HOVER => {
-                    component.apply_slot_map.insert(SubMenuState::Hover, applys);
                 }
                 ACTIVE => {
                     component
@@ -284,11 +293,9 @@ impl Component for GSubMenu {
         let prop = &cx.global::<Conf>().components.sub_menu;
         self.prop = prop.clone();
         self.header.prop.basic = self.prop.basic.header;
-        self.header.prop.hover = self.prop.hover.header;
         self.header.prop.pressed = self.prop.active.header;
         self.header.prop.disabled = self.prop.disabled.header;
         self.body.prop.basic = self.prop.basic.body;
-        self.body.prop.hover = self.prop.hover.body;
         self.body.prop.pressed = self.prop.active.body;
         self.body.prop.disabled = self.prop.disabled.body;
     }
@@ -336,14 +343,14 @@ impl Component for GSubMenu {
                     cx.set_key_focus(area);
                 }
             }
-            Hit::FingerHoverIn(meta) => {
+            Hit::FingerHoverIn(_meta) => {
                 cx.set_cursor(self.prop.get(self.state).header.cursor);
-                self.switch_state_with_animation(cx, SubMenuState::Hover);
-                self.active_hover_in(cx, meta);
+                // self.switch_state_with_animation(cx, SubMenuState::Hover);
+                // self.active_hover_in(cx, meta);
             }
-            Hit::FingerHoverOut(meta) => {
-                self.switch_state_with_animation(cx, SubMenuState::Basic);
-                self.active_hover_out(cx, meta);
+            Hit::FingerHoverOut(_meta) => {
+                // self.switch_state_with_animation(cx, SubMenuState::Basic);
+                // self.active_hover_out(cx, meta);
             }
             Hit::FingerUp(meta) => {
                 self.active = !self.active;
@@ -409,16 +416,14 @@ impl Component for GSubMenu {
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
             let basic_prop = self.prop.get(SubMenuState::Basic);
-            let hover_prop = self.prop.get(SubMenuState::Hover);
             let active_prop = self.prop.get(SubMenuState::Active);
             let disabled_prop = self.prop.get(SubMenuState::Disabled);
-            let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
-                (None, None, None, None);
+            let (mut basic_index, mut active_index, mut disabled_index) = (None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
                 &[
                     live_id!(animator).as_field(),
-                    live_id!(hover).as_instance(),
+                    live_id!(active).as_instance(),
                     live_id!(off).as_instance(),
                 ],
             ) {
@@ -429,19 +434,8 @@ impl Component for GSubMenu {
                 self.index,
                 &[
                     live_id!(animator).as_field(),
-                    live_id!(hover).as_instance(),
-                    live_id!(on).as_instance(),
-                ],
-            ) {
-                hover_index = Some(index);
-            }
-
-            if let Some(index) = nodes.child_by_path(
-                self.index,
-                &[
-                    live_id!(animator).as_field(),
-                    live_id!(hover).as_instance(),
                     live_id!(active).as_instance(),
+                    live_id!(on).as_instance(),
                 ],
             ) {
                 active_index = Some(index);
@@ -451,7 +445,7 @@ impl Component for GSubMenu {
                 self.index,
                 &[
                     live_id!(animator).as_field(),
-                    live_id!(hover).as_instance(),
+                    live_id!(active).as_instance(),
                     live_id!(disabled).as_instance(),
                 ],
             ) {
@@ -470,17 +464,6 @@ impl Component for GSubMenu {
                         blur_radius => (basic_prop.container.blur_radius as f64),
                         shadow_offset => basic_prop.container.shadow_offset,
                         background_visible => basic_prop.container.background_visible.to_f64()
-                    },
-                    hover_index => {
-                        background_color => hover_prop.container.background_color,
-                        border_color => hover_prop.container.border_color,
-                        border_radius => hover_prop.container.border_radius,
-                        border_width => (hover_prop.container.border_width as f64),
-                        shadow_color => hover_prop.container.shadow_color,
-                        spread_radius => (hover_prop.container.spread_radius as f64),
-                        blur_radius => (hover_prop.container.blur_radius as f64),
-                        shadow_offset => hover_prop.container.shadow_offset,
-                        background_visible => hover_prop.container.background_visible.to_f64()
                     },
                     active_index => {
                         background_color => active_prop.container.background_color,
@@ -514,31 +497,23 @@ impl Component for GSubMenu {
                     self.index,
                     &[
                         live_id!(animator).as_field(),
-                        live_id!(hover).as_instance(),
+                        live_id!(active).as_instance(),
                         live_id!(off).as_instance(),
-                    ],
-                ),
-                SubMenuState::Hover => nodes.child_by_path(
-                    self.index,
-                    &[
-                        live_id!(animator).as_field(),
-                        live_id!(hover).as_instance(),
-                        live_id!(on).as_instance(),
                     ],
                 ),
                 SubMenuState::Active => nodes.child_by_path(
                     self.index,
                     &[
                         live_id!(animator).as_field(),
-                        live_id!(hover).as_instance(),
                         live_id!(active).as_instance(),
+                        live_id!(on).as_instance(),
                     ],
                 ),
                 SubMenuState::Disabled => nodes.child_by_path(
                     self.index,
                     &[
                         live_id!(animator).as_field(),
-                        live_id!(hover).as_instance(),
+                        live_id!(active).as_instance(),
                         live_id!(disabled).as_instance(),
                     ],
                 ),
@@ -569,10 +544,6 @@ impl Component for GSubMenu {
 }
 
 impl GSubMenu {
-    active_event! {
-        active_hover_in: SubMenuEvent::HoverIn |meta: FingerHoverEvent| => SubMenuHoverIn {meta},
-        active_hover_out: SubMenuEvent::HoverOut |meta: FingerHoverEvent| => SubMenuHoverOut {meta}
-    }
     pub fn active_changed(&mut self, cx: &mut Cx, meta: Option<FingerUpEvent>) {
         if self.event_open {
             self.scope_path.as_ref().map(|path| {
@@ -589,8 +560,6 @@ impl GSubMenu {
         }
     }
     event_option! {
-        hover_in: SubMenuEvent::HoverIn => SubMenuHoverIn,
-        hover_out: SubMenuEvent::HoverOut => SubMenuHoverOut,
         changed: SubMenuEvent::Changed => SubMenuChanged
     }
     area! {

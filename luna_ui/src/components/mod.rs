@@ -49,6 +49,7 @@ live_design! {
     pub GView = <GViewBase>{
         animation_open: false,
         event_open: false,
+        scroll_bars: <GScrollBars>{}
     }
 
     pub GHLayout = <GView> {
@@ -386,9 +387,15 @@ live_design! {
             <GLabel>{
                 text: "Menu Header",
             }
-        }
+        },
         body: <GView>{
             scroll_bars: <GScrollBars> {}
+        },
+        footer: <GView> {
+            visible: false,
+            <GLabel>{
+                text: "Menu Footer",
+            }
         }
     }
 

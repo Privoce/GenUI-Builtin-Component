@@ -45,7 +45,7 @@ live_design! {
                     },
                     show_bg: true,
                     draw_bg: {
-                        color: #000,
+                        color: #140D2A,
                     }
                     // <GView> {
                     //     prop: {
@@ -837,11 +837,18 @@ live_design! {
                         //                 }
                         //             }
                         //         }
-                        //         <GMenuItem> {
-                        //             text: <GLabel>{
-                        //                 text: "Sub Menu Item 1",
-                        //             }
-                        //         }
+                                // <GMenuItem> {
+                                //     prop: {
+                                //         basic: {
+                                //             container: {
+                                //                 theme: Primary,
+                                //             }
+                                //         }
+                                //     }
+                                //     text: <GLabel>{
+                                //         text: "Sub Menu Item 1",
+                                //     }
+                                // }
                         //     },
                         //     footer: <GView>{
                         //         prop: {
@@ -857,9 +864,57 @@ live_design! {
                         //     }
                         // }
                     // }
-                    body = <HomePage> {}
+                    // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+                    <GSubMenu> {
+                    prop: {
+                        basic: {
+                            container: {
+                                theme: Primary,
+                            },
+                            header: {
+                                theme: Primary,
+                            },
+                            body: {
+                                theme: Primary,
+                            }
+                        }
+                    },
+                    header: {
+                        <GLabel> {
+                            text: "Basic Components"
+                        }
+                    },
+                    body: {
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "View"
+                            },
+                            value: "tab_view"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Button"
+                            },
+                            value: "tab_button"
+                        }
+                    }
+                }
                 }
             }
         }
