@@ -12,6 +12,11 @@ live_design! {
         varying sdf_rect_pos: vec2,
         varying sdf_rect_size: vec2,
 
+        // [getter] -------------------------------------------------------------------------------
+        fn get_background_color(self) -> vec4 { return self.background_color; }
+        fn get_border_color(self) -> vec4 { return self.border_color; }
+        fn get_shadow_color(self) -> vec4 { return self.shadow_color; }
+
         // [vertex shader] ------------------------------------------------------------------------
         fn vertex(self) -> vec4 {
             // - [get minimum shadow offset] ------------------------------------------------------
@@ -56,7 +61,7 @@ live_design! {
                             self.blur_radius,
                             max_border_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
+                        let shadow_color = vec4(self.get_shadow_color().rgb, self.get_shadow_color().a * v);
                         sdf.clear(shadow_color);
                     } else {
                         let v = GaussShadow::box_shadow(
@@ -65,7 +70,7 @@ live_design! {
                             self.pos * self.rect_size3,
                             self.blur_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
+                        let shadow_color = vec4(self.get_shadow_color().rgb, self.get_shadow_color().a * v);
                         sdf.clear(shadow_color);
                     }
                 }
@@ -89,12 +94,12 @@ live_design! {
 
             // - [background color if visible] ----------------------------------------------------
             if self.background_visible == 1.0 {
-                sdf.fill_keep(self.background_color);
+                sdf.fill_keep(self.get_background_color());
             }
 
             // - [border with and color if width bigger than 0] -----------------------------------
             if border_width > 0.0 {
-                sdf.stroke(self.border_color, border_width);
+                sdf.stroke(self.get_border_color(), border_width);
             }
 
             return sdf.result;
@@ -107,10 +112,6 @@ live_design! {
 pub struct DrawView {
     #[deref]
     pub draw_super: DrawQuad,
-    // #[live]
-    // pub hover: f32,
-    // #[live]
-    // pub pressed: f32,
     #[live]
     pub background_color: Vec4,
     #[live]

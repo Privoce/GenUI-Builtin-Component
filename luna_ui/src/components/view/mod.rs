@@ -679,6 +679,12 @@ impl Component for GView {
                 self.switch_state_with_animation(cx, ViewState::Basic);
                 hit_hover_out!(self, cx, e);
             }
+            Hit::FingerHoverOver(e) => {
+                cx.set_cursor(self.prop.get(self.state).cursor);
+                self.switch_state_with_animation(cx, ViewState::Hover);
+                self.play_animation(cx, id!(hover.on));
+                self.active_hover_over(cx, e);
+            }
             Hit::KeyDown(e) => {
                 self.switch_state_with_animation(cx, ViewState::Pressed);
                 self.active_key_down(cx, e);
@@ -898,6 +904,7 @@ impl Component for GView {
 impl GView {
     active_event! {
         active_hover_in: ViewEvent::HoverIn |meta: FingerHoverEvent| => ViewHoverIn {meta},
+        active_hover_over: ViewEvent::HoverOver |meta: FingerHoverEvent| => ViewHoverOver {meta},
         active_hover_out: ViewEvent::HoverOut |meta: FingerHoverEvent| => ViewHoverOut {meta},
         active_finger_down: ViewEvent::FingerDown |meta: FingerDownEvent| => ViewFingerDown {meta},
         active_finger_up: ViewEvent::FingerUp |meta: FingerUpEvent| => ViewFingerUp {meta},
@@ -909,6 +916,7 @@ impl GView {
     }
     event_option! {
         hover_in: ViewEvent::HoverIn => ViewHoverIn,
+        hover_over: ViewEvent::HoverOver => ViewHoverOver,
         hover_out: ViewEvent::HoverOut => ViewHoverOut,
         finger_down: ViewEvent::FingerDown => ViewFingerDown,
         finger_up: ViewEvent::FingerUp => ViewFingerUp,
@@ -1010,6 +1018,7 @@ impl GView {
 impl GViewRef {
     event_option_ref! {
         hover_in => ViewHoverIn,
+        hover_over => ViewHoverOver,
         hover_out => ViewHoverOut,
         finger_down => ViewFingerDown,
         finger_up => ViewFingerUp,

@@ -9,7 +9,10 @@ live_design! {
 
     pub CBox = {{CBox}} {
         show = <GHLayout> {
-
+            prop: {basic: {
+                margin: {left: 0.0, right: 0.0},
+                padding: {left: 0.0, right: 0.0},
+            }}
         }
         desc = <GLabel> {
             text: "Desc"

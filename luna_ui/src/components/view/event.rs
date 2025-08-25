@@ -11,6 +11,7 @@ pub enum ViewEvent {
     Move(ViewMove),
     HoverIn(ViewHoverIn),
     HoverOut(ViewHoverOut),
+    HoverOver(ViewHoverOver),
     KeyDown(ViewKeyDown),
     KeyUp(ViewKeyUp),
     Clicked(ViewClicked),
@@ -54,6 +55,11 @@ pub struct ViewMove {
 
 #[derive(Clone, Debug)]
 pub struct ViewHoverIn {
+    pub meta: FingerHoverEvent,
+}
+
+#[derive(Clone, Debug)]
+pub struct ViewHoverOver {
     pub meta: FingerHoverEvent,
 }
 

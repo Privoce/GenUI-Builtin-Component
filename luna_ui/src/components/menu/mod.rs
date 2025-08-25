@@ -204,7 +204,7 @@ impl Widget for GMenu {
                 }
 
                 if let Some(e_type) = active {
-                    let (meta, value) = match e_type {
+                    let (meta, _value) = match e_type {
                         MenuActionType::SubMenu(SubMenuChanged { value, meta, .. }) => {
                             (meta, value)
                         }
@@ -214,15 +214,7 @@ impl Widget for GMenu {
                         }
                     };
 
-                    cx.widget_action(
-                        self.widget_uid(),
-                        &scope.path,
-                        MenuEvent::Changed(MenuChanged {
-                            meta,
-                            active: Some(value),
-                        }),
-                    );
-
+                    self.active_changed(cx, meta);
                     self.set_target_active(cx);
                 }
             }
@@ -482,7 +474,7 @@ fn handle_nested(
     index_chain: &Vec<usize>,
     item_modes: &mut Vec<MenuItemMode>,
     is_action: bool,
-) {
+) -> bool {
     if let Some(mut child) = child.as_gsub_menu().borrow_mut() {
         if child.value.is_empty() {
             child.generate_value(&index_chain);
@@ -494,10 +486,11 @@ fn handle_nested(
             }
         }
         let mut sub_menu_mode = vec![];
+        let mut active_sub = false;
         for (sub_index, (_id, sub_child)) in child.body.children.iter().enumerate() {
             let mut index_chain = index_chain.clone();
             index_chain.push(sub_index);
-            handle_nested(
+            let is_active = handle_nested(
                 cx,
                 sub_child,
                 active,
@@ -505,7 +498,9 @@ fn handle_nested(
                 &mut sub_menu_mode,
                 is_action,
             );
+            active_sub |= is_active;
         }
+        child.active = active_sub;
         if !is_action {
             item_modes.push(MenuItemMode::SubMenu {
                 active: child.active,
@@ -513,6 +508,7 @@ fn handle_nested(
                 items: sub_menu_mode,
             });
         }
+        return child.active;
     } else if let Some(mut child) = child.as_gmenu_item().borrow_mut() {
         if child.value.is_empty() {
             child.generate_value(&index_chain);
@@ -529,6 +525,7 @@ fn handle_nested(
                 active: child.active,
             });
         }
+        return child.active;
     } else {
         panic!("GMenu only allows GMenuItem or GSubMenu as child!");
     }
