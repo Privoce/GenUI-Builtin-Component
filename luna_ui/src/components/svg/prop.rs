@@ -294,10 +294,10 @@ impl BasicProp for SvgPartProp {
 
     state_color! {
         (color_level),
-        SvgState::Basic => (500),
-        SvgState::Hover => (400),
-        SvgState::Pressed => (600),
-        SvgState::Disabled => (300)
+        SvgState::Basic => (200),
+        SvgState::Hover => (100),
+        SvgState::Pressed => (300),
+        SvgState::Disabled => (100)
     }
 
     fn len() -> usize {

@@ -8,7 +8,7 @@ use makepad_widgets::*;
 
 use crate::{
     components::{
-        popup::{container::GPopupContainer},
+        popup::{GPopupContainer},
         traits::PopupComponent,
         view::GView,
     },

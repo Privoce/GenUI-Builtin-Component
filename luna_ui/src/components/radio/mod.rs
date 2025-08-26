@@ -1,9 +1,12 @@
 mod event;
-pub mod group;
+mod group;
 mod prop;
+mod register;
 
 pub use event::*;
 pub use prop::*;
+pub use group::*;
+pub use register::register as radio_register;
 
 use makepad_widgets::*;
 
@@ -24,7 +27,7 @@ use crate::{
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::{draw_radio::DrawRadio, draw_view::DrawView},
     sync,
-    themes::Conf,
+    themes::conf::Conf,
     visible, ComponentAnInit,
 };
 

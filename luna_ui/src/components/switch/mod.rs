@@ -14,7 +14,7 @@ use crate::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER_ACTIVE, HOVER_BASIC},
         traits::ToFloat,
         ApplyStateMap,
-    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_switch::DrawSwitch, sync, themes::Conf, visible, ComponentAnInit
+    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_switch::DrawSwitch, sync, themes::conf::Conf, visible, ComponentAnInit
 };
 
 live_design! {

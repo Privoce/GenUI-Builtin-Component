@@ -1,5 +1,5 @@
 use makepad_widgets::*;
-use themes::Conf;
+use crate::themes::conf::Conf;
 
 pub mod components;
 pub mod error;

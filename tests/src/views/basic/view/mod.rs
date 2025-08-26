@@ -1,7 +1,5 @@
 use luna_ui::{
-    components::{
-        button::GButtonWidgetExt, label::GLabelWidgetExt, view::{GView, GViewWidgetExt}
-    },
+    components::*,
     inherits_view_livehook,
 };
 use makepad_widgets::*;

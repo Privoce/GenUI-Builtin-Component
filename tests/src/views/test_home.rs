@@ -1,5 +1,5 @@
 use luna_ui::{
-    components::{button::GButtonWidgetExt, lifecycle::LifeCycle, router::GRouterWidgetExt, view::{GView, GViewWidgetExt}},
+    components::*,
     inherits_view_livehook, inherits_view_widget_node,
 };
 use makepad_widgets::*;
@@ -65,7 +65,7 @@ impl LiveHook for THomePage {
 impl Widget for THomePage {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         let _ = self.deref_widget.draw_walk(cx, scope, walk);
-        
+
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
@@ -76,10 +76,10 @@ impl Widget for THomePage {
         let v1 = self.gview(id!(v1));
         let v2 = self.gview(id!(v2));
         if let Some(_) = btn1.clicked(&actions) {
-           v1.set_visible(cx, !v1.get_visible());
+            v1.set_visible(cx, !v1.get_visible());
         }
         if let Some(_) = btn2.clicked(&actions) {
-           v2.set_visible(cx, !v2.get_visible());
+            v2.set_visible(cx, !v2.get_visible());
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{components::view::ViewBasicProp, prop::traits::ToFloat};
+use crate::{components::ViewBasicProp, prop::traits::ToFloat};
 use makepad_widgets::*;
 
 live_design! {

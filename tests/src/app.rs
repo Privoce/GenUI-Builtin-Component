@@ -1,10 +1,5 @@
 use luna_ui::{
-    components::{
-        button::{ButtonState, GButtonWidgetRefExt},
-        label::GLabelWidgetRefExt,
-        traits::{BasicProp, Component},
-        view::GViewWidgetRefExt,
-    },
+    components::*,
     prop::traits::ToColor,
     themes::Theme,
 };
@@ -864,57 +859,10 @@ live_design! {
                         //     }
                         // }
                     // }
-                    // body = <HomePage> {}
+                    body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                    <GSubMenu> {
-                    prop: {
-                        basic: {
-                            container: {
-                                theme: Primary,
-                            },
-                            header: {
-                                theme: Primary,
-                            },
-                            body: {
-                                theme: Primary,
-                            }
-                        }
-                    },
-                    header: {
-                        <GLabel> {
-                            text: "Basic Components"
-                        }
-                    },
-                    body: {
-                        <GMenuItem> {
-                            prop: {
-                                basic: {
-                                    container: {
-                                        theme: Primary,
-                                    }
-                                }
-                            }
-                            text: {
-                                text: "View"
-                            },
-                            value: "tab_view"
-                        }
-                        <GMenuItem> {
-                            prop: {
-                                basic: {
-                                    container: {
-                                        theme: Primary,
-                                    }
-                                }
-                            }
-                            text: {
-                                text: "Button"
-                            },
-                            value: "tab_button"
-                        }
-                    }
-                }
+                 
                 }
             }
         }

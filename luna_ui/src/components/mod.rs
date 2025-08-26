@@ -1,37 +1,54 @@
 use makepad_widgets::*;
 
-use crate::{
-    component,
-    components::{
-        button::GButton, card::GCard, label::GLabel, radio::GRadio, svg::GSvg, view::GView,
-    },
-};
+mod button;
+mod card;
+mod checkbox;
+mod collapse;
+mod divider;
+mod drop_down;
+mod image;
+mod label;
+mod lifecycle;
+mod link;
+mod live_props;
+mod loading;
+mod menu;
+mod popup;
+mod radio;
+mod router;
+mod select;
+mod svg;
+mod switch;
+mod tabbar;
+mod tag;
+mod traits;
+mod view;
 
-pub mod button;
-pub mod card;
-pub mod checkbox;
-pub mod collapse;
-pub mod divider;
-pub mod drop_down;
-pub mod image;
-pub mod label;
-pub mod lifecycle;
-pub mod link;
-pub mod live_props;
-pub mod loading;
-pub mod menu;
-pub mod popup;
-pub mod radio;
-pub mod router;
-pub mod select;
-pub mod svg;
-pub mod switch;
-pub mod tabbar;
-pub mod tag;
-pub mod traits;
-pub mod view;
+pub use button::*;
+pub use card::*;
+pub use checkbox::*;
+pub use collapse::*;
+pub use divider::*;
+pub use drop_down::*;
+pub use image::*;
+pub use label::*;
+pub use lifecycle::*;
+pub use link::*;
+pub use live_props::*;
+// pub use loading::*;
+pub use menu::*;
+pub use popup::*;
+pub use radio::*;
+pub use router::*;
+// pub use select::*;
+pub use svg::*;
+pub use switch::*;
+pub use tabbar::*;
+pub use tag::*;
+pub use traits::*;
+pub use view::*;
 
-use traits::Component;
+use crate::component;
 
 live_design! {
     link gen_ui;
@@ -407,27 +424,20 @@ pub fn components_register(cx: &mut Cx) {
     view::live_design(cx);
     button::live_design(cx);
     card::live_design(cx);
-    radio::live_design(cx);
-    radio::group::live_design(cx);
-    checkbox::live_design(cx);
-    checkbox::group::live_design(cx);
+    radio::radio_register(cx);
+    checkbox::checkbox_register(cx);
     switch::live_design(cx);
     divider::live_design(cx);
     svg::live_design(cx);
     image::live_design(cx);
-    popup::live_design(cx);
-    popup::container::live_design(cx);
+    popup::popup_register(cx);
     drop_down::live_design(cx);
-    tabbar::live_design(cx);
-    tabbar::item::live_design(cx);
-    // tabbar::virt::live_design(cx); TODO: not compeleted yet
+    tabbar::tabbar_register(cx);
     tag::live_design(cx);
     link::live_design(cx);
     router::page::live_design(cx);
     router::live_design(cx);
-    menu::item::live_design(cx);
-    menu::sub::live_design(cx);
-    menu::live_design(cx);
+    menu::menu_register(cx);
     collapse::live_design(cx);
 }
 

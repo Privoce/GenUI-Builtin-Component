@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::components::svg::SvgPartProp;
+use crate::components::SvgPartProp;
 
 live_design! {
     DrawSvg = {{DrawSvg}} {

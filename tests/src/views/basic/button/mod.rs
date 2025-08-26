@@ -1,7 +1,5 @@
 use luna_ui::{
-    components::{
-        button::GButtonWidgetExt, label::GLabelWidgetExt, view::{GView, GViewWidgetExt}
-    },
+    components::*,
     inherits_view_livehook,
 };
 use makepad_widgets::*;
@@ -30,15 +28,198 @@ live_design! {
                         }
                     }
                 }
+                <GButton> {
+                    prop: {
+                        basic: {
+                            theme: Success,
+                        }
+                    }
+                }
+                <GButton> {
+                    prop: {
+                        basic: {
+                            theme: Info,
+                        }
+                    }
+                }
+                <GButton> {
+                    prop: {
+                        basic: {
+                            theme: Warning,
+                        }
+                    }
+                }
+                <GButton> {
+                    prop: {
+                        basic: {
+                            theme: Error,
+                        }
+                    }
+                }
             }
             desc = {
                 text: "Basic Button Component"
             }
         }
-        // --------------------- animation ---------------------------------------------------------
-        
+        // --------------------- others -------------------------------------------------------------
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                    }
+                }
+                <GHLayout>{
+                    prop: {
+                        basic: {
+                            height: Fit,
+                            width: Fill,
+                            margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
+                            padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                        }
+                    }
+                    <GButton> {
+                        slot: {
+                            text: "Only Text"
+                        }
+                    }
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                            }
+                        },
+                        slot: <GHLayout>{
+                            prop: {
+                                basic: {
+                                    width: Fit,
+                                    height: Fit,
+                                    align: {
+                                        x: 0.5,
+                                        y: 0.5
+                                    },
+                                    margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
+                                    padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                                },
+                            }
+                            <GSvg> {
+                                prop: {
+                                    basic: {
+                                        svg: {height: 18.0, width: 18.0, theme: Primary},
+                                    }
+                                },
+                                src: dep("crate://self/resources/heavy.svg"),
+                            }
+                            <GLabel> {
+                                text: "Bold text + Icon",
+                                mode: Bold
+                            }
+                        }
+                    }
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Success,
+                            }
+                        }
+                        slot: <GSvg> {
+                            prop: {
+                                basic: {
+                                    svg: {height: 20.0, width: 20.0},
+                                }
+                            },
+                            src: dep("crate://self/resources/heavy.svg"),
+                        }
+                    }
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Info,
+                                border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
+                                padding: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
+                            }
+                        }
+                        slot: <GSvg> {
+                                prop: {
+                                    basic: {
+                                        svg: {height: 20.0, width: 20.0, theme: Primary},
+                                    }
+                                },
+                                src: dep("crate://self/resources/heavy.svg"),
+                            }
+                    }
+                }
+                <GHLayout> {
+                    prop: {
+                        basic: {
+                            height: Fit,
+                            width: Fill,
+                            margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
+                            padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                        }
+                    },
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Info,
+                                spread_radius: 4.0,
+                                blur_radius: 4.0,
+                            }
+                        }
+                        slot: {
+                            text: "with shadow"
+                        }
+                    }
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Warning,
+                                border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0}
+                            }
+                        },
+                        slot: {
+                            text: "Round Button"
+                        }
+                    }
+                    <GButton> {
+                        prop: {
+                            basic: {
+                                theme: Error,
+                                border_radius: {left: 4.0, right: 10.0, top: 6.0, bottom: 2.0}
+                            }
+                        },
+                        slot: {
+                            text: "Different Radius"
+                        }
+                    }
+                }
+            }
+            desc = {
+                text: "Different Button Component"
+            }
+        }
         // --------------------- event handling ---------------------------------------------------------
-       
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                    }
+                }
+                ebtn = <GButton> {
+                    slot: {
+                        text: "None"
+                    }
+                }
+            }
+            desc = {
+                text: "Button Event"
+            }
+        }
     }
 }
 
@@ -69,17 +250,28 @@ impl Widget for ButtonPage {
 
 impl MatchEvent for ButtonPage {
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-        // let eview = self.gview(id!(eview));
-        // let etext = self.glabel(id!(etext));
-        // let ebtn = self.gbutton(id!(ebtn));
-        // if let Some(_) = eview.clicked(actions) {
-        //     dbg!("Clicked");
-        //     let _ = etext.set_text(cx, "Clicked".to_string());
-        // }
-        // if let Some(_) = ebtn.clicked(actions) {
-        //     dbg!("Button Clicked");
-        //     let _ = etext.set_text(cx, "Button Clicked".to_string());
-        // }
+        let ebtn = self.gbutton(id!(ebtn));
+        if let Some(_) = ebtn.clicked(actions) {
+            ebtn.borrow_mut().map(|btn| {
+                let _ = btn.slot.as_glabel().set_text(cx, "Clicked".to_string());
+            });
+        } else if let Some(_) = ebtn.hover_in(actions) {
+            ebtn.borrow_mut().map(|btn| {
+                let _ = btn.slot.as_glabel().set_text(cx, "Hover In".to_string());
+            });
+        } else if let Some(_) = ebtn.hover_out(actions) {
+            ebtn.borrow_mut().map(|btn| {
+                let _ = btn.slot.as_glabel().set_text(cx, "Hover Out".to_string());
+            });
+        } else if let Some(_) = ebtn.finger_down(actions) {
+            ebtn.borrow_mut().map(|btn| {
+                let _ = btn.slot.as_glabel().set_text(cx, "Finger Down".to_string());
+            });
+        } else if let Some(_) = ebtn.finger_up(actions) {
+            ebtn.borrow_mut().map(|btn| {
+                let _ = btn.slot.as_glabel().set_text(cx, "Finger Up".to_string());
+            });
+        }
     }
 }
 

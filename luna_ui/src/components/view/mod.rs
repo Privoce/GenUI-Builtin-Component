@@ -24,7 +24,7 @@ use crate::{
     pure_after_apply, set_animation, set_index, set_scope_path, setter,
     shader::draw_view::DrawView,
     sync,
-    themes::{Conf, Theme},
+    themes::{conf::Conf, Theme},
     visible, ComponentAnInit,
 };
 pub use rely::*;

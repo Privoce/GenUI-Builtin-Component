@@ -8,7 +8,7 @@ use crate::{
         manuel::{BASIC, DISABLED},
         traits::ToColor,
         ApplyStateMap,
-    }, pure_after_apply, set_index, set_scope_path, setter, sync, themes::{Conf, Theme}, visible
+    }, pure_after_apply, set_index, set_scope_path, setter, sync, themes::{conf::Conf, Theme}, visible
 };
 
 mod prop;

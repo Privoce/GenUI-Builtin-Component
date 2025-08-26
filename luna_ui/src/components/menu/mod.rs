@@ -1,17 +1,21 @@
 mod event;
-pub mod item;
 mod prop;
-pub mod sub;
+mod item;
+mod sub;
+mod register;
 
 pub use event::*;
-use makepad_widgets::*;
 pub use prop::*;
+pub use item::*;
+pub use sub::*;
+pub use register::register as menu_register;
+
+use makepad_widgets::*;
 
 use crate::{
     active_event, area, area_ref,
     components::{
         lifecycle::LifeCycle,
-        menu::{item::GMenuItemWidgetRefExt, sub::GSubMenuWidgetRefExt},
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
     },
@@ -24,7 +28,7 @@ use crate::{
     pure_after_apply, set_index, set_scope_path,
     shader::draw_view::DrawView,
     sync,
-    themes::Conf,
+    themes::conf::Conf,
     visible, ComponentAnInit,
 };
 
@@ -433,7 +437,7 @@ impl GMenu {
             handle_nested(
                 cx,
                 child,
-                &self.active,
+                &active,
                 &index_chain,
                 &mut self.item_modes,
                 false,

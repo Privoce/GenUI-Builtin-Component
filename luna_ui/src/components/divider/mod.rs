@@ -7,7 +7,7 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop},
-    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::Conf, visible
+    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::conf::Conf, visible
 };
 
 live_design! {

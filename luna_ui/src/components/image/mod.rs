@@ -13,7 +13,7 @@ use crate::error::Error;
 use crate::prop::manuel::{BASIC, LOADING};
 use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
-use crate::themes::Conf;
+use crate::themes::conf::Conf;
 use crate::{
     lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, sync, visible, ComponentAnInit
 };

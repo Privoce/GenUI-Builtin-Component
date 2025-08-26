@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::{components::link::LinkBasicProp, prop::traits::ToFloat, shader::draw_view::DrawView};
+use crate::{components::LinkBasicProp, prop::traits::ToFloat, shader::draw_view::DrawView};
 
 live_design! {
     use link::shaders::*;

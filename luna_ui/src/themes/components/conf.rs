@@ -1,26 +1,12 @@
-use crate::components::button::ButtonProp;
-use crate::components::card::CardProp;
-use crate::components::checkbox::CheckboxProp;
-use crate::components::collapse::CollapseProp;
-use crate::components::divider::DividerProp;
-use crate::components::image::ImageProp;
-use crate::components::label::LabelProp;
-use crate::components::link::LinkProp;
-use crate::components::menu::item::MenuItemProp;
-use crate::components::menu::sub::SubMenuProp;
-use crate::components::menu::MenuProp;
-use crate::components::popup::container::PopupContainerProp;
-use crate::components::popup::PopupProp;
-use crate::components::radio::RadioProp;
-use crate::components::svg::SvgProp;
-use crate::components::switch::SwitchProp;
-use crate::components::tabbar::item::TabbarItemProp;
-use crate::components::tabbar::TabbarProp;
-use crate::components::tag::TagProp;
-use crate::components::view::ViewProp;
+use crate::components::{
+    ButtonProp, CardProp, CheckboxProp, CollapseProp, DividerProp, ImageProp, LabelProp, LinkProp,
+    MenuItemProp, MenuProp, PopupContainerProp, PopupProp, RadioProp, SubMenuProp, SvgProp,
+    SwitchProp, TabbarItemProp, TabbarProp, TagProp, ViewProp,
+};
 use crate::error::Error;
 use crate::prop::manuel::{
-    BUTTON, CARD, CHECKBOX, COLLAPSE, DIVIDER, IMAGE, LABEL, LINK, MENU, MENU_ITEM, POPUP, POPUP_CONTAINER, RADIO, SUB_MENU, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW
+    BUTTON, CARD, CHECKBOX, COLLAPSE, DIVIDER, IMAGE, LABEL, LINK, MENU, MENU_ITEM, POPUP,
+    POPUP_CONTAINER, RADIO, SUB_MENU, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW,
 };
 use crate::try_from_toml_item;
 

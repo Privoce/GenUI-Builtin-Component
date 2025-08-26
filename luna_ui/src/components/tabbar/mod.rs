@@ -1,18 +1,21 @@
 mod event;
-pub mod item;
+mod item;
 mod prop;
+mod register;
 // pub mod virt;
 mod schema;
 
 use crate::{
-    components::view::GView, event_option, event_option_ref, inherits_view_livehook,
+    components::GView, event_option, event_option_ref, inherits_view_livehook,
     inherits_view_widget_node,
 };
 pub use event::*;
-use item::*;
-use makepad_widgets::*;
+pub use item::*;
 pub use prop::*;
 pub use schema::*;
+pub use register::register as tabbar_register;
+
+use makepad_widgets::*;
 
 live_design! {
     link genui_basic;

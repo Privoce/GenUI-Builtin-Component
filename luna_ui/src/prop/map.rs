@@ -1,7 +1,6 @@
 use crate::{
     components::{
-        live_props::LivePropsValue,
-        traits::{BasicProp, Component, Part, SlotBasicProp},
+        LivePropsValue, {BasicProp, Component, Part, SlotBasicProp},
     },
     error::Error,
     prop::{manuel::THEME, prop_converter::PropVecConverter},
@@ -857,7 +856,7 @@ where
             .filter_map(|(k, v)| {
                 if v.is_empty() {
                     None
-                }else{
+                } else {
                     Some((k.into(), v))
                 }
             })

@@ -1,10 +1,5 @@
 use luna_ui::{
-    components::{
-        lifecycle::LifeCycle,
-        menu::{GMenuWidgetExt, MenuChanged},
-        router::GRouterWidgetExt,
-        view::{GView, GViewWidgetExt},
-    },
+    components::*,
     inherits_view_livehook, inherits_view_widget_node,
 };
 use makepad_widgets::*;
@@ -35,7 +30,7 @@ live_design! {
                     }
                 }
             },
-            active: "tab_view",
+            // active: "tab_view",
             body: {
                 <GSubMenu> {
                     prop: {
@@ -129,9 +124,36 @@ pub struct HomePage {
 }
 
 impl LiveHook for HomePage {
-    inherits_view_livehook!();
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
+    }
+    fn after_new_before_apply(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_new_before_apply(cx);
+    }
+    fn before_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
+        self.deref_widget.before_apply(cx, apply, index, nodes);
+    }
+    fn after_update_from_doc(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_update_from_doc(cx);
+    }
+    fn after_apply_from_doc(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_apply_from_doc(cx);
+    }
+    fn after_new_from_doc(&mut self, cx: &mut Cx) {
+        self.deref_widget.after_new_from_doc(cx);
+        self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
+            menu.set_active(cx, Some("tab_button".to_string()));
+        });
+    }
+    fn apply_value_instance(
+        &mut self,
+        cx: &mut Cx,
+        apply: &mut Apply,
+        index: usize,
+        nodes: &[LiveNode],
+    ) -> usize {
+        self.deref_widget
+            .apply_value_instance(cx, apply, index, nodes)
     }
 }
 
@@ -143,9 +165,11 @@ impl Widget for HomePage {
             router.borrow_mut().map(|mut router| {
                 router
                     .init(ids!(view_page, button_page), None, None)
-                    .active(id!(view_page))
+                    .active(id!(button_page))
                     .build(cx);
             });
+            let menu = self.gmenu(id!(menu));
+
             self.lifecycle.next();
         }
         DrawStep::done()

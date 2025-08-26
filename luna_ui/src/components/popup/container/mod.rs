@@ -8,7 +8,7 @@ use crate::{
         lifecycle::LifeCycle,
         popup::{GPopup, PopupState},
         traits::{BasicProp, PopupComponent, Prop},
-    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap, Position}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, themes::Conf
+    }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap, Position}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, themes::conf::Conf
 };
 
 live_design! {

@@ -1,11 +1,13 @@
-pub mod container;
+mod container;
 mod prop;
-
-use std::cell::RefCell;
+ mod register;
 
 pub use prop::*;
+pub use container::*;
+pub use register::register as popup_register;
 
 use makepad_widgets::*;
+use std::cell::RefCell;
 
 use crate::{
     components::{
@@ -18,7 +20,7 @@ use crate::{
     prop::{manuel::BASIC, ApplyStateMap, CloseMode, DeferWalks, Position},
     pure_after_apply, set_index, set_scope_path,
     shader::draw_popup::DrawPopup,
-    themes::Conf,
+    themes::conf::Conf,
 };
 
 live_design! {

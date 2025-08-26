@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::radio::RadioPartProp,
+    components::RadioPartProp,
     prop::{traits::ToFloat, ActiveMode},
 };
 

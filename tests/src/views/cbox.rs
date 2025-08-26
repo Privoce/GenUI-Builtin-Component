@@ -1,4 +1,4 @@
-use luna_ui::{components::view::GView, inherits_view_livehook};
+use luna_ui::{components::*, inherits_view_livehook};
 use makepad_widgets::*;
 
 use crate::widget_node;

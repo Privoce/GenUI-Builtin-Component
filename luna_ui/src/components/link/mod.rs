@@ -23,7 +23,7 @@ use crate::{
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_link::DrawLink,
     sync,
-    themes::{Conf, Hex},
+    themes::{conf::Conf, Hex},
     visible, ComponentAnInit,
 };
 

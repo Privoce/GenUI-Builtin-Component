@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::{components::switch::SwitchBasicProp, prop::traits::ToFloat};
+use crate::{components::SwitchBasicProp, prop::traits::ToFloat};
 
 live_design! {
     use link::shaders::*;

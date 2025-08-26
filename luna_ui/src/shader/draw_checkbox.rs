@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 use crate::{
-    components::checkbox::CheckboxPartProp,
+    components::CheckboxPartProp,
     prop::{traits::ToFloat, ActiveMode},
 };
 

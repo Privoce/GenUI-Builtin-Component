@@ -1,10 +1,9 @@
-mod components;
-mod conf;
+pub mod components;
+pub mod conf;
 mod global;
 mod theme;
 
-pub use components::*;
-pub use conf::*;
+
 pub use global::*;
 use makepad_widgets::{
     image_cache::ImageFit, Align, DVec2, Flow, Margin, MouseCursor, Padding, Size, Vec2,
@@ -222,7 +221,7 @@ impl TomlValueTo for Value {
 
 #[cfg(test)]
 mod tests {
-    use super::Conf;
+    use super::conf::Conf;
 
     #[test]
     fn toml_conf() {

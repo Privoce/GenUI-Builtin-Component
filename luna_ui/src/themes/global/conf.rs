@@ -1,8 +1,8 @@
 use toml_edit::Item;
 
-use crate::error::Error;
+use crate::{error::Error, themes::container::ContainerConf};
 
-use super::{controller::ControllerConf, ContainerConf};
+use super::controller::ControllerConf;
 
 #[derive(Clone, Debug, Default)]
 pub struct GlobalConf {
