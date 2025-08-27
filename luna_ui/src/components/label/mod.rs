@@ -4,11 +4,17 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Prop},
-    }, error::Error, getter, getter_setter_ref, lifecycle, prop::{
+    },
+    error::Error,
+    getter, getter_setter_ref, lifecycle,
+    prop::{
         manuel::{BASIC, DISABLED},
         traits::ToColor,
         ApplyStateMap,
-    }, pure_after_apply, set_index, set_scope_path, setter, sync, themes::{conf::Conf, Theme}, visible
+    },
+    pure_after_apply, set_index, set_scope_path, setter, sync,
+    themes::{conf::Conf, Theme},
+    visible,
 };
 
 mod prop;
@@ -68,6 +74,8 @@ pub struct GLabel {
     pub lifecycle: LifeCycle,
     #[rust]
     pub state: LabelState,
+    #[rust]
+    is_set_disabled_color: bool,
 }
 
 impl WidgetNode for GLabel {
@@ -105,6 +113,7 @@ impl WidgetNode for GLabel {
 }
 
 impl Widget for GLabel {
+    /// calc font height: font_size + (6 * line_spacing), so default height is 19.2
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
@@ -184,11 +193,18 @@ impl Component for GLabel {
         if self.disabled {
             self.switch_state(LabelState::Disabled);
         }
-        let state = self.state;
         // [sync to draw_text] -------------------------------------------------------
-        self.draw_text.color = self.prop.get(state).color;
-        self.draw_text.text_style.font_size = self.prop.get(state).font_size;
-        self.draw_text.text_style.line_spacing = self.prop.get(state).line_spacing;
+        let is_set_disabled_color = self.is_set_disabled_color();
+        if !self.is_set_disabled_color {
+            self.is_set_disabled_color = is_set_disabled_color;
+        }
+        let prop = self.prop.get_mut(self.state);
+        if !self.is_set_disabled_color && self.disabled {
+            prop.sync(LabelState::Disabled);
+        }
+        self.draw_text.color = prop.color;
+        self.draw_text.text_style.font_size = prop.font_size;
+        self.draw_text.text_style.line_spacing = prop.line_spacing;
         self.draw_text.text_style.font_family = match self.mode {
             FontMode::Regular => self.font_regular.font_family.clone(),
             FontMode::Bold => self.font_bold.font_family.clone(),
@@ -234,6 +250,12 @@ impl Component for GLabel {
 }
 
 impl GLabel {
+    pub fn is_set_disabled_color(&mut self) -> bool {
+        self.apply_state_map
+            .get(&LabelState::Disabled)
+            .map(|applys| applys.contains_key("color"))
+            .unwrap_or(false)
+    }
     getter! {
         GLabel{
             get_theme(Theme) {|c| {c.prop.basic.get_theme()}},

@@ -2,11 +2,11 @@ mod async_impl;
 mod prop;
 
 use makepad_widgets::image_cache::{
-    AsyncImageLoad, AsyncLoadResult, ImageCacheImpl, ImageError, ImageFit,
+    AsyncImageLoad, AsyncLoadResult, ImageCache, ImageCacheImpl, ImageError, ImageFit,
 };
 pub use prop::*;
 
-use crate::components::image::async_impl::ImageAsync;
+use crate::components::image::async_impl::{parse_image_buffer, ImageAsync};
 use crate::components::lifecycle::LifeCycle;
 use crate::components::traits::{BasicProp, Component, Prop};
 use crate::error::Error;
@@ -15,9 +15,11 @@ use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
 use crate::themes::conf::Conf;
 use crate::{
-    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, sync, visible, ComponentAnInit
+    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, sync, visible,
+    ComponentAnInit,
 };
 use makepad_widgets::*;
+use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -188,7 +190,33 @@ impl Widget for GImage {
                     }
                 }
             }
+        } else if let Event::NetworkResponses(response_events) = &event {
+            if self.src.is_url() {
+                for response_event in response_events {
+                    match &response_event.response {
+                        NetworkResponse::HttpResponse(response) => {
+                            match response_event.request_id {
+                                live_id!(ImageDownload) => {
+                                    if response.status_code == 200 {
+                                        // 这是图片的下载请求，请求方式为GET，我们需要转为buf
+                                        if let Some(buf) = &response.body {
+                                            let result = parse_image_buffer(buf.clone());
+                                            Cx::post_action(AsyncImageLoad {
+                                                image_path: PathBuf::from(self.src.to_string()),
+                                                result: RefCell::new(Some(result)),
+                                            });
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
         }
+
         let prop = self.prop.get(self.state);
         if let Some(nf) = self.next_frame.is_event(event) {
             // compute the next frame and patch things up
@@ -355,6 +383,9 @@ impl Widget for GImage {
         DrawStep::done()
     }
 }
+
+#[allow(unused)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AsyncLoad {
     Yes,
     No,

@@ -11,8 +11,18 @@ default = ["dev"]
 
 [dependencies]
 base64 = "0.22.1"
-cargo_metadata = "0.20.0"
+# cargo_metadata = "0.20.0"
 imghdr = "0.7.0"
 makepad-widgets = { path = "/Users/shengyifei/projects/makepad/makepad/widgets" }
-reqwest = { version = "0.12.22", features = ["blocking"] }
+
 toml_edit = "0.22.26"
+
+
+# [target.'cfg(target_arch = "wasm32")'.dependencies]
+# wasm-bindgen = "0.2.100"
+# wasm-bindgen-futures = "0.4.50"
+# web-sys = "0.3.77"
+# js-sys = "0.3.77"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+reqwest = { version = "0.12.22", features = ["blocking"] }

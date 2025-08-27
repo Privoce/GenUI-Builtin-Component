@@ -42,157 +42,9 @@ live_design! {
                     draw_bg: {
                         color: #140D2A,
                     }
-                    // <GView> {
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Info,
-                    //             height: 200.0,
-                    //             width: 200.0,
-                    //             background_visible: true,
-                    //         }
-                    //         hover: {
-                    //             theme: Warning,
-                    //         }
-                    //     },
-                    //     animation_open: true
-                    // }
-                    // <GButton>{
-                    //         prop: {
-                    //             basic: {
-                    //                 theme: Error,
-                    //                 abs_pos: vec2(0.0, 1.0),
-                    //             }
-                    //             hover: {
-                    //                 theme: Primary,
-                    //             }
-                    //             disabled: {
-                    //                 theme: Info,
-                    //                 padding: {
-                    //                     top: 10.0,
-                    //                     bottom: 20.0,
-                    //                     left: 10.0,
-                    //                     right: 20.0,
-                    //                 }
-                    //             }
-                    //         }
-                    //         disabled: true,
-                    //         slot: <GLabel>{
-                    //             text: "Button",
-                    //             mode: Regular,
-                    //         }
-                    //     }
-                    //     btn1 = <GButton>{
-                    //         prop: {
-                    //             hover: {
-                    //                 theme: Warning,
-                    //             }
-
-                    //         }
-                    //         slot: <GLabel>{
-                    //             text: "Click me !",
-                    //             mode: Bold,
-                    //         }
-                    //     }
-
-                        // lb = <GLabel>{
-                        //     text: "Hello World!",
-                        //     mode: Bold
-                        //     prop: {
-                        //         basic: {
-                        //             font_size: 24.0,
-                        //         }
-                        //     }
-                        // }
-                        // lb2 = <GLabel>{
-                        //     text: "Hello World! hello",
-                        //     mode: Bold
-                        //     disabled: true,
-                        //     prop: {
-                        //         basic: {
-                        //             font_size: 24.0,
-                        //         }
-                        //     }
-                        // }
 
 
-
-                    // <GCard>{
-                    //     prop: {
-                    //         basic: {
-                    //             container: {
-                    //                 theme: Primary,
-                    //                 height: 200.0,
-                    //                 width: 200.0,
-                    //                 background_visible: true,
-
-                    //             },
-                    //             header: {
-                    //                 border_width: 2.0,
-                    //                 border_color: #00f,
-                    //                 background_visible: true,
-                    //             },
-                    //             footer: {
-                    //                 theme: Error,
-                    //                 height: 40.0,
-                    //                 border_width: 2.0,
-                    //                 border_color: #f00,
-                    //                 background_visible: true,
-                    //             }
-                    //         }
-                    //     }
-
-                    // }
-
-                //    <GCard>{}
-                    // <GRadioGroup> {
-                    //     active: "2",
-                    //     <GRadio> {
-                    //         prop: {
-                    //             basic: {
-                    //                 radio: {
-                    //                     theme: Warning,
-                    //                     mode: Cross,
-                    //                 }
-                    //             }
-                    //         }
-
-                    //         extra: {
-                    //             <GLabel>{
-                    //                 text: "Radio Cross",
-                    //                 mode: Bold,
-                    //             }
-                    //         }
-                    //     }
-                    //     <GRadio>{
-                    //         active: true,
-                    //     }
-                    //     <GRadio> {
-                    //         prop: {
-                    //             basic: {
-                    //                 container: {
-                    //                     background_visible: true,
-                    //                     theme: Info,
-                    //                 },
-                    //                 radio: {
-                    //                     theme: Primary,
-                    //                     mode: Tick,
-
-                    //                 }
-                    //             },
-                    //             hover: {
-                    //                 radio: {
-                    //                     theme: Warning,
-                    //                 }
-                    //             }
-                    //         },
-                    //         extra: {
-                    //              <GLabel> {
-                    //                 text: "Radio Tick"
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    //
+                   
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
                     //     prop: {
@@ -304,59 +156,8 @@ live_design! {
                     //             theme: Error,
                     //         }
                     //     }
-                    //     <GSvg> {
-                    //         prop: {
-                    //             basic: {
-                    //                 container: {background_visible: true, theme: Primary}
-                    //                 svg: {height: 36.0, width: 36.0},
-                    //             }
-                    //         }
-                    //         src: dep("crate://self/resources/heavy.svg"),
-                    //     }
-                    // }
-                    // <GSvg> {
-                    //     prop: {
-                    //         basic: {
-                    //             container: {background_visible: true, theme: Primary, cursor: Hand}
-                    //             svg: {height: 36.0, width: 36.0},
-                    //         }
-                    //     },
-                    //     // disabled: true,
-                    //     src: dep("crate://self/resources/rain.svg"),
-                    // }
-                    // <GImage> {
-                    //     src: Live(dep("crate://self/resources/install.png")),
-                    //     prop: {
-                    //         basic: {
-                    //             height: 300.0,
-                    //             width: 500.0,
-                    //         }
-                    //     }
-                    // }
-                    // <GImage> {
-                    //     // src: Url("https://genui.privoce.com/genui.png"),
-                    //     src: File("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png"),
-                    //     // src: Live(dep("/Users/shengyifei/projects/gen_ui/components/tests/resources/bg.png")),
-
-                    // }
-                    // <GImage> {
-                    //     src: Url("https://aisearch.bj.bcebos.com/homepage/input_panel/aisearch_online.png"),
-                    //     prop: {
-                    //         basic: {
-                    //             height: 100.0,
-                    //             width: 200.0,
-                    //         }
-                    //     }
-                    // }
-                    // <GImage> {
-                    //     src: Url("https://miro.medium.com/v2/resize:fit:1200/0*fmpeXj1eUS-Nrkkv.png"),
-                    //     prop: {
-                    //         basic: {
-                    //             height: 100.0,
-                    //             width: 200.0,
-                    //         }
-                    //     }
-                    // }
+                  
+                    
                     // <GDialog> {
                     //     popup: {
                     //         popup: {
@@ -862,7 +663,6 @@ live_design! {
                     body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                 
                 }
             }
         }

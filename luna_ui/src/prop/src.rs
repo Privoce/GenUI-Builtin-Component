@@ -34,6 +34,21 @@ impl Src {
             Src::File(path) => path.is_empty(),
         }
     }
+    pub fn is_url(&self) -> bool {
+        matches!(self, Src::Url(_))
+    }
+    pub fn is_file(&self) -> bool {
+        matches!(self, Src::File(_))
+    }
+    pub fn is_none(&self) -> bool {
+        matches!(self, Src::None)
+    }
+    pub fn is_live(&self) -> bool {
+        matches!(self, Src::Live(_))
+    }
+    pub fn is_base64(&self) -> bool {
+        matches!(self, Src::Base64(_))
+    }
 }
 
 impl ToString for Src {

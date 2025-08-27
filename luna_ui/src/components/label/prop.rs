@@ -112,14 +112,14 @@ impl BasicProp for LabelBasicProp {
     type State = LabelState;
     type Colors = Color;
 
-    fn set_from_str(&mut self, key: &str, value: &LiveValue, _state: Self::State) -> () {
+    fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
             THEME => {
                 self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
             }
             COLOR => {
-                self.color = Vec4::from_live_color(value)
-                    .unwrap_or(ColorFontConf::from_key("primary").into());
+                let color = Self::state_colors(self.theme, state);
+                self.color = Vec4::from_live_color(value).unwrap_or(color.into());
             }
             FONT_SIZE => {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);

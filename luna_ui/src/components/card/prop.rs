@@ -234,7 +234,8 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
 impl CardBasicProp {
     pub fn default_header(theme: Theme, state: CardState) -> ViewBasicProp {
         let mut header = Self::default_container(theme, state);
-        header.set_height(Size::Fixed(32.0));
+        header.set_height(Size::Fixed(36.0));
+        header.set_background_visible(false);
         header
     }
     pub fn default_footer(theme: Theme, state: CardState) -> ViewBasicProp {
@@ -243,11 +244,13 @@ impl CardBasicProp {
     pub fn default_container(theme: Theme, state: CardState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
         container.set_cursor(Default::default());
+        container.set_background_visible(true);
         container
     }
     pub fn default_body(theme: Theme, state: CardState) -> ViewBasicProp {
         let mut body = Self::default_container(theme, state);
         body.set_height(Size::Fill);
+        body.set_background_visible(false);
         body
     }
 }

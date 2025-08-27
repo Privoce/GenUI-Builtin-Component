@@ -5,8 +5,17 @@ use makepad_widgets::{
         AsyncImageLoad, AsyncLoadResult, ImageBuffer, ImageCache, ImageCacheEntry, ImageCacheImpl,
         ImageError,
     },
-    Cx, TagThreadPool,
+    *,
 };
+
+// #[cfg(target_arch = "wasm32")]
+// use wasm_bindgen::prelude::*;
+
+// #[cfg(target_arch = "wasm32")]
+// use wasm_bindgen_futures::spawn_local;
+
+// #[cfg(target_arch = "wasm32")]
+// use web_sys::{Request, RequestInit, RequestMode, Response};
 
 pub trait ImageAsync: ImageCacheImpl {
     fn load_from_local<P>(
@@ -119,27 +128,32 @@ pub trait ImageAsync: ImageCacheImpl {
         match self.check_and_convert_load_result(cx, path.as_path()) {
             Ok(res) => Ok(res),
             Err(_) => {
-                if cx.get_global::<ImageCache>().thread_pool.is_none() {
-                    cx.get_global::<ImageCache>().thread_pool =
-                        Some(TagThreadPool::new(cx, cx.cpu_cores().max(3) - 2));
-                }
                 // 由于网络上的图片是需要reqwest来加载的，不知道宽高，所以直接使用传入的宽高即可
                 cx.get_global::<ImageCache>().map.insert(
                     path.as_path().to_path_buf(),
                     ImageCacheEntry::Loading(width, height),
                 );
-                cx.get_global::<ImageCache>()
-                    .thread_pool
-                    .as_mut()
-                    .unwrap()
-                    .execute_rev(path.as_path().to_path_buf(), move |image_path| {
-                        // 进行下载
-                        let result = download(url);
-                        Cx::post_action(AsyncImageLoad {
-                            image_path: image_path.clone(),
-                            result: RefCell::new(Some(result)),
-                        });
-                    });
+                let request = HttpRequest::new(url.to_string(), HttpMethod::GET);
+                let request_id = live_id!(ImageDownload);
+                cx.http_request(request_id, request);
+                // if cx.get_global::<ImageCache>().thread_pool.is_none() {
+                //     cx.get_global::<ImageCache>().thread_pool =
+                //         Some(TagThreadPool::new(cx, cx.cpu_cores().max(3) - 2));
+                // }
+                // cx.get_global::<ImageCache>()
+                //     .thread_pool
+                //     .as_mut()
+                //     .unwrap()
+                //     .execute_rev(path.as_path().to_path_buf(), move |image_path| {
+                //         // 进行下载
+                //         // let result = download_blocking(url);
+
+                //         // Cx::post_action(AsyncImageLoad {
+                //         //     image_path: image_path.clone(),
+                //         //     result: RefCell::new(Some(result)),
+                //         // });
+
+                //     });
 
                 Ok(AsyncLoadResult::Loading(width, height))
             }
@@ -162,19 +176,7 @@ impl TryFromCxImage for Cx {
     }
 }
 
-fn download(url: String) -> Result<ImageBuffer, ImageError> {
-    let (sender, reciver) = std::sync::mpsc::channel();
-    std::thread::spawn(move || {
-        let buf = reqwest::blocking::get(&url)
-            .map_err(|e| e.to_string())
-            .and_then(|res| res.bytes().map_err(|e| e.to_string()))
-            .map(|bytes| bytes.to_vec());
-        sender.send(buf).unwrap();
-    });
-    let buf = reciver
-        .recv()
-        .map_err(|e| ImageError::ThreadRecv(e))?
-        .map_err(|e| ImageError::NetworkError(e))?;
+pub fn parse_image_buffer(buf: Vec<u8>) -> Result<ImageBuffer, ImageError> {
     match imghdr::from_bytes(&buf) {
         Some(ty) => match ty {
             imghdr::Type::Png => ImageBuffer::from_png(&buf),

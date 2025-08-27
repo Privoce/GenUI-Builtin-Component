@@ -215,6 +215,12 @@ live_design! {
                         text: "None"
                     }
                 }
+                <GButton> {
+                    disabled: true,
+                    slot: {
+                        text: "Disabled"
+                    }
+                }
             }
             desc = {
                 text: "Button Event"

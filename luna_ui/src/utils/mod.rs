@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use cargo_metadata::MetadataCommand;
+// use cargo_metadata::MetadataCommand;
 use toml_edit::{DocumentMut, InlineTable, Item, Table, Value};
 
 pub fn get_from_doc<U, D, F>(doc: &DocumentMut, key: &str, default: D, f: F) -> U
@@ -27,12 +27,12 @@ where
     v.get(key).map_or_else(default, f)
 }
 
-pub fn makepad_resource_dir() -> Option<PathBuf> {
-    let meta = MetadataCommand::new().exec().ok()?;
-    for pkg in meta.packages {
-        if pkg.name.as_str() == "makepad-widgets" {
-            return Some(pkg.manifest_path.parent()?.to_path_buf().into());
-        }
-    }
-    None
-}
+// pub fn makepad_resource_dir() -> Option<PathBuf> {
+//     let meta = MetadataCommand::new().exec().ok()?;
+//     for pkg in meta.packages {
+//         if pkg.name.as_str() == "makepad-widgets" {
+//             return Some(pkg.manifest_path.parent()?.to_path_buf().into());
+//         }
+//     }
+//     None
+// }

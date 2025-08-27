@@ -20,6 +20,7 @@ pub enum NavMode {
     Switch,
 }
 
+#[allow(unused)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PageType {
     #[default]
@@ -29,6 +30,7 @@ pub enum PageType {
     None,
 }
 
+#[allow(unused)]
 impl PageType {
     pub fn live_id(&self) -> LiveId {
         match self {
