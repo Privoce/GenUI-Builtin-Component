@@ -2,26 +2,20 @@ use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_part, component_state,
-    components::{
+    component_part, component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    get_get_mut,
-    prop::{
+        view::ViewState, ViewBasicProp,
+    }, error::Error, from_inherit_to_view_basic_prop, get_get_mut, inherits_view_basic_prop, prop::{
         manuel::{
-            ABS_POS, BACKGROUND_COLOR, BASIC, COLOR, CONTAINER, CURSOR, DISABLED, HEIGHT, HOVER,
-            MARGIN, PRESSED, SVG, THEME, WIDTH,
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
+            BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, COLOR, CONTAINER, CURSOR, DISABLED, FLOW,
+            HEIGHT, HOVER, MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET,
+            SPACING, SPREAD_RADIUS, SVG, THEME, WIDTH,
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
-        ApplySlotMapImpl,
-    },
-    state_color,
-    themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable,
+        ApplySlotMapImpl, Radius,
+    }, state_color, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -81,7 +75,7 @@ impl SlotProp for SvgProp {
 impl Default for SvgProp {
     fn default() -> Self {
         Self {
-            basic: Default::default(),
+            basic: SvgBasicProp::default(),
             hover: SvgBasicProp::from_state(Theme::default(), SvgState::Hover),
             pressed: SvgBasicProp::from_state(Theme::default(), SvgState::Pressed),
             disabled: SvgBasicProp::from_state(Theme::default(), SvgState::Disabled),
@@ -103,8 +97,8 @@ try_from_toml_item! {
 pub struct SvgBasicProp {
     #[live(SvgPartProp::default())]
     pub svg: SvgPartProp,
-    #[live(Self::default_container(Theme::default(), SvgState::Basic))]
-    pub container: ViewBasicProp,
+    #[live(SvgBasicProp::default_container(Theme::default(), SvgState::Basic))]
+    pub container: ContainerPartProp,
 }
 
 impl Default for SvgBasicProp {
@@ -157,7 +151,7 @@ impl BasicProp for SvgBasicProp {
     }
 
     fn len() -> usize {
-        SvgPartProp::len() + ViewBasicProp::len()
+        SvgPartProp::len() + ContainerPartProp::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -172,7 +166,7 @@ impl BasicProp for SvgBasicProp {
     fn live_props() -> LiveProps {
         vec![
             (live_id!(svg), SvgPartProp::live_props().into()),
-            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(container), ContainerPartProp::live_props().into()),
         ]
     }
 
@@ -232,17 +226,18 @@ impl TryFrom<(&InlineTable, SvgState)> for SvgBasicProp {
 }
 
 impl SvgBasicProp {
-    pub fn default_container(theme: Theme, state: SvgState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
-        container.set_clip_x(true);
-        container.set_clip_y(true);
-        container.set_align(Align::from_f64(0.5));
-        container.set_width(Size::Fit);
-        container.set_height(Size::Fit);
-        container.set_background_visible(false);
-        container.set_padding(Padding::from_f64(0.0));
-        container.set_margin(Margin::from_f64(0.0));
-        container
+    pub fn default_container(theme: Theme, state: SvgState) -> ContainerPartProp {
+        // let mut container = ContainerPartProp::from_state(theme, state.into());
+        // container.set_clip_x(true);
+        // container.set_clip_y(true);
+        // container.set_align(Align::from_f64(0.5));
+        // container.set_width(Size::Fit);
+        // container.set_height(Size::Fit);
+        // container.set_background_visible(false);
+        // container.set_padding(Padding::from_f64(0.0));
+        // container.set_margin(Margin::from_f64(0.0));
+        // container
+        ContainerPartProp::from_state(theme, state.into())
     }
     pub fn default_svg(theme: Theme, state: SvgState) -> SvgPartProp {
         SvgPartProp::from_state(theme, state)
@@ -462,3 +457,29 @@ component_part! {
         Svg => svg => SVG
     } , SvgState
 }
+
+inherits_view_basic_prop!{
+    ContainerPartProp {
+        border_width: 0.0,
+        border_radius: Radius::new(4.0),
+        spread_radius: 0.0,
+        blur_radius: 0.0,
+        shadow_offset: vec2(0.0, 0.0),
+        background_visible: false,
+        rotation: 0.0,
+        scale: 1.0,
+        padding: Padding::from_f64(0.0),
+        margin: Margin::from_f64(0.0),
+        clip_x: false,
+        clip_y: false,
+        align: Align::from_f64(0.5),
+        cursor: MouseCursor::default(),
+        flow: Flow::Down,
+        spacing: 0.0,
+        height: Size::Fit,
+        width: Size::Fit,
+        abs_pos: None,
+    }, SvgState, "svg.container"
+}
+
+from_inherit_to_view_basic_prop!(ContainerPartProp);

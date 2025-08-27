@@ -128,12 +128,7 @@ impl WidgetNode for GCard {
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.state);
-        Walk {
-            abs_pos: prop.container.abs_pos,
-            margin: prop.container.margin,
-            width: prop.container.width,
-            height: prop.container.height,
-        }
+        prop.walk()
     }
 
     fn area(&self) -> Area {
@@ -174,19 +169,7 @@ impl Widget for GCard {
         let state = self.state;
         let prop = self.prop.get(state);
 
-        let _ = self.draw_card.begin(
-            cx,
-            walk,
-            Layout {
-                clip_x: false,
-                clip_y: false,
-                padding: prop.container.padding,
-                align: prop.container.align,
-                flow: prop.container.flow,
-                spacing: prop.container.spacing,
-                ..Default::default()
-            },
-        );
+        let _ = self.draw_card.begin(cx, walk, prop.layout());
 
         let _ = SlotDrawer::new(
             [

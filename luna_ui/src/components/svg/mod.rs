@@ -150,6 +150,7 @@ impl Widget for GSvg {
             return DrawStep::done();
         }
         let prop = self.prop.get(self.state);
+        // dbg!(prop.svg,walk);
         self.draw_svg_container
             .begin(cx, walk, prop.container.layout());
         self.draw_svg.draw_walk(cx, prop.svg.walk());
@@ -254,9 +255,11 @@ impl Component for GSvg {
             self.switch_state(SvgState::Disabled);
         }
         let prop = self.prop.get(self.state);
-        self.draw_svg_container.merge(&prop.container);
+        self.draw_svg_container.merge(&prop.container.into());
         self.draw_svg.merge(&prop.svg);
-        self.draw_svg.svg_file = self.src.clone();
+        if self.draw_svg.svg_file.as_str() != self.src.as_str() {
+            self.draw_svg.svg_file = self.src.clone();
+        }
         Ok(())
     }
 

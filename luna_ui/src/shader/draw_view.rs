@@ -51,8 +51,10 @@ live_design! {
                     if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
                         self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
                         let max_border_radius = max(
-                            max(self.border_radius.x, self.border_radius.y),
-                            max(self.border_radius.z, self.border_radius.w)
+                            max(
+                                max(self.border_radius.x, self.border_radius.y),
+                                max(self.border_radius.z, self.border_radius.w)
+                            ), 1.0
                         );
                         let v = GaussShadow::rounded_box_shadow(
                             shadow_lower,
@@ -79,17 +81,17 @@ live_design! {
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
             let total_shadow_size = self.spread_radius + self.blur_radius;
-            
+
             // 使用calculated位置而不是原始rect_size
             sdf.box_all(
                 self.sdf_rect_pos.x,
                 self.sdf_rect_pos.y,
                 self.sdf_rect_size.x,
                 self.sdf_rect_size.y,
-                self.border_radius.x,
-                self.border_radius.y,
-                self.border_radius.z,
-                self.border_radius.w
+                max(self.border_radius.x, 1.0),
+                max(self.border_radius.y, 1.0),
+                max(self.border_radius.z, 1.0),
+                max(self.border_radius.w, 1.0)
             );
 
             // - [background color if visible] ----------------------------------------------------

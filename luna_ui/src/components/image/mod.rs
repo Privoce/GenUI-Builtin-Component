@@ -2,7 +2,7 @@ mod async_impl;
 mod prop;
 
 use makepad_widgets::image_cache::{
-    AsyncImageLoad, AsyncLoadResult, ImageCache, ImageCacheImpl, ImageError, ImageFit,
+    AsyncImageLoad, AsyncLoadResult, ImageCacheImpl, ImageError, ImageFit,
 };
 pub use prop::*;
 
@@ -15,8 +15,8 @@ use crate::prop::{ApplyStateMap, Src, SrcType};
 use crate::shader::draw_image::DrawImg;
 use crate::themes::conf::Conf;
 use crate::{
-    lifecycle, play_animation, pure_after_apply, set_index, set_scope_path, sync, visible,
-    ComponentAnInit,
+    animation_open_then_redraw, lifecycle, play_animation, pure_after_apply, set_index,
+    set_scope_path, sync, visible, ComponentAnInit,
 };
 use makepad_widgets::*;
 use std::cell::RefCell;
@@ -167,147 +167,9 @@ impl Widget for GImage {
             return;
         }
         cx.global::<ComponentAnInit>().image = true;
-        if self.animator_handle_event(cx, event).must_redraw() {
-            self.draw_img.redraw(cx);
-        }
-
-        // lets check if we have a post action
-        if let Event::Actions(actions) = &event {
-            for action in actions {
-                if let Some(AsyncImageLoad { image_path, result }) = &action.downcast_ref() {
-                    if let Some(result) = result.borrow_mut().take() {
-                        // we have a result for the image_cache to load up
-                        self.process_async_image_load(cx, image_path, result);
-                    }
-                    if self.async_image_size.is_some()
-                        && self.async_image_path.clone() == Some(image_path.to_path_buf())
-                    {
-                        // see if we can load from cache
-                        self.load_image_from_cache(cx, image_path, 0);
-                        self.async_image_size = None;
-                        self.animator_play(cx, id!(loading.off));
-                        self.redraw(cx);
-                    }
-                }
-            }
-        } else if let Event::NetworkResponses(response_events) = &event {
-            if self.src.is_url() {
-                for response_event in response_events {
-                    match &response_event.response {
-                        NetworkResponse::HttpResponse(response) => {
-                            match response_event.request_id {
-                                live_id!(ImageDownload) => {
-                                    if response.status_code == 200 {
-                                        // 这是图片的下载请求，请求方式为GET，我们需要转为buf
-                                        if let Some(buf) = &response.body {
-                                            let result = parse_image_buffer(buf.clone());
-                                            Cx::post_action(AsyncImageLoad {
-                                                image_path: PathBuf::from(self.src.to_string()),
-                                                result: RefCell::new(Some(result)),
-                                            });
-                                        }
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
-
-        let prop = self.prop.get(self.state);
-        if let Some(nf) = self.next_frame.is_event(event) {
-            // compute the next frame and patch things up
-            if let Some(image_texture) = &self.texture {
-                let (texture_width, texture_height) = image_texture
-                    .get_format(cx)
-                    .vec_width_height()
-                    .unwrap_or((prop.min_width as usize, prop.min_height as usize));
-                if let Some(animation) = image_texture.animation(cx).clone() {
-                    let delta = if let Some(last_time) = &self.last_time {
-                        nf.time - last_time
-                    } else {
-                        0.0
-                    };
-                    self.last_time = Some(nf.time);
-                    let num_frames = animation.num_frames as f64;
-                    match self.animation {
-                        ImageAnimation::Stop => {}
-                        ImageAnimation::Frame(frame) => {
-                            self.animation_frame = frame;
-                        }
-                        ImageAnimation::Factor(pos) => {
-                            self.animation_frame = pos * (num_frames - 1.0);
-                        }
-                        ImageAnimation::Once => {
-                            self.animation_frame += 1.0;
-                            if self.animation_frame >= num_frames {
-                                self.animation_frame = num_frames - 1.0;
-                            } else {
-                                self.next_frame = cx.new_next_frame();
-                            }
-                        }
-                        ImageAnimation::Loop => {
-                            self.animation_frame += 1.0;
-                            if self.animation_frame >= num_frames {
-                                self.animation_frame = 0.0;
-                            }
-                            self.next_frame = cx.new_next_frame();
-                        }
-                        ImageAnimation::Bounce => {
-                            self.animation_frame += 1.0;
-                            if self.animation_frame >= num_frames * 2.0 {
-                                self.animation_frame = 0.0;
-                            }
-                            self.next_frame = cx.new_next_frame();
-                        }
-                        ImageAnimation::OnceFps(fps) => {
-                            self.animation_frame += delta * fps;
-                            if self.animation_frame >= num_frames {
-                                self.animation_frame = num_frames - 1.0;
-                            } else {
-                                self.next_frame = cx.new_next_frame();
-                            }
-                        }
-                        ImageAnimation::LoopFps(fps) => {
-                            self.animation_frame += delta * fps;
-                            if self.animation_frame >= num_frames {
-                                self.animation_frame = 0.0;
-                            }
-                            self.next_frame = cx.new_next_frame();
-                        }
-                        ImageAnimation::BounceFps(fps) => {
-                            self.animation_frame += delta * fps;
-                            if self.animation_frame >= num_frames * 2.0 {
-                                self.animation_frame = 0.0;
-                            }
-                            self.next_frame = cx.new_next_frame();
-                        }
-                    }
-                    // alright now lets turn animation_frame into the right image_pan
-                    let last_pan = self.draw_img.image_pan;
-
-                    let frame = if self.animation_frame >= num_frames {
-                        num_frames * 2.0 - 1.0 - self.animation_frame
-                    } else {
-                        self.animation_frame
-                    } as usize;
-
-                    let horizontal_frames = texture_width / animation.width;
-                    let xpos = ((frame % horizontal_frames) * animation.width) as f32
-                        / texture_width as f32;
-                    let ypos = ((frame / horizontal_frames) * animation.height) as f32
-                        / texture_height as f32;
-                    self.draw_img.image_pan = vec2(xpos, ypos);
-                    if self.draw_img.image_pan != last_pan {
-                        // patch it into the area
-                        self.draw_img.update_instance_area_value(cx, id!(image_pan))
-                    }
-                }
-            }
-        }
+        let area = self.area();
+        let hit = event.hits(cx, area);
+        self.handle_widget_event(cx, event, hit, area);
     }
 
     fn draw_walk(&mut self, cx: &mut Cx2d, _scope: &mut Scope, mut walk: Walk) -> DrawStep {
@@ -523,8 +385,146 @@ impl Component for GImage {
         Ok(())
     }
 
-    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
-        ()
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, _hit: Hit, _area: Area) {
+        animation_open_then_redraw!(self, cx, event);
+
+        // lets check if we have a post action
+        if let Event::Actions(actions) = &event {
+            for action in actions {
+                if let Some(AsyncImageLoad { image_path, result }) = &action.downcast_ref() {
+                    if let Some(result) = result.borrow_mut().take() {
+                        // we have a result for the image_cache to load up
+                        self.process_async_image_load(cx, image_path, result);
+                    }
+                    if self.async_image_size.is_some()
+                        && self.async_image_path.clone() == Some(image_path.to_path_buf())
+                    {
+                        // see if we can load from cache
+                        self.load_image_from_cache(cx, image_path, 0);
+                        self.async_image_size = None;
+                        self.animator_play(cx, id!(loading.off));
+                        self.redraw(cx);
+                    }
+                }
+            }
+        } else if let Event::NetworkResponses(response_events) = &event {
+            if self.src.is_url() {
+                for response_event in response_events {
+                    match &response_event.response {
+                        NetworkResponse::HttpResponse(response) => {
+                            match response_event.request_id {
+                                live_id!(ImageDownload) => {
+                                    if response.status_code == 200 {
+                                        // 这是图片的下载请求，请求方式为GET，我们需要转为buf
+                                        if let Some(buf) = &response.body {
+                                            let result = parse_image_buffer(buf.clone());
+                                            Cx::post_action(AsyncImageLoad {
+                                                image_path: PathBuf::from(self.src.to_string()),
+                                                result: RefCell::new(Some(result)),
+                                            });
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        let prop = self.prop.get(self.state);
+        if let Some(nf) = self.next_frame.is_event(event) {
+            // compute the next frame and patch things up
+            if let Some(image_texture) = &self.texture {
+                let (texture_width, texture_height) = image_texture
+                    .get_format(cx)
+                    .vec_width_height()
+                    .unwrap_or((prop.min_width as usize, prop.min_height as usize));
+                if let Some(animation) = image_texture.animation(cx).clone() {
+                    let delta = if let Some(last_time) = &self.last_time {
+                        nf.time - last_time
+                    } else {
+                        0.0
+                    };
+                    self.last_time = Some(nf.time);
+                    let num_frames = animation.num_frames as f64;
+                    match self.animation {
+                        ImageAnimation::Stop => {}
+                        ImageAnimation::Frame(frame) => {
+                            self.animation_frame = frame;
+                        }
+                        ImageAnimation::Factor(pos) => {
+                            self.animation_frame = pos * (num_frames - 1.0);
+                        }
+                        ImageAnimation::Once => {
+                            self.animation_frame += 1.0;
+                            if self.animation_frame >= num_frames {
+                                self.animation_frame = num_frames - 1.0;
+                            } else {
+                                self.next_frame = cx.new_next_frame();
+                            }
+                        }
+                        ImageAnimation::Loop => {
+                            self.animation_frame += 1.0;
+                            if self.animation_frame >= num_frames {
+                                self.animation_frame = 0.0;
+                            }
+                            self.next_frame = cx.new_next_frame();
+                        }
+                        ImageAnimation::Bounce => {
+                            self.animation_frame += 1.0;
+                            if self.animation_frame >= num_frames * 2.0 {
+                                self.animation_frame = 0.0;
+                            }
+                            self.next_frame = cx.new_next_frame();
+                        }
+                        ImageAnimation::OnceFps(fps) => {
+                            self.animation_frame += delta * fps;
+                            if self.animation_frame >= num_frames {
+                                self.animation_frame = num_frames - 1.0;
+                            } else {
+                                self.next_frame = cx.new_next_frame();
+                            }
+                        }
+                        ImageAnimation::LoopFps(fps) => {
+                            self.animation_frame += delta * fps;
+                            if self.animation_frame >= num_frames {
+                                self.animation_frame = 0.0;
+                            }
+                            self.next_frame = cx.new_next_frame();
+                        }
+                        ImageAnimation::BounceFps(fps) => {
+                            self.animation_frame += delta * fps;
+                            if self.animation_frame >= num_frames * 2.0 {
+                                self.animation_frame = 0.0;
+                            }
+                            self.next_frame = cx.new_next_frame();
+                        }
+                    }
+                    // alright now lets turn animation_frame into the right image_pan
+                    let last_pan = self.draw_img.image_pan;
+
+                    let frame = if self.animation_frame >= num_frames {
+                        num_frames * 2.0 - 1.0 - self.animation_frame
+                    } else {
+                        self.animation_frame
+                    } as usize;
+
+                    let horizontal_frames = texture_width / animation.width;
+                    let xpos = ((frame % horizontal_frames) * animation.width) as f32
+                        / texture_width as f32;
+                    let ypos = ((frame / horizontal_frames) * animation.height) as f32
+                        / texture_height as f32;
+                    self.draw_img.image_pan = vec2(xpos, ypos);
+                    if self.draw_img.image_pan != last_pan {
+                        // patch it into the area
+                        self.draw_img.update_instance_area_value(cx, id!(image_pan))
+                    }
+                }
+            }
+        }
     }
 
     fn switch_state(&mut self, state: Self::State) -> () {

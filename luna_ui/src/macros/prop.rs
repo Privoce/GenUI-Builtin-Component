@@ -263,3 +263,544 @@ macro_rules! sync {
         }
     };
 }
+
+/// ## Inherit View Basic Properties
+/// This macro generates a struct that inherits the basic properties of a view.
+/// ### When to use
+/// You may find, sometimes the component prop which use `ViewBasicProp` will change to `ViewBasicProp::default()`
+/// instead of the right prop value apply from doc after Live reloading application
+/// ### Example
+/// ```
+/// inherits_view_basic_prop!{
+///     ContainerPartProp {
+///         border_width: 0.0,
+///         border_radius: Radius::new(4.0),
+///         spread_radius: 0.0,
+///         blur_radius: 0.0,
+///         shadow_offset: vec2(0.0, 0.0),
+///         background_visible: false,
+///         rotation: 0.0,
+///         scale: 1.0,
+///         padding: Padding::from_f64(0.0),
+///         margin: Margin::from_f64(0.0),
+///         clip_x: false,
+///         clip_y: false,
+///         align: Align::from_f64(0.5),
+///         cursor: MouseCursor::default(),
+///         flow: Flow::Down,
+///         spacing: 0.0,
+///         height: Size::Fit,
+///         width: Size::Fit,
+///         abs_pos: None,
+///     }, SvgState, "svg.container"
+/// }
+/// ```
+#[macro_export]
+macro_rules! inherits_view_basic_prop {
+    ($struct_name: ident {
+        border_width: $border_width_value: expr,
+        border_radius: $border_radius_value: expr,
+        spread_radius: $spread_radius_value: expr,
+        blur_radius: $blur_radius_value: expr,
+        shadow_offset: $shadow_offset_value: expr,
+        background_visible: $background_visible_value: expr,
+        rotation: $rotation_value: expr,
+        scale: $scale_value: expr,
+        padding: $padding_value: expr,
+        margin: $margin_value: expr,
+        clip_x: $clip_x_value: expr,
+        clip_y: $clip_y_value: expr,
+        align: $align_value: expr,
+        cursor: $cursor_value: expr,
+        flow: $flow_value: expr,
+        spacing: $spacing_value: expr,
+        height: $height_value: expr,
+        width: $width_value: expr,
+        abs_pos: $abs_pos_value: expr,
+    }, $state: ident, $name: expr) => {
+        #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
+        #[live_ignore]
+        pub struct $struct_name {
+            #[live]
+            pub theme: Theme,
+            #[live]
+            pub background_color: Vec4,
+            #[live]
+            pub border_color: Vec4,
+            #[live($border_width_value)]
+            pub border_width: f32,
+            #[live($border_radius_value)]
+            pub border_radius: Radius,
+            #[live]
+            pub shadow_color: Vec4,
+            #[live($spread_radius_value)]
+            pub spread_radius: f32,
+            #[live($blur_radius_value)]
+            pub blur_radius: f32,
+            #[live($shadow_offset_value)]
+            pub shadow_offset: Vec2,
+            #[live($background_visible_value)]
+            pub background_visible: bool,
+            #[live($rotation_value)]
+            pub rotation: f32,
+            #[live($scale_value)]
+            pub scale: f32,
+            #[live($padding_value)]
+            pub padding: Padding,
+            #[live($margin_value)]
+            pub margin: Margin,
+            #[live($clip_x_value)]
+            pub clip_x: bool,
+            #[live($clip_y_value)]
+            pub clip_y: bool,
+            #[live($align_value)]
+            pub align: Align,
+            #[live($cursor_value)]
+            pub cursor: MouseCursor,
+            #[live($flow_value)]
+            pub flow: Flow,
+            #[live($spacing_value)]
+            pub spacing: f64,
+            #[live($height_value)]
+            pub height: Size,
+            #[live($width_value)]
+            pub width: Size,
+            #[live($abs_pos_value)]
+            pub abs_pos: Option<DVec2>,
+        }
+
+        impl BasicProp for $struct_name {
+            type State = $state;
+
+            type Colors = (Color, Color, Color);
+
+            fn len() -> usize {
+                22
+            }
+
+            fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
+                match key {
+                    THEME => {
+                        self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
+                        self.sync(state);
+                    }
+                    BACKGROUND_COLOR => {
+                        let (background_color, _, _) = Self::state_colors(self.theme, state);
+                        self.background_color =
+                            Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    }
+                    BORDER_COLOR => {
+                        let (_, border_color, _) = Self::state_colors(self.theme, state);
+                        self.border_color =
+                            Vec4::from_live_color(value).unwrap_or(border_color.into());
+                    }
+                    BORDER_WIDTH => {
+                        self.border_width =
+                            f32::from_live_value(value).unwrap_or($border_width_value);
+                    }
+                    BORDER_RADIUS => {
+                        self.border_radius =
+                            Radius::from_live_value(value).unwrap_or($border_radius_value);
+                    }
+                    SHADOW_COLOR => {
+                        let (_, _, shadow_color) = Self::state_colors(self.theme, state);
+                        self.shadow_color =
+                            Vec4::from_live_color(value).unwrap_or(shadow_color.into());
+                    }
+                    SPREAD_RADIUS => {
+                        self.spread_radius =
+                            f32::from_live_value(value).unwrap_or($spread_radius_value);
+                    }
+                    BLUR_RADIUS => {
+                        self.blur_radius =
+                            f32::from_live_value(value).unwrap_or($blur_radius_value);
+                    }
+                    SHADOW_OFFSET => {
+                        self.shadow_offset =
+                            Vec2::from_live_value(value).unwrap_or($shadow_offset_value);
+                    }
+                    BACKGROUND_VISIBLE => {
+                        self.background_visible =
+                            bool::from_live_value(value).unwrap_or($background_visible_value);
+                    }
+                    ROTATION => {
+                        self.rotation = f32::from_live_value(value).unwrap_or($rotation_value);
+                    }
+                    SCALE => {
+                        self.scale = f32::from_live_value(value).unwrap_or($scale_value);
+                    }
+                    PADDING => {
+                        self.padding = Padding::from_live_value(value).unwrap_or($padding_value);
+                    }
+                    MARGIN => {
+                        self.margin = Margin::from_live_value(value).unwrap_or($margin_value);
+                    }
+                    CLIP_X => {
+                        self.clip_x = bool::from_live_value(value).unwrap_or($clip_x_value);
+                    }
+                    CLIP_Y => {
+                        self.clip_y = bool::from_live_value(value).unwrap_or($clip_y_value);
+                    }
+                    ALIGN => {
+                        self.align = Align::from_live_value(value).unwrap_or($align_value);
+                    }
+                    CURSOR => {
+                        let cursor = if state.is_disabled() {
+                            MouseCursor::NotAllowed
+                        } else {
+                            $cursor_value
+                        };
+                        self.cursor = MouseCursor::from_live_value(value).unwrap_or(cursor);
+                    }
+                    FLOW => {
+                        self.flow = Flow::from_live_value(value).unwrap_or($flow_value);
+                    }
+                    SPACING => {
+                        self.spacing = f64::from_live_value(value).unwrap_or($spacing_value);
+                    }
+                    HEIGHT => {
+                        self.height = Size::from_live_value(value).unwrap_or($height_value);
+                    }
+                    WIDTH => {
+                        self.width = Size::from_live_value(value).unwrap_or($width_value);
+                    }
+                    ABS_POS => {
+                        self.abs_pos = DVec2::from_live_value(value);
+                    }
+                    _ => {}
+                }
+            }
+
+            fn sync(&mut self, state: Self::State) -> () {
+                let (background_color, border_color, shadow_color) =
+                    Self::state_colors(self.theme, state);
+                self.background_color = background_color.into();
+                self.border_color = border_color.into();
+                self.shadow_color = shadow_color.into();
+            }
+
+            fn from_state(theme: Theme, state: Self::State) -> Self {
+                let (background_color, border_color, shadow_color) =
+                    Self::state_colors(theme, state);
+
+                let cursor = if state.is_disabled() {
+                    MouseCursor::NotAllowed
+                } else {
+                    $cursor_value
+                };
+
+                Self {
+                    theme,
+                    background_color: background_color.into(),
+                    border_color: border_color.into(),
+                    border_width: $border_width_value,
+                    border_radius: $border_radius_value,
+                    shadow_color: shadow_color.into(),
+                    spread_radius: $spread_radius_value,
+                    blur_radius: $blur_radius_value,
+                    shadow_offset: $shadow_offset_value,
+                    background_visible: $background_visible_value,
+                    rotation: $rotation_value,
+                    scale: $scale_value,
+                    padding: $padding_value,
+                    margin: $margin_value,
+                    clip_x: $clip_x_value,
+                    clip_y: $clip_y_value,
+                    align: $align_value,
+                    cursor,
+                    flow: $flow_value,
+                    spacing: $spacing_value,
+                    height: $height_value,
+                    width: $width_value,
+                    abs_pos: $abs_pos_value,
+                }
+            }
+
+            state_colors! {
+                (bg_level, border_level, shadow_level),
+                $state::Basic => (500, 500, 400),
+                $state::Hover => (400, 400, 300),
+                $state::Pressed => (600, 600, 500),
+                $state::Disabled => (300, 300, 200)
+            }
+
+            fn live_props() -> LiveProps {
+                vec![
+                    (live_id!(theme), None.into()),
+                    (live_id!(background_color), None.into()),
+                    (live_id!(border_color), None.into()),
+                    (live_id!(border_width), None.into()),
+                    (
+                        live_id!(border_radius),
+                        Some(vec![
+                            live_id!(top),
+                            live_id!(bottom),
+                            live_id!(left),
+                            live_id!(right),
+                        ])
+                        .into(),
+                    ),
+                    (live_id!(shadow_color), None.into()),
+                    (live_id!(spread_radius), None.into()),
+                    (live_id!(blur_radius), None.into()),
+                    (live_id!(shadow_offset), None.into()),
+                    (live_id!(background_visible), None.into()),
+                    (live_id!(rotation), None.into()),
+                    (live_id!(scale), None.into()),
+                    (
+                        live_id!(padding),
+                        Some(vec![
+                            live_id!(top),
+                            live_id!(bottom),
+                            live_id!(left),
+                            live_id!(right),
+                        ])
+                        .into(),
+                    ),
+                    (
+                        live_id!(margin),
+                        Some(vec![
+                            live_id!(top),
+                            live_id!(bottom),
+                            live_id!(left),
+                            live_id!(right),
+                        ])
+                        .into(),
+                    ),
+                    (live_id!(clip_x), None.into()),
+                    (live_id!(clip_y), None.into()),
+                    (live_id!(align), Some(vec![live_id!(x), live_id!(y)]).into()),
+                    (live_id!(cursor), None.into()),
+                    (live_id!(flow), None.into()),
+                    (live_id!(spacing), None.into()),
+                    (live_id!(height), None.into()),
+                    (live_id!(width), None.into()),
+                    (live_id!(abs_pos), None.into()),
+                ]
+            }
+
+            fn walk(&self) -> Walk {
+                Walk {
+                    abs_pos: self.abs_pos,
+                    margin: self.margin,
+                    width: self.width,
+                    height: self.height,
+                }
+            }
+
+            fn layout(&self) -> Layout {
+                Layout {
+                    clip_x: self.clip_x,
+                    clip_y: self.clip_y,
+                    padding: self.padding,
+                    align: self.align,
+                    flow: self.flow,
+                    spacing: self.spacing,
+                    ..Default::default()
+                }
+            }
+        }
+
+        impl Default for $struct_name {
+            fn default() -> Self {
+                $struct_name::from_state(Theme::default(), $state::Basic)
+            }
+        }
+
+        impl TryFrom<(&Value, $state)> for $struct_name {
+            type Error = Error;
+
+            fn try_from((value, state): (&Value, $state)) -> Result<Self, Self::Error> {
+                let inline_table =
+                    value
+                        .as_inline_table()
+                        .ok_or(Error::ThemeStyleParse(format!(
+                            "[components.{}.$state] should be an inline table",
+                            $name
+                        )))?;
+                (inline_table, state).try_into()
+            }
+        }
+
+        impl TryFrom<(&Item, $state)> for $struct_name {
+            type Error = Error;
+
+            fn try_from((value, state): (&Item, $state)) -> Result<Self, Self::Error> {
+                let inline_table =
+                    value
+                        .as_inline_table()
+                        .ok_or(Error::ThemeStyleParse(format!(
+                            "[components.{}.$state] should be an inline table",
+                            $name
+                        )))?;
+                (inline_table, state).try_into()
+            }
+        }
+
+        impl TryFrom<(&InlineTable, $state)> for $struct_name {
+            type Error = Error;
+
+            fn try_from(
+                (inline_table, state): (&InlineTable, $state),
+            ) -> Result<Self, Self::Error> {
+                let theme = Theme::default();
+                let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
+
+                let (background_color, border_color, shadow_color) =
+                    Self::state_colors(theme, state);
+
+                let background_color = get_from_itable(
+                    inline_table,
+                    BACKGROUND_COLOR,
+                    || Ok(background_color),
+                    |v| v.try_into(),
+                )?
+                .into();
+
+                let border_color = get_from_itable(
+                    inline_table,
+                    BORDER_COLOR,
+                    || Ok(border_color),
+                    |v| v.try_into(),
+                )?
+                .into();
+
+                let border_width =
+                    get_from_itable(inline_table, BORDER_WIDTH, || Ok($border_width_value), |v| v.to_f32())?;
+
+                let border_radius = get_from_itable(
+                    inline_table,
+                    BORDER_RADIUS,
+                    || Ok($border_radius_value),
+                    |v| v.try_into(),
+                )?;
+
+                let shadow_color = get_from_itable(
+                    inline_table,
+                    SHADOW_COLOR,
+                    || Ok(shadow_color),
+                    |v| v.try_into(),
+                )?
+                .into();
+
+                let spread_radius =
+                    get_from_itable(inline_table, SPREAD_RADIUS, || Ok($spread_radius_value), |v| v.to_f32())?;
+
+                let blur_radius =
+                    get_from_itable(inline_table, BLUR_RADIUS, || Ok($blur_radius_value), |v| v.to_f32())?;
+                let shadow_offset = $shadow_offset_value;
+                let shadow_offset = get_from_itable(
+                    inline_table,
+                    SHADOW_OFFSET,
+                    || Ok(shadow_offset),
+                    |v| v.to_vec2(shadow_offset),
+                )?;
+
+                let background_visible = get_from_itable(
+                    inline_table,
+                    BACKGROUND_VISIBLE,
+                    || Ok($background_visible_value),
+                    |v| v.to_bool(),
+                )?;
+
+                let rotation = get_from_itable(inline_table, ROTATION, || Ok($rotation_value), |v| v.to_f32())?;
+                let scale = get_from_itable(inline_table, SCALE, || Ok($scale_value), |v| v.to_f32())?;
+                let padding = $padding_value;
+                let padding = get_from_itable(
+                    inline_table,
+                    PADDING,
+                    || Ok(padding),
+                    |v| v.to_padding(padding),
+                )?;
+                let margin = $margin_value;
+                let margin =
+                    get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
+                let clip_x = get_from_itable(inline_table, CLIP_X, || Ok($clip_x_value), |v| v.to_bool())?;
+                let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok($clip_y_value), |v| v.to_bool())?;
+                let align = $align_value;
+                let align =
+                    get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
+                let cursor = if state.is_disabled() {
+                    MouseCursor::NotAllowed
+                } else {
+                    $cursor_value
+                };
+                let cursor =
+                    get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
+                let flow = get_from_itable(inline_table, FLOW, || Ok($flow_value), |v| v.to_flow())?;
+                let spacing = get_from_itable(inline_table, SPACING, || Ok($spacing_value), |v| v.to_f64())?;
+                let height =
+                    get_from_itable(inline_table, HEIGHT, || Ok($height_value), |v| v.to_size())?;
+                let width =
+                    get_from_itable(inline_table, WIDTH, || Ok($width_value), |v| v.to_size())?;
+                let abs_pos = get_from_itable(
+                    inline_table,
+                    ABS_POS,
+                    || Ok($abs_pos_value),
+                    |v| v.to_dvec2().map(Some),
+                )?;
+
+                Ok(Self {
+                    theme,
+                    background_color,
+                    border_color,
+                    border_width,
+                    border_radius,
+                    shadow_color,
+                    spread_radius,
+                    blur_radius,
+                    shadow_offset,
+                    background_visible,
+                    rotation,
+                    scale,
+                    padding,
+                    margin,
+                    clip_x,
+                    clip_y,
+                    align,
+                    cursor,
+                    flow,
+                    spacing,
+                    height,
+                    width,
+                    abs_pos,
+                })
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! from_inherit_to_view_basic_prop {
+    ($struct_name: ident) => {
+        impl From<$struct_name> for ViewBasicProp {
+            fn from(value: $struct_name) -> Self {
+                Self {
+                    theme: value.theme,
+                    background_color: value.background_color,
+                    border_color: value.border_color,
+                    border_width: value.border_width,
+                    border_radius: value.border_radius,
+                    shadow_color: value.shadow_color,
+                    spread_radius: value.spread_radius,
+                    blur_radius: value.blur_radius,
+                    shadow_offset: value.shadow_offset,
+                    background_visible: value.background_visible,
+                    rotation: value.rotation,
+                    scale: value.scale,
+                    padding: value.padding,
+                    margin: value.margin,
+                    clip_x: value.clip_x,
+                    clip_y: value.clip_y,
+                    align: value.align,
+                    cursor: value.cursor,
+                    flow: value.flow,
+                    spacing: value.spacing,
+                    height: value.height,
+                    width: value.width,
+                    abs_pos: value.abs_pos,
+                }
+            }
+        }
+    };
+}

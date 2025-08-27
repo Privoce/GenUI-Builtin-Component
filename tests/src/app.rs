@@ -660,9 +660,28 @@ live_design! {
                         //     }
                         // }
                     // }
-                    body = <HomePage> {}
+                    // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+
+      
+                    <GCard>{
+                        prop: {
+                            basic: {
+                                container: {
+                                    width: 300.0,
+                                }
+                            }
+                        }
+                        body: {
+                            <GButton>{}
+                            <GLabel> {
+                                text: "Hello World"
+                            }
+                        }
+                    }
+
+                    
                 }
             }
         }
@@ -699,6 +718,11 @@ impl MatchEvent for App {
         //         dbg!(&v1.apply_state_map);
         //     }
         // }
+        let rsvg = self.ui.gsvg(id!(rsvg));
+        let rbtn = self.ui.gbutton(id!(rbtn));
+        if let Some(_) = rbtn.clicked(actions) {
+            rsvg.redraw(cx);
+        }
     }
 }
 
