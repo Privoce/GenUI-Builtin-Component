@@ -18,56 +18,149 @@ live_design! {
                         flow: Down,
                     }
                 }
-                <GRadioGroup> {
-                    active: "2",
-                    <GRadio> {
-                        prop: {
-                            basic: {
-                                radio: {
-                                    theme: Warning,
-                                    mode: Cross,
-                                }
-                            }
+                <GRadio>{
+                    extra: {
+                        <GLabel> {
+                            text: "Basic Radio: Round "
                         }
-
-                        extra: {
-                            <GLabel>{
-                                text: "Radio Cross",
-                                mode: Bold,
+                    }
+                }
+                <GRadio> {
+                    prop: {
+                        basic: {
+                            radio: {
+                                theme: Warning,
+                                mode: Cross,
                             }
                         }
                     }
-                    <GRadio>{
-                        active: true,
+                    extra: {
+                        <GLabel>{
+                            text: "Radio: Cross",
+                        }
                     }
-                    <GRadio> {
-                        prop: {
-                            basic: {
-                                container: {
-                                    background_visible: true,
-                                    theme: Info,
-                                },
-                                radio: {
-                                    theme: Primary,
-                                     mode: Tick,
-                                    }
+                }
+                    
+                <GRadio> {
+                    prop: {
+                        basic: {
+                            container: {
+                                background_visible: true,
+                                theme: Info,
                             },
-                            hover: {
-                                radio: {
-                                    theme: Warning,
-                                }
+                            radio: {
+                                theme: Primary,
+                                mode: Tick,
                             }
                         },
+                        hover: {
+                            radio: {
+                                theme: Warning,
+                            }
+                        }
+                    },
+                    extra: {
+                        <GLabel> {
+                            text: "Radio: Tick act as radio button"
+                        }
+                    }
+                }
+                <GRadio> {
+                    prop: {
+                        basic: {
+                            container: {
+                                background_visible: true,
+                                theme: Error,
+                            },
+                        },
+                    },
+                    radio_visible: false,
+                    extra: {
+                        <GLabel> {
+                            text: "Radio without radio act as button"
+                        }
+                    }
+                }
+            }
+            desc = {
+                text: "Radio: Radio let people select one option from a set of options"
+            }
+        }
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                    }
+                }
+                <GRadioGroup> {
+                    prop: {
+                        basic: {
+                            flow: Down,
+                            align: {
+                                x: 0.0
+                            }
+                        }
+                    }
+                    active: "callisto",
+                    <GRadio> {
+                        prop: {
+                            basic: {
+                                radio: {theme: Primary, mode: Round}
+                            }
+                        }
+                        value: "none",
                         extra: {
                             <GLabel> {
-                                text: "Radio Tick"
+                                text: "None",
+                            }
+                        }
+                    }
+                    <GRadio> {
+                        prop: {
+                            basic: {
+                                radio: {theme: Primary, mode: Round}
+                            }
+                        }
+                        value: "callisto",
+                        extra: {
+                            <GLabel> {
+                                text: "Callisto",
+                            }
+                        }
+                    }
+                    <GRadio> {
+                        prop: {
+                            basic: {
+                                radio: {theme: Primary, mode: Round}
+                            }
+                        }
+                        value: "ganymede",
+                        extra: {
+                            <GLabel> {
+                                text: "Ganymede",
+                            }
+                        }
+                    }
+                    <GRadio> {
+                        prop: {
+                            basic: {
+                                radio: {theme: Primary, mode: Round}
+                            }
+                        }
+                        value: "luna",
+                        extra: {
+                            <GLabel> {
+                                text: "Luna",
                             }
                         }
                     }
                 }
             }
             desc = {
-                text: ""
+                text: "RadioGroup: A group of radio buttons"
             }
         }
 

@@ -24,7 +24,7 @@ live_design! {
             match self.mode {
                 ActiveMode::Round => {
                     // draw a circle with 1/4 rect_size.x
-                    sdf.circle(center.x, center.y, self.rect_size.x * 0.25);
+                    sdf.circle(center.x, center.y, self.rect_size.x * 0.275);
                     sdf.fill(self.stroke_color);
                 }
                 ActiveMode::Tick => {

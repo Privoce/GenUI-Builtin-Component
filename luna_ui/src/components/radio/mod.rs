@@ -4,8 +4,8 @@ mod prop;
 mod register;
 
 pub use event::*;
-pub use prop::*;
 pub use group::*;
+pub use prop::*;
 pub use register::register as radio_register;
 
 use makepad_widgets::*;
@@ -91,6 +91,8 @@ pub struct GRadio {
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
+    #[live(true)]
+    pub radio_visible: bool,
     // --- others -------------------
     #[live(false)]
     pub disabled: bool,
@@ -183,9 +185,11 @@ impl Widget for GRadio {
 
             self.draw_container
                 .begin(cx, prop.container.walk(), prop.container.layout());
-            self.draw_radio
-                .begin(cx, prop.radio.walk(), prop.radio.layout());
-            self.draw_radio.end(cx);
+            if self.radio_visible {
+                self.draw_radio
+                    .begin(cx, prop.radio.walk(), prop.radio.layout());
+                self.draw_radio.end(cx);
+            }
             if self.extra.visible {
                 self.extra.disabled = self.disabled;
                 let _ = self.extra.draw_walk(cx, scope, prop.extra.walk());
