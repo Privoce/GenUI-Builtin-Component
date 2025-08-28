@@ -42,9 +42,6 @@ live_design! {
                     draw_bg: {
                         color: #140D2A,
                     }
-
-
-                   
                     // <GCheckboxGroup>{
                     //     active: ["coffee", "milk"],
                     //     prop: {
@@ -660,28 +657,9 @@ live_design! {
                         //     }
                         // }
                     // }
-                    // body = <HomePage> {}
+                    body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-
-      
-                    <GCard>{
-                        prop: {
-                            basic: {
-                                container: {
-                                    width: 300.0,
-                                }
-                            }
-                        }
-                        body: {
-                            <GButton>{}
-                            <GLabel> {
-                                text: "Hello World"
-                            }
-                        }
-                    }
-
-                    
                 }
             }
         }

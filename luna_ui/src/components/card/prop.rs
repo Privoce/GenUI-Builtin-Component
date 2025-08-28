@@ -1,22 +1,18 @@
 use makepad_widgets::*;
-use toml_edit::Item;
+use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_part, component_state,
-    components::{
+    component_part, component_state, components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    get_get_mut,
-    prop::{
-        manuel::{BASIC, BODY, CONTAINER, FOOTER, HEADER, HOVER},
-        ApplySlotMapImpl, ApplyStateMapImpl, Applys,
-    },
-    themes::{Color, Theme},
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, error::Error, from_inherit_to_view_basic_prop, get_get_mut, inherits_view_basic_prop, prop::{
+        manuel::{
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BODY, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CONTAINER, CURSOR, FLOW, FOOTER, HEADER, HEIGHT, HOVER, MARGIN, PADDING, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH
+        },
+        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        ApplySlotMapImpl, ApplyStateMapImpl, Applys, Radius,
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -94,11 +90,11 @@ pub struct CardBasicProp {
     #[live(CardBasicProp::default_container(Theme::default(), CardState::Basic))]
     pub container: ViewBasicProp,
     #[live(CardBasicProp::default_header(Theme::default(), CardState::Basic))]
-    pub header: ViewBasicProp,
+    pub header: CardHeaderProp,
     #[live(CardBasicProp::default_body(Theme::default(), CardState::Basic))]
-    pub body: ViewBasicProp,
+    pub body: CardBodyProp,
     #[live(CardBasicProp::default_footer(Theme::default(), CardState::Basic))]
-    pub footer: ViewBasicProp,
+    pub footer: CardFooterProp,
 }
 
 impl BasicProp for CardBasicProp {
@@ -232,14 +228,11 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
 }
 
 impl CardBasicProp {
-    pub fn default_header(theme: Theme, state: CardState) -> ViewBasicProp {
-        let mut header = Self::default_container(theme, state);
-        header.set_height(Size::Fixed(36.0));
-        header.set_background_visible(false);
-        header
+    pub fn default_header(theme: Theme, state: CardState) -> CardHeaderProp {
+        CardHeaderProp::from_state(theme, state.into())
     }
-    pub fn default_footer(theme: Theme, state: CardState) -> ViewBasicProp {
-        Self::default_header(theme, state)
+    pub fn default_footer(theme: Theme, state: CardState) -> CardFooterProp {
+        CardFooterProp::from_state(theme, state.into())
     }
     pub fn default_container(theme: Theme, state: CardState) -> ViewBasicProp {
         let mut container = ViewBasicProp::from_state(theme, state.into());
@@ -247,11 +240,8 @@ impl CardBasicProp {
         container.set_background_visible(true);
         container
     }
-    pub fn default_body(theme: Theme, state: CardState) -> ViewBasicProp {
-        let mut body = Self::default_container(theme, state);
-        body.set_height(Size::Fill);
-        body.set_background_visible(false);
-        body
+    pub fn default_body(theme: Theme, state: CardState) -> CardBodyProp {
+        CardBodyProp::from_state(theme, state.into())
     }
 }
 
@@ -286,6 +276,84 @@ impl From<ViewState> for CardState {
         }
     }
 }
+
+inherits_view_basic_prop! {
+    CardHeaderProp {
+        border_width: 0.0,
+        border_radius: Radius::new(4.0),
+        spread_radius: 0.0,
+        blur_radius: 0.0,
+        shadow_offset: vec2(0.0, 0.0),
+        background_visible: false,
+        rotation: 0.0,
+        scale: 1.0,
+        padding: Padding::from_f64(0.0),
+        margin: Margin::from_f64(0.0),
+        clip_x: false,
+        clip_y: false,
+        align: Align::default(),
+        cursor: MouseCursor::default(),
+        flow: Flow::Right,
+        spacing: 0.0,
+        height: Size::Fit,
+        width: Size::Fill,
+        abs_pos: None,
+    }, ViewState, "card.header"
+}
+
+
+inherits_view_basic_prop! {
+    CardBodyProp {
+        border_width: 0.0,
+        border_radius: Radius::new(4.0),
+        spread_radius: 0.0,
+        blur_radius: 0.0,
+        shadow_offset: vec2(0.0, 0.0),
+        background_visible: false,
+        rotation: 0.0,
+        scale: 1.0,
+        padding: Padding::from_f64(0.0),
+        margin: Margin::from_f64(0.0),
+        clip_x: false,
+        clip_y: false,
+        align: Align::default(),
+        cursor: MouseCursor::default(),
+        flow: Flow::Right,
+        spacing: 0.0,
+        height: Size::Fill,
+        width: Size::Fill,
+        abs_pos: None,
+    }, ViewState, "card.body"
+}
+
+inherits_view_basic_prop! {
+    CardFooterProp {
+        border_width: 0.0,
+        border_radius: Radius::new(4.0),
+        spread_radius: 0.0,
+        blur_radius: 0.0,
+        shadow_offset: vec2(0.0, 0.0),
+        background_visible: false,
+        rotation: 0.0,
+        scale: 1.0,
+        padding: Padding::from_f64(0.0),
+        margin: Margin::from_f64(0.0),
+        clip_x: false,
+        clip_y: false,
+        align: Align::default(),
+        cursor: MouseCursor::default(),
+        flow: Flow::Right,
+        spacing: 0.0,
+        height: Size::Fit,
+        width: Size::Fill,
+        abs_pos: None,
+    }, ViewState, "card.footer"
+}
+
+from_inherit_to_view_basic_prop!(CardHeaderProp);
+from_inherit_to_view_basic_prop!(CardBodyProp);
+from_inherit_to_view_basic_prop!(CardFooterProp);
+
 
 component_part! {
     CardPart {

@@ -98,7 +98,7 @@ pub struct SvgBasicProp {
     #[live(SvgPartProp::default())]
     pub svg: SvgPartProp,
     #[live(SvgBasicProp::default_container(Theme::default(), SvgState::Basic))]
-    pub container: ContainerPartProp,
+    pub container: SvgContainerProp,
 }
 
 impl Default for SvgBasicProp {
@@ -151,7 +151,7 @@ impl BasicProp for SvgBasicProp {
     }
 
     fn len() -> usize {
-        SvgPartProp::len() + ContainerPartProp::len()
+        SvgPartProp::len() + SvgContainerProp::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -166,7 +166,7 @@ impl BasicProp for SvgBasicProp {
     fn live_props() -> LiveProps {
         vec![
             (live_id!(svg), SvgPartProp::live_props().into()),
-            (live_id!(container), ContainerPartProp::live_props().into()),
+            (live_id!(container), SvgContainerProp::live_props().into()),
         ]
     }
 
@@ -226,18 +226,8 @@ impl TryFrom<(&InlineTable, SvgState)> for SvgBasicProp {
 }
 
 impl SvgBasicProp {
-    pub fn default_container(theme: Theme, state: SvgState) -> ContainerPartProp {
-        // let mut container = ContainerPartProp::from_state(theme, state.into());
-        // container.set_clip_x(true);
-        // container.set_clip_y(true);
-        // container.set_align(Align::from_f64(0.5));
-        // container.set_width(Size::Fit);
-        // container.set_height(Size::Fit);
-        // container.set_background_visible(false);
-        // container.set_padding(Padding::from_f64(0.0));
-        // container.set_margin(Margin::from_f64(0.0));
-        // container
-        ContainerPartProp::from_state(theme, state.into())
+    pub fn default_container(theme: Theme, state: SvgState) -> SvgContainerProp {
+        SvgContainerProp::from_state(theme, state.into())
     }
     pub fn default_svg(theme: Theme, state: SvgState) -> SvgPartProp {
         SvgPartProp::from_state(theme, state)
@@ -459,7 +449,7 @@ component_part! {
 }
 
 inherits_view_basic_prop!{
-    ContainerPartProp {
+    SvgContainerProp {
         border_width: 0.0,
         border_radius: Radius::new(4.0),
         spread_radius: 0.0,
@@ -482,4 +472,4 @@ inherits_view_basic_prop!{
     }, SvgState, "svg.container"
 }
 
-from_inherit_to_view_basic_prop!(ContainerPartProp);
+from_inherit_to_view_basic_prop!(SvgContainerProp);

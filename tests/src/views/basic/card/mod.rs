@@ -1,7 +1,4 @@
-use luna_ui::{
-    components::*,
-    inherits_view_livehook,
-};
+use luna_ui::{components::*, inherits_view_livehook};
 use makepad_widgets::*;
 
 use crate::widget_node;
@@ -25,22 +22,63 @@ live_design! {
                     prop: {
                         basic: {
                             container: {
-                                theme: Primary,
-                                height: 200.0,
-                                width: 200.0,
-                                background_visible: true,
-                            },
-                            header: {
-                                border_width: 2.0,
-                                border_color: #00f,
-                                background_visible: true,
-                            },
-                            footer: {
-                                theme: Error,
-                                height: 40.0,
-                                border_width: 2.0,
-                                border_color: #f00,
-                                background_visible: true,
+                                width: 360.0,
+                                theme: Info,
+                            }
+                        }
+                    }
+                    header: <GView>{
+                        <GLabel> {
+                            prop: {
+                                basic: {
+                                    font_size: 16.0
+                                }
+                            }
+                            text: "Dan-Reyes",
+                            mode: Bold
+                        }
+                    }
+                    body: <GView>{
+                        <GImage> {
+                            src: Live(dep("crate://self/resources/cat.jpg")),
+                            prop: {
+                                basic: {
+                                    height: Fill,
+                                    width: Fill,
+                                }
+                            }
+                        }
+                    }
+                    footer: <GView>{
+                        prop: {
+                            basic: {
+                                align: {
+                                    y: 0.5
+                                }
+                            }
+                        }
+                        <GLabel> {
+                            text: "Star: 12k"
+                        }
+                        <GView> {
+                            prop: {
+                                basic: {
+                                    height: Fit,
+                                    align: {
+                                        x: 1.0, y: 0.5
+                                    }
+                                    padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                                }
+                            }
+                            <GButton> {
+                                prop: {
+                                    basic: {
+                                        theme: Primary,
+                                    }
+                                }
+                                slot: {
+                                    text: "Download"
+                                }
                             }
                         }
                     }
@@ -60,13 +98,13 @@ live_design! {
                         flow: Down,
                     }
                 }
-                
+
             }
             desc = {
                 text: "Different Button Component"
             }
         }
-        
+
     }
 }
 

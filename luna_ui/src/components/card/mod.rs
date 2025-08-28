@@ -7,25 +7,15 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, animation_open_then_redraw, area, area_ref,
-    components::{
+    active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp, ViewState},
-    },
-    error::Error,
-    event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle,
-    play_animation,
-    prop::{
+    }, error::Error, event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
         manuel::{BASIC, HOVER},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, DeferWalks, SlotDrawer, ToStateMap,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::draw_view::DrawView,
-    sync,
-    themes::conf::Conf,
-    visible, ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::conf::Conf, visible, ComponentAnInit
 };
 
 live_design! {
@@ -170,7 +160,6 @@ impl Widget for GCard {
         let prop = self.prop.get(state);
 
         let _ = self.draw_card.begin(cx, walk, prop.layout());
-
         let _ = SlotDrawer::new(
             [
                 (live_id!(header), (&mut self.header).into()),
@@ -263,12 +252,12 @@ impl Component for GCard {
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let prop = &cx.global::<Conf>().components.card;
         self.prop = prop.clone();
-        self.header.prop.basic = self.prop.basic.header;
-        self.header.prop.hover = self.prop.hover.header;
-        self.body.prop.basic = self.prop.basic.body;
-        self.body.prop.hover = self.prop.hover.body;
-        self.footer.prop.basic = self.prop.basic.footer;
-        self.footer.prop.hover = self.prop.hover.footer;
+        self.header.prop.basic = self.prop.basic.header.into();
+        self.header.prop.hover = self.prop.hover.header.into();
+        self.body.prop.basic = self.prop.basic.body.into();
+        self.body.prop.hover = self.prop.hover.body.into();
+        self.footer.prop.basic = self.prop.basic.footer.into();
+        self.footer.prop.hover = self.prop.hover.footer.into();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {

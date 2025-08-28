@@ -75,7 +75,7 @@ pub struct ImageBasicProp {
     pub height: Size,
     #[live(Size::Fixed(128.0))]
     pub width: Size,
-    #[live(Margin::from_f64(6.0))]
+    #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
@@ -95,7 +95,7 @@ impl Default for ImageBasicProp {
             fit: ImageFit::default(),
             height: Size::Fixed(64.0),
             width: Size::Fixed(128.0),
-            margin: Margin::from_f64(6.0),
+            margin: Margin::from_f64(0.0),
             cursor: MouseCursor::default(),
             abs_pos: None,
             min_width: 128.0,
@@ -127,7 +127,7 @@ impl TryFrom<(&Item, ImageState)> for ImageBasicProp {
         };
 
         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-        let margin = Margin::from_f64(6.0);
+        let margin = Margin::from_f64(0.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let height = get_from_itable(
             inline_table,
@@ -181,7 +181,7 @@ impl BasicProp for ImageBasicProp {
             fit: ImageFit::default(),
             height: Size::Fixed(64.0),
             width: Size::Fixed(128.0),
-            margin: Margin::from_f64(6.0),
+            margin: Margin::from_f64(0.0),
             cursor,
             abs_pos: None,
             min_width: 128.0,
@@ -210,7 +210,7 @@ impl BasicProp for ImageBasicProp {
                 self.width = Size::from_live_value(value).unwrap_or(Size::Fit);
             }
             MARGIN => {
-                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             CURSOR => {
                 let cursor = if state.is_disabled() {

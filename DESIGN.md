@@ -1,29 +1,378 @@
-# Design for GenUI Builtin Components
+# GenUI 组件设计文档
 
-- Components with themes
-- Getter and Setter for each `live` prop
-- macros for widgets `impl`
-- use `features` for release or dev 
-- keep `redraw` in user control
+## 概述
 
+GenUI 是一个基于 Makepad 框架的现代化 UI 组件库。本文档详细介绍了组件的设计模式、架构关系和实现原则，旨在帮助开发者快速理解和使用该组件库。
 
+## 组件分类
 
-# GenUI 内置组件设计
+GenUI 将组件分为三大类，每类都有特定的用途和实现模式：
 
-- 带主题的组件: 每个组件都默认带有内置主题, 主题控制组件样式
-- 每个 `live` 属性的 Getter 和 Setter: 为每个标记`#[live]`的组件属性都应该有对应的`get`和`set`方法
-- 组件 `impl` 的宏：对于组件的`impl`提供大量强大的宏支持来简化代码编写
-- 使用 `features` 进行发布或开发: 开发时和发布时由`feature`进行控制，减少体积，明确职责
-- 让 `redraw` 保持用户控制: 保持GUI框架特性，让开发者控制何时`redraw`以达到更好的性能
-- 平滑统一的动画: 对动画的控制应该保持统一性
-- 事件包装: 提供组件事件的包装类型
-- 贴近`css`的`prop`: prop的命名和书写规则应贴近`css`并对prop解构，扁平化书写体验
-- 现代化组件：强大的可扩展的灵活的组件
+### 1. 普通组件 (Ordinary Components)
+**代表：Label 组件**
 
-## 细节
+**特点：**
+- 无插槽，直接渲染自身内容
+- 结构简单，专注于单一功能
+- 适用于文本显示、图标等基础元素
 
-### render()
+**结构示例：**
+```rust
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
+pub struct GLabel {
+    #[live] pub prop: LabelProp,
+    #[live] pub draw_text: DrawText,
+    #[rust] pub state: LabelState,
+}
+```
 
+### 2. 非具名插槽组件 (Unnamed Slot Components)
+**代表：Button 组件**
+
+**特点：**
+- 包含一个通用插槽 `slot`
+- 可以在插槽中放置任意内容
+- 适用于按钮、输入框等需要包装内容的组件
+
+**结构示例：**
+```rust
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
+pub struct GButton {
+    #[live] pub prop: ButtonProp,
+    #[live] pub draw_button: DrawButton,
+    #[live] pub slot: WidgetRef,
+    #[rust] pub state: ButtonState,
+}
+```
+
+### 3. 具名插槽组件 (Named Slot Components)
+**代表：Card 组件**
+
+**特点：**
+- 包含多个具名插槽（如 header、body、footer）
+- 每个插槽都有特定语义和用途
+- 适用于复杂布局的组件
+
+**结构示例：**
+```rust
+#[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
+pub struct GCard {
+    #[live] pub prop: CardProp,
+    #[live] pub header: GView,
+    #[live] pub body: GView,
+    #[live] pub footer: GView,
+    #[rust] pub state: CardState,
+}
+```
+
+## 核心架构关系
+
+### 组件核心关系图
+
+```mermaid
+graph TD
+    A[组件结构体] --> B[属性系统 Prop]
+    A --> C[动画系统 Animator] 
+    A --> D[事件系统 Event]
+    A --> E[绘制系统 Draw]
+    
+    B --> F[配置系统 Conf]
+    B --> G[状态系统 State]
+    
+    C --> H[动画属性设置]
+    D --> I[状态切换]
+    
+    F --> J[TOML配置文件]
+    G --> K[BasicProp/Hover/Pressed/Disabled]
+    
+    L[插槽系统] --> M[普通插槽 WidgetRef]
+    L --> N[具名插槽 GView]
+    
+    A --> L
+```
+
+### 详细交互关系图
+
+```mermaid
+graph TB
+    subgraph "配置层"
+        Conf[TOML配置] --> Merge[merge_conf_prop]
+    end
+    
+    subgraph "组件层" 
+        Component[组件结构体] --> Prop[属性Prop]
+        Component --> Animator[动画器]
+        Component --> Event[事件处理]
+        Component --> Draw[绘制系统]
+    end
+    
+    subgraph "属性层"
+        Prop --> BasicProp[基础属性]
+        Prop --> StateProp[状态属性]
+        BasicProp --> Theme[主题系统]
+        StateProp --> State[组件状态]
+    end
+    
+    subgraph "动画层"
+        Animator --> AnimationProp[动画属性]
+        AnimationProp --> LiveNode[Live节点]
+        LiveNode --> ApplyMap[应用映射]
+    end
+    
+    subgraph "事件层"
+        Event --> Hit[命中检测]
+        Hit --> StateChange[状态变化]
+        StateChange --> AnimationTrigger[动画触发]
+    end
+    
+    subgraph "插槽层"
+        Slot[插槽系统] --> WidgetSlot[普通插槽]
+        Slot --> NamedSlot[具名插槽]
+        NamedSlot --> SlotProp[插槽属性]
+    end
+    
+    Conf --> Prop
+    ApplyMap --> Prop
+    StateChange --> Prop
+    Slot --> Component
+```
+
+## 核心关系说明
+
+### 1. 组件 ↔ 属性系统
+- 组件通过 `prop: ComponentProp` 持有所有属性
+- 属性分为四种状态：`basic`、`hover`、`pressed`、`disabled`
+- 每个状态包含完整的 `BasicProp`（基础属性）
+
+### 2. 属性 ↔ 配置系统
+- `merge_conf_prop()` 方法从全局配置合并属性
+- 配置存储在 `cx.global::<Conf>()` 中
+- 支持运行时动态配置更新
+
+### 3. 属性 ↔ 动画系统
+- 使用 `set_animation!` 宏建立动画属性映射
+- 动画值存储在 `ApplyStateMap` 或 `ApplySlotMap` 中
+- `sync()` 方法将动画值同步到组件属性
+
+### 4. 属性 ↔ 事件系统
+- 事件触发状态切换：`switch_state()`
+- 状态变化自动更新对应属性
+- 支持带动画的状态切换
+
+### 5. 组件 ↔ 插槽系统
+- **普通插槽**：`slot: WidgetRef`，可放置任意内容
+- **具名插槽**：`header: GView`、`body: GView` 等，特定用途
+- 插槽属性通过 `SlotProp` 和 `SlotBasicProp` 管理
+
+## 设计原则
+
+### 1. 状态驱动设计
+```rust
+// 状态决定当前使用的属性
+let prop = self.prop.get(self.state);
+
+// 事件改变状态
+self.switch_state(ButtonState::Pressed);
+
+// 状态变化触发重绘
+self.redraw(cx);
+```
+
+### 2. 配置优先原则
+```rust
+// 配置覆盖默认值，确保一致性
+fn merge_conf_prop(&mut self, cx: &mut Cx) {
+    let conf_prop = &cx.global::<Conf>().components.button;
+    self.prop = conf_prop.clone();
+}
+```
+
+### 3. 动画集成原则
+```rust
+// 动画值实时同步到组件属性
+set_animation! {
+    nodes: draw_button = {
+        color => prop.color,
+        background_color => prop.background_color
+    }
+}
+```
+
+### 4. 插槽抽象原则
+```rust
+// 普通插槽 - 灵活性高
+#[live] pub slot: WidgetRef
+
+// 具名插槽 - 语义明确
+#[live] pub header: GView
+#[live] pub body: GView
+#[live] pub footer: GView
+```
+
+## 实现模式详解
+
+### 普通组件实现模式 (Label)
+
+```rust
+impl Component for GLabel {
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        // 同步属性到绘制对象
+        self.draw_text.color = self.prop.get(self.state).color;
+        self.draw_text.text_style.font_size = self.prop.get(self.state).font_size;
+        Ok(())
+    }
+}
+
+impl Widget for GLabel {
+    fn draw_walk(&mut self, cx: &mut Cx, scope: &mut Scope, walk: Walk) -> DrawStep {
+        // 直接绘制自身
+        self.draw_text.draw_walk(cx, scope, walk)
+    }
+}
+```
+
+### 非具名插槽组件实现模式 (Button)
+
+```rust
+impl Component for GButton {
+    fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        // 同步属性
+        self.draw_button.merge(&self.prop.get(self.state));
+        Ok(())
+    }
+}
+
+impl Widget for GButton {
+    fn draw_walk(&mut self, cx: &mut Cx, scope: &mut Scope, walk: Walk) -> DrawStep {
+        // 先绘制按钮背景
+        self.draw_button.draw_walk(cx, scope, walk)?;
+        
+        // 再绘制插槽内容
+        self.slot.draw_walk(cx, scope, walk)
+    }
+}
+```
+
+### 具名插槽组件实现模式 (Card)
+
+```rust
+impl SlotComponent for GCard {
+    fn render_slots(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
+        // 同步插槽属性
+        self.header.apply_slot_prop(cx, &self.prop.get(self.state).header);
+        self.body.apply_slot_prop(cx, &self.prop.get(self.state).body);
+        self.footer.apply_slot_prop(cx, &self.prop.get(self.state).footer);
+        Ok(())
+    }
+}
+
+impl Widget for GCard {
+    fn draw_walk(&mut self, cx: &mut Cx, scope: &mut Scope, walk: Walk) -> DrawStep {
+        // 依次绘制各个具名插槽
+        self.header.draw_walk(cx, scope, walk)?;
+        self.body.draw_walk(cx, scope, walk)?;
+        self.footer.draw_walk(cx, scope, walk)
+    }
+}
+```
+
+## 属性系统详解
+
+### 属性结构层次
+```
+ComponentProp {
+    basic: ComponentBasicProp {
+        component_part: ComponentPartProp,  // 组件特定属性
+        container: ViewBasicProp,          // 容器属性
+    },
+    hover: ComponentBasicProp { ... },
+    pressed: ComponentBasicProp { ... },
+    disabled: ComponentBasicProp { ... },
+}
+```
+
+### 属性继承宏
+```rust
+inherits_view_basic_prop!{
+    ComponentPartProp {
+        border_width: 0.0,
+        background_visible: true,
+        // ... 其他属性
+    }, ComponentState, "component.container"
+}
+```
+
+## 动画系统详解
+
+### 动画设置模式
+```rust
+set_animation! {
+    nodes: draw_component = {
+        color => prop.color,
+        background_color => prop.background_color,
+        border_width => prop.border_width
+    }
+}
+```
+
+### 状态动画切换
+```rust
+// 带动画的状态切换
+self.switch_state_with_animation(cx, ButtonState::Hover, AnimationType::EaseInOut);
+
+// 立即状态切换
+self.switch_state(ButtonState::Pressed);
+```
+
+## ⚡ 事件系统详解
+
+### 事件处理流程
+```rust
+fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) -> EventAction {
+    match event {
+        Event::Actions(actions) => {
+            // 处理命中事件
+            if let Some(hit) = actions.find_hit(cx, scope, self.draw_button.area()) {
+                match hit.action {
+                    ButtonAction::Pressed => {
+                        self.switch_state(ButtonState::Pressed);
+                        return EventAction::Consumed;
+                    }
+                    ButtonAction::Released => {
+                        self.switch_state(ButtonState::Hover);
+                        // 触发点击事件
+                        cx.widget_action(self.widget_uid(), &scope.path, ButtonEvent::Clicked);
+                        return EventAction::Consumed;
+                    }
+                }
+            }
+        }
+    }
+    EventAction::None
+}
+```
+
+## 最佳实践
+
+### 1. 属性设计
+- 使用宏继承 `ViewBasicProp` 避免 live reload 问题
+- 为每个状态定义完整的属性集合
+- 使用 `from_live_value()` 进行类型转换
+
+### 2. 组件实现
+- 始终实现 `Component` trait
+- 具名插槽组件额外实现 `SlotComponent` trait
+- 在 `render()` 中同步属性到绘制对象
+
+### 3. 事件处理
+- 使用 `find_hit()` 检测组件区域内的点击
+- 状态变化后调用 `redraw()` 触发重绘
+- 重要事件通过 `widget_action()` 向父组件传递
+
+### 4. 插槽管理
+- 普通插槽使用 `WidgetRef`
+- 具名插槽使用 `GView`
+- 插槽属性通过 `apply_slot_prop()` 应用
 
 ## prompt
 

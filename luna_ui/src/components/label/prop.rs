@@ -78,7 +78,7 @@ pub struct LabelBasicProp {
     pub color: Vec4,
     #[live(12.0)]
     pub font_size: f32,
-    #[live(1.2)]
+    #[live(1.0)]
     pub line_spacing: f32,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
@@ -125,7 +125,7 @@ impl BasicProp for LabelBasicProp {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);
             }
             LINE_SPACING => {
-                self.line_spacing = f32::from_live_value(value).unwrap_or(1.2);
+                self.line_spacing = f32::from_live_value(value).unwrap_or(1.0);
             }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
@@ -155,7 +155,7 @@ impl BasicProp for LabelBasicProp {
             theme,
             color: color.into(),
             font_size: 12.0,
-            line_spacing: 1.2,
+            line_spacing: 1.0,
             margin: Margin::from_f64(0.0),
             padding: Padding::from_f64(0.0),
             flow: Flow::RightWrap,
@@ -251,7 +251,7 @@ impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
         let color = Self::state_colors(theme, state);
         let color = get(inline_table, COLOR, || Ok(color), |value| value.try_into())?.into();
         let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
-        let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.2), |item| item.to_f32())?;
+        let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.0), |item| item.to_f32())?;
 
         let default_margin = Margin::from_f64(0.0);
 
