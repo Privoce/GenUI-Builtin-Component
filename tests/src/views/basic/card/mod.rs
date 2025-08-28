@@ -15,9 +15,61 @@ live_design! {
                     basic: {
                         height: Fit,
                         width: Fill,
+                        flow: Down,
                     }
                 }
-                <GCard>{}
+                <GCard>{
+                    prop: {
+                        basic: {
+                            container: {
+                                width: 360.0,
+                                height: 200.0,
+                                background_color: #F7F2FA
+                            }
+                        }
+                    }
+                    header: <GView>{
+                        <GLabel> {
+                            prop: {
+                                basic: {
+                                    font_size: 22.0,
+                                    color: #000
+                                }
+                            }
+                            text: "Play\nrelaxing songs",
+                        }
+                    },
+                    body: <GView>{
+                        <GLabel> {
+                            prop: {
+                                basic: {
+                                    color: #4D4256
+                                }
+                            }
+                            text: "From your recent favorites"
+                        }
+                    },
+                    footer: <GView>{
+                        prop: {
+                            basic: {
+                                align: {
+                                    y: 0.5, x: 1.0
+                                }
+                            }
+                        }
+                        <GButton> {
+                                prop: {
+                                    basic: {
+                                        theme: Primary,
+                                        border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0}
+                                    }
+                                }
+                                slot: {
+                                    text: "Get started"
+                                }
+                            }
+                    }
+                }
                 <GCard>{
                     prop: {
                         basic: {
@@ -101,7 +153,7 @@ live_design! {
 
             }
             desc = {
-                text: "Different Button Component"
+                text: ""
             }
         }
 

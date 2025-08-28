@@ -134,12 +134,13 @@ pub trait ImageAsync: ImageCacheImpl {
                     ImageCacheEntry::Loading(width, height),
                 );
                 let request = HttpRequest::new(url.to_string(), HttpMethod::GET);
-                let request_id = live_id!(ImageDownload);
+                // let request_id = live_id!(ImageDownload);
+                let request_id = LiveId::from_str(&url);
                 cx.http_request(request_id, request);
-                // if cx.get_global::<ImageCache>().thread_pool.is_none() {
-                //     cx.get_global::<ImageCache>().thread_pool =
-                //         Some(TagThreadPool::new(cx, cx.cpu_cores().max(3) - 2));
-                // }
+                if cx.get_global::<ImageCache>().thread_pool.is_none() {
+                    cx.get_global::<ImageCache>().thread_pool =
+                        Some(TagThreadPool::new(cx, cx.cpu_cores().max(3) - 2));
+                }
                 // cx.get_global::<ImageCache>()
                 //     .thread_pool
                 //     .as_mut()

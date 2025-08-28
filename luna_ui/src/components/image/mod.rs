@@ -2,7 +2,7 @@ mod async_impl;
 mod prop;
 
 use makepad_widgets::image_cache::{
-    AsyncImageLoad, AsyncLoadResult, ImageCacheImpl, ImageError, ImageFit,
+    AsyncImageLoad, AsyncLoadResult, ImageCache, ImageCacheImpl, ImageError, ImageFit,
 };
 pub use prop::*;
 
@@ -412,20 +412,27 @@ impl Component for GImage {
                 for response_event in response_events {
                     match &response_event.response {
                         NetworkResponse::HttpResponse(response) => {
-                            match response_event.request_id {
-                                live_id!(ImageDownload) => {
-                                    if response.status_code == 200 {
-                                        // 这是图片的下载请求，请求方式为GET，我们需要转为buf
-                                        if let Some(buf) = &response.body {
-                                            let result = parse_image_buffer(buf.clone());
-                                            Cx::post_action(AsyncImageLoad {
-                                                image_path: PathBuf::from(self.src.to_string()),
-                                                result: RefCell::new(Some(result)),
+                            let image_live_id = LiveId::from_str(&self.src.to_string());
+                            if response_event.request_id == image_live_id {
+                                if response.status_code == 200 {
+                                    // 这是图片的下载请求，请求方式为GET，我们需要转为buf
+                                    if let Some(buf) = &response.body {
+                                        let buf = buf.clone();
+                                        let path_str = self.src.to_string();
+                                        let path = PathBuf::from(&path_str);
+                                        cx.get_global::<ImageCache>()
+                                            .thread_pool
+                                            .as_mut()
+                                            .unwrap()
+                                            .execute_rev(path, move |image_path| {
+                                                let result = parse_image_buffer(buf);
+                                                Cx::post_action(AsyncImageLoad {
+                                                    image_path,
+                                                    result: RefCell::new(Some(result)),
+                                                });
                                             });
-                                        }
                                     }
                                 }
-                                _ => {}
                             }
                         }
                         _ => {}
