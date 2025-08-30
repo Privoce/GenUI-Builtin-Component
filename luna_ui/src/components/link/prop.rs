@@ -317,10 +317,10 @@ impl BasicProp for LinkBasicProp {
 
     state_colors! {
         (color_level, underline_level, background_level, border_level, shadow_level),
-        LinkState::Basic => (400, 400, 500, 500, 400),
-        LinkState::Hover => (300, 300, 400, 400, 300),
-        LinkState::Pressed => (500, 500, 600, 600, 500),
-        LinkState::Disabled => (200, 200, 300, 300, 200)
+        LinkState::Basic => (300, 300, 500, 500, 400),
+        LinkState::Hover => (200, 200, 400, 400, 300),
+        LinkState::Pressed => (400, 400, 600, 600, 500),
+        LinkState::Disabled => (100, 100, 300, 300, 200)
     }
 
     fn live_props() -> LiveProps {
@@ -375,6 +375,9 @@ impl BasicProp for LinkBasicProp {
             (live_id!(align), Some(vec![live_id!(x), live_id!(y)]).into()),
             (live_id!(cursor), None.into()),
             (live_id!(abs_pos), None.into()),
+            (live_id!(underline_visible), None.into()),
+            (live_id!(underline_width), None.into()),
+            (live_id!(underline_color), None.into()),
         ]
     }
 
@@ -385,7 +388,6 @@ impl BasicProp for LinkBasicProp {
             width: Size::Fit,
             abs_pos: self.abs_pos,
         }
-        .with_add_padding(self.padding)
     }
 
     fn layout(&self) -> Layout {

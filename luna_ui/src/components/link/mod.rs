@@ -23,7 +23,7 @@ use crate::{
     pure_after_apply, set_animation, set_index, set_scope_path,
     shader::draw_link::DrawLink,
     sync,
-    themes::{conf::Conf, Hex},
+    themes::conf::Conf,
     visible, ComponentAnInit,
 };
 
@@ -325,7 +325,6 @@ impl Component for GLink {
             Hit::FingerHoverIn(e) => {
                 cx.set_cursor(self.prop.get(self.state).cursor);
                 self.switch_state_with_animation(cx, LinkState::Hover);
-                dbg!(Hex(self.draw_link.background_color).to_string());
                 hit_hover_in!(self, cx, e);
             }
             Hit::FingerHoverOut(e) => {

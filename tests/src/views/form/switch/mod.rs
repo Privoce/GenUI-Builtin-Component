@@ -59,7 +59,54 @@ live_design! {
                 text: ""
             }
         }
-
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                    }
+                }
+                <GHLayout> {
+                    prop: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
+                    <GView> {
+                        prop: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
+                        <GLabel> {
+                            text: "Wi-Fi"
+                        }
+                    }
+                    <GSwitch> {
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                            }
+                        },
+                        value: true
+                    }
+                }
+                <GHLayout> {
+                    prop: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
+                    <GView> {
+                        prop: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
+                        <GLabel> {
+                            text: "Bluetooth"
+                        }
+                    }
+                    <GSwitch>{
+                        prop: {
+                            basic: {
+                                theme: Primary,
+                            }
+                        }
+                        value: false
+                    }   
+                }
+            }
+            desc = {
+                text: ""
+            }
+        }
     }
 }
 

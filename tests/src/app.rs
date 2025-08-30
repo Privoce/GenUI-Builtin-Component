@@ -146,19 +146,7 @@ live_design! {
                     //         text: "tag"
                     //     }
                     // }
-                    // <GLink>{
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Primary,
-                    //             font_size: 24.0,
-                    //             background_visible: true,
-                    //         }
-                    //     },
-                    //     draw_text: {
-                    //         color: #00f,
-                    //     }
-                    //     text: "Click me! I am a link",
-                    // }
+                    
                     // <GView> {
                     //     prop: {
                     //         basic: {

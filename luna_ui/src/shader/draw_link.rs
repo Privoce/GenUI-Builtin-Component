@@ -18,8 +18,10 @@ live_design! {
                     if self.border_radius.x != 0.0 || self.border_radius.y != 0.0 ||
                         self.border_radius.z != 0.0 || self.border_radius.w != 0.0 {
                         let max_border_radius = max(
-                            max(self.border_radius.x, self.border_radius.y),
-                            max(self.border_radius.z, self.border_radius.w)
+                            max(
+                                max(self.border_radius.x, self.border_radius.y),
+                                max(self.border_radius.z, self.border_radius.w)
+                            ), 1.0
                         );
                         let v = GaussShadow::rounded_box_shadow(
                             shadow_lower,
@@ -28,7 +30,7 @@ live_design! {
                             self.blur_radius,
                             max_border_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
+                        let shadow_color = vec4(self.get_shadow_color().rgb, self.get_shadow_color().a * v);
                         sdf.clear(shadow_color);
                     } else {
                         let v = GaussShadow::box_shadow(
@@ -37,41 +39,48 @@ live_design! {
                             self.pos * self.rect_size3,
                             self.blur_radius
                         );
-                        let shadow_color = vec4(self.shadow_color.rgb, self.shadow_color.a * v);
+                        let shadow_color = vec4(self.get_shadow_color().rgb, self.get_shadow_color().a * v);
                         sdf.clear(shadow_color);
                     }
                 }
             }
-            // - [draw underline] -----------------------------------------------------------------
-            if self.underline_visible == 1.0 {
-                let offset = self.underline_width + 1.0;
-                sdf.move_to(0., self.rect_size.y - offset);
-                sdf.line_to(self.rect_size.x, self.rect_size.y - offset);
-                sdf.stroke(self.underline_color, self.underline_width);
-                sdf.close_path();
-            }
+
 
             // - [basic sdf for draw a view] ------------------------------------------------------
             let border_width = self.border_width;
-            sdf.box_all(
-                self.border_inset.x + border_width,
-                self.border_inset.y + border_width,
-                self.rect_size.x - (self.border_inset.x + self.border_inset.z + border_width * 2.0),
-                self.rect_size.y - (self.border_inset.y + self.border_inset.w + border_width * 2.0),
-                self.border_radius.x,
-                self.border_radius.y,
-                self.border_radius.z,
-                self.border_radius.w
-            );
+            let total_shadow_size = self.spread_radius + self.blur_radius;
 
             // - [background color if visible] ----------------------------------------------------
             if self.background_visible == 1.0 {
-                sdf.fill_keep(self.background_color);
+                // 使用calculated位置而不是原始rect_size
+                sdf.box_all(
+                    self.sdf_rect_pos.x,
+                    self.sdf_rect_pos.y,
+                    self.sdf_rect_size.x,
+                    self.sdf_rect_size.y,
+                    max(self.border_radius.x, 1.0),
+                    max(self.border_radius.y, 1.0),
+                    max(self.border_radius.z, 1.0),
+                    max(self.border_radius.w, 1.0)
+                );
+                sdf.fill(self.get_background_color());
+            }
+            // - [draw underline] -----------------------------------------------------------------
+            if self.underline_visible == 1.0 {
+                // 通过font_size来计算下划线位置，font一定在盒子的中间
+                if self.underline_width > 0.0 {
+                    let underline_y = self.pos.y + (self.rect_size.y - self.font_size - self.underline_width) / 2.0;
+                    let offset = self.underline_width + 1.0;
+                    let max_border_offset = max(self.border_radius.x, max(self.border_radius.y, max(self.border_radius.z, self.border_radius.w))) * 2.0;
+                    let underline_h = self.rect_size.x - max_border_offset;
+                    sdf.rect(0.0 + max_border_offset / 2.0 , underline_y + offset + self.font_size, underline_h, self.underline_width);
+                    sdf.fill(self.underline_color);
+                }
             }
 
             // - [border with and color if width bigger than 0] -----------------------------------
             if border_width > 0.0 {
-                sdf.stroke(self.border_color, border_width);
+                sdf.stroke(self.get_border_color(), border_width);
             }
 
             return sdf.result;
@@ -90,6 +99,8 @@ pub struct DrawLink {
     pub underline_color: Vec4,
     #[live(1.0)]
     pub underline_width: f32,
+    #[live(12.0)]
+    pub font_size: f32,
 }
 
 impl DrawLink {
@@ -108,6 +119,7 @@ impl DrawLink {
         self.background_visible = other.background_visible.to_f32();
         self.rotation = other.rotation;
         self.scale = other.scale;
+        self.font_size = other.font_size;
         // self.draw_super.merge(&other.into());
     }
 }

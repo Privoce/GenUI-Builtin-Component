@@ -15,6 +15,8 @@ live_design! {
     use crate::views::form::radio::*;
     use crate::views::form::checkbox::*;
     use crate::views::form::switch::*;
+    use crate::views::basic::divider::*;
+    use crate::views::basic::link::*;
 
     pub HomePage = {{HomePage}} {
         prop: {
@@ -134,6 +136,32 @@ live_design! {
                             },
                             value: "tab_card"
                         }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Divider"
+                            },
+                            value: "tab_divider"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Link"
+                            },
+                            value: "tab_link"
+                        }
                     }
                 }
                 <GSubMenu> {
@@ -195,6 +223,7 @@ live_design! {
                             },
                             value: "tab_switch"
                         }
+
                     }
                 }
             }
@@ -228,6 +257,12 @@ live_design! {
                     }
                     switch_page = <GBarPage> {
                         <SwitchPage>{}
+                    }
+                    divider_page = <GBarPage> {
+                        <DividerPage>{}
+                    }
+                    link_page = <GBarPage> {
+                        <LinkPage>{}
                     }
                     // tabbar = <GTabbar>{
                     //     <GTabbarItem>{
@@ -280,7 +315,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_switch".to_string()));
+            menu.set_active(cx, Some("tab_link".to_string()));
         });
     }
     fn apply_value_instance(
@@ -312,12 +347,14 @@ impl Widget for HomePage {
                             card_page,
                             radio_page,
                             checkbox_page,
-                            switch_page
+                            switch_page,
+                            divider_page,
+                            link_page,
                         ),
                         None,
                         None,
                     )
-                    .active(id!(switch_page))
+                    .active(id!(link_page))
                     .build(cx);
             });
             self.lifecycle.next();
@@ -364,6 +401,12 @@ impl MatchEvent for HomePage {
                     }
                     "tab_switch" => {
                         router.nav_to(cx, id!(switch_page));
+                    }
+                    "tab_divider" => {
+                        router.nav_to(cx, id!(divider_page));
+                    }
+                    "tab_link" => {
+                        router.nav_to(cx, id!(link_page));
                     }
                     _ => {}
                 }
