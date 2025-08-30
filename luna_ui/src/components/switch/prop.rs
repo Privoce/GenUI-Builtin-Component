@@ -91,7 +91,7 @@ try_from_toml_item! {
 pub struct SwitchBasicProp {
     #[live(Theme::default())]
     pub theme: Theme,
-    #[live(22.0)]
+    #[live(24.0)]
     pub size: f32,
     #[live]
     pub background_color: Vec4,
@@ -103,7 +103,7 @@ pub struct SwitchBasicProp {
     pub background_visible: bool,
     #[live(1.0)]
     pub border_width: f32,
-    #[live(Radius::new(4.0))]
+    #[live(Radius::new(5.4))]
     pub border_radius: Radius,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
@@ -145,7 +145,7 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
             |v| v.try_into(),
         )?
         .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(22.0), |item| item.to_f32())?;
+        let size = get_from_itable(inline_table, SIZE, || Ok(24.0), |item| item.to_f32())?;
         let background_visible = get_from_itable(
             inline_table,
             BACKGROUND_VISIBLE,
@@ -171,7 +171,7 @@ impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
         let border_radius = get_from_itable(
             inline_table,
             BORDER_RADIUS,
-            || Ok(Radius::new(4.0)),
+            || Ok(Radius::new(5.4)),
             |v| v.try_into(),
         )?;
         Ok(Self {
@@ -204,7 +204,7 @@ impl BasicProp for SwitchBasicProp {
         };
         Self {
             theme,
-            size: 22.0,
+            size: 24.0,
             background_color: background_color.into(),
             stroke_color: stroke_color.into(),
             border_color: border_color.into(),
@@ -212,7 +212,7 @@ impl BasicProp for SwitchBasicProp {
             border_width: 1.0,
             margin: Margin::from_f64(0.0),
             abs_pos: None,
-            border_radius: Radius::new(4.0),
+            border_radius: Radius::new(5.4),
             cursor,
         }
     }
@@ -222,7 +222,7 @@ impl BasicProp for SwitchBasicProp {
         SwitchState::Basic => (200, 400, 400),
         SwitchState::HoverBasic => (100, 300, 500),
         SwitchState::HoverActive => (500, 300, 500),
-        SwitchState::Active => (600, 400, 500),
+        SwitchState::Active => (400, 200, 500),
         SwitchState::Disabled => (100, 200, 300)
     }
 
@@ -250,7 +250,7 @@ impl BasicProp for SwitchBasicProp {
                 self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
             }
             SIZE => {
-                self.size = f32::from_live_value(value).unwrap_or(22.0);
+                self.size = f32::from_live_value(value).unwrap_or(24.0);
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);
@@ -311,7 +311,7 @@ impl BasicProp for SwitchBasicProp {
         Walk {
             abs_pos: self.abs_pos,
             margin: self.margin,
-            width: Size::Fixed(self.size as f64 * 2.0),
+            width: Size::Fixed(self.size as f64 * 1.8),
             height: Size::Fixed(self.size as f64),
         }
     }

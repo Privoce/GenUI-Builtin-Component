@@ -18,56 +18,42 @@ live_design! {
                         flow: Down,
                     }
                 }
-                <GLabel>{
-                    text: "Normal Label"
+                <GHLayout> {
+                    prop: { basic: { height: Fit, width: Fill,}},
+                    <GSwitch> {}
+                    <GLabel> {
+                        text: "basic"
+                    }
                 }
-                <GLabel>{
-                    text: "Bold Label",
-                    mode: Bold
-                }
-                <GLabel>{
-                    text: "Italic Label",
-                    mode: Italic,
-                }
-                <GLabel>{
-                    text: "BoldItalic Label",
-                    mode: BoldItalic,
-                }
-                <GLabel>{
-                    prop: {
-                        basic: {
-                            font_size: 20.0,
-                            color: #f00
+                <GHLayout> {
+                    prop: { basic: { height: Fit, width: Fill,}},
+                    <GSwitch>{
+                        prop: {
+                            basic: {
+                                theme: Warning,
+                            }
                         }
-                    },
-                    text: "BoldItalic Label font size: 20.0, color: #f00",
-                    mode: BoldItalic,
+                        value: true
+                    }
+                    <GLabel> {
+                        text: "active true"
+                    }
                 }
-                <GLabel>{
-                    text: "Disabled",
-                    mode: Bold,
-                    disabled: true
-                }
-                <GLabel>{
-                    prop: {
-                        basic: {
-                            color: #ff0
+                <GHLayout> {
+                    prop: { basic: { height: Fit, width: Fill,}},
+                    <GSwitch>{
+                        prop: {
+                            basic: {
+                                theme: Info,
+                            }
                         }
-                    },
-                    text: "Disabled but set basic color (use disabled color)",
-                    mode: Bold,
-                    disabled: true
+                        disabled: true,
+                    }
+                    <GLabel> {
+                        text: "disabled"
+                    }
                 }
-                <GLabel>{
-                    prop: {
-                        disabled: {
-                            color: #ff0
-                        }
-                    },
-                    text: "Disabled but set disabled color",
-                    mode: Bold,
-                    disabled: true
-                }
+                
             }
             desc = {
                 text: ""

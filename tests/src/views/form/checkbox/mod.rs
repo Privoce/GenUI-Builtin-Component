@@ -18,56 +18,189 @@ live_design! {
                         flow: Down,
                     }
                 }
-                <GLabel>{
-                    text: "Normal Label"
+                <GCheckbox>{
+                    extra: {
+                        <GLabel> {
+                            text: "Basic Checkbox: Round "
+                        }
+                    }
                 }
-                <GLabel>{
-                    text: "Bold Label",
-                    mode: Bold
-                }
-                <GLabel>{
-                    text: "Italic Label",
-                    mode: Italic,
-                }
-                <GLabel>{
-                    text: "BoldItalic Label",
-                    mode: BoldItalic,
-                }
-                <GLabel>{
+                <GCheckbox> {
                     prop: {
                         basic: {
-                            font_size: 20.0,
-                            color: #f00
+                            checkbox: {
+                                theme: Warning,
+                                mode: Cross,
+                            }
                         }
-                    },
-                    text: "BoldItalic Label font size: 20.0, color: #f00",
-                    mode: BoldItalic,
+                    }
+                    extra: {
+                        <GLabel>{
+                            text: "Checkbox: Cross",
+                        }
+                    }
                 }
-                <GLabel>{
-                    text: "Disabled",
-                    mode: Bold,
-                    disabled: true
-                }
-                <GLabel>{
+                    
+                <GCheckbox> {
                     prop: {
                         basic: {
-                            color: #ff0
+                            container: {
+                                background_visible: true,
+                                theme: Info,
+                            },
+                            checkbox: {
+                                theme: Primary,
+                                mode: Tick,
+                            }
+                        },
+                        hover: {
+                            checkbox: {
+                                theme: Warning,
+                            }
                         }
                     },
-                    text: "Disabled but set basic color (use disabled color)",
-                    mode: Bold,
-                    disabled: true
+                    extra: {
+                        <GLabel> {
+                            text: "Checkbox: Tick act as Checkbox button"
+                        }
+                    }
                 }
-                <GLabel>{
+                <GCheckbox> {
                     prop: {
-                        disabled: {
-                            color: #ff0
-                        }
+                        basic: {
+                            container: {
+                                background_visible: true,
+                                theme: Error,
+                            },
+                        },
                     },
-                    text: "Disabled but set disabled color",
-                    mode: Bold,
-                    disabled: true
+                    checkbox_visible: false,
+                    extra: {
+                        <GLabel> {
+                            text: "Checkbox without Checkbox act as button"
+                        }
+                    }
                 }
+            }
+            desc = {
+                text: "Checkbox: Checkbox let people select one option from a set of options"
+            }
+        }
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                    }
+                }
+                <GCheckboxGroup>{
+                        active: ["1", "2"],
+                        prop: {
+                            basic: {
+                                width: 400.0,
+                                flow: Down,
+                                align: {x: 0.0}
+                            }
+                        }
+                        <GCheckbox>{
+                            prop: {
+                                basic: {
+                                    container: {
+                                        width: Fill,
+                                    }
+                                    checkbox: {
+                                        theme: Primary,
+                                        mode: Tick,
+                                    },
+                                    extra: {
+                                        width: Fill,
+                                        align: {x: 0.0}
+                                    }
+                                }
+                            },
+                            value: "1",
+                            reverse: true,
+                            extra: {
+                                <GLabel>{
+                                    text: "Microphone access"
+                                }
+                            }
+                        }
+                        <GCheckbox>{
+                            prop: {
+                                basic: {
+                                    container: {
+                                        width: Fill,
+                                    }
+                                    checkbox: {
+                                        theme: Primary,
+                                        mode: Tick,
+                                    }
+                                    extra: {
+                                        width: Fill,
+                                        align: {x: 0.0}
+                                    }
+                                }
+                            },
+                            value: "2",
+                            reverse: true,
+                            extra: {
+                                <GLabel>{
+                                    text: "Location access"
+                                }
+                            }
+                        }
+                        <GCheckbox>{
+                            prop: {
+                                basic: {
+                                    container: {
+                                        width: Fill,
+                                    }
+                                    checkbox: {
+                                        theme: Primary,
+                                        mode: Tick,
+                                    }
+                                    extra: {
+                                        width: Fill,
+                                        align: {x: 0.0}
+                                    }
+                                }
+                            },
+                            value: "3",
+                            reverse: true,
+                            extra: {
+                                <GLabel>{
+                                    text: "Haptics"
+                                }
+                            }
+                        }
+                        <GCheckbox>{
+                            prop: {
+                                basic: {
+                                    container: {
+                                        width: Fill,
+                                    }
+                                    checkbox: {
+                                        theme: Primary,
+                                        mode: Tick,
+                                    }
+                                    extra: {
+                                        width: Fill,
+                                        align: {x: 0.0}
+                                    }
+                                }
+                            },
+                            value: "4",
+                            reverse: true,
+                            extra: {
+                                <GLabel>{
+                                    text: "Location access"
+                                }
+                            }
+                        }
+                    }
             }
             desc = {
                 text: ""

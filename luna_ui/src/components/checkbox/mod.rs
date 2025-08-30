@@ -91,6 +91,10 @@ pub struct GCheckbox {
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
+    #[live(true)]
+    pub checkbox_visible: bool,
+    #[live]
+    pub reverse: bool,
     // --- others -------------------
     #[live(false)]
     pub disabled: bool,
@@ -183,12 +187,24 @@ impl Widget for GCheckbox {
             let prop = self.prop.get(state);
 
             self.draw_container.begin(cx, walk, prop.container.layout());
-            self.draw_checkbox
-                .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
-            self.draw_checkbox.end(cx);
+            if !self.reverse {
+                if self.checkbox_visible {
+                    self.draw_checkbox
+                        .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
+                    self.draw_checkbox.end(cx);
+                }
+            }
             if self.extra.visible {
                 self.extra.disabled = self.disabled;
                 let _ = self.extra.draw_walk(cx, scope, prop.extra.walk());
+            }
+
+            if self.reverse {
+                if self.checkbox_visible {
+                    self.draw_checkbox
+                        .begin(cx, prop.checkbox.walk(), prop.checkbox.layout());
+                    self.draw_checkbox.end(cx);
+                }
             }
             self.draw_container.end(cx);
         }

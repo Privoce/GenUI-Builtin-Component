@@ -280,7 +280,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_radio".to_string()));
+            menu.set_active(cx, Some("tab_switch".to_string()));
         });
     }
     fn apply_value_instance(
@@ -317,7 +317,7 @@ impl Widget for HomePage {
                         None,
                         None,
                     )
-                    .active(id!(radio_page))
+                    .active(id!(switch_page))
                     .build(cx);
             });
             self.lifecycle.next();

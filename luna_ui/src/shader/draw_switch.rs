@@ -7,6 +7,7 @@ live_design! {
 
     DrawSwitch = {{DrawSwitch}} {
         fn pixel(self) -> vec4 {
+            let scale = 0.82;
             let sdf = Sdf2d::viewport(self.pos * self.rect_size);
             let box_size = vec2(self.rect_size.x - self.border_width * 3.0, self.rect_size.y - self.border_width * 3.0);
             let start_point = vec2(self.pos.x + self.border_width, self.pos.y + self.border_width);
@@ -24,19 +25,20 @@ live_design! {
                 sdf.fill_keep(self.background_color);
             }
             sdf.stroke(self.border_color, self.border_width);
-            let spacing = self.rect_size.x * 0.01;
-            let inner_box_size = vec2(box_size.x / 2.0, box_size.y) - vec2(spacing * 2.0, spacing * 2.0);
+            let inner_circle_radius = mix(box_size.y * scale * scale, box_size.y * scale, self.active);
+            let h_spacing = (box_size.x * 0.5 - inner_circle_radius) / 2.0;
+            let v_spacing = (box_size.y - inner_circle_radius) / 2.0;
             let inner_pos = mix(
-                vec2(start_point.x + spacing, start_point.y + spacing),
-                vec2(self.pos.x + self.rect_size.x - inner_box_size.x - spacing * 3.0, start_point.y + spacing),
+                start_point + vec2(v_spacing),
+                start_point + vec2(box_size.x, v_spacing) - vec2(inner_circle_radius + v_spacing, 0.0),
                 self.active
             );
-            let inner_radius = self.border_radius - vec4(spacing);
+            let inner_radius = (self.border_radius * inner_circle_radius) / box_size.y;
             sdf.box_all(
                 inner_pos.x,
                 inner_pos.y,
-                inner_box_size.x,
-                inner_box_size.y,
+                inner_circle_radius,
+                inner_circle_radius,
                 inner_radius.r,
                 inner_radius.g,
                 inner_radius.b,

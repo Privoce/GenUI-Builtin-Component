@@ -239,7 +239,9 @@ impl CheckboxBasicProp {
         container
     }
     pub fn default_extra(theme: Theme, state: CheckboxState) -> ViewBasicProp {
-        Self::default_container(theme, state)
+        let mut extra = Self::default_container(theme, state);
+        extra.set_padding(Padding::from_f64(0.0));
+        extra
     }
 
     pub fn default_checkbox(theme: Theme, state: CheckboxState) -> CheckboxPartProp {
@@ -252,7 +254,7 @@ impl CheckboxBasicProp {
 pub struct CheckboxPartProp {
     #[live(Theme::default())]
     pub theme: Theme,
-    #[live(16.0)]
+    #[live(20.0)]
     pub size: f32,
     #[live]
     pub background_color: Vec4,
@@ -306,7 +308,7 @@ impl TryFrom<(&Value, CheckboxState)> for CheckboxPartProp {
             |v| v.try_into(),
         )?
         .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(16.0), |item| item.to_f32())?;
+        let size = get_from_itable(inline_table, SIZE, || Ok(20.0), |item| item.to_f32())?;
         let background_visible = get_from_itable(
             inline_table,
             BACKGROUND_VISIBLE,
@@ -366,7 +368,7 @@ impl BasicProp for CheckboxPartProp {
         };
         Self {
             theme,
-            size: 16.0,
+            size: 20.0,
             background_color: background_color.into(),
             stroke_color: stroke_color.into(),
             border_color: border_color.into(),
@@ -411,7 +413,7 @@ impl BasicProp for CheckboxPartProp {
                 self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
             }
             SIZE => {
-                self.size = f32::from_live_value(value).unwrap_or(16.0);
+                self.size = f32::from_live_value(value).unwrap_or(20.0);
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);

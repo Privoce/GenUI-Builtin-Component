@@ -108,7 +108,8 @@ live_design! {
                     <GRadio> {
                         prop: {
                             basic: {
-                                radio: {theme: Primary, mode: Round}
+                                radio: {theme: Primary, mode: Round},
+                                container: {spacing: 20.0}
                             }
                         }
                         value: "none",
@@ -121,7 +122,8 @@ live_design! {
                     <GRadio> {
                         prop: {
                             basic: {
-                                radio: {theme: Primary, mode: Round}
+                                radio: {theme: Primary, mode: Round},
+                                container: {spacing: 20.0}
                             }
                         }
                         value: "callisto",
@@ -134,7 +136,8 @@ live_design! {
                     <GRadio> {
                         prop: {
                             basic: {
-                                radio: {theme: Primary, mode: Round}
+                                radio: {theme: Primary, mode: Round},
+                                container: {spacing: 20.0}
                             }
                         }
                         value: "ganymede",
@@ -147,7 +150,8 @@ live_design! {
                     <GRadio> {
                         prop: {
                             basic: {
-                                radio: {theme: Primary, mode: Round}
+                                radio: {theme: Primary, mode: Round},
+                                container: {spacing: 20.0}
                             }
                         }
                         value: "luna",
