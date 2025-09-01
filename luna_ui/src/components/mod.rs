@@ -51,9 +51,9 @@ pub use view::*;
 use crate::component;
 
 live_design! {
-    link gen_ui;
+    link genui;
 
-    // use link::luna_theme::*;
+    // use link::genui_theme::*;
     use link::widgets::*;
     use link::shaders::*;
     use link::genui_basic::*;
@@ -146,7 +146,78 @@ live_design! {
     pub GDivider = <GDividerBase> {}
 
     pub GSvg = <GSvgBase> {}
-
+    pub IconClose = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/close.svg")
+    }
+    pub IconDown = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/down.svg")
+    }
+    pub IconUp = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/up.svg")
+    }
+    pub IconLeft = <GSvg> {
+        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        src: dep("crate://self/resources/icons/svg/left.svg")
+    }
+    pub IconRight = <GSvg> {
+        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        src: dep("crate://self/resources/icons/svg/right.svg")
+    }
+    pub IconMore = <GSvg> {
+        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        src: dep("crate://self/resources/icons/svg/more.svg")
+    }
+    pub IconAll = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/all.svg")
+    }
+    pub IconChart = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/chart.svg")
+    }
+    pub IconCheck = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/check.svg")
+    }
+    pub IconCloudDownload = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/cloud_download.svg")
+    }
+    pub IconCloudUpload = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/cloud_upload.svg")
+    }
+    pub IconCut = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/cut.svg")
+    }
+    pub IconGallery = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/gallery.svg")
+    }
+    pub IconGift = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/gift.svg")
+    }
+    pub IconHome = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/home.svg")
+    }
+    pub IconLink = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/link.svg")
+    }
+    pub IconMinus = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/minus.svg")
+    }
+    pub IconPlus = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/plus.svg")
+    }
+    pub IconPowerOff = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/poweroff.svg")
+    }
+    // pub IconRedo = <GSvg> {
+    //     src: dep("crate://self/resources/icons/svg/redo.svg")
+    // }
+    pub IconScatter = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/scatter.svg")
+    }
+    pub IconSearch = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/search.svg")
+    }
+    pub IconWaiting = <GSvg> {
+        src: dep("crate://self/resources/icons/svg/waiting.svg")
+    }
     pub GImage = <GImageBase> {}
 
     pub GPopup = <GPopupBase>{}
@@ -276,7 +347,17 @@ live_design! {
     //     item: <GTabbarItem> {}
     // }
 
-    pub GTag = <GTagBase> {}
+    pub GTag = <GTagBase> {
+        icon: <GSvg>{
+            visible: false
+        },
+        text: <GLabel>{
+            text: "GTag"
+        },
+        close: <GSvg>{
+            visible: false
+        }
+    }
 
     pub GLink = <GLinkBase> {}
 
@@ -420,6 +501,7 @@ live_design! {
 }
 
 pub fn components_register(cx: &mut Cx) {
+    svg::live_design(cx);
     label::live_design(cx);
     view::live_design(cx);
     button::live_design(cx);
@@ -428,7 +510,6 @@ pub fn components_register(cx: &mut Cx) {
     checkbox::checkbox_register(cx);
     switch::live_design(cx);
     divider::live_design(cx);
-    svg::live_design(cx);
     image::live_design(cx);
     popup::popup_register(cx);
     drop_down::live_design(cx);

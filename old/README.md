@@ -4,7 +4,7 @@
 - update date: 2025-04-06
 - author: [Will-YiFei Sheng](syf20020816@outlook.com)
 - makepad_widget version: `v0.6.0`
-- makepad branch: `gen_ui`
+- makepad branch: `genui`
 
 ## Basic Builtin Component
 

@@ -5,7 +5,7 @@ use crate::widget_node;
 
 live_design! {
     use link::widgets::*;
-    use link::gen_ui::*;
+    use link::genui::*;
     use crate::views::cbox::*;
 
     pub LabelPage = {{LabelPage}} {

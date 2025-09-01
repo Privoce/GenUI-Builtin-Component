@@ -5,7 +5,7 @@ use crate::widget_node;
 
 live_design! {
     use link::widgets::*;
-    use link::gen_ui::*;
+    use link::genui::*;
 
     pub CBox = {{CBox}} {
         show = <GHLayout> {

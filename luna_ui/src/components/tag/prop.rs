@@ -16,7 +16,7 @@ use crate::{
     prop::{
         manuel::{BASIC, CLOSE, CONTAINER, DISABLED, HOVER, ICON, PRESSED, TEXT},
         traits::NewFrom,
-        ApplySlotMapImpl,
+        ApplySlotMapImpl, Radius,
     },
     themes::Theme,
     try_from_toml_item,
@@ -116,13 +116,13 @@ impl Prop for TagProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct TagBasicProp {
-    #[live]
+    #[live(TagBasicProp::default_icon(Theme::default(), TagState::default()))]
     pub icon: SvgBasicProp,
-    #[live]
+    #[live(TagBasicProp::default_text(Theme::default(), TagState::default()))]
     pub text: LabelBasicProp,
-    #[live]
+    #[live(TagBasicProp::default_close(Theme::default(), TagState::default()))]
     pub close: SvgBasicProp,
-    #[live]
+    #[live(TagBasicProp::default_container(Theme::default(), TagState::default()))]
     pub container: ViewBasicProp,
 }
 
@@ -295,16 +295,23 @@ impl TagBasicProp {
         container.width = Size::Fit;
         container.align = Align::from_f64(0.5);
         container.background_visible = true;
+        container.set_padding(Padding::from_all(4.0, 8.0, 4.0, 8.0));
+        container.set_border_radius(Radius::new(2.0));
         container
     }
     
     pub fn default_text(theme: Theme, state: TagState) -> LabelBasicProp {
         let mut text = LabelBasicProp::from_state(theme, state.into());
         text.flow = Flow::Right;
+        text.set_font_size(10.0);
         text
     }
     
     pub fn default_close(theme: Theme, state: TagState) -> SvgBasicProp {
+        SvgBasicProp::from_state(theme, state.into())
+    }
+
+    pub fn default_icon(theme: Theme, state: TagState) -> SvgBasicProp {
         SvgBasicProp::from_state(theme, state.into())
     }
 }component_state! {

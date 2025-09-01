@@ -5,7 +5,7 @@ use crate::widget_node;
 
 live_design! {
     use link::widgets::*;
-    use link::gen_ui::*;
+    use link::genui::*;
     use crate::views::cbox::*;
 
     pub SvgPage = {{SvgPage}} {
@@ -88,6 +88,36 @@ live_design! {
                     <GLabel> {
                         text: "more props"
                     }
+                }
+                <GHLayout>{
+                    prop: {
+                        basic: {
+                            height: Fit,
+                            width: Fill,
+                            align: {y: 0.5}
+                        }
+                    },
+                    <IconClose> {}
+                    <IconLeft> {}
+                    <IconRight> {}
+                    <IconMore> {}
+                    <IconAll> {}
+                    <IconMinus> {}
+                    <IconPlus> {}
+                    <IconChart> {}
+                    <IconCheck> {}
+                    <IconCloudDownload> {}
+                    <IconCloudUpload> {}
+                    <IconUp> {}
+                    <IconDown> {}
+                    <IconHome> {}
+                    <IconLink> {}
+                    <IconPowerOff> {}
+                    <IconScatter> {}
+                    <IconSearch> {}
+                    <IconWaiting> {}
+                    <IconGallery> {}
+                    <IconGift> {}
                 }
             }
             desc = {

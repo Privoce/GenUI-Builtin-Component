@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 
 live_design!{
-    link basic_luna_theme;
+    link basic_genui_theme;
 
     pub global = {
         theme: Dark,

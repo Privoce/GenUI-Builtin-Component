@@ -5,7 +5,7 @@ use crate::widget_node;
 
 live_design! {
     use link::widgets::*;
-    use link::gen_ui::*;
+    use link::genui::*;
     use crate::views::basic::view::*;
     use crate::views::basic::button::*;
     use crate::views::basic::label::*;
@@ -17,6 +17,7 @@ live_design! {
     use crate::views::form::switch::*;
     use crate::views::basic::divider::*;
     use crate::views::basic::link::*;
+    use crate::views::data::tag::*;
 
     pub HomePage = {{HomePage}} {
         prop: {
@@ -226,6 +227,41 @@ live_design! {
 
                     }
                 }
+                <GSubMenu> {
+                    prop: {
+                        basic: {
+                            container: {
+                                theme: Primary,
+                            },
+                            header: {
+                                theme: Primary,
+                            },
+                            body: {
+                                theme: Primary,
+                            }
+                        }
+                    },
+                    header: {
+                        <GLabel> {
+                            text: "Data Components"
+                        }
+                    },
+                    body: {
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Tag"
+                            },
+                            value: "tab_tag"
+                        }
+                    }
+                }
             }
         }
         <GVLayout> {
@@ -263,6 +299,9 @@ live_design! {
                     }
                     link_page = <GBarPage> {
                         <LinkPage>{}
+                    }
+                    tag_page = <GBarPage> {
+                        <TagPage>{}
                     }
                     // tabbar = <GTabbar>{
                     //     <GTabbarItem>{
@@ -315,7 +354,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_link".to_string()));
+            menu.set_active(cx, Some("tab_tag".to_string()));
         });
     }
     fn apply_value_instance(
@@ -350,11 +389,12 @@ impl Widget for HomePage {
                             switch_page,
                             divider_page,
                             link_page,
+                            tag_page
                         ),
                         None,
                         None,
                     )
-                    .active(id!(link_page))
+                    .active(id!(tag_page))
                     .build(cx);
             });
             self.lifecycle.next();

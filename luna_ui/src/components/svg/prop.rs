@@ -245,7 +245,7 @@ pub struct SvgPartProp {
     pub margin: Margin,
     #[live(MouseCursor::default())]
     pub cursor: MouseCursor,
-    #[live(Size::Fixed(16.0))]
+    #[live(Size::Fit)]
     pub height: Size,
     #[live(Size::Fixed(16.0))]
     pub width: Size,
@@ -271,7 +271,7 @@ impl BasicProp for SvgPartProp {
             color,
             margin: Margin::from_f64(0.0),
             cursor: MouseCursor::default(),
-            height: Size::Fixed(16.0),
+            height: Size::Fit,
             width: Size::Fixed(16.0),
             abs_pos: None,
         }
@@ -303,7 +303,7 @@ impl BasicProp for SvgPartProp {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             HEIGHT => {
-                self.height = Size::from_live_value(value).unwrap_or(Size::Fixed(16.0));
+                self.height = Size::from_live_value(value).unwrap_or(Size::Fit);
             }
             WIDTH => {
                 self.width = Size::from_live_value(value).unwrap_or(Size::Fixed(16.0));
@@ -388,7 +388,7 @@ impl TryFrom<(&Value, SvgState)> for SvgPartProp {
         let height = get_from_itable(
             inline_table,
             HEIGHT,
-            || Ok(Size::Fixed(16.0)),
+            || Ok(Size::Fit),
             |v| v.to_size(),
         )?;
         let width = get_from_itable(

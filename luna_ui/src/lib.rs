@@ -10,7 +10,7 @@ pub mod themes;
 pub mod utils;
 
 pub fn live_design(cx: &mut Cx) {
-    cx.link(live_id!(basic_luna_theme), live_id!(luna_theme));
+    cx.link(live_id!(basic_genui_theme), live_id!(genui_theme));
     // cx.set_global(Conf::default());
     let conf = Conf::load::<&str>(Some("/Users/shengyifei/projects/gen_ui/components/luna_ui"));
     let conf = if let Err(e) = &conf {

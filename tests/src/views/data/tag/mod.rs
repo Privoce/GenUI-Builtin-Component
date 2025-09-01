@@ -8,7 +8,7 @@ live_design! {
     use link::genui::*;
     use crate::views::cbox::*;
 
-    pub DividerPage = {{DividerPage}} {
+    pub TagPage = {{TagPage}} {
         <CBox> {
             show = {
                 prop: {
@@ -19,22 +19,12 @@ live_design! {
                         spacing: 20.0,
                     }
                 }
-                <GDivider>{}
-                <GDivider>{
-                    prop: {basic: {theme: Primary}}
+                <GTag>{
+                    text: <GLabel> {
+                        text: "Basic Tag"
+                    }
                 }
-                <GDivider>{
-                    prop: {basic: {theme: Info}}
-                }
-                <GDivider>{
-                    prop: {basic: {theme: Success}}
-                }
-                <GDivider>{
-                    prop: {basic: {theme: Warning}}
-                }
-                <GDivider>{
-                    prop: {basic: {theme: Error}}
-                }
+                
             }
             desc = {
                 text: ""
@@ -45,19 +35,19 @@ live_design! {
 }
 
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
-pub struct DividerPage {
+pub struct TagPage {
     #[deref]
     pub deref_widget: GView,
 }
 
-impl LiveHook for DividerPage {
+impl LiveHook for TagPage {
     inherits_view_livehook!();
     fn after_apply(&mut self, cx: &mut Cx, apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
         self.deref_widget.after_apply(cx, apply, index, nodes);
     }
 }
 
-impl Widget for DividerPage {
+impl Widget for TagPage {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         let _ = self.deref_widget.draw_walk(cx, scope, walk);
 
@@ -69,8 +59,8 @@ impl Widget for DividerPage {
     }
 }
 
-impl MatchEvent for DividerPage {
+impl MatchEvent for TagPage {
     fn handle_actions(&mut self, _cx: &mut Cx, _actions: &Actions) {}
 }
 
-widget_node!(DividerPage);
+widget_node!(TagPage);

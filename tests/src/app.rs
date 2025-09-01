@@ -7,7 +7,7 @@ use makepad_widgets::*;
 
 live_design! {
     use link::theme::*;
-    use link::gen_ui::*;
+    use link::genui::*;
     use link::shaders::*;
     use link::widgets::*;
     use crate::an::*;
@@ -563,6 +563,13 @@ live_design! {
                     body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+                    // <GTag>{
+                    //     icon: <IconClose> {}
+                    //     text: <GLabel> {
+                    //         text: "Basic Tag"
+                    //     }
+                    // }
+
                 }
             }
         }
