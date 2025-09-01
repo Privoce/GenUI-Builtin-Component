@@ -7,11 +7,7 @@ use std::{cell::RefCell, rc::Rc};
 use makepad_widgets::*;
 
 use crate::{
-    components::{
-        popup::{GPopupContainer},
-        traits::PopupComponent,
-        view::GView,
-    },
+    components::{popup::GPopupContainer, traits::PopupComponent, view::GView},
     prop::{CloseMode, PopupMode, Position, TriggerMode},
     visible,
 };
@@ -24,6 +20,9 @@ live_design! {
             basic: {
                 height: Fit,
                 width: Fit,
+                padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
+                margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0},
+                spacing: 0.0,
             }
         }
     }
@@ -47,7 +46,7 @@ pub struct GDropDown {
     pub opened: bool,
     #[live(true)]
     pub visible: bool,
-    #[live(6.0)]
+    #[live(4.0)]
     pub offset: f32,
     #[live]
     pub offset_x: f32,
@@ -106,7 +105,7 @@ impl Widget for GDropDown {
                             y: area.size.y + self.offset as f64,
                         },
                         Position::Top => DVec2 {
-                            x: 0.0 - area.size.x / 2.0,
+                            x: -container.size.x / 2.0 + area.size.x / 2.0,
                             y: -self.offset as f64 - container.size.y,
                         },
                         Position::TopLeft => DVec2 {

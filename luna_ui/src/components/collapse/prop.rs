@@ -244,12 +244,13 @@ impl CollapseBasicProp {
         container.set_background_visible(true);
         container.set_flow(Flow::Down);
         container.set_margin(Margin::from_f64(0.0));
+        container.set_padding(Padding::from_f64(0.0));
         container.set_spacing(0.0);
         container
     }
     pub fn default_header(theme: Theme, state: CollapseState) -> ViewBasicProp {
         let mut header = ViewBasicProp::from_state(theme, state.into());
-        header.set_height(Size::Fixed(42.0));
+        header.set_height(Size::Fit);
         header.set_width(Size::Fill);
         header.set_background_visible(true);
         header.set_cursor(MouseCursor::Hand);

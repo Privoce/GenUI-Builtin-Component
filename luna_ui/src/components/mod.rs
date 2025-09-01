@@ -499,7 +499,18 @@ live_design! {
         }
     }
 
-    pub GCollapse = <GCollapseBase> {}
+    pub GCollapse = <GCollapseBase> {
+        header: <GView> {
+            <GLabel> {
+                text: "Collapse Header"
+            }
+        },
+        body: <GView> {
+            <GLabel> {
+                text: "Collapse Body"
+            }
+        }
+    }
 }
 
 pub fn components_register(cx: &mut Cx) {

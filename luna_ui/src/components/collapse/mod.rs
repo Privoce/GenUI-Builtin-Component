@@ -7,24 +7,15 @@ pub use prop::*;
 use makepad_widgets::*;
 
 use crate::{
-    active_event, area,
-    components::{
+    active_event, area, components::{
         lifecycle::LifeCycle,
         traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
         view::{GView, ViewBasicProp},
-    },
-    error::Error,
-    event_option, lifecycle, play_animation,
-    prop::{
+    }, error::Error, event_option, event_option_ref, lifecycle, play_animation, prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER},
         traits::ToFloat,
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, Position4, ToStateMap,
-    },
-    pure_after_apply, set_animation, set_index, set_scope_path,
-    shader::draw_view::DrawView,
-    sync,
-    themes::conf::Conf,
-    visible, ComponentAnInit,
+    }, pure_after_apply, set_animation, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::conf::Conf, visible, ComponentAnInit
 };
 
 live_design! {
@@ -114,7 +105,7 @@ pub struct GCollapse {
 }
 
 impl Widget for GCollapse {
-    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, mut walk: Walk) -> DrawStep {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if !self.visible {
             return DrawStep::done();
         }
@@ -144,40 +135,48 @@ impl Widget for GCollapse {
         // self.layout.flow = flow;
         prop.container.flow = flow;
         if self.draw_state.begin(cx, steps[0]) {
-            if !self.active {
-                match self.position {
-                    Position4::Left | Position4::Right => {
-                        if !walk.width.is_fixed() {
-                            walk.width = header_walk.width;
-                        }
-                    }
-                    Position4::Top | Position4::Bottom => {
-                        if !walk.height.is_fixed() {
-                            walk.height = header_walk.height;
-                        }
-                    }
-                }
-            } else {
-                match self.position {
-                    Position4::Left | Position4::Right => {
-                        if !walk.width.is_fixed() {
-                            walk.width = Size::Fill;
-                        }
-                    }
-                    Position4::Top | Position4::Bottom => {
-                        // if !walk.height.is_fixed() {
-                        //     walk.height = Size::Fill;
-                        // }
-                    }
-                }
-            }
+            // if !self.active {
+            //     match self.position {
+            //         Position4::Left | Position4::Right => {
+            //             if !walk.width.is_fixed() {
+            //                 walk.width = header_walk.width;
+            //             }
+            //         }
+            //         Position4::Top | Position4::Bottom => {
+            //             if !walk.height.is_fixed() {
+            //                 walk.height = header_walk.height;
+            //             }
+            //         }
+            //     }
+            // } else {
+            //     match self.position {
+            //         Position4::Left | Position4::Right => {
+            //             if !walk.width.is_fixed() {
+            //                 walk.width = Size::Fill;
+            //             }
+            //         }
+            //         Position4::Top | Position4::Bottom => {
+            //             if !walk.height.is_fixed() {
+            //                 walk.height = Size::Fill;
+            //             }
+            //         }
+            //     }
+            // }
             cx.begin_turtle(walk, prop.layout());
         }
 
         for (index, _) in steps.iter().enumerate() {
             let _ = self.draw_state.get().map(|state| match state {
                 DrawCollapseState::DrawHeader => {
-                    let _ = self.header.draw_walk(cx, scope, header_walk);
+                    if self.header.visible {
+                        let w = if let Some(mut dw) = cx.defer_walk(header_walk) {
+                            dw.resolve(cx)
+                        } else {
+                            header_walk
+                        };
+                        let _ = self.header.draw_walk(cx, scope, w);
+                    }
+
                     // check is the first step
                     if index == 0 {
                         cx.begin_turtle(
@@ -203,8 +202,14 @@ impl Widget for GCollapse {
                 DrawCollapseState::DrawBody => {
                     if self.fold == 1.0 {
                         self.animator_play(cx, id!(active.on));
-                        let _ = self.body.draw_walk(cx, scope, body_walk);
+                        let w = if let Some(mut dw) = cx.defer_walk(body_walk) {
+                            dw.resolve(cx)
+                        } else {
+                            body_walk
+                        };
+                        let _ = self.body.draw_walk(cx, scope, w);
                     }
+
                     // check is the last step
                     if index == 1 {
                         match self.position {
@@ -291,7 +296,11 @@ impl WidgetNode for GCollapse {
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.state);
-        prop.container.walk()
+        if self.active {
+            prop.container.walk()
+        } else {
+            prop.header.walk()
+        }
     }
 
     fn area(&self) -> Area {
@@ -392,11 +401,20 @@ impl GCollapse {
     }
     event_option! {
         hover_in: CollapseEvent::HoverIn => CollapseHoverIn,
-        hover_out: CollapseEvent::HoverOut => CollapseHoverOut
+        hover_out: CollapseEvent::HoverOut => CollapseHoverOut,
+        changed: CollapseEvent::Changed => CollapseChanged
     }
     area! {
         area_header, header,
         area_body, body
+    }
+}
+
+impl GCollapseRef {
+    event_option_ref!{
+        hover_in => CollapseHoverIn,
+        hover_out => CollapseHoverOut,
+        changed => CollapseChanged
     }
 }
 
@@ -476,7 +494,7 @@ impl Component for GCollapse {
             }
             Hit::FingerUp(meta) => {
                 self.active = !self.active;
-                self.fold = self.active.to_f32() as f64;
+                self.fold = self.active.to_f64();
                 if self.active {
                     self.switch_state_with_animation(cx, CollapseState::Active);
                     self.animator_play(cx, id!(active.on));

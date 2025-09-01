@@ -18,6 +18,11 @@ live_design! {
     use crate::views::basic::divider::*;
     use crate::views::basic::link::*;
     use crate::views::data::tag::*;
+    use crate::views::data::collapse::*;
+    use crate::views::nav::dialog::*;
+    use crate::views::nav::popover::*;
+    use crate::views::nav::tooltip::*;
+    use crate::views::nav::drawer::*;
 
     pub HomePage = {{HomePage}} {
         prop: {
@@ -260,6 +265,93 @@ live_design! {
                             },
                             value: "tab_tag"
                         }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Collapse"
+                            },
+                            value: "tab_collapse"
+                        }
+                    }
+                }
+                <GSubMenu> {
+                    prop: {
+                        basic: {
+                            container: {
+                                theme: Primary,
+                            },
+                            header: {
+                                theme: Primary,
+                            },
+                            body: {
+                                theme: Primary,
+                            }
+                        }
+                    },
+                    header: {
+                        <GLabel> {
+                            text: "Nav Components"
+                        }
+                    },
+                    body: {
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Dialog"
+                            },
+                            value: "tab_dialog"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Drawer"
+                            },
+                            value: "tab_drawer"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Popover"
+                            },
+                            value: "tab_popover"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "ToolTip"
+                            },
+                            value: "tab_tooltip"
+                        }
                     }
                 }
             }
@@ -302,6 +394,21 @@ live_design! {
                     }
                     tag_page = <GBarPage> {
                         <TagPage>{}
+                    }
+                    collapse_page = <GBarPage> {
+                        <CollapsePage>{}
+                    }
+                    dialog_page = <GBarPage> {
+                        <DialogPage>{}
+                    }
+                    drawer_page = <GBarPage> {
+                        <DrawerPage>{}
+                    }
+                    popover_page = <GBarPage> {
+                        <PopoverPage>{}
+                    }
+                    tooltip_page = <GBarPage> {
+                        <TooltipPage>{}
                     }
                     // tabbar = <GTabbar>{
                     //     <GTabbarItem>{
@@ -354,7 +461,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_tag".to_string()));
+            menu.set_active(cx, Some("tab_popover".to_string()));
         });
     }
     fn apply_value_instance(
@@ -389,12 +496,17 @@ impl Widget for HomePage {
                             switch_page,
                             divider_page,
                             link_page,
-                            tag_page
+                            tag_page,
+                            collapse_page,
+                            popover_page,
+                            tooltip_page,
+                            dialog_page,
+                            drawer_page
                         ),
                         None,
                         None,
                     )
-                    .active(id!(tag_page))
+                    .active(id!(popover_page))
                     .build(cx);
             });
             self.lifecycle.next();
@@ -447,6 +559,24 @@ impl MatchEvent for HomePage {
                     }
                     "tab_link" => {
                         router.nav_to(cx, id!(link_page));
+                    }
+                    "tab_popover" => {
+                        router.nav_to(cx, id!(popover_page));
+                    }
+                    "tab_tooltip" => {
+                        router.nav_to(cx, id!(tooltip_page));
+                    }
+                    "tab_dialog" => {
+                        router.nav_to(cx, id!(dialog_page));
+                    }
+                    "tab_drawer" => {
+                        router.nav_to(cx, id!(drawer_page));
+                    }
+                    "tab_collapse" => {
+                        router.nav_to(cx, id!(collapse_page));
+                    }
+                    "tab_tag" => {
+                        router.nav_to(cx, id!(tag_page));
                     }
                     _ => {}
                 }

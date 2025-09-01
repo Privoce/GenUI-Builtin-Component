@@ -119,7 +119,7 @@ pub struct ButtonBasicProp {
     // --- cursor -------------------
     #[live(MouseCursor::Hand)]
     pub cursor: MouseCursor,
-    #[live(Margin::from_f64(6.0))]
+    #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
     #[live(Padding::from_xy(10.0, 16.0))]
     pub padding: Padding,
@@ -250,7 +250,7 @@ impl BasicProp for ButtonBasicProp {
                 self.cursor = MouseCursor::from_live_value(value).unwrap_or(cursor);
             }
             MARGIN => {
-                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(6.0));
+                self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
             }
             PADDING => {
                 self.padding =
@@ -306,7 +306,7 @@ impl BasicProp for ButtonBasicProp {
             border_color: border_color.into(),
             border_radius: Radius::new(4.0),
             cursor,
-            margin: Margin::from_f64(6.0),
+            margin: Margin::from_f64(0.0),
             padding: Padding::from_xy(10.0, 16.0),
             flow: Flow::Right,
             align: Align::from_f64(0.5),
@@ -464,7 +464,7 @@ impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
         };
 
         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-        let margin = Margin::from_f64(6.0);
+        let margin = Margin::from_f64(0.0);
         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
         let padding = Padding::from_xy(10.0, 16.0);
         let padding = get_from_itable(

@@ -4,13 +4,24 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_part, component_state, components::{
-        label::{LabelBasicProp, LabelState}, live_props::LiveProps, svg::{SvgBasicProp, SvgPart, SvgState}, traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp}, view::{ViewBasicProp, ViewState}, GLabel, GSvg
-    }, error::Error, get_get_mut, prop::{
+    component_part, component_state,
+    components::{
+        label::{LabelBasicProp, LabelState},
+        live_props::LiveProps,
+        svg::{SvgBasicProp, SvgPart, SvgState},
+        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
+        view::{ViewBasicProp, ViewState},
+    },
+    error::Error,
+    get_get_mut,
+    prop::{
         manuel::{BASIC, CLOSE, CONTAINER, DISABLED, HOVER, ICON, PRESSED, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Radius,
-    }, themes::Theme, try_from_toml_item, utils::get_from_itable
+    },
+    themes::Theme,
+    try_from_toml_item,
+    utils::get_from_itable,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -122,11 +133,9 @@ impl SlotBasicProp for TagBasicProp {
         part: Self::Part,
     ) -> () {
         match part {
-            TagPart::Container => {
-                self
+            TagPart::Container => self
                 .container
-                .set_from_str(key, &value.into(), state.into())
-            },
+                .set_from_str(key, &value.into(), state.into()),
             TagPart::Icon => {
                 // if is slot, key is part, value is key + value
                 let icon_part = SvgPart::from_str(key).unwrap();

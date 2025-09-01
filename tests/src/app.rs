@@ -43,31 +43,7 @@ live_design! {
                         color: #140D2A,
                     }
                     
-                    
-                    // <GButton>{
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Success,
-                    //         }
-                    //     }
-                    // }
-                    // <GDivider>{
-                    //     prop: {
-                    //         basic: {
-                    //             theme: Primary,
-                    //         }
-                    //     }
-                    // }
-                    // <GView>{
-                    //     prop: {
-                    //         basic: {
-                    //             height: 100.0,
-                    //             width: 100.0,
-                    //             background_visible: true,
-                    //             align: {x: 0.5, y: 0.5},
-                    //             theme: Error,
-                    //         }
-                    //     }
+                  
                   
                     
                     // <GDialog> {
@@ -96,14 +72,6 @@ live_design! {
                     //     <GButton> {}
                     // }
 
-                    // <GPopover> {
-                    //     position: Right
-                    //     <GButton> {}
-                    // }
-
-                    // <GToolTip> {
-                    //     <GButton> {}
-                    // }
                     // <GTabbarItem> {
                     //     prop: {
                     //         basic: {
@@ -271,53 +239,6 @@ live_design! {
                     // }
                     //
 
-                    // <GCollapse> {
-                    //     prop: {
-                    //         basic: {
-                    //             container: {
-                    //                 background_color: #fff,
-                    //                 background_visible: true
-                    //             }
-                    //         }
-                    //     },
-                    //     active: true,
-                    //     position: Top,
-                    //     header: <GView> {
-
-                    //         <GLabel> {
-                    //             text: "Collapse Header"
-                    //         }
-                    //     }
-                    //     body: <GView> {
-                    //         <GLabel> {
-                    //             text: "Collapse Body"
-                    //         }
-                    //     }
-                    // }
-                    // <GCollapse> {
-                    //     prop: {
-                    //         basic: {
-                    //             header: {
-                    //                 width: 200.0,
-                    //             },
-                    //             body: {
-                    //                 height: 300.0,
-                    //             }
-                    //         }
-                    //     },
-                    //     position: Right,
-                    //     active: true,
-                    //     header: <GView> {
-                    //         <GLabel> {
-                    //             text: "Collapse Header"
-                    //         }
-                    //     }
-                    //     body: <GView> {
-                    //         <GLabel> {
-                    //             text: "Collapse Body"
-                    //         }
-                    //     }
-                    // }
                     // <GMenuItem> {
                     //     text: <GLabel> {
                     //         text: "Menu item"
@@ -560,20 +481,9 @@ live_design! {
                         //     }
                         // }
                     // }
-                    // body = <HomePage> {}
+                    body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                    <GTag>{
-                    prop: {basic: {
-                        container: {theme: Primary},
-                        icon: { svg: {width: 12.0}},
-                        close: { svg: {width: 12.0}},
-                    }},
-                    icon: <IconCheck> {}
-                    text: <GLabel> {
-                        text: "with icon: check"
-                    }
-                }
                 }
             }
         }
