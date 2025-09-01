@@ -9,10 +9,12 @@ mod size;
 mod vec;
 mod image_fit;
 mod path;
+mod area;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 pub use path::*;
 use crate::{error::Error, themes::Color};
+pub use area::*;
 
 pub trait NewFrom {
     fn from_f64(uni: f64) -> Self;

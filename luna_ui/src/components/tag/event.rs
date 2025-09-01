@@ -4,33 +4,33 @@ use makepad_widgets::*;
 pub enum TagEvent {
     HoverIn(TagHoverIn),
     HoverOut(TagHoverOut),
-    Pressed(TagPressed),
+    FingerDown(TagFingerDown),
     Clicked(TagClicked),
-    CloseClicked(TagCloseClicked),
+    Close(TagClose),
     None,
 }
 
 #[derive(Clone, Debug)]
 pub struct TagHoverIn {
-    pub fe: FingerHoverEvent,
+    pub meta: FingerHoverEvent,
 }
 
 #[derive(Clone, Debug)]
 pub struct TagHoverOut {
-    pub fe: FingerHoverEvent,
+    pub meta: FingerHoverEvent,
 }
 
 #[derive(Clone, Debug)]
-pub struct TagPressed {
-    pub fe: FingerDownEvent,
+pub struct TagFingerDown {
+    pub meta: FingerDownEvent,
 }
 
 #[derive(Clone, Debug)]
 pub struct TagClicked {
-    pub fe: FingerUpEvent,
+    pub meta: FingerUpEvent,
 }
 
 #[derive(Clone, Debug)]
-pub struct TagCloseClicked {
-    pub fe: FingerUpEvent,
+pub struct TagClose {
+    pub meta: FingerUpEvent,
 }

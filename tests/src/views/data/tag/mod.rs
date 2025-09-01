@@ -24,7 +24,77 @@ live_design! {
                         text: "Basic Tag"
                     }
                 }
-                
+                <GTag>{
+                    prop: {basic: {
+                        container: {theme: Primary},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }},
+                    icon: <IconCheck> {}
+                    text: <GLabel> {
+                        text: "with icon: check"
+                    }
+                }
+                <GTag>{
+                    prop: {basic: {
+                        container: {theme: Error},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }}
+                    text: <GLabel> {
+                        text: "with close"
+                    }
+                    close: <IconClose> {}
+                }
+                <GTag>{
+                    prop: {basic: {
+                        container: {theme: Success},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }}
+                    icon: <IconPlus> {}
+                    text: <GLabel> {
+                        text: "icon + close"
+                    }
+                    close: <IconClose> {}
+                }
+                <GTag>{
+                    prop: {basic: {
+                        container: {theme: Info, border_radius: {left: 6.0, right: 6.0, top: 6.0, bottom: 6.0}},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }}
+                    text: <GLabel> {
+                        text: "rounded tag"
+                    }
+                }
+            }
+            desc = {
+                text: ""
+            }
+        }
+        <CBox> {
+            show = {
+                prop: {
+                    basic: {
+                        height: Fit,
+                        width: Fill,
+                        flow: Down,
+                        spacing: 20.0,
+                    }
+                }
+                etag = <GTag>{
+                    prop: {basic: {
+                        container: {theme: Success},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }}
+                    icon: <IconPlus> {}
+                    text: <GLabel> {
+                        text: "icon + close"
+                    }
+                    close: <IconClose> {}
+                }
             }
             desc = {
                 text: ""
@@ -60,7 +130,30 @@ impl Widget for TagPage {
 }
 
 impl MatchEvent for TagPage {
-    fn handle_actions(&mut self, _cx: &mut Cx, _actions: &Actions) {}
+    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
+        let mut etag = self.gtag(id!(etag));
+        if let Some(_) = etag.clicked(actions) {
+            etag.slot_text_mut(cx, |cx, lb| {
+                let _ = lb.set_text(cx, "Clicked".to_string());
+            });
+        } else if let Some(_) = etag.hover_in(actions) {
+            etag.slot_text_mut(cx, |cx, lb| {
+                let _ = lb.set_text(cx, "Hover In".to_string());
+            });
+        } else if let Some(_) = etag.hover_out(actions) {
+            etag.slot_text_mut(cx, |cx, lb| {
+                let _ = lb.set_text(cx, "Hover Out".to_string());
+            });
+        } else if let Some(_) = etag.finger_down(actions) {
+            etag.slot_text_mut(cx, |cx, lb| {
+                let _ = lb.set_text(cx, "Finger Down".to_string());
+            });
+        } else if let Some(_) = etag.close(actions) {
+            etag.slot_text_mut(cx, |cx, lb| {
+                let _ = lb.set_text(cx, "Close".to_string());
+            });
+        }
+    }
 }
 
 widget_node!(TagPage);

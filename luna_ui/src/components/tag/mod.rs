@@ -6,6 +6,7 @@ use makepad_widgets::*;
 pub use prop::*;
 
 use crate::{
+    active_event, animation_open_then_redraw,
     components::{
         label::{GLabel, LabelBasicProp},
         lifecycle::LifeCycle,
@@ -14,10 +15,11 @@ use crate::{
         view::ViewBasicProp,
     },
     error::Error,
-    lifecycle, play_animation,
+    event_option, event_option_ref, hit_finger_down, hit_hover_in, hit_hover_out, lifecycle,
+    play_animation,
     prop::{
         manuel::{BASIC, DISABLED, HOVER, PRESSED},
-        traits::ToFloat,
+        traits::{RectExp, ToFloat},
         ApplyMapImpl, ApplySlotMap, ApplySlotMapImpl, ApplySlotMergeImpl, DeferWalks, SlotDrawer,
         ToSlotMap, ToStateMap,
     },
@@ -252,43 +254,39 @@ impl Component for GTag {
         Ok(())
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, _event: &Event, hit: Hit, _area: Area) {
+    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+        animation_open_then_redraw!(self, cx, event);
         match hit {
-            Hit::FingerHoverIn(_e) => {
-                if !self.disabled {
-                    self.switch_state_and_redraw(cx, TagState::Hover);
-                }
+            Hit::FingerHoverIn(e) => {
+                self.switch_state_with_animation(cx, TagState::Hover);
+                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                hit_hover_in!(self, cx, e);
             }
-            Hit::FingerHoverOut(_e) => {
-                if !self.disabled {
-                    self.switch_state_and_redraw(cx, TagState::Basic);
-                }
+            Hit::FingerHoverOut(e) => {
+                self.switch_state_with_animation(cx, TagState::Basic);
+                hit_hover_out!(self, cx, e);
             }
-            Hit::FingerDown(_e) => {
-                if !self.disabled {
-                    self.switch_state_and_redraw(cx, TagState::Pressed);
-                }
+            Hit::FingerDown(e) => {
+                self.switch_state_with_animation(cx, TagState::Pressed);
+                hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerUp(e) => {
-                if !self.disabled {
-                    if e.is_over {
-                        if e.has_hovers() {
-                            self.switch_state_and_redraw(cx, TagState::Hover);
-                        } else {
-                            self.switch_state_and_redraw(cx, TagState::Basic);
-                        }
-                        // Send clicked event
-                        cx.widget_action(
-                            self.widget_uid(),
-                            &self
-                                .scope_path
-                                .as_ref()
-                                .unwrap_or(&HeapLiveIdPath::default()),
-                            TagEvent::Clicked(TagClicked { fe: e }),
-                        );
+                if e.is_over {
+                    if e.has_hovers() {
+                        self.switch_state_with_animation(cx, TagState::Hover);
+                        self.play_animation(cx, id!(hover.on));
                     } else {
-                        self.switch_state_and_redraw(cx, TagState::Basic);
+                        self.switch_state_with_animation(cx, TagState::Basic);
+                        self.play_animation(cx, id!(hover.off));
                     }
+                    if self.area_close().rect(cx).is_in_pos(&e.abs) {
+                        self.visible = false;
+                        self.active_close(cx, e);
+                        return;
+                    }
+                    self.active_clicked(cx, e);
+                } else {
+                    self.switch_state_with_animation(cx, TagState::Basic);
                 }
             }
             _ => {}
@@ -408,7 +406,7 @@ impl Component for GTag {
             }
 
             set_animation! {
-                nodes: draw_container = {
+                nodes: draw_tag = {
                     basic_index => {
                         background_color => basic_prop.container.background_color,
                         border_color => basic_prop.container.border_color,
@@ -493,7 +491,7 @@ impl Component for GTag {
                 ),
             };
             set_animation! {
-                nodes: draw_container = {
+                nodes: draw_tag = {
                     index => {
                         background_color => prop.container.background_color,
                         border_color => prop.container.border_color,
@@ -545,13 +543,63 @@ impl Widget for GTag {
         }
 
         self.set_animation(cx);
-        // cx.global::<ComponentAnInit>().tag = true;
+        cx.global::<ComponentAnInit>().tag = true;
         let area = self.area();
         let hit = event.hits(cx, area);
         if self.disabled {
             self.handle_when_disabled(cx, event, hit);
         } else {
             self.handle_widget_event(cx, event, hit, area);
+        }
+    }
+}
+
+impl GTag {
+    pub fn area_close(&self) -> Area {
+        self.close.area()
+    }
+    pub fn area_text(&self) -> Area {
+        self.text.area()
+    }
+    pub fn area_icon(&self) -> Area {
+        self.icon.area()
+    }
+    active_event! {
+        active_hover_in: TagEvent::HoverIn |meta: FingerHoverEvent| => TagHoverIn { meta },
+        active_hover_out: TagEvent::HoverOut |meta: FingerHoverEvent| => TagHoverOut { meta },
+        active_finger_down: TagEvent::FingerDown |meta: FingerDownEvent| => TagFingerDown { meta },
+        active_clicked: TagEvent::Clicked |meta: FingerUpEvent| => TagClicked { meta },
+        active_close: TagEvent::Close |meta: FingerUpEvent| => TagClose { meta }
+    }
+    event_option! {
+        hover_in: TagEvent::HoverIn => TagHoverIn,
+        hover_out: TagEvent::HoverOut => TagHoverOut,
+        finger_down: TagEvent::FingerDown => TagFingerDown,
+        clicked: TagEvent::Clicked => TagClicked,
+        close: TagEvent::Close => TagClose
+    }
+    pub fn slot_text(&self) -> &GLabel {
+        &self.text
+    }
+    pub fn slot_text_mut(&mut self) -> &mut GLabel {
+        &mut self.text
+    }
+}
+
+impl GTagRef {
+    event_option_ref! {
+        hover_in => TagHoverIn,
+        hover_out => TagHoverOut,
+        finger_down => TagFingerDown,
+        clicked => TagClicked,
+        close => TagClose
+    }
+    pub fn slot_text_mut<F>(&mut self, cx: &mut Cx, f: F) -> ()
+    where
+        F: FnOnce(&mut Cx, &mut GLabel),
+    {
+        if let Some(mut c_ref) = self.borrow_mut() {
+            f(cx, c_ref.slot_text_mut());
         }
     }
 }

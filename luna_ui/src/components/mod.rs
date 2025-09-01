@@ -349,13 +349,15 @@ live_design! {
 
     pub GTag = <GTagBase> {
         icon: <GSvg>{
+            prop: {basic: {svg: {width: 12.0}}}
             visible: false
         },
         text: <GLabel>{
             text: "GTag"
         },
-        close: <GSvg>{
-            visible: false
+        close: <IconClose>{
+            visible: false,
+            prop: {basic: {svg: {width: 12.0}}}
         }
     }
 

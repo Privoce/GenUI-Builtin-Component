@@ -4,23 +4,13 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_part, component_state,
-    components::{
-        label::{LabelBasicProp, LabelState},
-        live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    prop::{
+    component_part, component_state, components::{
+        label::{LabelBasicProp, LabelState}, live_props::LiveProps, svg::{SvgBasicProp, SvgPart, SvgState}, traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp}, view::{ViewBasicProp, ViewState}, GLabel, GSvg
+    }, error::Error, get_get_mut, prop::{
         manuel::{BASIC, CLOSE, CONTAINER, DISABLED, HOVER, ICON, PRESSED, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Radius,
-    },
-    themes::Theme,
-    try_from_toml_item,
-    utils::get_from_itable,
+    }, themes::Theme, try_from_toml_item, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -83,22 +73,11 @@ impl Prop for TagProp {
 
     type Basic = TagBasicProp;
 
-    fn get(&self, state: Self::State) -> &Self::Basic {
-        match state {
-            TagState::Basic => &self.basic,
-            TagState::Hover => &self.hover,
-            TagState::Pressed => &self.pressed,
-            TagState::Disabled => &self.disabled,
-        }
-    }
-
-    fn get_mut(&mut self, state: Self::State) -> &mut Self::Basic {
-        match state {
-            TagState::Basic => &mut self.basic,
-            TagState::Hover => &mut self.hover,
-            TagState::Pressed => &mut self.pressed,
-            TagState::Disabled => &mut self.disabled,
-        }
+    get_get_mut! {
+        TagState::Basic => basic,
+        TagState::Hover => hover,
+        TagState::Pressed => pressed,
+        TagState::Disabled => disabled
     }
 
     fn len() -> usize {
@@ -144,9 +123,10 @@ impl SlotBasicProp for TagBasicProp {
     ) -> () {
         match part {
             TagPart::Container => {
-                self.container
-                    .set_from_str(key, &value.into(), state.into())
-            }
+                self
+                .container
+                .set_from_str(key, &value.into(), state.into())
+            },
             TagPart::Icon => {
                 // if is slot, key is part, value is key + value
                 let icon_part = SvgPart::from_str(key).unwrap();
@@ -249,12 +229,7 @@ impl TryFrom<(&Item, TagState)> for TagBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || {
-                Ok(TagBasicProp::default_container(
-                    Theme::default(),
-                    state,
-                ))
-            },
+            || Ok(TagBasicProp::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -297,16 +272,18 @@ impl TagBasicProp {
         container.background_visible = true;
         container.set_padding(Padding::from_all(4.0, 8.0, 4.0, 8.0));
         container.set_border_radius(Radius::new(2.0));
+        container.set_flow(Flow::Right);
+        container.set_spacing(4.0);
         container
     }
-    
+
     pub fn default_text(theme: Theme, state: TagState) -> LabelBasicProp {
         let mut text = LabelBasicProp::from_state(theme, state.into());
         text.flow = Flow::Right;
         text.set_font_size(10.0);
         text
     }
-    
+
     pub fn default_close(theme: Theme, state: TagState) -> SvgBasicProp {
         SvgBasicProp::from_state(theme, state.into())
     }
@@ -314,7 +291,8 @@ impl TagBasicProp {
     pub fn default_icon(theme: Theme, state: TagState) -> SvgBasicProp {
         SvgBasicProp::from_state(theme, state.into())
     }
-}component_state! {
+}
+component_state! {
     TagState {
         Basic => BASIC,
         Hover => HOVER,
@@ -366,9 +344,7 @@ impl From<TagState> for SvgState {
 impl From<TagState> for LabelState {
     fn from(value: TagState) -> Self {
         match value {
-            TagState::Basic | TagState::Hover | TagState::Pressed => {
-                LabelState::Basic
-            }
+            TagState::Basic | TagState::Hover | TagState::Pressed => LabelState::Basic,
             TagState::Disabled => LabelState::Disabled,
         }
     }

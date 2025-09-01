@@ -560,16 +560,20 @@ live_design! {
                         //     }
                         // }
                     // }
-                    body = <HomePage> {}
+                    // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                    // <GTag>{
-                    //     icon: <IconClose> {}
-                    //     text: <GLabel> {
-                    //         text: "Basic Tag"
-                    //     }
-                    // }
-
+                    <GTag>{
+                    prop: {basic: {
+                        container: {theme: Primary},
+                        icon: { svg: {width: 12.0}},
+                        close: { svg: {width: 12.0}},
+                    }},
+                    icon: <IconCheck> {}
+                    text: <GLabel> {
+                        text: "with icon: check"
+                    }
+                }
                 }
             }
         }
