@@ -189,6 +189,7 @@ impl Widget for GTabbar {
         animation_open_then_redraw!(self, cx, event);
         let uid = self.widget_uid();
         let scope_path = scope.path.clone();
+        let mut active_value =  None;
         for (index, (_id, child)) in self.children.iter_mut().enumerate() {
             let mixin = |cx: &mut Cx, param: TabbarItemClicked| {
                 cx.widget_action(
@@ -201,19 +202,25 @@ impl Widget for GTabbar {
                     }),
                 );
             };
-            let _ = child.as_gtabbar_item().borrow_mut().map(|mut item| {
+            if let Some(mut item) = child.as_gtabbar_item().borrow_mut() {
                 if item.value.is_empty() {
                     item.value = index.to_string();
                 }
                 let active = item.handle_event_mixin(cx, event, scope, Some(mixin));
-
-                
+                // item.toggle_mixin(cx, active, false, true);
+                // if active {
+                //     self.active.replace(item.value.to_string());
+                //     dbg!(&self.active);
+                // }
                 if active {
-                    item.toggle_mixin(cx, active, false, true);
-                    self.active.replace(item.value.to_string());
-                    dbg!(&self.active);
+                    active_value.replace(item.value.to_string());
+                    // self.toggle(cx, Some(item.value.clone()), false);
+                    break;
                 }
-            });
+            }
+        }
+        if let Some(active) = active_value {
+            self.toggle(cx, Some(active), false);
         }
     }
 }
@@ -469,7 +476,7 @@ impl GTabbar {
                         child.value = index.to_string();
                     }
                     let active = child.value.eq(self.active.as_ref().unwrap());
-                    child.toggle(cx, active, init);
+                    child.toggle_mixin(cx, active, init, true);
                 } else {
                     panic!("GTabbar only allows GTabbarItem as child!")
                 }

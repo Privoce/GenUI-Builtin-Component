@@ -303,14 +303,14 @@ impl Component for GTabbarItem {
 
     fn switch_state(&mut self, state: Self::State) -> () {
         self.state = state;
-        self.icon.switch_state(state.into());
-        self.text.switch_state(state.into());
     }
 
     fn switch_state_with_animation(&mut self, cx: &mut Cx, state: Self::State) -> () {
         if !self.animation_open {
             return;
         }
+        self.icon.switch_state_with_animation(cx, state.into());
+        self.text.switch_state_with_animation(cx, state.into());
         self.switch_state(state);
         self.set_animation(cx);
     }
@@ -397,7 +397,7 @@ impl Component for GTabbarItem {
             }
 
             set_animation! {
-                nodes: draw_container = {
+                nodes: draw_item = {
                     basic_index => {
                         background_color => basic_prop.container.background_color,
                         border_color => basic_prop.container.border_color,
@@ -542,7 +542,7 @@ impl GTabbarItem {
             (false, true) => (TabbarItemState::Basic, None),
             (false, false) => (TabbarItemState::Basic, Some(id!(hover.off))),
         };
-        self.switch_state(state);
+        self.switch_state_with_animation(cx, state);
         if let Some(hover_id) = hover_id {
             self.play_animation(cx, hover_id);
         }

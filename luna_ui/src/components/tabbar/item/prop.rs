@@ -13,7 +13,7 @@ use crate::{
     }, error::Error, get_get_mut, prop::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, HOVER, ICON, TEXT},
         traits::NewFrom,
-        ApplySlotMapImpl,
+        ApplySlotMapImpl, Radius,
     }, themes::Theme, try_from_toml_item, utils::get_from_itable
 };
 
@@ -266,7 +266,8 @@ impl TabbarItemBasicProp {
     pub fn default_icon(theme: Theme, state: TabbarItemState) -> SvgBasicProp {
         let mut icon = SvgBasicProp::from_state(theme, state.into());
         icon.container.height = Size::Fixed(32.0);
-        icon.container.width = Size::Fixed(32.0);
+        icon.container.width = Size::Fixed(64.0);
+        icon.container.border_radius = Radius::from_f64(8.0);
         icon.container.background_visible = true;
         icon.container.cursor = MouseCursor::Hand;
         icon

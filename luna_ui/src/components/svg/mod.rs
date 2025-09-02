@@ -113,8 +113,7 @@ pub struct GSvg {
     #[live(true)]
     pub sync: bool,
     // --- animator ----------------
-    // default animation is off
-    #[live(false)]
+    #[live(true)]
     pub animation_open: bool,
     #[animator]
     pub animator: Animator,

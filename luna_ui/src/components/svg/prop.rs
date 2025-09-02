@@ -120,7 +120,7 @@ impl SlotBasicProp for SvgBasicProp {
         match part {
             SvgPart::Container => {
                 self.container
-                    .set_from_str(key, &value.into(), state.into());
+                    .set_from_str(key, &value.into(), state);
             }
             SvgPart::Svg => self.svg.set_from_str(key, &value.into(), state),
         }
@@ -128,7 +128,7 @@ impl SlotBasicProp for SvgBasicProp {
 
     fn sync_slot(&mut self, state: Self::State, part: Self::Part) -> () {
         match part {
-            SvgPart::Container => self.container.sync(state.into()),
+            SvgPart::Container => self.container.sync(state),
             SvgPart::Svg => self.svg.sync(state),
         }
     }

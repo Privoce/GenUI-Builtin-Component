@@ -1,8 +1,4 @@
-use luna_ui::{
-    components::*,
-    prop::traits::ToColor,
-    themes::Theme,
-};
+use luna_ui::{components::*, prop::traits::ToColor, themes::Theme};
 use makepad_widgets::*;
 
 live_design! {
@@ -44,7 +40,7 @@ live_design! {
                     }
 
 
-                    
+
                     // <GVTabbar>{
                     //     items: [
                     //         {
@@ -320,48 +316,10 @@ live_design! {
                         //     }
                         // }
                     // }
-                    // body = <HomePage> {}
+                    body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                    
-                    <GTabbar> {
-                        <GTabbarItem> {
-                            value: "news",
-                            icon: <GSvg> {
-                                src: dep("crate://self/resources/news.svg"),
-                            }
-                            text: <GLabel> {
-                                text: "News"
-                            }
-                        }
-                        <GTabbarItem> {
-                            value: "global",
-                            icon: <GSvg> {
-                                src: dep("crate://self/resources/global.svg"),
-                            }
-                            text: <GLabel> {
-                                text: "Global"
-                            }
-                        }
-                        <GTabbarItem> {
-                            value: "for_you",
-                            icon: <GSvg> {
-                                src: dep("crate://self/resources/star.svg"),
-                            }
-                            text: <GLabel> {
-                                text: "For You"
-                            }
-                        }
-                        <GTabbarItem> {
-                            value: "trending",
-                            icon: <GSvg> {
-                                src: dep("crate://self/resources/trending.svg"),
-                            }
-                            text: <GLabel> {
-                                text: "Trending"
-                            }
-                        }
-                    }
+
                 }
             }
         }
