@@ -185,20 +185,13 @@ impl Widget for GTabbarItem {
         self.set_scope_path(&scope.path);
         DrawStep::done()
     }
-    fn handle_event(&mut self, cx: &mut Cx, event: &Event, _scope: &mut Scope) {
-        if !self.visible() {
-            return;
-        }
-
-        self.set_animation(cx);
-        cx.global::<ComponentAnInit>().tabbar_item = true;
-        let area = self.area();
-        let hit = event.hits(cx, area);
-        if self.disabled {
-            self.handle_when_disabled(cx, event, hit);
-        } else {
-            self.handle_widget_event(cx, event, hit, area);
-        }
+    fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
+        self.handle_event_mixin(
+            cx,
+            event,
+            scope,
+            Option::<fn(&mut Cx, TabbarItemClicked)>::None,
+        );
     }
 }
 
@@ -289,41 +282,13 @@ impl Component for GTabbarItem {
     }
 
     fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
-        animation_open_then_redraw!(self, cx, event);
-        if !self.active {
-            match hit {
-                Hit::FingerDown(_) => {
-                    if self.grab_key_focus {
-                        cx.set_key_focus(area);
-                    }
-                }
-                Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.state).container.cursor);
-                    self.switch_state_with_animation(cx, TabbarItemState::Hover);
-                    hit_hover_in!(self, cx, e);
-                }
-                Hit::FingerHoverOut(e) => {
-                    self.switch_state_with_animation(cx, TabbarItemState::Basic);
-                    hit_hover_out!(self, cx, e);
-                }
-                Hit::FingerUp(e) => {
-                    if e.is_over {
-                        if e.has_hovers() {
-                            self.active = true;
-                            self.switch_state_with_animation(cx, TabbarItemState::Active);
-                            self.play_animation(cx, id!(hover.active));
-                        } else {
-                            self.switch_state_with_animation(cx, TabbarItemState::Basic);
-                            self.play_animation(cx, id!(hover.off));
-                        }
-                        self.active_clicked(cx, Some(e));
-                    } else {
-                        self.switch_state_with_animation(cx, TabbarItemState::Basic);
-                    }
-                }
-                _ => {}
-            }
-        }
+        self.handle_widget_event_mixin(
+            cx,
+            event,
+            hit,
+            area,
+            Option::<fn(&mut Cx, TabbarItemClicked)>::None,
+        );
     }
 
     fn handle_when_disabled(&mut self, cx: &mut Cx, _event: &Event, hit: Hit) -> () {
@@ -567,6 +532,9 @@ impl GTabbarItem {
         }
     }
     pub fn toggle(&mut self, cx: &mut Cx, active: bool, init: bool) -> () {
+        self.toggle_mixin(cx, active, init, false);
+    }
+    pub fn toggle_mixin(&mut self, cx: &mut Cx, active: bool, init: bool, mixin: bool) -> () {
         self.active = active;
         let (state, hover_id) = match (active, init) {
             (true, false) => (TabbarItemState::Active, Some(id!(hover.active))),
@@ -578,6 +546,93 @@ impl GTabbarItem {
         if let Some(hover_id) = hover_id {
             self.play_animation(cx, hover_id);
         }
-        self.active_clicked(cx, None);
+        if !mixin {
+            self.active_clicked(cx, None);
+        }
+    }
+    pub fn handle_event_mixin<F>(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        _scope: &mut Scope,
+        mixin: Option<F>,
+    ) -> bool
+    where
+        F: FnOnce(&mut Cx, TabbarItemClicked) -> (),
+    {
+        if !self.visible() {
+            return false;
+        }
+
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().tabbar_item = true;
+        let area = self.area();
+        let hit = event.hits(cx, area);
+        if self.disabled {
+            self.handle_when_disabled(cx, event, hit);
+        } else {
+            return self.handle_widget_event_mixin(cx, event, hit, area, mixin);
+        }
+        return false;
+    }
+    fn handle_widget_event_mixin<F>(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        hit: Hit,
+        area: Area,
+        mixin: Option<F>,
+    ) -> bool
+    where
+        F: FnOnce(&mut Cx, TabbarItemClicked) -> (),
+    {
+        animation_open_then_redraw!(self, cx, event);
+        if !self.active {
+            match hit {
+                Hit::FingerDown(_) => {
+                    if self.grab_key_focus {
+                        cx.set_key_focus(area);
+                    }
+                }
+                Hit::FingerHoverIn(e) => {
+                    cx.set_cursor(self.prop.get(self.state).container.cursor);
+                    self.switch_state_with_animation(cx, TabbarItemState::Hover);
+                    hit_hover_in!(self, cx, e);
+                }
+                Hit::FingerHoverOut(e) => {
+                    self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                    hit_hover_out!(self, cx, e);
+                }
+                Hit::FingerUp(e) => {
+                    if e.is_over {
+                        if e.has_hovers() {
+                            self.active = true;
+                            self.switch_state_with_animation(cx, TabbarItemState::Active);
+                            self.play_animation(cx, id!(hover.active));
+                        } else {
+                            self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                            self.play_animation(cx, id!(hover.off));
+                        }
+                        if let Some(mixin) = mixin {
+                            mixin(
+                                cx,
+                                TabbarItemClicked {
+                                    active: self.active,
+                                    value: self.value.to_string(),
+                                    meta: Some(e),
+                                },
+                            );
+                            return true;
+                        } else {
+                            self.active_clicked(cx, Some(e));
+                        }
+                    } else {
+                        self.switch_state_with_animation(cx, TabbarItemState::Basic);
+                    }
+                }
+                _ => {}
+            }
+        }
+        return false;
     }
 }

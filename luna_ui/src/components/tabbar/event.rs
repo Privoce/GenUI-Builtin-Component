@@ -36,7 +36,7 @@ pub enum TabbarEvent {
 pub struct TabbarChanged {
     pub meta: Option<FingerUpEvent>,
     /// The index of the active radio.
-    pub index: i32,
+    pub index: usize,
     /// The value of the active radio.
     pub value: Option<String>,
 }

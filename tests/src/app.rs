@@ -32,7 +32,7 @@ live_design! {
         ui: <Root>{
             main_window = <Window>{
                 body = <View>{
-                    flow: Down,
+                    flow: Right,
                     spacing:30,
                     align: {
                         x: 0.5,
@@ -323,6 +323,7 @@ live_design! {
                     // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+                    
                     <GTabbar> {
                         <GTabbarItem> {
                             value: "news",

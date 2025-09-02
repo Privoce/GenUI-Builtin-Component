@@ -254,6 +254,8 @@ impl TabbarItemBasicProp {
         container.align = Align::from_f64(0.5);
         container.background_visible = false;
         container.cursor = MouseCursor::Hand;
+        container.padding = Padding::from_f64(0.0);
+        container.spacing = 0.0;
         container
     }
     pub fn default_text(theme: Theme, state: TabbarItemState) -> LabelBasicProp {
@@ -263,8 +265,8 @@ impl TabbarItemBasicProp {
     }
     pub fn default_icon(theme: Theme, state: TabbarItemState) -> SvgBasicProp {
         let mut icon = SvgBasicProp::from_state(theme, state.into());
-        icon.container.height = Size::Fixed(36.0);
-        icon.container.width = Size::Fixed(36.0);
+        icon.container.height = Size::Fixed(32.0);
+        icon.container.width = Size::Fixed(32.0);
         icon.container.background_visible = true;
         icon.container.cursor = MouseCursor::Hand;
         icon

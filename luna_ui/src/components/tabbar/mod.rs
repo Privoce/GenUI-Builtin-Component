@@ -187,37 +187,33 @@ impl Widget for GTabbar {
         cx.global::<ComponentAnInit>().tabbar = true;
 
         animation_open_then_redraw!(self, cx, event);
-
-        if let Event::Actions(actions) = event {
-            let mut active_index = None;
-            let mut active_value = None;
-            let mut active_event = None;
-            for (index, (_id, child)) in self.children.iter().enumerate() {
-                let _ = child.as_gtabbar_item().borrow().map(|radio| {
-                    if let Some(param) = radio.clicked(&actions) {
-                        if param.active && active_index.is_none() && active_event.is_none() {
-                            active_value.replace(param.value);
-                            active_index = Some(index);
-                            active_event = param.meta;
-                        }
-                    }
-                });
-                if active_index.is_some() {
-                    break;
-                }
-            }
-            if active_index.is_some() && active_value.is_some() {
-                let _ = self.toggle(cx, active_value.clone(), false);
+        let uid = self.widget_uid();
+        let scope_path = scope.path.clone();
+        for (index, (_id, child)) in self.children.iter_mut().enumerate() {
+            let mixin = |cx: &mut Cx, param: TabbarItemClicked| {
                 cx.widget_action(
-                    self.widget_uid(),
-                    &scope.path,
+                    uid,
+                    &scope_path,
                     TabbarEvent::Changed(TabbarChanged {
-                        meta: active_event,
-                        value: active_value,
-                        index: active_index.unwrap() as i32,
+                        meta: param.meta,
+                        value: Some(param.value.clone()),
+                        index,
                     }),
                 );
-            }
+            };
+            let _ = child.as_gtabbar_item().borrow_mut().map(|mut item| {
+                if item.value.is_empty() {
+                    item.value = index.to_string();
+                }
+                let active = item.handle_event_mixin(cx, event, scope, Some(mixin));
+
+                
+                if active {
+                    item.toggle_mixin(cx, active, false, true);
+                    self.active.replace(item.value.to_string());
+                    dbg!(&self.active);
+                }
+            });
         }
     }
 }
