@@ -19,61 +19,7 @@ live_design! {
                         spacing: 20.0,
                     }
                 }
-                <GCollapse> {}
-                <GCollapse> {
-                    active: true,
-                    position: Top,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Top, active true"
-                        }
-                    }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Collapse Body"
-                        }
-                    }
-                } 
-                <GCollapse> {
-                    prop: {
-                        basic: {
-                            header: {
-                                theme: Primary,
-                                width: 200.0,
-                            },
-                            body: {
-                                theme: Primary
-                            }
-                        }
-                    },
-                    position: Left,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Left"
-                        }
-                    }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Theme: Primary"
-                        }
-                    }
-                }
-                <GCollapse> {
-                        prop: {
-                            basic: {
-                                header: {
-                                    theme: Info,
-                                    width: 200.0,
-                                },
-                                body: {
-                                    theme: Info,
-                                    height: 300.0,
-                                }
-                            }
-                        },
-                        position: Right,
-                        active: true,
-                    }
+                <GDialog> {}
             }
             desc = {
                 text: ""

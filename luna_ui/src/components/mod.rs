@@ -277,9 +277,10 @@ live_design! {
             fn pixel(self) -> vec4{
                 let sdf = Sdf2d::viewport(self.pos * self.rect_size);
                 sdf.rect(self.pos.x, self.pos.y, self.rect_size.x, self.rect_size.y);
-                let color = self.background_color;
-                // sdf.fill(vec4(color.r, color.g, color.b, self.opacity));
-                sdf.fill(color);
+                let color = self.get_background_color();
+                if self.background_visible == 1.0 {
+                    sdf.fill(vec4(color.r, color.g, color.b, 0.2));
+                }
                 return sdf.result;
             }
         }
@@ -287,6 +288,18 @@ live_design! {
 
     pub GDrawerContainer = <GPopupContainer> {
         popup: <GDrawerPopup> {},
+        draw_popup_container: {
+            // this is a mask
+            fn pixel(self) -> vec4{
+                let sdf = Sdf2d::viewport(self.pos * self.rect_size);
+                sdf.rect(self.pos.x, self.pos.y, self.rect_size.x, self.rect_size.y);
+                let color = self.get_background_color();
+                if self.background_visible == 1.0 {
+                    sdf.fill(vec4(color.r, color.g, color.b, 0.2));
+                }
+                return sdf.result;
+            }
+        }
     }
 
     pub GPopoverContainer = <GPopupContainer> {
@@ -321,7 +334,40 @@ live_design! {
 
     pub GDialog = <GDropDownBase>{
         mode: Dialog,
-        popup: <GDialogContainer>{}
+        popup: <GDialogContainer>{
+            popup: {
+                prop: {basic: {height: 260.0, width: 360.0}}
+                <GHLayout> {
+                    prop: {basic: {height: 48.0}}
+                    <GLabel> {
+                        prop: {basic: {font_size: 22.0}}
+                        text: "Basic dialog title",
+                        mode: Bold
+                    }
+                }
+                <GHLayout>{
+                    prop: {basic: {height: Fill}}
+                    <GLabel> {
+                        prop: {basic: {width: Fill,}}
+                        text: "A dialog is a modal window that appears in front of app content to provide critical information or ask for a decision."
+                    }
+                }
+                <GHLayout>{
+                    prop: {basic: {height: Fit, align: {x: 1.0}}}
+                    <GButton> {
+                        prop:{basic: {theme: Dark}}
+                        slot: {text: "Cancel"}
+                    }
+                    <GButton> {
+                        slot: {
+                            prop:{basic: {color: #4CAF50}}
+                            text: "OK"
+                        }
+                    }
+                }
+            }
+        }
+        <GButton> {slot: {text: "Dialog"}}
     }
 
     pub GDrawer = <GDropDownBase> {

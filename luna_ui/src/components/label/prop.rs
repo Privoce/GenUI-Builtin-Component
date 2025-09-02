@@ -10,7 +10,10 @@ use crate::{
     error::Error,
     get_get_mut, getter_setter_prop,
     prop::{
-        manuel::{BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, LINE_SPACING, MARGIN, PADDING, THEME},
+        manuel::{
+            BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, HEIGHT, LINE_SPACING, MARGIN, PADDING, THEME,
+            WIDTH,
+        },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl,
     },
@@ -86,6 +89,10 @@ pub struct LabelBasicProp {
     pub padding: Padding,
     // #[live]
     // pub align: Align,
+    #[live(Size::Fit)]
+    pub height: Size,
+    #[live(Size::Fit)]
+    pub width: Size,
     #[live(Flow::RightWrap)]
     pub flow: Flow,
 }
@@ -136,6 +143,12 @@ impl BasicProp for LabelBasicProp {
             FLOW => {
                 self.flow = Flow::from_live_value(value).unwrap_or(Flow::RightWrap);
             }
+            HEIGHT => {
+                self.height = Size::from_live_value(value).unwrap_or(Size::Fit);
+            }
+            WIDTH => {
+                self.width = Size::from_live_value(value).unwrap_or(Size::Fit);
+            }
             _ => {}
         }
     }
@@ -159,6 +172,8 @@ impl BasicProp for LabelBasicProp {
             margin: Margin::from_f64(0.0),
             padding: Padding::from_f64(0.0),
             flow: Flow::RightWrap,
+            height: Size::Fit,
+            width: Size::Fit,
         }
     }
 
@@ -196,14 +211,16 @@ impl BasicProp for LabelBasicProp {
                 .into(),
             ),
             (live_id!(flow), None.into()),
+            (live_id!(height), None.into()),
+            (live_id!(width), None.into()),
         ]
     }
 
     fn walk(&self) -> Walk {
         Walk {
             margin: self.margin,
-            height: Size::Fit,
-            width: Size::Fit,
+            height: self.height,
+            width: self.width,
             ..Default::default()
         }
         .with_add_padding(self.padding)
@@ -278,6 +295,14 @@ impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
             |item| item.to_flow(),
         )?;
 
+        let height = get(
+            inline_table,
+            HEIGHT,
+            || Ok(Size::Fit),
+            |item| item.to_size(),
+        )?;
+        let width = get(inline_table, WIDTH, || Ok(Size::Fit), |item| item.to_size())?;
+
         Ok(Self {
             theme,
             color,
@@ -286,6 +311,8 @@ impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
             margin,
             padding,
             flow,
+            height,
+            width,
         })
     }
 }

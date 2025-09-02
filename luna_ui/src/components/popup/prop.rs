@@ -84,7 +84,7 @@ pub struct PopupBasicProp {
     pub border_color: Vec4,
     #[live(0.0)]
     pub border_width: f32,
-    #[live(Radius::new(4.0))]
+    #[live(Radius::new(8.0))]
     pub border_radius: Radius,
     #[live]
     pub shadow_color: Vec4,
@@ -100,7 +100,7 @@ pub struct PopupBasicProp {
     pub rotation: f32,
     #[live(1.0)]
     pub scale: f32,
-    #[live(Padding::from_f64(6.0))]
+    #[live(Padding::from_f64(12.0))]
     pub padding: Padding,
     #[live(Margin::from_f64(0.0))]
     pub margin: Margin,
@@ -152,7 +152,7 @@ impl BasicProp for PopupBasicProp {
                 self.border_width = f32::from_live_value(value).unwrap_or(0.0);
             }
             BORDER_RADIUS => {
-                self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(4.0));
+                self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(8.0));
             }
             SHADOW_COLOR => {
                 let (_, _, shadow_color) = Self::state_colors(self.theme, state);
@@ -177,7 +177,7 @@ impl BasicProp for PopupBasicProp {
                 self.scale = f32::from_live_value(value).unwrap_or(1.0);
             }
             PADDING => {
-                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(6.0));
+                self.padding = Padding::from_live_value(value).unwrap_or(Padding::from_f64(12.0));
             }
             MARGIN => {
                 self.margin = Margin::from_live_value(value).unwrap_or(Margin::from_f64(0.0));
@@ -239,7 +239,7 @@ impl BasicProp for PopupBasicProp {
             background_color: background_color.into(),
             border_color: border_color.into(),
             border_width: 0.0,
-            border_radius: Radius::new(4.0),
+            border_radius: Radius::new(8.0),
             shadow_color: shadow_color.into(),
             spread_radius: 0.0,
             blur_radius: 0.0,
@@ -247,7 +247,7 @@ impl BasicProp for PopupBasicProp {
             background_visible: true,
             rotation: 0.0,
             scale: 1.0,
-            padding: Padding::from_f64(6.0),
+            padding: Padding::from_f64(12.0),
             margin: Margin::from_f64(0.0),
             clip_x: false,
             clip_y: false,
@@ -434,7 +434,7 @@ impl TryFrom<(&InlineTable, PopupState)> for PopupBasicProp {
         let border_radius = get_from_itable(
             inline_table,
             BORDER_RADIUS,
-            || Ok(Radius::new(4.0)),
+            || Ok(Radius::new(8.0)),
             |v| v.try_into(),
         )?;
 
@@ -467,7 +467,7 @@ impl TryFrom<(&InlineTable, PopupState)> for PopupBasicProp {
 
         let rotation = get_from_itable(inline_table, ROTATION, || Ok(0.0), |v| v.to_f32())?;
         let scale = get_from_itable(inline_table, SCALE, || Ok(1.0), |v| v.to_f32())?;
-        let padding = Padding::from_f64(6.0);
+        let padding = Padding::from_f64(12.0);
         let padding = get_from_itable(
             inline_table,
             PADDING,

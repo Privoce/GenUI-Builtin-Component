@@ -42,35 +42,6 @@ live_design! {
                     draw_bg: {
                         color: #140D2A,
                     }
-                    
-                  
-                  
-                    
-                    // <GDialog> {
-                    //     popup: {
-                    //         popup: {
-                    //             <GButton> {
-                    //                 prop: {
-                    //                     basic: {theme: Success}
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    //     <GButton> {}
-                    // }
-
-                    // <GDrawer> {
-                    //     popup: {
-                    //         popup: {
-                    //             <GButton> {
-                    //                 prop: {
-                    //                     basic: {theme: Success}
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    //     <GButton> {}
-                    // }
 
                     // <GTabbarItem> {
                     //     prop: {
@@ -481,9 +452,12 @@ live_design! {
                         //     }
                         // }
                     // }
-                    body = <HomePage> {}
+                    // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+                    <GDrawer>{
+                        <GButton> {}
+                    }
                 }
             }
         }

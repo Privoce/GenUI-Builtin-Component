@@ -461,7 +461,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_popover".to_string()));
+            menu.set_active(cx, Some("tab_dialog".to_string()));
         });
     }
     fn apply_value_instance(
@@ -506,7 +506,7 @@ impl Widget for HomePage {
                         None,
                         None,
                     )
-                    .active(id!(popover_page))
+                    .active(id!(dialog_page))
                     .build(cx);
             });
             self.lifecycle.next();

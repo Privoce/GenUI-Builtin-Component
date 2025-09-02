@@ -544,7 +544,87 @@ impl Widget for GView {
         self.set_scope_path(&scope.path);
         DrawStep::done()
     }
+    fn handle_event_with(
+        &mut self,
+        cx: &mut Cx,
+        event: &Event,
+        scope: &mut Scope,
+        sweep_area: Area,
+    ) {
+        if !self.visible && event.requires_visibility() {
+            return;
+        }
 
+        self.set_animation(cx);
+        cx.global::<ComponentAnInit>().view = true;
+
+        animation_open_then_redraw!(self, cx, event);
+
+        if self.block_signal_event {
+            if let Event::Signal = event {
+                return;
+            }
+        }
+        if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+            let mut actions = Vec::new();
+            scroll_bars.handle_main_event(cx, event, scope, &mut actions);
+            if actions.len() > 0 {
+                cx.redraw_area_and_children(self.area);
+            };
+        }
+
+        // If the UI tree has changed significantly (e.g. AdaptiveView varaints changed),
+        // we need to clear the cache and re-query widgets.
+        if cx.widget_query_invalidation_event.is_some() {
+            self.find_cache.borrow_mut().clear();
+        }
+
+        match &self.event_order {
+            EventOrder::Up => {
+                for (id, child) in self.children.iter_mut().rev() {
+                    scope.with_id(*id, |scope| {
+                        child.handle_event_with(cx, event, scope, sweep_area);
+                    });
+                }
+            }
+            EventOrder::Down => {
+                for (id, child) in self.children.iter_mut() {
+                    scope.with_id(*id, |scope| {
+                        child.handle_event_with(cx, event, scope, sweep_area);
+                    });
+                }
+            }
+            EventOrder::List(list) => {
+                for id in list {
+                    if let Some((_, child)) = self.children.iter_mut().find(|(id2, _)| id2 == id) {
+                        scope.with_id(*id, |scope| {
+                            child.handle_event_with(cx, event, scope, sweep_area);
+                        });
+                    }
+                }
+            }
+        }
+
+        // match event.hit_designer(cx, self.area) {
+        //     HitDesigner::DesignerPick(_e) => {
+        //         cx.widget_action(uid, &scope.path, WidgetDesignAction::PickedBody)
+        //     }
+        //     _ => (),
+        // }
+
+        if self.visible || self.animator.live_ptr.is_some() {
+            let hit = event.hits_with_capture_overload(cx, sweep_area, self.capture_overload);
+            if self.disabled {
+                self.handle_when_disabled(cx, event, hit);
+            } else {
+                self.handle_widget_event(cx, event, hit, sweep_area);
+            }
+        }
+
+        if let Some(scroll_bars) = &mut self.scroll_bars_obj {
+            scroll_bars.handle_scroll_event(cx, event, scope, &mut Vec::new());
+        }
+    }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
         if !self.visible && event.requires_visibility() {
             return;
