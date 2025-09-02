@@ -6,6 +6,8 @@ pub mod drawer;
 pub mod dialog;
 pub mod menu;
 pub mod router;
+pub mod tabbar;
+
 
 pub fn register(cx: &mut Cx) {
     popover::live_design(cx);
@@ -14,4 +16,5 @@ pub fn register(cx: &mut Cx) {
     dialog::live_design(cx);
     menu::live_design(cx);
     router::live_design(cx);
+    tabbar::live_design(cx);
 }

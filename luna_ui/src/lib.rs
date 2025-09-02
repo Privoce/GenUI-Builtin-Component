@@ -41,6 +41,7 @@ pub struct ComponentAnInit {
     checkbox: bool,
     svg: bool,
     image: bool,
+    tabbar: bool,
     tabbar_item: bool,
     tag: bool,
     link: bool,

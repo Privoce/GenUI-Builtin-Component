@@ -23,6 +23,9 @@ live_design! {
     use crate::views::nav::popover::*;
     use crate::views::nav::tooltip::*;
     use crate::views::nav::drawer::*;
+    use crate::views::nav::menu::*;
+    use crate::views::nav::tabbar::*;
+    use crate::views::nav::router::*;
 
     pub HomePage = {{HomePage}} {
         prop: {
@@ -352,6 +355,45 @@ live_design! {
                             },
                             value: "tab_tooltip"
                         }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "TabBar"
+                            },
+                            value: "tab_tabbar"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Menu"
+                            },
+                            value: "tab_menu"
+                        }
+                        <GMenuItem> {
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Primary,
+                                    }
+                                }
+                            }
+                            text: {
+                                text: "Router"
+                            },
+                            value: "tab_router"
+                        }
                     }
                 }
             }
@@ -410,6 +452,15 @@ live_design! {
                     tooltip_page = <GBarPage> {
                         <TooltipPage>{}
                     }
+                    tabbar_page = <GBarPage> {
+                        <TabbarPage>{}
+                    }
+                    menu_page = <GBarPage> {
+                        <MenuPage>{}
+                    }
+                    router_page = <GBarPage> {
+                        <RouterPage>{}
+                    }
                     // tabbar = <GTabbar>{
                     //     <GTabbarItem>{
                     //         icon: {
@@ -461,7 +512,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_dialog".to_string()));
+            menu.set_active(cx, Some("tab_tabbar".to_string()));
         });
     }
     fn apply_value_instance(
@@ -501,12 +552,15 @@ impl Widget for HomePage {
                             popover_page,
                             tooltip_page,
                             dialog_page,
-                            drawer_page
+                            drawer_page,
+                            tabbar_page,
+                            router_page,
+                            menu_page
                         ),
                         None,
                         None,
                     )
-                    .active(id!(dialog_page))
+                    .active(id!(tabbar_page))
                     .build(cx);
             });
             self.lifecycle.next();
@@ -577,6 +631,15 @@ impl MatchEvent for HomePage {
                     }
                     "tab_tag" => {
                         router.nav_to(cx, id!(tag_page));
+                    }
+                    "tab_router" => {
+                        router.nav_to(cx, id!(router_page));
+                    }
+                    "tab_menu" => {
+                        router.nav_to(cx, id!(menu_page));
+                    }
+                    "tab_tabbar" => {
+                        router.nav_to(cx, id!(tabbar_page));
                     }
                     _ => {}
                 }

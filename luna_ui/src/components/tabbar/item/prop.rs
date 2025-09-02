@@ -98,7 +98,7 @@ impl Prop for TabbarItemProp {
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct TabbarItemBasicProp {
-    #[live(SvgBasicProp::default())]
+    #[live(Self::default_icon(Theme::default(), TabbarItemState::Basic))]
     pub icon: SvgBasicProp,
     #[live(Self::default_text(Theme::default(), TabbarItemState::Basic))]
     pub text: LabelBasicProp,
@@ -158,7 +158,7 @@ impl BasicProp for TabbarItemBasicProp {
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
-            icon: SvgBasicProp::from_state(theme, state.into()),
+            icon: Self::default_icon(theme, state),
             text: Self::default_text(theme, state),
             container: Self::default_container(theme, state),
         }
@@ -227,7 +227,7 @@ impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicProp {
         let icon = get_from_itable(
             inline_table,
             ICON,
-            || Ok(SvgBasicProp::default()),
+            || Ok(Self::default_icon(Theme::default(), state)),
             |v| (v, state.into()).try_into(),
         )?;
 
@@ -252,13 +252,22 @@ impl TabbarItemBasicProp {
         container.height = Size::Fill;
         container.width = Size::Fill;
         container.align = Align::from_f64(0.5);
-        container.background_visible = true;
+        container.background_visible = false;
+        container.cursor = MouseCursor::Hand;
         container
     }
     pub fn default_text(theme: Theme, state: TabbarItemState) -> LabelBasicProp {
         let mut text = LabelBasicProp::from_state(theme, state.into());
         text.flow = Flow::Right;
         text
+    }
+    pub fn default_icon(theme: Theme, state: TabbarItemState) -> SvgBasicProp {
+        let mut icon = SvgBasicProp::from_state(theme, state.into());
+        icon.container.height = Size::Fixed(36.0);
+        icon.container.width = Size::Fixed(36.0);
+        icon.container.background_visible = true;
+        icon.container.cursor = MouseCursor::Hand;
+        icon
     }
 }
 

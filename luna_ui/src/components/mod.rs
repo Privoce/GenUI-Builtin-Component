@@ -238,6 +238,7 @@ live_design! {
             basic: {
                 height: Fit,
                 width: Fit,
+                border_radius: {left: 6.0, bottom: 6.0, top: 6.0, right: 6.0}
             }
         }
     }
@@ -247,6 +248,7 @@ live_design! {
             basic: {
                 height: Fit,
                 width: Fit,
+                border_radius: {left: 6.0, bottom: 6.0, top: 6.0, right: 6.0}
             }
         }
     }
@@ -367,7 +369,6 @@ live_design! {
                 }
             }
         }
-        <GButton> {slot: {text: "Dialog"}}
     }
 
     pub GDrawer = <GDropDownBase> {

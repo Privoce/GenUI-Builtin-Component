@@ -102,7 +102,13 @@ inherits_view_basic_prop!{
         height: Size::Fill,
         width: Size::Fill,
         abs_pos: None,
-    }, ViewState, "view"
+    }, ViewState, "view",
+    {
+        ViewState::Basic => (500, 500, 400),
+        ViewState::Hover => (400, 400, 300),
+        ViewState::Pressed => (600, 600, 500),
+        ViewState::Disabled => (300, 300, 200)
+    }
 }
 
 impl ViewBasicProp {

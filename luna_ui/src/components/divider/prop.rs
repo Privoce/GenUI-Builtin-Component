@@ -121,7 +121,7 @@ impl BasicProp for DividerBasicProp {
     
     state_colors! {
         (bg_level, shadow_level),
-        DividerState::Basic => (500, 400)
+        DividerState::Basic => (300, 400)
     }
 
     fn len() -> usize {

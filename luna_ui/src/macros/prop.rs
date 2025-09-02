@@ -292,7 +292,13 @@ macro_rules! sync {
 ///         height: Size::Fit,
 ///         width: Size::Fit,
 ///         abs_pos: None,
-///     }, SvgState, "svg.container"
+///     }, SvgState, "svg.container",
+///     {
+///         SvgState::Basic => (500, 500, 400),
+///         SvgState::Hover => (400, 400, 300),
+///         SvgState::Pressed => (600, 600, 500),
+///         SvgState::Disabled => (300, 300, 200)
+///     }
 /// }
 /// ```
 #[macro_export]
@@ -317,7 +323,7 @@ macro_rules! inherits_view_basic_prop {
         height: $height_value: expr,
         width: $width_value: expr,
         abs_pos: $abs_pos_value: expr,
-    }, $state: ident, $name: expr) => {
+    }, $state: ident, $name: expr, {$($state_path: path => ($($level_number: expr),*)),*}) => {
         #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
         #[live_ignore]
         pub struct $struct_name {
@@ -518,10 +524,7 @@ macro_rules! inherits_view_basic_prop {
 
             state_colors! {
                 (bg_level, border_level, shadow_level),
-                $state::Basic => (500, 500, 400),
-                $state::Hover => (400, 400, 300),
-                $state::Pressed => (600, 600, 500),
-                $state::Disabled => (300, 300, 200)
+                $($state_path => ($($level_number),*)),*
             }
 
             fn live_props() -> LiveProps {
@@ -800,6 +803,163 @@ macro_rules! from_inherit_to_view_basic_prop {
                     width: value.width,
                     abs_pos: value.abs_pos,
                 }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_view_trait_widget_node {
+    ($struct_name: ident, $draw: ident) => {
+        impl WidgetNode for $struct_name {
+            fn walk(&mut self, _cx: &mut Cx) -> Walk {
+                let prop = self.prop.get(self.state);
+                prop.walk()
+            }
+
+            fn area(&self) -> Area {
+                self.area
+            }
+
+            fn uid_to_widget(&self, uid: WidgetUid) -> WidgetRef {
+                for (_, child) in &self.children {
+                    let x = child.uid_to_widget(uid);
+                    if !x.is_empty() {
+                        return x;
+                    }
+                }
+                WidgetRef::empty()
+            }
+
+            fn redraw(&mut self, cx: &mut Cx) {
+                let _ = self.render(cx);
+                self.area.redraw(cx);
+                self.$draw.redraw(cx);
+                for (_, child) in &mut self.children {
+                    child.redraw(cx);
+                }
+            }
+            fn find_widgets(&self, path: &[LiveId], cached: WidgetCache, results: &mut WidgetSet) {
+                match cached {
+                    WidgetCache::Yes | WidgetCache::Clear => {
+                        if let WidgetCache::Clear = cached {
+                            self.find_cache.borrow_mut().clear();
+                            if path.len() == 0 {
+                                return;
+                            }
+                        }
+                        let mut hash = 0u64;
+                        for i in 0..path.len() {
+                            hash ^= path[i].0
+                        }
+                        if let Some((_, widget_set)) =
+                            self.find_cache.borrow().iter().find(|(h, _v)| h == &hash)
+                        {
+                            results.extend_from_set(widget_set);
+                            return;
+                        }
+                        let mut local_results = WidgetSet::empty();
+                        if let Some((_, child)) = self.children.iter().find(|(id, _)| *id == path[0]) {
+                            if path.len() > 1 {
+                                child.find_widgets(&path[1..], WidgetCache::No, &mut local_results);
+                            } else {
+                                local_results.push(child.clone());
+                            }
+                        }
+                        for (_, child) in &self.children {
+                            child.find_widgets(path, WidgetCache::No, &mut local_results);
+                        }
+                        if !local_results.is_empty() {
+                            results.extend_from_set(&local_results);
+                        }
+                        self.find_cache.borrow_mut().push((hash, local_results));
+                    }
+                    WidgetCache::No => {
+                        if let Some((_, child)) = self.children.iter().find(|(id, _)| *id == path[0]) {
+                            if path.len() > 1 {
+                                child.find_widgets(&path[1..], WidgetCache::No, results);
+                            } else {
+                                results.push(child.clone());
+                            }
+                        }
+                        for (_, child) in &self.children {
+                            child.find_widgets(path, WidgetCache::No, results);
+                        }
+                    }
+                }
+            }
+
+            fn animation_spread(&self) -> bool {
+                self.animation_spread
+            }
+
+            fn state(&self) -> String {
+                self.state.to_string()
+            }
+
+            crate::visible!();
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_view_trait_live_hook {
+    () => {
+        fn before_apply(
+            &mut self,
+            _cx: &mut Cx,
+            apply: &mut Apply,
+            _index: usize,
+            _nodes: &[LiveNode],
+        ) {
+            if let ApplyFrom::UpdateFromDoc { .. } = apply.from {
+                //self.draw_order.clear();
+                self.live_update_order.clear();
+                self.find_cache.get_mut().clear();
+            }
+        }
+        fn apply_value_instance(
+            &mut self,
+            cx: &mut Cx,
+            apply: &mut Apply,
+            index: usize,
+            nodes: &[LiveNode],
+        ) -> usize {
+            let id = nodes[index].id;
+            match apply.from {
+                ApplyFrom::Animate | ApplyFrom::Over => {
+                    let node_id = nodes[index].id;
+                    if let Some((_, component)) =
+                        self.children.iter_mut().find(|(id, _)| *id == node_id)
+                    {
+                        component.apply(cx, apply, index, nodes)
+                    } else {
+                        nodes.skip_node(index)
+                    }
+                }
+                ApplyFrom::NewFromDoc { .. } | ApplyFrom::UpdateFromDoc { .. } => {
+                    if nodes[index].is_instance_prop() {
+                        if apply.from.is_update_from_doc() {
+                            //livecoding
+                            self.live_update_order.push(id);
+                        }
+                        //self.draw_order.push(id);
+                        if let Some((_, node)) = self.children.iter_mut().find(|(id2, _)| *id2 == id) {
+                            node.apply(cx, apply, index, nodes)
+                        } else {
+                            self.children.push((id, WidgetRef::new(cx)));
+                            self.children
+                                .last_mut()
+                                .unwrap()
+                                .1
+                                .apply(cx, apply, index, nodes)
+                        }
+                    } else {
+                        cx.apply_error_no_matching_field(live_error_origin!(), index, nodes);
+                        nodes.skip_node(index)
+                    }
+                }
+                _ => nodes.skip_node(index),
             }
         }
     };

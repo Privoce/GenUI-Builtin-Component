@@ -20,17 +20,75 @@ live_design! {
                     }
                 }
                 <GDrawer> {
+                    popup: {
                         popup: {
-                            popup: {
-                                <GButton> {
-                                    prop: {
-                                        basic: {theme: Success}
-                                    }
+                            <GHLayout> {
+                                prop: {basic: {height: 80.0}}
+                                <GVLayout> {
+                                    prop: {basic: {align: {x: 0.5}}}
+                                    <IconPlus> {}
+                                    <GLabel> {text: "Add to"}
+                                }
+                                <GVLayout> {
+                                    prop: {basic: {align: {x: 0.5}}}
+                                    <IconClose> {}
+                                    <GLabel> {text: "Close"}
+                                }
+                                <GVLayout> {
+                                    prop: {basic: {align: {x: 0.5}}}
+                                    <IconHome> {}
+                                    <GLabel> {text: "Home"}
+                                }
+                                <GVLayout> {
+                                    prop: {basic: {align: {x: 0.5}}}
+                                    <IconGift> {}
+                                    <GLabel> {text: "Gift"}
+                                }
+                            }
+                            <GDivider> {}
+                        }
+                    }
+                    <GButton> {slot: {text: "Bottom"}}
+                }
+                <GDrawer> {
+                    popup: {
+                        popup: {
+                            <GButton> {
+                                prop: {
+                                    basic: {theme: Success}
                                 }
                             }
                         }
-                        <GButton> {}
-                    }
+                    },
+                    position: Top,
+                    <GButton> {slot: {text: "Top"}}
+                }
+                <GDrawer> {
+                    popup: {
+                        popup: {
+                            <GButton> {
+                                prop: {
+                                    basic: {theme: Success}
+                                }
+                            }
+                        }
+                    },
+                    position: Left,  
+                    <GButton> {slot: {text: "Left"}}
+                }
+                <GDrawer> {
+                    popup: {
+                        popup: {
+                            <GButton> {
+                                prop: {
+                                    basic: {theme: Success}
+                                }
+                            }
+                        }
+                    },
+                    position: Right,
+                    <GButton> {slot: {text: "Right"}}
+                }
             }
             desc = {
                 text: ""

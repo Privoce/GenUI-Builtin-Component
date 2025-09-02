@@ -43,140 +43,8 @@ live_design! {
                         color: #140D2A,
                     }
 
-                    // <GTabbarItem> {
-                    //     prop: {
-                    //         basic: {
-                    //             icon: {
-                    //                 svg: {
-                    //                     theme: Error,
-                    //                 },
-                    //                 container: {
-                    //                     background_visible: true,
-                    //                     theme: Info,
-                    //                     margin: {
-                    //                         top: 10.0,
-                    //                         right: 10.0
-                    //                         left: 10.0,
-                    //                         bottom: 10.0,
-                    //                     }
-                    //                 }
-                    //             },
-                    //             text: {
-                    //                 font_size: 24.0,
-                    //             }
-                    //         }
-                    //     }
-                    //     icon: <GSvg> {
-                    //         prop: {
-                    //             basic: {
-                    //                 svg: {
-                    //                     theme: Primary
-                    //                 }
-                    //             }
-                    //         }
-                    //         src: dep("crate://self/resources/wind.svg"),
-                    //     }
-                    //     text: <GLabel> {
-                    //         text: "Wind"
-                    //     }
-                    // }
-                    // <GTag> {
-                    //     text: <GLabel>{
-                    //         text: "tag"
-                    //     }
-                    // }
-                    
-                    // <GView> {
-                    //     prop: {
-                    //         basic: {
-                    //             height: Fill,
-                    //             width: Fill,
-                    //             background_visible: true,
-                    //             theme: Primary,
-                    //             flow: Right
-                    //         }
-                    //     }
-                    //     // <GView> {
-                    //     //     prop: {
-                    //     //         basic: {
-                    //     //             height: Fill,
-                    //     //             width: Fill,
-                    //     //             background_visible: true,
-                    //     //             theme: Info,
-                    //     //         }
-                    //     //     }
-                    //     // }
-                    //     // <GView> {
-                    //     //     prop: {
-                    //     //         basic: {
-                    //     //             height: Fill,
-                    //     //             width: Fill,
-                    //     //             background_visible: true,
-                    //     //             theme: Error,
-                    //     //         }
-                    //     //     }
-                    //     // }
-                    //     <GTabbarItem> {
-                    //         value: "wind",
-                    //         icon: <GSvg> {
-                    //             prop: {
-                    //                 basic: {
-                    //                     svg: {
-                    //                         theme: Error,
-                    //                     },
-                    //                 }
-                    //             }
-                    //             src: dep("crate://self/resources/wind.svg"),
-                    //         }
-                    //         text: <GLabel> {
-                    //             text: "Wind"
-                    //         }
-                    //     }
-                    //     <GTabbarItem> {
-                    //         value: "wind",
-                    //         icon: <GSvg> {
-                    //             prop: {
-                    //                 basic: {
-                    //                     svg: {
-                    //                         theme: Error,
-                    //                     },
-                    //                 }
-                    //             }
-                    //             src: dep("crate://self/resources/wind.svg"),
-                    //         }
-                    //         text: <GLabel> {
-                    //             text: "Wind"
-                    //         }
-                    //     }
-                    // }
 
-                    // <GTabbar> {
-                    //     <GTabbarItem> {
-                    //         value: "wind",
-                    //         icon: <GSvg> {
-                    //             prop: {
-                    //                 basic: {
-                    //                     svg: {
-                    //                         theme: Error,
-                    //                     },
-                    //                 }
-                    //             }
-                    //             src: dep("crate://self/resources/wind.svg"),
-                    //         }
-                    //         text: <GLabel> {
-                    //             text: "Wind"
-                    //         }
-                    //     }
-                    //     <GTabbarItem> {
-                    //         value: "heavy",
-                    //         icon: <GSvg> {
-                    //             src: dep("crate://self/resources/heavy.svg"),
-                    //         }
-                    //         text: <GLabel> {
-                    //             text: "Heavy"
-                    //         }
-                    //     }
-                    // }
+                    
                     // <GVTabbar>{
                     //     items: [
                     //         {
@@ -455,8 +323,43 @@ live_design! {
                     // body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
-                    <GDrawer>{
-                        <GButton> {}
+                    <GTabbar> {
+                        <GTabbarItem> {
+                            value: "news",
+                            icon: <GSvg> {
+                                src: dep("crate://self/resources/news.svg"),
+                            }
+                            text: <GLabel> {
+                                text: "News"
+                            }
+                        }
+                        <GTabbarItem> {
+                            value: "global",
+                            icon: <GSvg> {
+                                src: dep("crate://self/resources/global.svg"),
+                            }
+                            text: <GLabel> {
+                                text: "Global"
+                            }
+                        }
+                        <GTabbarItem> {
+                            value: "for_you",
+                            icon: <GSvg> {
+                                src: dep("crate://self/resources/star.svg"),
+                            }
+                            text: <GLabel> {
+                                text: "For You"
+                            }
+                        }
+                        <GTabbarItem> {
+                            value: "trending",
+                            icon: <GSvg> {
+                                src: dep("crate://self/resources/trending.svg"),
+                            }
+                            text: <GLabel> {
+                                text: "Trending"
+                            }
+                        }
                     }
                 }
             }

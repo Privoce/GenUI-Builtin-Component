@@ -19,7 +19,7 @@ live_design! {
                         spacing: 20.0,
                     }
                 }
-                <GDialog> {}
+                <GDialog> {<GButton> {slot: {text: "Dialog"}}}
             }
             desc = {
                 text: ""

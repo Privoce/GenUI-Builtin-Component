@@ -469,7 +469,13 @@ inherits_view_basic_prop!{
         height: Size::Fit,
         width: Size::Fit,
         abs_pos: None,
-    }, SvgState, "svg.container"
+    }, SvgState, "svg.container", 
+    {
+        SvgState::Basic => (500, 500, 400),
+        SvgState::Hover => (400, 400, 300),
+        SvgState::Pressed => (600, 600, 500),
+        SvgState::Disabled => (300, 300, 200)
+    }
 }
 
 from_inherit_to_view_basic_prop!(SvgContainerProp);

@@ -282,12 +282,7 @@ impl LiveHook for GView {
 impl WidgetNode for GView {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
         let prop = self.prop.get(self.state);
-        Walk {
-            abs_pos: prop.abs_pos,
-            margin: prop.margin,
-            width: prop.width,
-            height: prop.height,
-        }
+        prop.walk()
     }
 
     fn area(&self) -> Area {

@@ -201,21 +201,21 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
             inline_table,
             HEADER,
             || Ok(CardBasicProp::default_header(Theme::default(), state)),
-            |v| (v, ViewState::from(state)).try_into(),
+            |v| (v, state).try_into(),
         )?;
 
         let body = get_from_itable(
             inline_table,
             BODY,
             || Ok(CardBasicProp::default_body(Theme::default(), state)),
-            |v| (v, ViewState::from(state)).try_into(),
+            |v| (v, state).try_into(),
         )?;
 
         let footer = get_from_itable(
             inline_table,
             FOOTER,
             || Ok(CardBasicProp::default_footer(Theme::default(), state)),
-            |v| (v, ViewState::from(state)).try_into(),
+            |v| (v, state).try_into(),
         )?;
 
         Ok(Self {
@@ -298,7 +298,11 @@ inherits_view_basic_prop! {
         height: Size::Fit,
         width: Size::Fill,
         abs_pos: None,
-    }, ViewState, "card.header"
+    }, CardState, "card.header",
+    {
+        CardState::Basic => (500, 500, 400),
+        CardState::Hover => (400, 400, 300)
+    }
 }
 
 
@@ -323,7 +327,10 @@ inherits_view_basic_prop! {
         height: Size::Fill,
         width: Size::Fill,
         abs_pos: None,
-    }, ViewState, "card.body"
+    }, CardState, "card.body", {
+        CardState::Basic => (500, 500, 400),
+        CardState::Hover => (400, 400, 300)
+    }
 }
 
 inherits_view_basic_prop! {
@@ -347,7 +354,11 @@ inherits_view_basic_prop! {
         height: Size::Fit,
         width: Size::Fill,
         abs_pos: None,
-    }, ViewState, "card.footer"
+    }, CardState, "card.footer", 
+    {
+        CardState::Basic => (500, 500, 400),
+        CardState::Hover => (400, 400, 300)
+    }
 }
 
 from_inherit_to_view_basic_prop!(CardHeaderProp);
