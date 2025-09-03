@@ -1,5 +1,5 @@
 pub use makepad_widgets;
-pub use luna_ui;
+pub use gen_ui;
 pub mod app;
 pub mod an;
 pub mod views;
@@ -28,7 +28,7 @@ macro_rules! widget_node {
             fn redraw(&mut self, cx: &mut Cx) {
                 self.deref_widget.redraw(cx);
             }
-            luna_ui::visible!();
+            gen_ui::visible!();
         }
     };
 }

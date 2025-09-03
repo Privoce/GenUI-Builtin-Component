@@ -1,4 +1,4 @@
-use luna_ui::{components::*, prop::traits::ToColor, themes::Theme};
+use gen_ui::{components::*, prop::traits::ToColor, themes::Theme};
 use makepad_widgets::*;
 
 live_design! {
@@ -124,7 +124,7 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
         crate::an::live_design(cx);
-        crate::luna_ui::live_design(cx);
+        crate::gen_ui::live_design(cx);
         crate::views::register(cx);
     }
 }

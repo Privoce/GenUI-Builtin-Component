@@ -1,6 +1,6 @@
 [workspace]
 members = [
-   "luna_ui",
+   "gen_ui",
    "tests",
-   "old"
+   # "old"
 ]

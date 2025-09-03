@@ -4,7 +4,7 @@ live_design! {
     use link::theme::*;
     use link::shaders::*;
     use link::widgets::*;
-    use link::luna_ui::*;
+    use link::gen_ui::*;
 
     TestPList = {{TestPList}} {
         list = <PortalList> {

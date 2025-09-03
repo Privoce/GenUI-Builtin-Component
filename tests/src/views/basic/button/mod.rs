@@ -1,4 +1,4 @@
-use luna_ui::{
+use gen_ui::{
     components::*,
     inherits_view_livehook,
 };

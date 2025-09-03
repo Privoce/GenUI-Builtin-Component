@@ -1,4 +1,4 @@
-use luna_ui::components::*;
+use gen_ui::components::*;
 use makepad_widgets::*;
 
 use crate::widget_node;
