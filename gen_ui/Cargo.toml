@@ -1,5 +1,5 @@
 [package]
-name = "luna_ui"
+name = "gen_ui"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,7 +14,6 @@ base64 = "0.22.1"
 # cargo_metadata = "0.20.0"
 imghdr = "0.7.0"
 makepad-widgets = { path = "/Users/shengyifei/projects/makepad/makepad/widgets" }
-
 toml_edit = "0.22.26"
 
 
@@ -24,5 +23,5 @@ toml_edit = "0.22.26"
 # web-sys = "0.3.77"
 # js-sys = "0.3.77"
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-reqwest = { version = "0.12.22", features = ["blocking"] }
+# [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# reqwest = { version = "0.12.22", features = ["blocking"] }

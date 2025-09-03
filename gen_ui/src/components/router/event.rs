@@ -10,6 +10,7 @@ pub enum RouterEvent {
     None,
 }
 
+#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct RouterInit {
     pub active_page: Option<HeapLiveIdPath>,
