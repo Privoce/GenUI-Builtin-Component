@@ -104,6 +104,10 @@ live_design! {
                     body = <HomePage> {}
                     // body = <THomePage> {}
                     // body = <ViewPage>{}
+                    // <GLabel> {
+                    //     text: "hello"
+                    // }
+                    // <GButton> {}
                 }
             }
         }
@@ -124,7 +128,7 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
         crate::an::live_design(cx);
-        crate::gen_ui::live_design(cx);
+        crate::gen_ui::live_design(cx, Option::<&str>::None);
         crate::views::register(cx);
     }
 }

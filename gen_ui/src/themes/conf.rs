@@ -46,6 +46,15 @@ impl TryFrom<DocumentMut> for Conf {
     }
 }
 
+impl From<&Conf> for DocumentMut {
+    fn from(value: &Conf) -> Self {
+        let mut doc = DocumentMut::new();
+        doc.insert(THEME, Item::Table((&value.theme).into()));
+        doc.insert(COMPONENTS, Item::Table((&value.components).into()));
+        doc
+    }
+}
+
 impl Conf {
     pub fn components(&self) -> &ComponentsConf {
         &self.components
@@ -75,6 +84,6 @@ impl Conf {
 
 impl Display for Conf {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        f.write_str(DocumentMut::from(self).to_string().as_str())
     }
 }

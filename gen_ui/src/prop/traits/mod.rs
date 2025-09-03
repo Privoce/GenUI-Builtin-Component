@@ -13,6 +13,7 @@ mod area;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 pub use path::*;
+use toml_edit::Value;
 use crate::{error::Error, themes::Color};
 pub use area::*;
 
@@ -71,4 +72,9 @@ pub trait ToColor {
     fn from_hex(s: &str) -> Result<Self, Error>
     where
         Self: Sized;
+}
+
+
+pub trait ToTomlValue {
+    fn to_toml_value(&self) -> Value;
 }

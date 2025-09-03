@@ -3,7 +3,6 @@ pub mod conf;
 mod global;
 mod theme;
 
-
 pub use global::*;
 use makepad_widgets::{
     image_cache::ImageFit, Align, DVec2, Flow, Margin, MouseCursor, Padding, Size, Vec2,
@@ -221,12 +220,16 @@ impl TomlValueTo for Value {
 
 #[cfg(test)]
 mod tests {
+    use std::{fs, path::PathBuf};
+
     use super::conf::Conf;
 
     #[test]
     fn toml_conf() {
+        let path = "/Users/shengyifei/projects/gen_ui/components/genui.theme.example.toml";
         let conf = Conf::default();
-
-        dbg!(conf);
+        let example_toml = PathBuf::from(path);
+        // write to example toml
+        fs::write(example_toml, conf.to_string()).unwrap();
     }
 }

@@ -1,4 +1,8 @@
+use std::fmt::Display;
+
 use toml_edit::Item;
+
+use crate::prop::manuel::{DISABLED, PLACEHOLDER, PRIMARY, SECONDARY};
 
 use super::Color;
 
@@ -29,10 +33,10 @@ impl ColorFontConf {
     pub fn from_key(s: &str) -> Color {
         Color::Hex(
             match s {
-                "primary" => "#FFFFFFE6",
-                "secondary" => "#ffffff99",
-                "placeholder" => "#ffffff66",
-                "disabled" => "#ffffff42",
+                PRIMARY => "#FFFFFFE6",
+                SECONDARY => "#ffffff99",
+                PLACEHOLDER => "#ffffff66",
+                DISABLED => "#ffffff42",
                 _ => unreachable!("Invalid color key"),
             }
             .parse()
@@ -57,10 +61,10 @@ impl TryFrom<&Item> for ColorFontConf {
                 .map_or_else(|| Ok(ColorFontConf::from_key(key)), |s| s.try_into())
         };
 
-        let primary = color("primary")?;
-        let secondary = color("secondary")?;
-        let placeholder = color("placeholder")?;
-        let disabled = color("disabled")?;
+        let primary = color(PRIMARY)?;
+        let secondary = color(SECONDARY)?;
+        let placeholder = color(PLACEHOLDER)?;
+        let disabled = color(DISABLED)?;
 
         Ok(ColorFontConf {
             primary,
@@ -68,5 +72,33 @@ impl TryFrom<&Item> for ColorFontConf {
             placeholder,
             disabled,
         })
+    }
+}
+
+impl From<&ColorFontConf> for Item {
+    fn from(value: &ColorFontConf) -> Self {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert(PRIMARY, (value.primary).into());
+        inline_table.insert(SECONDARY, (value.secondary).into());
+        inline_table.insert(PLACEHOLDER, (value.placeholder).into());
+        inline_table.insert(DISABLED, (value.disabled).into());
+        Item::Value(inline_table.into())
+    }
+}
+
+impl Display for ColorFontConf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(Item::from(self).to_string().as_str())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::themes::ColorFontConf;
+
+    #[test]
+    fn color_font_conf_fmt() {
+        let conf = ColorFontConf::default();
+        dbg!(conf.to_string());
     }
 }

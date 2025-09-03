@@ -1,5 +1,5 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
+use toml_edit::{Formatted, InlineTable, Item, Table, Value};
 
 use crate::{
     component_state,
@@ -14,7 +14,7 @@ use crate::{
             BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, HEIGHT, LINE_SPACING, MARGIN, PADDING, THEME,
             WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl,
     },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
@@ -45,6 +45,31 @@ try_from_toml_item! {
         basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
         disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
     }, "[component.label] should be a table"
+}
+
+impl From<&LabelProp> for Item {
+    fn from(value: &LabelProp) -> Self {
+        let mut table = Table::new();
+        table.insert(BASIC, (&value.basic).into());
+        table.insert(DISABLED, (&value.disabled).into());
+        Item::Table(table)
+    }
+}
+
+impl From<&LabelBasicProp> for Item {
+    fn from(value: &LabelBasicProp) -> Self {
+        let mut inline_table = InlineTable::new();
+        inline_table.insert(THEME, value.theme.into());
+        inline_table.insert(COLOR, value.color.to_color().into());
+        inline_table.insert(FONT_SIZE, Value::Float(Formatted::new(value.font_size as f64)));
+        inline_table.insert(LINE_SPACING, Value::Float(Formatted::new(value.line_spacing as f64)));
+        inline_table.insert(MARGIN, value.margin.to_toml_value());
+        inline_table.insert(PADDING, value.padding.to_toml_value());
+        inline_table.insert(FLOW, value.flow.to_toml_value());
+        inline_table.insert(HEIGHT, value.height.to_toml_value());
+        inline_table.insert(WIDTH, value.width.to_toml_value());
+        Item::Value(Value::InlineTable(inline_table))
+    }
 }
 
 impl Prop for LabelProp {
@@ -153,8 +178,8 @@ impl BasicProp for LabelBasicProp {
         }
     }
 
-    fn sync(&mut self, state: Self::State) -> () {
-        self.color = Self::state_colors(Theme::default(), state).into();
+    fn sync(&mut self, _state: Self::State) -> () {
+        // self.color = Self::state_colors(Theme::default(), state).into();
     }
 
     fn len() -> usize {

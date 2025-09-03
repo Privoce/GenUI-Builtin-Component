@@ -1,4 +1,6 @@
-use toml_edit::Item;
+use std::fmt::Display;
+
+use toml_edit::{Formatted, Item, Table, Value};
 
 use crate::error::Error;
 
@@ -41,18 +43,18 @@ impl TryFrom<&Item> for ThemeConf {
         ))?;
 
         let color =
-            |theme:&str, default: ThemeColorItemConf| -> Result<ThemeColorItemConf, Error> {
+            |theme: &str, default: ThemeColorItemConf| -> Result<ThemeColorItemConf, Error> {
                 table
                     .get(theme)
                     .map_or_else(|| Ok(default), |v| v.try_into())
             };
 
-        let dark = color("dark",ThemeColorItemConf::dark())?;
-        let primary = color("primary",ThemeColorItemConf::primary())?;
-        let error = color("error",ThemeColorItemConf::error())?;
-        let warning = color("warning",ThemeColorItemConf::warning())?;
-        let success = color("success",ThemeColorItemConf::success())?;
-        let info = color("info",ThemeColorItemConf::info())?;
+        let dark = color("dark", ThemeColorItemConf::dark())?;
+        let primary = color("primary", ThemeColorItemConf::primary())?;
+        let error = color("error", ThemeColorItemConf::error())?;
+        let warning = color("warning", ThemeColorItemConf::warning())?;
+        let success = color("success", ThemeColorItemConf::success())?;
+        let info = color("info", ThemeColorItemConf::info())?;
 
         let font = table
             .get("font")
@@ -67,6 +69,26 @@ impl TryFrom<&Item> for ThemeConf {
             info,
             font,
         })
+    }
+}
+
+impl From<&ThemeConf> for Table {
+    fn from(value: &ThemeConf) -> Self {
+        let mut table = Table::new();
+        table.insert("dark", (&value.dark).into());
+        table.insert("primary", (&value.primary).into());
+        table.insert("error", (&value.error).into());
+        table.insert("warning", (&value.warning).into());
+        table.insert("success", (&value.success).into());
+        table.insert("info", (&value.info).into());
+        table.insert("font", (&value.font).into());
+        table
+    }
+}
+
+impl Display for ThemeConf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(Table::from(self).to_string().as_str())
     }
 }
 
@@ -167,5 +189,54 @@ impl TryFrom<&Item> for ThemeColorItemConf {
             c_800,
             c_900,
         })
+    }
+}
+
+impl From<&ThemeColorItemConf> for Item {
+    fn from(value: &ThemeColorItemConf) -> Self {
+        let mut inline_table = toml_edit::InlineTable::new();
+
+        for (key, v) in [
+            ("c_50", value.c_50.to_string()),
+            ("c_100", value.c_100.to_string()),
+            ("c_200", value.c_200.to_string()),
+            ("c_300", value.c_300.to_string()),
+            ("c_400", value.c_400.to_string()),
+            ("c_500", value.c_500.to_string()),
+            ("c_600", value.c_600.to_string()),
+            ("c_700", value.c_700.to_string()),
+            ("c_800", value.c_800.to_string()),
+            ("c_900", value.c_900.to_string()),
+        ] {
+            inline_table.insert(key, Value::String(Formatted::new(v)));
+        }
+
+        Item::Value(toml_edit::Value::InlineTable(inline_table))
+    }
+}
+
+impl Display for ThemeColorItemConf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(Item::from(self).to_string().as_str())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use toml_edit::Item;
+
+    use crate::themes::theme::conf::{ThemeColorItemConf, ThemeConf};
+
+    #[test]
+    fn theme_color_conf_to_fmt() {
+        let conf = ThemeConf::default();
+        dbg!(conf.to_string());
+    }
+
+    #[test]
+    fn theme_color_item_conf_to_item_fmt() {
+        let conf = ThemeColorItemConf::dark();
+        let item: Item = (&conf).into();
+        dbg!(item.to_string());
     }
 }

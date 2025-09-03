@@ -5,6 +5,20 @@
 // --- theme -----------------------------------------------------
 pub const THEME: &str = "theme";
 pub const COMPONENTS: &str = "components";
+pub const PRIMARY: &str = "primary";
+pub const PRIMARY_UP: &str = "Primary";
+pub const SECONDARY: &str = "secondary";
+pub const PLACEHOLDER: &str = "placeholder";
+pub const DARK: &str = "dark";
+pub const DARK_UP: &str = "Dark";
+pub const ERROR: &str = "error";
+pub const ERROR_UP: &str = "Error";
+pub const WARNING: &str = "warning";
+pub const WARNING_UP: &str = "Warning";
+pub const SUCCESS: &str = "success";
+pub const SUCCESS_UP: &str = "Success";
+pub const INFO: &str = "info";
+pub const INFO_UP: &str = "Info";
 // --- background ------------------------------------------------
 pub const BACKGROUND_COLOR: &str = "background_color";
 pub const BACKGROUND_VISIBLE: &str = "background_visible";
@@ -110,3 +124,7 @@ pub const X: &str = "x";
 pub const Y: &str = "y";
 pub const Z: &str = "z";
 pub const W: &str = "w";
+pub const DOWN: &str = "Down";
+pub const OVERLAY: &str = "Overlay";
+pub const RIGHT_UP: &str = "Right";
+pub const RIGHT_WRAP: &str = "RightWrap";

@@ -32,3 +32,10 @@ macro_rules! try_from_toml_item {
         }
     };
 }
+
+#[macro_export]
+macro_rules! from_prop_to_toml_ {
+    () => {
+        
+    };
+}

@@ -4,7 +4,7 @@ use makepad_widgets::Vec4;
 
 use crate::error::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Hex(pub Vec4);
 
 impl FromStr for Hex {

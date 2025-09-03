@@ -1,3 +1,5 @@
+use toml_edit::{Item, Table};
+
 use crate::components::{
     ButtonProp, CardProp, CheckboxProp, CollapseProp, DividerProp, ImageProp, LabelProp, LinkProp,
     MenuItemProp, MenuProp, PopupContainerProp, PopupProp, RadioProp, SubMenuProp, SvgProp,
@@ -57,4 +59,13 @@ try_from_toml_item! {
         menu => MENU, MenuProp::default(), |item| item.try_into(),
         collapse => COLLAPSE, CollapseProp::default(), |item| item.try_into()
     }, "[components] should be a table"
+}
+
+impl From<&ComponentsConf> for Table {
+    fn from(value: &ComponentsConf) -> Self {
+        let mut table = Table::new();
+        table.insert(LABEL, (&value.label).into());
+        
+        table
+    }
 }

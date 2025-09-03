@@ -1,7 +1,11 @@
-use crate::prop::traits::FromLiveValue;
+use crate::prop::{
+    manuel::{BOTTOM, LEFT, RIGHT, TOP},
+    traits::{FromLiveValue, ToTomlValue},
+};
 
 use super::NewFrom;
 use makepad_widgets::Margin;
+use toml_edit::{Formatted, InlineTable, Value};
 
 impl NewFrom for Margin {
     fn from_f64(uni: f64) -> Self {
@@ -42,5 +46,16 @@ impl FromLiveValue for Margin {
         } else {
             None
         }
+    }
+}
+
+impl ToTomlValue for Margin {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = InlineTable::new();
+        inline_table.insert(TOP, Value::Float(Formatted::new(self.top)));
+        inline_table.insert(RIGHT, Value::Float(Formatted::new(self.right)));
+        inline_table.insert(BOTTOM, Value::Float(Formatted::new(self.bottom)));
+        inline_table.insert(LEFT, Value::Float(Formatted::new(self.left)));
+        Value::InlineTable(inline_table)
     }
 }

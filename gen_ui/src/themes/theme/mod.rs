@@ -1,13 +1,19 @@
 mod color;
 pub mod conf;
 
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 pub use color::*;
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::{Formatted, Item, Value};
 
-use crate::{error::Error, prop::traits::FromLiveValue};
+use crate::{
+    error::Error,
+    prop::{
+        manuel::{DARK, DARK_UP, ERROR, ERROR_UP, INFO, INFO_UP, PRIMARY, PRIMARY_UP, SUCCESS, SUCCESS_UP, WARNING, WARNING_UP},
+        traits::FromLiveValue,
+    },
+};
 
 #[derive(Copy, Clone, Debug, Live, LiveHook, Default)]
 #[live_ignore]
@@ -26,12 +32,12 @@ impl FromLiveValue for Theme {
     fn from_live_value(value: &LiveValue) -> Option<Self> {
         if let LiveValue::BareEnum(theme) = value {
             match theme.to_string().as_str() {
-                "Dark" => Some(Theme::Dark),
-                "Primary" => Some(Theme::Primary),
-                "Error" => Some(Theme::Error),
-                "Warning" => Some(Theme::Warning),
-                "Success" => Some(Theme::Success),
-                "Info" => Some(Theme::Info),
+                DARK_UP => Some(Theme::Dark),
+                PRIMARY_UP => Some(Theme::Primary),
+                ERROR_UP => Some(Theme::Error),
+                WARNING_UP => Some(Theme::Warning),
+                SUCCESS_UP => Some(Theme::Success),
+                INFO_UP => Some(Theme::Info),
                 _ => None,
             }
         } else {
@@ -258,12 +264,12 @@ impl FromStr for Theme {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "dark" => Ok(Theme::Dark),
-            "primary" => Ok(Theme::Primary),
-            "error" => Ok(Theme::Error),
-            "warning" => Ok(Theme::Warning),
-            "success" => Ok(Theme::Success),
-            "info" => Ok(Theme::Info),
+            DARK => Ok(Theme::Dark),
+            PRIMARY => Ok(Theme::Primary),
+            ERROR => Ok(Theme::Error),
+            WARNING => Ok(Theme::Warning),
+            SUCCESS => Ok(Theme::Success),
+            INFO => Ok(Theme::Info),
             _ => Err(Error::ThemeStyleParse(format!(
                 "Unknown theme style: {}",
                 s
@@ -297,5 +303,27 @@ impl TryFrom<Option<&str>> for Theme {
                 "[global.theme] should be a string".to_string(),
             ))?
             .parse()
+    }
+}
+
+impl From<Theme> for Value {
+    fn from(value: Theme) -> Self {
+        Value::String(Formatted::new(
+            match value {
+                Theme::Dark => DARK,
+                Theme::Primary => PRIMARY,
+                Theme::Error => ERROR,
+                Theme::Warning => WARNING,
+                Theme::Success => SUCCESS,
+                Theme::Info => INFO,
+            }
+            .to_string(),
+        ))
+    }
+}
+
+impl Display for Theme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(Value::from(*self).to_string().as_str())
     }
 }

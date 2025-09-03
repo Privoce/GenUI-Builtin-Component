@@ -193,6 +193,7 @@ impl Component for GLabel {
         if self.disabled {
             self.switch_state(LabelState::Disabled);
         }
+        // dbg!(self.prop.basic.color);
         // [sync to draw_text] -------------------------------------------------------
         let is_set_disabled_color = self.is_set_disabled_color();
         if !self.is_set_disabled_color {

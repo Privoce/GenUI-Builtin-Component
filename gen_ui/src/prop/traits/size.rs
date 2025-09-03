@@ -1,6 +1,7 @@
 use makepad_widgets::Size;
+use toml_edit::Value;
 
-use crate::prop::traits::FromLiveValue;
+use crate::prop::traits::{FromLiveValue, ToTomlValue};
 
 impl FromLiveValue for Size {
     fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
@@ -17,6 +18,17 @@ impl FromLiveValue for Size {
                 _ => None,
             },
             _ => None,
+        }
+    }
+}
+
+impl ToTomlValue for Size {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        match self {
+            Size::Fixed(num) => Value::Float(toml_edit::Formatted::new(*num)),
+            Size::Fill => Value::String(toml_edit::Formatted::new("Fill".to_string())),
+            Size::All => Value::String(toml_edit::Formatted::new("All".to_string())),
+            Size::Fit => Value::String(toml_edit::Formatted::new("Fit".to_string())),
         }
     }
 }

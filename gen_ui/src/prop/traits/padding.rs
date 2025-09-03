@@ -1,5 +1,9 @@
+use crate::prop::{
+    manuel::{BOTTOM, LEFT, RIGHT, TOP},
+    traits::{FromLiveValue, NewFrom, ToTomlValue},
+};
 use makepad_widgets::Padding;
-use crate::prop::traits::{FromLiveValue, NewFrom};
+use toml_edit::{Formatted, InlineTable, Value};
 
 impl NewFrom for Padding {
     fn from_f64(uni: f64) -> Self {
@@ -33,11 +37,23 @@ impl NewFrom for Padding {
 impl FromLiveValue for Padding {
     fn from_live_value(v: &makepad_widgets::LiveValue) -> Option<Self>
     where
-        Self: Sized {
+        Self: Sized,
+    {
         if let makepad_widgets::LiveValue::Vec4(vec4) = v {
             Some(Padding::from_vec4(vec4))
         } else {
             None
         }
+    }
+}
+
+impl ToTomlValue for Padding {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = InlineTable::new();
+        inline_table.insert(TOP, Value::Float(Formatted::new(self.top)));
+        inline_table.insert(RIGHT, Value::Float(Formatted::new(self.right)));
+        inline_table.insert(BOTTOM, Value::Float(Formatted::new(self.bottom)));
+        inline_table.insert(LEFT, Value::Float(Formatted::new(self.left)));
+        Value::InlineTable(inline_table)
     }
 }

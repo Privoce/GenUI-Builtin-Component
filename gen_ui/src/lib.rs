@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use makepad_widgets::*;
 use crate::themes::conf::Conf;
 
@@ -9,10 +11,10 @@ pub mod shader;
 pub mod themes;
 pub mod utils;
 
-pub fn live_design(cx: &mut Cx) {
+pub fn live_design<P>(cx: &mut Cx, path: Option<P>) where P: AsRef<Path>{
     cx.link(live_id!(basic_genui_theme), live_id!(genui_theme));
     // cx.set_global(Conf::default());
-    let conf = Conf::load::<&str>(Some("/Users/shengyifei/projects/gen_ui/components/gen_ui"));
+    let conf = Conf::load(path);
     let conf = if let Err(e) = &conf {
         eprintln!("Error loading theme configuration: {}", e);
         conf.unwrap_or_default()

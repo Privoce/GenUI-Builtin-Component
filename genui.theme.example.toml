@@ -1,0 +1,14 @@
+[theme]
+dark = { c_50 = "#F2F2F2FF", c_100 = "#E3E3E3FF", c_200 = "#C7C7C7FF", c_300 = "#ABABABFF", c_400 = "#919191FF", c_500 = "#777777FF", c_600 = "#5E5E5EFF", c_700 = "#474747FF", c_800 = "#303030FF", c_900 = "#1B1B1CFF" }
+primary = { c_50 = "#F7ECFEFF", c_100 = "#EEDCFEFF", c_200 = "#D9BAFDFF", c_300 = "#C597FFFF", c_400 = "#AD72FFFF", c_500 = "#9254EAFF", c_600 = "#7438D2FF", c_700 = "#5629A4FF", c_800 = "#400B84FF", c_900 = "#280255FF" }
+error = { c_50 = "#FFECEEFF", c_100 = "#FFDADCFF", c_200 = "#FFB3AEFF", c_300 = "#FF8983FF", c_400 = "#F55E57FF", c_500 = "#DB372DFF", c_600 = "#B3251EFF", c_700 = "#8A1A16FF", c_800 = "#60150FFF", c_900 = "#3A0907FF" }
+warning = { c_50 = "#FFF2E8FF", c_100 = "#FFD8BFFF", c_200 = "#FFBB96FF", c_300 = "#FF9C6EFF", c_400 = "#FF7A45FF", c_500 = "#FA541CFF", c_600 = "#D4380DFF", c_700 = "#AD2102FF", c_800 = "#871400FF", c_900 = "#610B00FF" }
+success = { c_50 = "#DDF8D8FF", c_100 = "#BEEFBBFF", c_200 = "#80DA88FF", c_300 = "#44C265FF", c_400 = "#1AA64AFF", c_500 = "#128937FF", c_600 = "#006C35FF", c_700 = "#00522CFF", c_800 = "#00381FFF", c_900 = "#002110FF" }
+info = { c_50 = "#E7F2FFFF", c_100 = "#D0E4FFFF", c_200 = "#A1C9FFFF", c_300 = "#76ACFFFF", c_400 = "#4E8FF8FF", c_500 = "#3271EAFF", c_600 = "#1157CEFF", c_700 = "#04409FFF", c_800 = "#012C6FFF", c_900 = "#001944FF" }
+font = { primary = "#FFFFFFE6", secondary = "#FFFFFF99", placeholder = "#FFFFFF66", disabled = "#FFFFFF42" }
+
+[components]
+
+[components.label]
+basic = { theme = "dark", color = "#FFFFFFE6", font_size = 12.0, line_spacing = 1.0, margin = { top = 0.0, right = 0.0, bottom = 0.0, left = 0.0 }, padding = { top = 0.0, right = 0.0, bottom = 0.0, left = 0.0 }, flow = "RightWrap", height = "Fit", width = "Fit" }
+disabled = { theme = "dark", color = "#FFFFFFE6", font_size = 12.0, line_spacing = 1.0, margin = { top = 0.0, right = 0.0, bottom = 0.0, left = 0.0 }, padding = { top = 0.0, right = 0.0, bottom = 0.0, left = 0.0 }, flow = "RightWrap", height = "Fit", width = "Fit" }

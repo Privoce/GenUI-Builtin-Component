@@ -10,11 +10,11 @@ pub use hex::Hex;
 use makepad_widgets::Vec4;
 pub use rgb::Rgb;
 pub use rgba::Rgba;
-use toml_edit::Value;
+use toml_edit::{Formatted, Value};
 
 use crate::error::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Color {
     Hex(Hex),
     RGB(Rgb),
@@ -52,6 +52,12 @@ impl TryFrom<&Value> for Color {
         } else {
             Err(Error::ThemeStyleParse("Invalid color format".to_string()))
         }
+    }
+}
+
+impl From<Color> for Value {
+    fn from(value: Color) -> Self {
+        Value::String(Formatted::new(value.to_string()))
     }
 }
 
