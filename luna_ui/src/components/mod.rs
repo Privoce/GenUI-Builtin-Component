@@ -75,6 +75,8 @@ live_design! {
                 height: Fill,
                 width: Fill,
                 flow: Right,
+                clip_y: true,
+                clip_x: true,
             }
         }
     }
@@ -85,6 +87,8 @@ live_design! {
                 height: Fill,
                 width: Fill,
                 flow: Down,
+                clip_y: true,
+                clip_x: true,
             }
         }
     }

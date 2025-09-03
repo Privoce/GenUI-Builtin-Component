@@ -96,7 +96,7 @@ impl Component for GRouter {
         self.deref_widget.render(cx)
     }
 
-    fn handle_widget_event(&mut self, cx: &mut Cx, event: &Event, hit: Hit, area: Area) {
+    fn handle_widget_event(&mut self, _cx: &mut Cx, _event: &Event, _hit: Hit, _area: Area) {
         ()
     }
 

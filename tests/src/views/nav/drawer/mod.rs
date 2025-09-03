@@ -123,8 +123,7 @@ impl Widget for DrawerPage {
 }
 
 impl MatchEvent for DrawerPage {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-    }
+
 }
 
 widget_node!(DrawerPage);

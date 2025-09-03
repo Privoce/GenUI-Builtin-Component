@@ -1,4 +1,4 @@
-use luna_ui::{components::*, inherits_view_livehook, inherits_view_widget_node};
+use luna_ui::components::*;
 use makepad_widgets::*;
 
 use crate::widget_node;
@@ -461,24 +461,6 @@ live_design! {
                     router_page = <GBarPage> {
                         <RouterPage>{}
                     }
-                    // tabbar = <GTabbar>{
-                    //     <GTabbarItem>{
-                    //         icon: {
-                    //             src: dep("crate://self/resources/wind.svg"),
-                    //         }
-                    //         text: {
-                    //             text: "Config"
-                    //         }
-                    //     }
-                    //     <GTabbarItem>{
-                    //         icon: {
-                    //              src: dep("crate://self/resources/heavy.svg"),
-                    //         }
-                    //         text: {
-                    //             text: "All"
-                    //         }
-                    //     }
-                    // }
                 }
             }
         }
@@ -512,7 +494,7 @@ impl LiveHook for HomePage {
     fn after_new_from_doc(&mut self, cx: &mut Cx) {
         self.deref_widget.after_new_from_doc(cx);
         self.gmenu(id!(menu)).borrow_mut().map(|mut menu| {
-            menu.set_active(cx, Some("tab_tabbar".to_string()));
+            menu.set_active(cx, Some("tab_router".to_string()));
         });
     }
     fn apply_value_instance(
@@ -560,7 +542,7 @@ impl Widget for HomePage {
                         None,
                         None,
                     )
-                    .active(id!(tabbar_page))
+                    .active(id!(router_page))
                     .build(cx);
             });
             self.lifecycle.next();

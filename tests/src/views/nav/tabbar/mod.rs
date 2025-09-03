@@ -117,7 +117,7 @@ impl Widget for TabbarPage {
 }
 
 impl MatchEvent for TabbarPage {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {}
+    
 }
 
 widget_node!(TabbarPage);

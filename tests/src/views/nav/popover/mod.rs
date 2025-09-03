@@ -144,7 +144,7 @@ impl Widget for PopoverPage {
 }
 
 impl MatchEvent for PopoverPage {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {}
+   
 }
 
 widget_node!(PopoverPage);

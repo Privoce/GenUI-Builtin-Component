@@ -9,93 +9,220 @@ live_design! {
     use crate::views::cbox::*;
 
     pub MenuPage = {{MenuPage}} {
+        prop: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
         <CBox> {
+            prop: {
+                basic: {
+                    margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                    padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
+                }
+            }
             show = {
                 prop: {
                     basic: {
-                        height: Fit,
+                        height: Fill,
                         width: Fill,
                         flow: Down,
-                        spacing: 20.0,
+                        spacing: 10.0,
+                        padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
                     }
                 }
-                <GCollapse> {}
-                <GCollapse> {
-                    active: true,
-                    position: Top,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Top, active true"
+                <GVLayout> {
+                    prop: {basic: {height: 300.0, width: Fill, padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
+                    <GMenuItem> {
+                        text: <GLabel> {
+                            text: "Menu item"
                         }
                     }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Collapse Body"
-                        }
-                    }
-                } 
-                <GCollapse> {
-                    prop: {
-                        basic: {
-                            header: {
-                                theme: Primary,
-                                width: 200.0,
-                            },
-                            body: {
-                                theme: Primary
+                    <GSubMenu>{
+                        header: <GView> {
+                            <GLabel>{
+                                text: "Sub Menu",
                             }
                         }
-                    },
-                    position: Left,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Left"
-                        }
-                    }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Theme: Primary"
-                        }
-                    }
-                }
-                <GCollapse> {
-                        prop: {
-                            basic: {
-                                header: {
-                                    theme: Info,
-                                    width: 200.0,
-                                },
-                                body: {
-                                    theme: Info,
-                                    height: 300.0,
+                        body: <GView> {
+                            <GMenuItem> {
+                                text: <GLabel>{
+                                    text: "Sub Menu Item 1",
                                 }
                             }
-                        },
-                        position: Right,
-                        active: true,
+                            <GMenuItem> {
+                                text: <GLabel>{
+                                    text: "Sub Menu Item 2",
+                                }
+                            }
+                        }
                     }
-            }
-            desc = {
-                text: ""
-            }
-        }
-        <CBox> {
-            show = {
-                prop: {
-                    basic: {
-                        height: Fit,
-                        width: Fill,
-                        flow: Down,
-                        spacing: 20.0,
+                    <GSubMenu>{
+                        header: <GView> {
+                            <GLabel>{
+                                text: "Sub Menu",
+                            }
+                        }
+                        body: <GView> {
+                            <GMenuItem> {
+                                text: <GLabel>{
+                                    text: "Sub Menu Item 1-1",
+                                }
+                            }
+                            <GSubMenu>{
+                                header: <GView> {
+                                    <GLabel>{
+                                        text: "Sub Menu",
+                                    }
+                                }
+                                body: <GView> {
+                                    <GMenuItem> {
+                                        text: <GLabel>{
+                                            text: "Sub Menu Item 2-1",
+                                        }
+                                    }
+                                    <GMenuItem> {
+                                        text: <GLabel>{
+                                            text: "Sub Menu Item 2-2",
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-
+                <GHLayout> {
+                    prop: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
+                    <GMenu>{
+                        body: {
+                            <GSubMenu>{
+                                header: <GView> {
+                                    <GLabel>{
+                                        text: "Sub Menu",
+                                    }
+                                }
+                                body: <GView> {
+                                    <GMenuItem> {
+                                        text: <GLabel>{
+                                            text: "Sub Menu Item 1-1",
+                                        }
+                                    }
+                                    <GSubMenu>{
+                                        header: <GView> {
+                                            <GLabel>{
+                                                text: "Sub Menu",
+                                            }
+                                        }
+                                        body: <GView> {
+                                            <GMenuItem> {
+                                                text: <GLabel>{
+                                                    text: "Sub Menu Item 2-1",
+                                                }
+                                            }
+                                            <GMenuItem> {
+                                                text: <GLabel>{
+                                                    text: "Sub Menu Item 2-2",
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                        <GMenu>{
+                            prop: {
+                                basic: {
+                                    container: {
+                                        theme: Error,
+                                    },
+                                    body: {
+                                        theme: Error,
+                                    },
+                                    footer: {theme: Error},
+                                    header: {theme: Error}
+                                }
+                            },
+                            active: "sub_active",
+                            header: <GView> {
+                                <GLabel>{
+                                    text: "Menu Header",
+                                }
+                            },
+                            body: {
+                                <GSubMenu>{
+                                    prop: {
+                                        basic: {
+                                            container: {
+                                                theme: Error,
+                                            },
+                                            header: {
+                                                theme: Error,
+                                            },
+                                            body: {
+                                                theme: Error,
+                                            }
+                                        }
+                                    },
+                                    body: {
+                                        <GMenuItem> {
+                                            prop: {basic: {container: {theme: Error}}}
+                                            text: <GLabel>{
+                                                text: "Sub Menu Item 0-0",
+                                            }
+                                        }
+                                        <GSubMenu>{
+                                            prop: {
+                                                basic: {
+                                                    container: {
+                                                        theme: Error,
+                                                    },
+                                                    header: {
+                                                        theme: Error,
+                                                    },
+                                                    body: {
+                                                        theme: Error,
+                                                    }
+                                                }
+                                            },
+                                            header: <GView> {
+                                                <GLabel>{
+                                                    text: "Sub Menu",
+                                                }
+                                            }
+                                            body: <GView> {
+                                                <GMenuItem> {
+                                                    prop: {basic: {container: {theme: Error}}}
+                                                    text: <GLabel>{
+                                                        text: "Sub Menu Item 0-1-0",
+                                                    }
+                                                }
+                                                <GMenuItem> {
+                                                    prop: {basic: {container: {theme: Error}}}
+                                                    value: "sub_active",
+                                                    text: <GLabel>{
+                                                        text: "Sub Menu Item 0-1-1",
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                <GMenuItem> {
+                                    prop: {basic: {container: {theme: Error}}}
+                                    text: <GLabel>{
+                                        text: "Sub Menu Item 1",
+                                    }
+                                }
+                            },
+                            footer: <GView>{
+                                <GLabel> {
+                                    text: "Menu Footer"
+                                }
+                            }
+                        }
+                }
             }
             desc = {
                 text: ""
             }
         }
-
     }
 }
 
@@ -125,8 +252,7 @@ impl Widget for MenuPage {
 }
 
 impl MatchEvent for MenuPage {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
-    }
+    fn handle_actions(&mut self, _cx: &mut Cx, _actions: &Actions) {}
 }
 
 widget_node!(MenuPage);

@@ -13,89 +13,76 @@ live_design! {
             show = {
                 prop: {
                     basic: {
-                        height: Fit,
+                        height: Fill,
                         width: Fill,
                         flow: Down,
                         spacing: 20.0,
                     }
                 }
-                <GCollapse> {}
-                <GCollapse> {
-                    active: true,
-                    position: Top,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Top, active true"
-                        }
-                    }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Collapse Body"
-                        }
-                    }
-                } 
-                <GCollapse> {
-                    prop: {
-                        basic: {
-                            header: {
-                                theme: Primary,
-                                width: 200.0,
-                            },
-                            body: {
-                                theme: Primary
-                            }
-                        }
-                    },
-                    position: Left,
-                    header: <GView> {
-                        <GLabel> {
-                            text: "Position: Left"
-                        }
-                    }
-                    body: <GView> {
-                        <GLabel> {
-                            text: "Theme: Primary"
-                        }
-                    }
+                <GHLayout> {
+                    prop: {basic: {height: Fit}}
+                    n1 = <GButton>{slot: {text: "Nav Page 1"}}
+                    n2 = <GButton>{slot: {text: "Nav Page 2"}}
                 }
-                <GCollapse> {
-                        prop: {
-                            basic: {
-                                header: {
-                                    theme: Info,
-                                    width: 200.0,
-                                },
-                                body: {
-                                    theme: Info,
-                                    height: 300.0,
+                page_router = <GRouter> {
+                    bar_pages = {
+                        prop:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
+                        bpage1 = <GBarPage> {
+                            prop:{basic: {height: Fill, width: Fill, background_visible: true}}
+                            <GLabel> {text: "Bar Page 1"}
+                        }
+                        bpage2 = <GBarPage> {
+                            <GLabel> {text: "Bar Page 2"}
+                        }
+                        bpage3 = <GBarPage> {
+                            <GLabel> {text: "Bar Page 3"}
+                        }
+                        tabbar = <GTabbar> {
+                            <GTabbarItem> {
+                                icon: <GSvg> {
+                                    src: dep("crate://self/resources/news.svg"),
+                                }
+                                text: <GLabel> {
+                                    text: "News"
                                 }
                             }
-                        },
-                        position: Right,
-                        active: true,
+                            <GTabbarItem> {
+                                icon: <GSvg> {
+                                    src: dep("crate://self/resources/global.svg"),
+                                }
+                                text: <GLabel> {
+                                    text: "Global"
+                                }
+                            }
+                            <GTabbarItem> {
+                                icon: <GSvg> {
+                                    src: dep("crate://self/resources/star.svg"),
+                                }
+                                text: <GLabel> {
+                                    text: "For You"
+                                }
+                            }
+                        }
                     }
-            }
-            desc = {
-                text: ""
-            }
-        }
-        <CBox> {
-            show = {
-                prop: {
-                    basic: {
-                        height: Fit,
-                        width: Fill,
-                        flow: Down,
-                        spacing: 20.0,
+                    nav_pages = {
+                        prop:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
+                        npage1 = <GNavPage> {
+                            <GLabel> {
+                                text: "Nav Page 1"
+                            }
+                        }
+                        npage2 = <GNavPage> {
+                            <GLabel> {
+                                text: "Nav Page 2"
+                            }
+                        }
                     }
                 }
-
             }
             desc = {
                 text: ""
             }
         }
-
     }
 }
 
@@ -103,6 +90,8 @@ live_design! {
 pub struct RouterPage {
     #[deref]
     pub deref_widget: GView,
+    #[rust]
+    pub lifecycle: LifeCycle,
 }
 
 impl LiveHook for RouterPage {
@@ -115,17 +104,39 @@ impl LiveHook for RouterPage {
 impl Widget for RouterPage {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         let _ = self.deref_widget.draw_walk(cx, scope, walk);
-
+        if self.lifecycle.is_created() {
+            let router = self.grouter(id!(page_router));
+            router.borrow_mut().map(|mut router| {
+                router
+                    .init(
+                        ids!(bpage1, bpage2, bpage3),
+                        Some(ids!(npage1, npage2)),
+                        None,
+                    )
+                    .active(id!(bpage1))
+                    .build(cx);
+            });
+            self.lifecycle.next();
+        }
         DrawStep::done()
     }
     fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) {
-        self.match_event(cx, event);
-        self.deref_widget.handle_event(cx, event, scope)
-    }
-}
+        // self.match_event(cx, event);
+        // self.deref_widget.handle_event(cx, event, scope)
+        let actions = cx.capture_actions(|cx| self.deref_widget.handle_event(cx, event, scope));
+        let router = self.grouter(id!(page_router));
+        let n1 = self.gbutton(id!(n1));
+        let n2 = self.gbutton(id!(n2));
+        if let Some(_) = n1.clicked(&actions) {
+            router.nav_to(cx, id!(npage1));
+        }
+        if let Some(_) = n2.clicked(&actions) {
+            router.nav_to(cx, id!(npage2));
+        }
 
-impl MatchEvent for RouterPage {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
+        router.borrow_mut().map(|mut route| {
+            route.handle_nav_events(cx, &actions);
+        });
     }
 }
 

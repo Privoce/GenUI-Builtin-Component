@@ -1,14 +1,14 @@
 mod event;
-mod prop;
 mod item;
-mod sub;
+mod prop;
 mod register;
+mod sub;
 
 pub use event::*;
-pub use prop::*;
 pub use item::*;
-pub use sub::*;
+pub use prop::*;
 pub use register::register as menu_register;
+pub use sub::*;
 
 use makepad_widgets::*;
 
@@ -84,6 +84,9 @@ pub struct GMenu {
     pub animation_spread: bool,
     #[rust]
     pub defer_walks: DeferWalks,
+    // /// control child sub menu/ menu item need to sync the menu theme
+    // #[live(true)]
+    // pub through: bool, TODO!(sync child menu theme)
 }
 
 impl WidgetNode for GMenu {
@@ -377,6 +380,7 @@ impl GMenu {
     /// 4. 如果有多个激活的菜单项，只会返回第一个
     /// 5. find时确定self.item_mode结构
     /// 6. 若使用者没有制定node的value，则按照索引进行指定，例如第3个subMenu中的第2个MenuItem，则value为"2_1" 2: 3的索引，1: 2的索引
+    /// 7. 需要将menu的theme向下同步
     pub fn find_active(&mut self) {
         fn nested_find(
             child: &WidgetRef,
