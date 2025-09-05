@@ -14,7 +14,7 @@ use crate::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, HOVER, ICON, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Radius,
-    }, themes::Theme, interconvert_prop_toml, utils::get_from_itable
+    }, themes::Theme, prop_interconvert, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -62,7 +62,7 @@ impl Default for TabbarItemProp {
     }
 }
 
-interconvert_prop_toml! {
+prop_interconvert! {
     TabbarItemProp {
         basic => BASIC, TabbarItemBasicProp::default(), |v| (v, TabbarItemState::Basic).try_into(),
         hover => HOVER, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover), |v| (v, TabbarItemState::Hover).try_into(),

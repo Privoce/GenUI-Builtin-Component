@@ -1,14 +1,31 @@
-/// # interconvert_prop_toml! macro
+/// # prop_interconvert! macro
 /// This macro generates an implementation of `TryFrom<&toml_edit::Item>` for a
 /// specified type. It extracts fields from a TOML table item, providing default
 /// values if the fields are not present.
 #[macro_export]
-macro_rules! interconvert_prop_toml {
-    ($ty_name: ty {
+macro_rules! prop_interconvert {
+    ($ty_name: ident {
+        basic_prop = $basic_prop: ident;
         $(
             $field: ident => $key: ident, $default: expr, $try_into: expr
         ),*
     }, $e: expr) => {
+        #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+        #[live_ignore]
+        pub struct $ty_name {
+            $(
+                #[live($default)]
+                pub $field: $basic_prop,
+            )*
+        }
+
+
+        impl Default for $ty_name {
+            fn default() -> Self {
+                Self {$($field: $default,)*}
+            }
+        }
+
         impl TryFrom<&toml_edit::Item> for $ty_name {
             type Error = crate::error::Error;
             fn try_from(value: &toml_edit::Item) -> Result<Self, Self::Error> {
@@ -31,7 +48,7 @@ macro_rules! interconvert_prop_toml {
             }
         }
 
-        impl From<&$ty_name> for &toml_edit::Item {
+        impl From<&$ty_name> for toml_edit::Item {
             fn from(value: &$ty_name) -> Self {
                 let mut table = toml_edit::Table::new();
                 $(table.insert($key, (&value.$field).into());)*
@@ -41,7 +58,7 @@ macro_rules! interconvert_prop_toml {
     };
 }
 
-/// # interconvert_basic_prop_toml! macro
+/// # basic_prop_interconvert! macro
 /// This macro generates implementations of `TryFrom` and `From` traits for a
 /// specified property struct. It handles conversion from TOML items, values,
 /// and inline tables, as well as conversion back to TOML items.
@@ -54,34 +71,54 @@ macro_rules! interconvert_prop_toml {
 /// - **Theme is not need to be included** : ❌ `theme => THEME, Theme::default(), |v| v.try_into()`
 /// ## usage
 /// ```rust
-/// interconvert_basic_prop_toml!{
+/// basic_prop_interconvert! {
 ///     LabelBasicProp {
 ///         state = LabelState;
 ///         colors = color;
 ///         color => COLOR, |v| v.try_into(),
 ///         {
-///             font_size => FONT_SIZE, 12.0, |v| v.to_f32(),
-///             line_spacing => LINE_SPACING, 1.0, |v| v.to_f32(),
-///             margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
-///             padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(Padding::from_f64(0.0)),
-///             flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
-///             height => HEIGHT, Size::Fit, |v| v.to_size(),
-///             width => WIDTH, Size::Fit, |v| v.to_size()
+///             font_size: f32 => FONT_SIZE, 12.0, |v| v.to_f32(),
+///             line_spacing: f32 => LINE_SPACING, 1.0, |v| v.to_f32(),
+///             margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
+///             padding: Padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(Padding::from_f64(0.0)),
+///             flow: Flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
+///             height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
+///             width: Size => WIDTH, Size::Fit, |v| v.to_size()
 ///         }
 ///     }, "LabelBasicProp should be a inline table"
 /// }
 /// ```
 #[macro_export]
-macro_rules! interconvert_basic_prop_toml {
-    ($prop_struct: ty {
+macro_rules! basic_prop_interconvert {
+    ($prop_struct: ident {
         state = $state_ty: ty;
-        $(
-            colors = $colors: ident;
-            $($color: ident => $color_key: ident, $color_try_into: expr),*
-        )?,
-        {$($field: ident => $key: ident, $field_val: expr, $try_into: expr),*}
+        $({$($color: ident => $color_key: ident, $color_try_into: expr),*})?;
+        {$($field: ident : $field_ty: ident => $key: ident, $field_val: expr, $try_into: expr),*}
     }, $e: expr) => {
-        impl TryFrom<(&toml_edit::Item, $state_ty)> for LabelBasicProp {
+        #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
+        #[live_ignore]
+        pub struct $prop_struct {
+            #[live]
+            pub theme: Theme,
+            $(
+                $(
+                    #[live]
+                    pub $color: Vec4,
+                )*
+            )?
+            $(
+                #[live($field_val)]
+                pub $field: $field_ty,
+            )*
+        }
+
+        impl Default for $prop_struct {
+            fn default() -> Self {
+                Self::from_state(Theme::default(), LabelState::Basic)
+            }
+        }
+
+        impl TryFrom<(&toml_edit::Item, $state_ty)> for $prop_struct {
             type Error = crate::error::Error;
 
             fn try_from((value, state): (&toml_edit::Item, $state_ty)) -> Result<Self, Self::Error> {
@@ -93,7 +130,7 @@ macro_rules! interconvert_basic_prop_toml {
             }
         }
 
-        impl TryFrom<(&toml_edit::Value, $state_ty)> for LabelBasicProp {
+        impl TryFrom<(&toml_edit::Value, $state_ty)> for $prop_struct {
             type Error = crate::error::Error;
 
             fn try_from((value, state): (&toml_edit::Value, $state_ty)) -> Result<Self, Self::Error> {
@@ -105,7 +142,7 @@ macro_rules! interconvert_basic_prop_toml {
             }
         }
 
-        impl TryFrom<(&toml_edit::InlineTable, $state_ty)> for LabelBasicProp {
+        impl TryFrom<(&toml_edit::InlineTable, $state_ty)> for $prop_struct {
             type Error = crate::error::Error;
 
             fn try_from((inline_table, state): (&toml_edit::InlineTable, $state_ty)) -> Result<Self, Self::Error> {
@@ -116,14 +153,14 @@ macro_rules! interconvert_basic_prop_toml {
                     let $field = $field_val;
                     let $field = crate::utils::get_from_itable(inline_table, $key, || Ok($field), $try_into)?;
                 )*
-                
+
                 $(
-                    let $colors = Self::state_colors(theme, state);
+                    let color = Self::state_colors(theme, state);
                     $(
                         let $color = crate::utils::get_from_itable(
                             inline_table,
                             $color_key,
-                            || Ok($color),
+                            || Ok(color.$color),
                             $color_try_into,
                         )?.into();
                     )*
@@ -148,6 +185,48 @@ macro_rules! interconvert_basic_prop_toml {
                     $(inline_table.insert($color_key, value.$color.to_color().into());)*
                 )?
                 toml_edit::Item::Value(toml_edit::Value::InlineTable(inline_table))
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! component_colors {
+    ($color: ident {
+        colors = ($($color_from: ty)*);
+        $($field: ident)*
+    }) => {
+        #[derive(Debug, Clone, Copy)]
+        pub struct $color {
+            $($field: crate::themes::Color),*
+        }
+
+        impl From<($($color_from)*)> for $color {
+            fn from(( $($field),* ): ($($color_from)*) ) -> Self {
+                Self {
+                    $($field),*
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! component_color {
+    ($color: ident {
+        colors = ($($color_from: ty)*);
+        $($field: ident)?
+    }) => {
+        #[derive(Debug, Clone, Copy)]
+        pub struct $color {
+            $($field: crate::themes::Color),*
+        }
+
+        impl From<crate::themes::Color> for $color {
+            fn from(color: crate::themes::Color ) -> Self {
+                Self {
+                    $($field: color)?
+                }
             }
         }
     };

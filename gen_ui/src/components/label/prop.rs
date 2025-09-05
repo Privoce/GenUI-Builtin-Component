@@ -1,13 +1,13 @@
 use makepad_widgets::*;
 
 use crate::{
-    component_state,
+    basic_prop_interconvert, component_color, component_state,
     components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
     },
     error::Error,
-    get_get_mut, getter_setter_prop, interconvert_basic_prop_toml, interconvert_prop_toml,
+    get_get_mut, getter_setter_prop,
     prop::{
         manuel::{
             BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, HEIGHT, LINE_SPACING, MARGIN, PADDING, THEME,
@@ -16,29 +16,13 @@ use crate::{
         traits::{FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl,
     },
-    themes::{Color, ColorFontConf, Theme, TomlValueTo},
+    prop_interconvert,
+    themes::{ColorFontConf, Theme, TomlValueTo},
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct LabelProp {
-    #[live(LabelBasicProp::default())]
-    pub basic: LabelBasicProp,
-    #[live(LabelBasicProp::from_state(Theme::default(), LabelState::Disabled))]
-    pub disabled: LabelBasicProp,
-}
-
-impl Default for LabelProp {
-    fn default() -> Self {
-        Self {
-            basic: LabelBasicProp::default(),
-            disabled: LabelBasicProp::default(),
-        }
-    }
-}
-
-interconvert_prop_toml! {
+prop_interconvert! {
     LabelProp {
+        basic_prop = LabelBasicProp;
         basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
         disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
     }, "[component.label] should be a table"
@@ -69,35 +53,20 @@ impl Prop for LabelProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
-#[live_ignore]
-pub struct LabelBasicProp {
-    #[live]
-    pub theme: Theme,
-    #[live]
-    pub color: Vec4,
-    #[live(12.0)]
-    pub font_size: f32,
-    #[live(1.0)]
-    pub line_spacing: f32,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(Padding::from_f64(0.0))]
-    pub padding: Padding,
-    // #[live]
-    // pub align: Align,
-    #[live(Size::Fit)]
-    pub height: Size,
-    #[live(Size::Fit)]
-    pub width: Size,
-    #[live(Flow::RightWrap)]
-    pub flow: Flow,
-}
-
-impl Default for LabelBasicProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), LabelState::Basic)
-    }
+basic_prop_interconvert! {
+    LabelBasicProp {
+        state = LabelState;
+        {color => COLOR, |v| v.try_into()};
+        {
+            font_size: f32 => FONT_SIZE, 12.0, |v| v.to_f32(),
+            line_spacing: f32 => LINE_SPACING, 1.0, |v| v.to_f32(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
+            padding: Padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(Padding::from_f64(0.0)),
+            flow: Flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
+            height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
+            width: Size => WIDTH, Size::Fit, |v| v.to_size()
+        }
+    }, "LabelBasicProp should be a inline table"
 }
 
 impl LabelBasicProp {
@@ -112,9 +81,16 @@ impl LabelBasicProp {
     }
 }
 
+component_color! {
+    LabelColors {
+        colors = (Color);
+        color
+    }
+}
+
 impl BasicProp for LabelBasicProp {
     type State = LabelState;
-    type Colors = Color;
+    type Colors = LabelColors;
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
@@ -123,7 +99,7 @@ impl BasicProp for LabelBasicProp {
             }
             COLOR => {
                 let color = Self::state_colors(self.theme, state);
-                self.color = Vec4::from_live_color(value).unwrap_or(color.into());
+                self.color = Vec4::from_live_color(value).unwrap_or(color.color.into());
             }
             FONT_SIZE => {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);
@@ -163,7 +139,7 @@ impl BasicProp for LabelBasicProp {
 
         Self {
             theme,
-            color: color.into(),
+            color: color.color.into(),
             font_size: 12.0,
             line_spacing: 1.0,
             margin: Margin::from_f64(0.0),
@@ -176,8 +152,8 @@ impl BasicProp for LabelBasicProp {
 
     fn state_colors(_theme: Theme, state: Self::State) -> Self::Colors {
         match state {
-            LabelState::Basic => ColorFontConf::from_key("primary"),
-            LabelState::Disabled => ColorFontConf::from_key("disabled"),
+            LabelState::Basic => ColorFontConf::from_key("primary").into(),
+            LabelState::Disabled => ColorFontConf::from_key("disabled").into(),
         }
     }
 
@@ -230,23 +206,6 @@ impl BasicProp for LabelBasicProp {
             ..Default::default()
         }
     }
-}
-
-interconvert_basic_prop_toml! {
-    LabelBasicProp {
-        state = LabelState;
-        colors = color;
-        color => COLOR, |v| v.try_into(),
-        {
-            font_size => FONT_SIZE, 12.0, |v| v.to_f32(),
-            line_spacing => LINE_SPACING, 1.0, |v| v.to_f32(),
-            margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
-            padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(Padding::from_f64(0.0)),
-            flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
-            height => HEIGHT, Size::Fit, |v| v.to_size(),
-            width => WIDTH, Size::Fit, |v| v.to_size()
-        }
-    }, "LabelBasicProp should be a inline table"
 }
 
 component_state! {

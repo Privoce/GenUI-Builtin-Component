@@ -10,7 +10,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
 };
 use makepad_widgets::*;
 use toml_edit::Item;
@@ -76,7 +76,7 @@ impl Prop for SwitchProp {
     }
 }
 
-interconvert_prop_toml! {
+prop_interconvert! {
     SwitchProp {
         basic => BASIC, SwitchBasicProp::default(),|v| (v, SwitchState::Basic).try_into(),
         hover_basic => HOVER_BASIC, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),

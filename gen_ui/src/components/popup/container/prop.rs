@@ -18,7 +18,7 @@ use crate::{
         ApplyStateMapImpl,
     },
     themes::{Color, Theme, TomlValueTo},
-    interconvert_prop_toml,
+    prop_interconvert,
     utils::get_from_itable,
 };
 
@@ -66,7 +66,7 @@ impl Prop for PopupContainerProp {
     }
 }
 
-interconvert_prop_toml! {
+prop_interconvert! {
     PopupContainerProp {
         basic => BASIC, PopupContainerBasicProp::default(),|v| (v, PopupState::Basic).try_into()
     }, "[component.popup] should be a table"

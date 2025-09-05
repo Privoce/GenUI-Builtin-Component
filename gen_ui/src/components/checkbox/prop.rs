@@ -12,7 +12,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ActiveMode, ApplySlotMapImpl,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
 };
 use makepad_widgets::*;
 use toml_edit::{Item, Value};
@@ -86,7 +86,7 @@ impl Prop for CheckboxProp {
     }
 }
 
-interconvert_prop_toml! {
+prop_interconvert! {
     CheckboxProp {
         basic => BASIC, CheckboxBasicProp::default(),|v| (v, CheckboxState::Basic).try_into(),
         hover => HOVER, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
