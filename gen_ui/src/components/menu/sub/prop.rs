@@ -18,7 +18,7 @@ use crate::{
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -76,7 +76,7 @@ impl SlotProp for SubMenuProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     SubMenuProp {
         basic => BASIC, SubMenuBasicProp::default(), |v| (v, SubMenuState::Basic).try_into(),
         active => ACTIVE, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),

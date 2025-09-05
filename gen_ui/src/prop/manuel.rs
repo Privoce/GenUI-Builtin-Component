@@ -128,3 +128,6 @@ pub const DOWN: &str = "Down";
 pub const OVERLAY: &str = "Overlay";
 pub const RIGHT_UP: &str = "Right";
 pub const RIGHT_WRAP: &str = "RightWrap";
+pub const FILL: &str = "Fill";
+pub const ALL: &str = "All";
+pub const FIT_UP: &str = "Fit";

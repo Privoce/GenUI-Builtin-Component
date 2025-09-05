@@ -15,7 +15,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplySlotMapImpl, Radius,
-    }, state_color, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    }, state_color, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -83,7 +83,7 @@ impl Default for SvgProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     SvgProp {
         basic => BASIC, SvgBasicProp::default(), |v| (v, SvgState::Basic).try_into(),
         hover => HOVER, SvgBasicProp::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),

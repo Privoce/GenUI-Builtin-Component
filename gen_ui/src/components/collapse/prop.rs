@@ -18,7 +18,7 @@ use crate::{
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -80,7 +80,7 @@ impl SlotProp for CollapseProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     CollapseProp {
         basic => BASIC, CollapseBasicProp::default(), |v| (v, CollapseState::Basic).try_into(),
         hover => HOVER, CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover), |v| (v, CollapseState::Hover).try_into(),

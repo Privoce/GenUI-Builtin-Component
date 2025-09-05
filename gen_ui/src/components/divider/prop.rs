@@ -13,7 +13,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -52,7 +52,7 @@ impl Default for DividerProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     DividerProp {
         basic => BASIC, DividerBasicProp::default(), |v| (v, DividerState::Basic).try_into()
     }, "[component.divider] should be a table"

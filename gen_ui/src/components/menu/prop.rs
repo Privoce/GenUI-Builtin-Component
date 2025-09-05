@@ -16,7 +16,7 @@ use crate::{
         ApplySlotMapImpl, ApplyStateMapImpl, Applys,
     },
     themes::{Color, Theme},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -66,7 +66,7 @@ impl SlotProp for MenuProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     MenuProp {
         basic => BASIC, MenuBasicProp::default(), |v| (v, MenuState::Basic).try_into()
     }, "[component.menu] should be a table"

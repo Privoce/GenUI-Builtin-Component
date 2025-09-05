@@ -12,7 +12,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplySlotMapImpl, ApplyStateMapImpl, Applys, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -68,7 +68,7 @@ impl SlotProp for CardProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     CardProp {
         basic => BASIC, CardBasicProp::default(), |v| (v, CardState::Basic).try_into(),
         hover => HOVER, CardBasicProp::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()

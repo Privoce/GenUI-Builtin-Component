@@ -9,7 +9,7 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
-    get_get_mut, getter_setter_prop,
+    get_get_mut, getter_setter_prop, interconvert_prop_toml,
     prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
@@ -21,7 +21,6 @@ use crate::{
     },
     state_colors,
     themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
     utils::get_from_itable,
 };
 
@@ -81,7 +80,7 @@ impl Default for ButtonProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     ButtonProp {
         basic => BASIC, ButtonBasicProp::default(),|v| (v, ButtonState::Basic).try_into(),
         hover => HOVER, ButtonBasicProp::from_state(Theme::default(), ButtonState::Hover),|v| (v, ButtonState::Hover).try_into(),
@@ -569,5 +568,11 @@ impl From<ButtonState> for ViewState {
 impl ComponentState for ButtonState {
     fn is_disabled(&self) -> bool {
         matches!(self, ButtonState::Disabled)
+    }
+}
+
+impl From<&ButtonBasicProp> for Item {
+    fn from(value: &ButtonBasicProp) -> Self {
+        todo!()
     }
 }

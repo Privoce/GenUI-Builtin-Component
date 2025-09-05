@@ -22,7 +22,7 @@ use crate::{
     },
     state_colors,
     themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -69,7 +69,7 @@ impl Prop for TabbarProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     TabbarProp {
         basic => BASIC, TabbarBasicProp::default(),|v| (v, TabbarState::Basic).try_into(),
         disabled => DISABLED, TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled), |v| (v, TabbarState::Disabled).try_into()

@@ -10,7 +10,7 @@ use crate::prop::manuel::{
     BUTTON, CARD, CHECKBOX, COLLAPSE, DIVIDER, IMAGE, LABEL, LINK, MENU, MENU_ITEM, POPUP,
     POPUP_CONTAINER, RADIO, SUB_MENU, SVG, SWITCH, TABBAR, TABBAR_ITEM, TAG, VIEW,
 };
-use crate::try_from_toml_item;
+use crate::interconvert_prop_toml;
 
 #[derive(Debug, Clone, Default)]
 pub struct ComponentsConf {
@@ -36,7 +36,7 @@ pub struct ComponentsConf {
     pub collapse: CollapseProp,
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     ComponentsConf {
         label => LABEL, LabelProp::default(), |item| item.try_into(),
         view => VIEW, ViewProp::default(), |item| item.try_into(),

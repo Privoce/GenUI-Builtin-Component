@@ -12,7 +12,7 @@ use crate::{
         },
         traits::{FromLiveValue, NewFrom},
         ApplyStateMapImpl,
-    }, themes::{Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    }, themes::{Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -33,7 +33,7 @@ impl Default for ImageProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     ImageProp {
         basic => BASIC, ImageBasicProp::default(), |v| (v, ImageState::Basic).try_into(),
         loading => LOADING, ImageBasicProp::default(), |v| (v, ImageState::Loading).try_into()

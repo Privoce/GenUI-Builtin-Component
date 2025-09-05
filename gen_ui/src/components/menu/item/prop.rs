@@ -20,7 +20,7 @@ use crate::{
         ApplySlotMapImpl, Applys,
     },
     themes::{Color, Theme},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -83,7 +83,7 @@ impl SlotProp for MenuItemProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     MenuItemProp {
         basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
         hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),

@@ -20,7 +20,7 @@ use crate::{
         ApplySlotMapImpl, Radius,
     },
     themes::Theme,
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 
@@ -70,7 +70,7 @@ impl Default for TagProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     TagProp {
         basic => BASIC, TagBasicProp::default(), |v| (v, TagState::Basic).try_into(),
         hover => HOVER, TagBasicProp::from_state(Theme::default(), TagState::Hover), |v| (v, TagState::Hover).try_into(),

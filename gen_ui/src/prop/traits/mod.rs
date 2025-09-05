@@ -10,6 +10,7 @@ mod vec;
 mod image_fit;
 mod path;
 mod area;
+mod string;
 
 use makepad_widgets::{LiveValue, Vec2, Vec3, Vec4};
 pub use path::*;

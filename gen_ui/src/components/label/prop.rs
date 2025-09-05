@@ -1,5 +1,4 @@
 use makepad_widgets::*;
-use toml_edit::{Formatted, InlineTable, Item, Table, Value};
 
 use crate::{
     component_state,
@@ -8,7 +7,7 @@ use crate::{
         traits::{BasicProp, ComponentState, Prop},
     },
     error::Error,
-    get_get_mut, getter_setter_prop,
+    get_get_mut, getter_setter_prop, interconvert_basic_prop_toml, interconvert_prop_toml,
     prop::{
         manuel::{
             BASIC, COLOR, DISABLED, FLOW, FONT_SIZE, HEIGHT, LINE_SPACING, MARGIN, PADDING, THEME,
@@ -18,8 +17,6 @@ use crate::{
         ApplyStateMapImpl,
     },
     themes::{Color, ColorFontConf, Theme, TomlValueTo},
-    try_from_toml_item,
-    utils::get_from_itable as get,
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -40,36 +37,11 @@ impl Default for LabelProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     LabelProp {
         basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
         disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
     }, "[component.label] should be a table"
-}
-
-impl From<&LabelProp> for Item {
-    fn from(value: &LabelProp) -> Self {
-        let mut table = Table::new();
-        table.insert(BASIC, (&value.basic).into());
-        table.insert(DISABLED, (&value.disabled).into());
-        Item::Table(table)
-    }
-}
-
-impl From<&LabelBasicProp> for Item {
-    fn from(value: &LabelBasicProp) -> Self {
-        let mut inline_table = InlineTable::new();
-        inline_table.insert(THEME, value.theme.into());
-        inline_table.insert(COLOR, value.color.to_color().into());
-        inline_table.insert(FONT_SIZE, Value::Float(Formatted::new(value.font_size as f64)));
-        inline_table.insert(LINE_SPACING, Value::Float(Formatted::new(value.line_spacing as f64)));
-        inline_table.insert(MARGIN, value.margin.to_toml_value());
-        inline_table.insert(PADDING, value.padding.to_toml_value());
-        inline_table.insert(FLOW, value.flow.to_toml_value());
-        inline_table.insert(HEIGHT, value.height.to_toml_value());
-        inline_table.insert(WIDTH, value.width.to_toml_value());
-        Item::Value(Value::InlineTable(inline_table))
-    }
 }
 
 impl Prop for LabelProp {
@@ -260,86 +232,21 @@ impl BasicProp for LabelBasicProp {
     }
 }
 
-impl TryFrom<(&Item, LabelState)> for LabelBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, LabelState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LabelProp should be a inline table".to_string(),
-        ))?;
-
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&Value, LabelState)> for LabelBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Value, LabelState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LabelProp should be a inline table".to_string(),
-        ))?;
-
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&InlineTable, LabelState)> for LabelBasicProp {
-    type Error = Error;
-
-    fn try_from((inline_table, state): (&InlineTable, LabelState)) -> Result<Self, Self::Error> {
-        let theme = Theme::default();
-        let theme = get(inline_table, THEME, || Ok(theme), |value| value.try_into())?;
-        let color = Self::state_colors(theme, state);
-        let color = get(inline_table, COLOR, || Ok(color), |value| value.try_into())?.into();
-        let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
-        let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.0), |item| item.to_f32())?;
-
-        let default_margin = Margin::from_f64(0.0);
-
-        let margin = get(
-            inline_table,
-            MARGIN,
-            || Ok(default_margin),
-            |item| item.to_margin(default_margin),
-        )?;
-
-        let default_padding = Padding::from_f64(0.0);
-
-        let padding = get(
-            inline_table,
-            PADDING,
-            || Ok(default_padding),
-            |item| item.to_padding(default_padding),
-        )?;
-
-        let flow = get(
-            inline_table,
-            FLOW,
-            || Ok(Flow::RightWrap),
-            |item| item.to_flow(),
-        )?;
-
-        let height = get(
-            inline_table,
-            HEIGHT,
-            || Ok(Size::Fit),
-            |item| item.to_size(),
-        )?;
-        let width = get(inline_table, WIDTH, || Ok(Size::Fit), |item| item.to_size())?;
-
-        Ok(Self {
-            theme,
-            color,
-            font_size,
-            line_spacing,
-            margin,
-            padding,
-            flow,
-            height,
-            width,
-        })
-    }
+interconvert_basic_prop_toml! {
+    LabelBasicProp {
+        state = LabelState;
+        colors = color;
+        color => COLOR, |v| v.try_into(),
+        {
+            font_size => FONT_SIZE, 12.0, |v| v.to_f32(),
+            line_spacing => LINE_SPACING, 1.0, |v| v.to_f32(),
+            margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
+            padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(Padding::from_f64(0.0)),
+            flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
+            height => HEIGHT, Size::Fit, |v| v.to_size(),
+            width => WIDTH, Size::Fit, |v| v.to_size()
+        }
+    }, "LabelBasicProp should be a inline table"
 }
 
 component_state! {

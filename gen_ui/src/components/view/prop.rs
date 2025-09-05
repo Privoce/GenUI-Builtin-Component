@@ -14,7 +14,7 @@ use crate::{
         },
         traits::{FromLiveColor, FromLiveValue, NewFrom},
         ApplyStateMapImpl, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, try_from_toml_item, utils::get_from_itable
+    }, state_colors, themes::{Color, Theme, TomlValueTo}, interconvert_prop_toml, utils::get_from_itable
 };
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
@@ -72,7 +72,7 @@ impl Prop for ViewProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     ViewProp {
         basic => BASIC, ViewBasicProp::default(),|v| (v, ViewState::Basic).try_into(),
         hover => HOVER, ViewBasicProp::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),

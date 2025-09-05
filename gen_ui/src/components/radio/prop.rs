@@ -19,7 +19,7 @@ use crate::{
     },
     state_colors,
     themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable,
 };
 use makepad_widgets::*;
@@ -90,7 +90,7 @@ impl Prop for RadioProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     RadioProp {
         basic => BASIC, RadioBasicProp::default(),|v| (v, RadioState::Basic).try_into(),
         hover => HOVER, RadioBasicProp::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),

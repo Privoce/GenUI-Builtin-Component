@@ -23,7 +23,7 @@ use crate::{
     },
     state_colors,
     themes::{Color, Theme, TomlValueTo},
-    try_from_toml_item,
+    interconvert_prop_toml,
     utils::get_from_itable as get,
 };
 
@@ -51,7 +51,7 @@ impl Default for LinkProp {
     }
 }
 
-try_from_toml_item! {
+interconvert_prop_toml! {
     LinkProp {
         basic => BASIC, LinkBasicProp::default(), |v| (v, LinkState::Basic).try_into(),
         hover => HOVER, LinkBasicProp::from_state(Theme::default(), LinkState::Hover), |v| (v, LinkState::Hover).try_into(),

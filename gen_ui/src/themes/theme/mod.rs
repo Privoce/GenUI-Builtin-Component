@@ -11,7 +11,7 @@ use crate::{
     error::Error,
     prop::{
         manuel::{DARK, DARK_UP, ERROR, ERROR_UP, INFO, INFO_UP, PRIMARY, PRIMARY_UP, SUCCESS, SUCCESS_UP, WARNING, WARNING_UP},
-        traits::FromLiveValue,
+        traits::{FromLiveValue, ToTomlValue},
     },
 };
 
@@ -45,6 +45,7 @@ impl FromLiveValue for Theme {
         }
     }
 }
+
 
 impl From<&LiveValue> for Theme {
     fn from(value: &LiveValue) -> Self {
@@ -319,6 +320,13 @@ impl From<Theme> for Value {
             }
             .to_string(),
         ))
+    }
+}
+
+
+impl ToTomlValue for Theme {
+    fn to_toml_value(&self) -> Value {
+        Value::from(*self)
     }
 }
 
