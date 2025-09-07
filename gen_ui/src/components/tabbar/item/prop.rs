@@ -10,24 +10,21 @@ use crate::{
         svg::{SvgBasicProp, SvgPart, SvgState},
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    }, error::Error, get_get_mut, prop::{
+    }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, HOVER, ICON, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Radius,
-    }, themes::Theme, prop_interconvert, utils::get_from_itable
+    }, prop_interconvert, themes::Theme, utils::get_from_itable
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct TabbarItemProp {
-    #[live(TabbarItemBasicProp::default())]
-    pub basic: TabbarItemBasicProp,
-    #[live(TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover))]
-    pub hover: TabbarItemBasicProp,
-    #[live(TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Active))]
-    pub active: TabbarItemBasicProp,
-    #[live(TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Disabled))]
-    pub disabled: TabbarItemBasicProp,
+prop_interconvert! {
+    TabbarItemProp {
+        basic_prop = TabbarItemBasicProp;
+        basic => BASIC, TabbarItemBasicProp::default(), |v| (v, TabbarItemState::Basic).try_into(),
+        hover => HOVER, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover), |v| (v, TabbarItemState::Hover).try_into(),
+        active => ACTIVE, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Active), |v| (v, TabbarItemState::Active).try_into(),
+        disabled => DISABLED, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Disabled), |v| (v, TabbarItemState::Disabled).try_into()
+    }, "[component.tabbar_item] should be a table"
 }
 
 impl SlotProp for TabbarItemProp {
@@ -49,26 +46,6 @@ impl SlotProp for TabbarItemProp {
             ],
         );
     }
-}
-
-impl Default for TabbarItemProp {
-    fn default() -> Self {
-        Self {
-            basic: TabbarItemBasicProp::default(),
-            hover: TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover),
-            active: TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Active),
-            disabled: TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Disabled),
-        }
-    }
-}
-
-prop_interconvert! {
-    TabbarItemProp {
-        basic => BASIC, TabbarItemBasicProp::default(), |v| (v, TabbarItemState::Basic).try_into(),
-        hover => HOVER, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover), |v| (v, TabbarItemState::Hover).try_into(),
-        active => ACTIVE, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Active), |v| (v, TabbarItemState::Active).try_into(),
-        disabled => DISABLED, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Disabled), |v| (v, TabbarItemState::Disabled).try_into()
-    }, "[component.tabbar_item] should be a table"
 }
 
 impl Prop for TabbarItemProp {
@@ -109,6 +86,14 @@ pub struct TabbarItemBasicProp {
 impl Default for TabbarItemBasicProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), TabbarItemState::default())
+    }
+}
+
+from_prop_to_toml!{
+    TabbarItemBasicProp {
+        icon => ICON,
+        text => TEXT,
+        container => CONTAINER
     }
 }
 

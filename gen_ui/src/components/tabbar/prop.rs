@@ -1,5 +1,4 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
     component_state,
@@ -17,31 +16,19 @@ use crate::{
             PADDING, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME,
             WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl, Radius,
     },
-    state_colors,
-    themes::{Color, Theme, TomlValueTo},
-    prop_interconvert,
-    utils::get_from_itable,
+    prop_interconvert, state_colors,
+    themes::{Theme, TomlValueTo},
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct TabbarProp {
-    #[live(TabbarBasicProp::default())]
-    pub basic: TabbarBasicProp,
-    #[live(TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled))]
-    pub disabled: TabbarBasicProp,
-}
-
-impl Default for TabbarProp {
-    fn default() -> Self {
-        Self {
-            basic: TabbarBasicProp::default(),
-            disabled: TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled),
-        }
-    }
+prop_interconvert! {
+    TabbarProp {
+        basic_prop = TabbarBasicProp;
+        basic => BASIC, TabbarBasicProp::default(),|v| (v, TabbarState::Basic).try_into(),
+        disabled => DISABLED, TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled), |v| (v, TabbarState::Disabled).try_into()
+    }, "[component.tabbar] should be a table"
 }
 
 impl Prop for TabbarProp {
@@ -67,13 +54,6 @@ impl Prop for TabbarProp {
             [(TabbarState::Disabled, &mut self.disabled)],
         );
     }
-}
-
-prop_interconvert! {
-    TabbarProp {
-        basic => BASIC, TabbarBasicProp::default(),|v| (v, TabbarState::Basic).try_into(),
-        disabled => DISABLED, TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled), |v| (v, TabbarState::Disabled).try_into()
-    }, "[component.tabbar] should be a table"
 }
 
 inherits_view_basic_prop! {

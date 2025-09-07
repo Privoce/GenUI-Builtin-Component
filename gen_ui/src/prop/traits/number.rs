@@ -1,5 +1,7 @@
-use crate::prop::traits::FromLiveValue;
+use crate::prop::traits::{FromLiveValue, ToTomlValue};
 use makepad_widgets::LiveValue;
+use toml_edit::Value;
+
 impl FromLiveValue for f32 {
     fn from_live_value(v: &LiveValue) -> Option<Self>
     where
@@ -25,3 +27,20 @@ impl FromLiveValue for f64 {
     }
 }
 
+impl ToTomlValue for f64 {
+    fn to_toml_value(&self) -> Value {
+        Value::Float(toml_edit::Formatted::new(*self))
+    }
+}
+
+impl ToTomlValue for f32 {
+    fn to_toml_value(&self) -> Value {
+        Value::Float(toml_edit::Formatted::new(*self as f64))
+    }
+}
+
+impl ToTomlValue for usize {
+    fn to_toml_value(&self) -> Value {
+        Value::Integer(toml_edit::Formatted::new(*self as i64))
+    }
+}

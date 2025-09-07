@@ -1,20 +1,25 @@
 use makepad_widgets::*;
-use toml_edit::Item;
 
 use crate::{
-    basic_prop_interconvert, component_state, components::{
+    basic_prop_interconvert, component_colors, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
         view::{ViewBasicProp, ViewState},
-    }, error::Error, get_get_mut, getter_setter_prop, prop::{
+    },
+    error::Error,
+    get_get_mut, getter_setter_prop,
+    prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, FLOW, HEIGHT, HOVER, MARGIN, PADDING,
             PRESSED, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToTomlValue, ToColor},
         ApplyStateMapImpl, Radius,
-    }, prop_interconvert, state_colors, themes::{Color, Theme, TomlValueTo}, utils::get_from_itable
+    },
+    prop_interconvert, state_colors,
+    themes::{Color, Theme, TomlValueTo},
 };
 
 prop_interconvert! {
@@ -59,86 +64,32 @@ impl Prop for ButtonProp {
     }
 }
 
-
-
-// #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-// #[live_ignore]
-// pub struct ButtonBasicProp {
-//     #[live]
-//     pub theme: Theme,
-//     // --- background ----------------
-//     #[live]
-//     pub background_color: Vec4,
-//     #[live(true)]
-//     pub background_visible: bool,
-//     // --- shadow -------------------
-//     #[live]
-//     pub shadow_color: Vec4,
-//     #[live(0.0)]
-//     pub spread_radius: f32,
-//     #[live(0.0)]
-//     pub blur_radius: f32,
-//     #[live(vec2(0.0, 0.0))]
-//     pub shadow_offset: Vec2,
-//     // --- border -------------------
-//     #[live(0.0)]
-//     pub border_width: f32,
-//     #[live]
-//     pub border_color: Vec4,
-//     #[live(Radius::new(4.0))]
-//     pub border_radius: Radius,
-//     // --- cursor -------------------
-//     #[live(MouseCursor::Hand)]
-//     pub cursor: MouseCursor,
-//     #[live(Margin::from_f64(0.0))]
-//     pub margin: Margin,
-//     #[live(Padding::from_xy(10.0, 16.0))]
-//     pub padding: Padding,
-//     #[live(Flow::Right)]
-//     pub flow: Flow,
-//     #[live(Align::from_f64(0.5))]
-//     pub align: Align,
-//     #[live(Size::Fit)]
-//     pub height: Size,
-//     #[live(Size::Fit)]
-//     pub width: Size,
-//     #[live(6.0)]
-//     pub spacing: f64,
-//     #[live(None)]
-//     pub abs_pos: Option<DVec2>,
-// }
-
-// impl Default for ButtonBasicProp {
-//     fn default() -> Self {
-//         Self::from_state(Theme::default(), ButtonState::Basic)
-//     }
-// }
-
 basic_prop_interconvert! {
     ButtonBasicProp {
         state = ButtonState;
-        colors = (background_color, border_color, shadow_color);
-        background_color => BACKGROUND_COLOR, |v| v.try_into(),
-        shadow_color => SHADOW_COLOR, |v| v.try_into(),
-        border_color => BORDER_COLOR, |v| v.try_into(),
+        {
+            background_color => BACKGROUND_COLOR, |v| v.try_into(),
+            shadow_color => SHADOW_COLOR, |v| v.try_into(),
+            border_color => BORDER_COLOR, |v| v.try_into()
+        };
         {
             background_visible: bool => BACKGROUND_VISIBLE, true, |v| v.to_bool(),
             spread_radius: f32 => SPREAD_RADIUS, 0.0, |v| v.to_f32(),
             blur_radius: f32 => BLUR_RADIUS, 0.0, |v| v.to_f32(),
-            shadow_offset: Vec2 => SHADOW_OFFSET, vec2(0.0, 0.0), |v| v.to_vec2(),
+            shadow_offset: Vec2 => SHADOW_OFFSET, vec2(0.0, 0.0), |v| v.to_vec2(shadow_offset),
             border_width: f32 => BORDER_WIDTH, 0.0, |v| v.to_f32(),
-            border_radius: Radius => BORDER_RADIUS, Radius::new(4.0), |v| v.to_radius(Radius::new(4.0)),
+            border_radius: Radius => BORDER_RADIUS, Radius::new(4.0), |v| v.try_into(),
             cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor(),
-            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(Margin::from_f64(0.0)),
-            padding: Padding => PADDING, Padding::from_xy(10.0, 16.0), |v| v.to_padding(Padding::from_xy(10.0, 16.0)),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            padding: Padding => PADDING, Padding::from_xy(10.0, 16.0), |v| v.to_padding(padding),
             flow: Flow => FLOW, Flow::Right, |v| v.to_flow(),
-            align: Align => ALIGN, Align::from_f64(0.5), |v| v.to_align(Align::from_f64(0.5)),
+            align: Align => ALIGN, Align::from_f64(0.5), |v| v.to_align(align),
             height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
             width: Size => WIDTH, Size::Fit, |v| v.to_size(),
             spacing: f64 => SPACING, 6.0, |v| v.to_f64(),
-            abs_pos: Option<DVec2> => ABS_POS, None, |v| v.to_dvec2_option()
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some)
         }
-    }, "LabelBasicProp should be a inline table"
+    }, "ButtonBasicProp should be a inline table"
 }
 
 impl From<&ButtonBasicProp> for ViewBasicProp {
@@ -193,11 +144,17 @@ impl From<&ButtonBasicProp> for ViewBasicProp {
     }
 }
 
+component_colors! {
+    ButtonColors {
+        colors = (Color, Color, Color);
+        background_color, border_color, shadow_color
+    }
+}
 
 impl BasicProp for ButtonBasicProp {
     type State = ButtonState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = ButtonColors;
 
     fn len() -> usize {
         19
@@ -210,17 +167,17 @@ impl BasicProp for ButtonBasicProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
-                let (background_color, _, _) = Self::state_colors(self.theme, state);
+                let color = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    Vec4::from_live_color(value).unwrap_or(color.background_color.into());
             }
             BACKGROUND_VISIBLE => {
                 self.background_visible = bool::from_live_value(value).unwrap_or(true);
             }
             SHADOW_COLOR => {
-                let (_, _, shadow_color) = Self::state_colors(self.theme, state);
-                 
-                self.shadow_color = Vec4::from_live_color(value).unwrap_or(shadow_color.into());
+                let color = Self::state_colors(self.theme, state);
+                self.shadow_color =
+                    Vec4::from_live_color(value).unwrap_or(color.shadow_color.into());
             }
             SPREAD_RADIUS => {
                 self.spread_radius = f32::from_live_value(value).unwrap_or(0.0);
@@ -235,8 +192,9 @@ impl BasicProp for ButtonBasicProp {
                 self.border_width = f32::from_live_value(value).unwrap_or(0.0);
             }
             BORDER_COLOR => {
-                let (_, border_color, _) = Self::state_colors(self.theme, state);
-                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+                let color = Self::state_colors(self.theme, state);
+                self.border_color =
+                    Vec4::from_live_color(value).unwrap_or(color.border_color.into());
             }
             BORDER_RADIUS => {
                 self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(4.0));
@@ -279,14 +237,22 @@ impl BasicProp for ButtonBasicProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let (background_color, border_color, shadow_color) = Self::state_colors(self.theme, state);
+        let ButtonColors {
+            background_color,
+            border_color,
+            shadow_color,
+        } = Self::state_colors(self.theme, state);
         self.background_color = background_color.into();
         self.border_color = border_color.into();
         self.shadow_color = shadow_color.into();
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);
+        let ButtonColors {
+            background_color,
+            border_color,
+            shadow_color,
+        } = Self::state_colors(theme, state);
 
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
@@ -397,118 +363,6 @@ impl BasicProp for ButtonBasicProp {
         }
     }
 }
-
-// impl TryFrom<(&Item, ButtonState)> for ButtonBasicProp {
-//     type Error = Error;
-
-//     fn try_from((value, state): (&Item, ButtonState)) -> Result<Self, Self::Error> {
-//         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-//             "[component.button.$state] should be an inline table".to_string(),
-//         ))?;
-
-//         let theme = Theme::default();
-//         let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-//         let (background_color, border_color, shadow_color) = Self::state_colors(theme, state);
-
-//         let background_color = get_from_itable(
-//             inline_table,
-//             BACKGROUND_COLOR,
-//             || Ok(background_color),
-//             |v| v.try_into(),
-//         )?
-//         .into();
-
-//         let background_visible = get_from_itable(
-//             inline_table,
-//             BACKGROUND_VISIBLE,
-//             || Ok(true),
-//             |v| v.to_bool(),
-//         )?;
-//         let shadow_color = get_from_itable(
-//             inline_table,
-//             SHADOW_COLOR,
-//             || Ok(shadow_color),
-//             |v| v.try_into(),
-//         )?
-//         .into();
-
-//         let spread_radius =
-//             get_from_itable(inline_table, SPREAD_RADIUS, || Ok(0.0), |v| v.to_f32())?;
-//         let blur_radius = get_from_itable(inline_table, BLUR_RADIUS, || Ok(0.0), |v| v.to_f32())?;
-//         let shadow_offset = vec2(0.0, 0.0);
-//         let shadow_offset = get_from_itable(
-//             inline_table,
-//             SHADOW_OFFSET,
-//             || Ok(shadow_offset),
-//             |v| v.to_vec2(shadow_offset),
-//         )?;
-
-//         let border_width = get_from_itable(inline_table, BORDER_WIDTH, || Ok(0.0), |v| v.to_f32())?;
-//         let border_color = get_from_itable(
-//             inline_table,
-//             BORDER_COLOR,
-//             || Ok(border_color),
-//             |v| v.try_into(),
-//         )?
-//         .into();
-//         let border_radius = get_from_itable(
-//             inline_table,
-//             BORDER_RADIUS,
-//             || Ok(Radius::new(6.0)),
-//             |v| v.try_into(),
-//         )?;
-//         let cursor = if state.is_disabled() {
-//             MouseCursor::NotAllowed
-//         } else {
-//             MouseCursor::Hand
-//         };
-
-//         let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-//         let margin = Margin::from_f64(0.0);
-//         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-//         let padding = Padding::from_xy(10.0, 16.0);
-//         let padding = get_from_itable(
-//             inline_table,
-//             PADDING,
-//             || Ok(padding),
-//             |v| v.to_padding(padding),
-//         )?;
-//         let flow = get_from_itable(inline_table, FLOW, || Ok(Flow::Right), |v| v.to_flow())?;
-//         let align = Align::from_f64(0.5);
-//         let align = get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
-//         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
-//         let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fit), |v| v.to_size())?;
-//         let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
-//         let abs_pos = get_from_itable(
-//             inline_table,
-//             ABS_POS,
-//             || Ok(None),
-//             |v| v.to_dvec2().map(Some),
-//         )?;
-
-//         Ok(Self {
-//             theme,
-//             background_color,
-//             background_visible,
-//             shadow_color,
-//             spread_radius,
-//             blur_radius,
-//             shadow_offset,
-//             border_width,
-//             border_color,
-//             border_radius,
-//             cursor,
-//             margin,
-//             padding,
-//             flow,
-//             align,
-//             height,
-//             width,
-//             spacing,
-//             abs_pos,
-//         })
-//     }
-// }
 
 impl ButtonBasicProp {
     getter_setter_prop! {

@@ -2,37 +2,27 @@ use makepad_widgets::*;
 use toml_edit::Item;
 
 use crate::{
-    component_part, component_state,
-    components::{
+    component_colors, component_part, component_state, components::{
         label::LabelState,
         live_props::LiveProps,
         svg::SvgState,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
-    },
-    error::Error,
-    get_get_mut,
-    prop::{
+        view::{ViewBasicProp, ViewState}, ViewColors,
+    }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{BASIC, BODY, CONTAINER, DISABLED, HEADER, HOVER, PRESSED},
         traits::NewFrom,
         ApplySlotMapImpl, Applys,
-    },
-    themes::{Color, Theme},
-    prop_interconvert,
-    utils::get_from_itable,
+    }, prop_interconvert, themes::{Color, Theme}, utils::get_from_itable
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct CollapseProp {
-    #[live(CollapseBasicProp::default())]
-    pub basic: CollapseBasicProp,
-    #[live(CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover))]
-    pub hover: CollapseBasicProp,
-    #[live(CollapseBasicProp::from_state(Theme::default(), CollapseState::Active))]
-    pub active: CollapseBasicProp,
-    #[live(CollapseBasicProp::from_state(Theme::default(), CollapseState::Disabled))]
-    pub disabled: CollapseBasicProp,
+prop_interconvert! {
+    CollapseProp {
+        basic_prop = CollapseBasicProp;
+        basic => BASIC, CollapseBasicProp::default(), |v| (v, CollapseState::Basic).try_into(),
+        hover => HOVER, CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover), |v| (v, CollapseState::Hover).try_into(),
+        active => PRESSED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Active), |v| (v, CollapseState::Active).try_into(),
+        disabled => DISABLED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Disabled), |v| (v, CollapseState::Disabled).try_into()
+    }, "[component.menu_item] should be a table"
 }
 
 impl Prop for CollapseProp {
@@ -80,26 +70,6 @@ impl SlotProp for CollapseProp {
     }
 }
 
-prop_interconvert! {
-    CollapseProp {
-        basic => BASIC, CollapseBasicProp::default(), |v| (v, CollapseState::Basic).try_into(),
-        hover => HOVER, CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover), |v| (v, CollapseState::Hover).try_into(),
-        active => PRESSED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Active), |v| (v, CollapseState::Active).try_into(),
-        disabled => DISABLED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Disabled), |v| (v, CollapseState::Disabled).try_into()
-    }, "[component.menu_item] should be a table"
-}
-
-impl Default for CollapseProp {
-    fn default() -> Self {
-        Self {
-            basic: CollapseBasicProp::default(),
-            hover: CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover),
-            active: CollapseBasicProp::from_state(Theme::default(), CollapseState::Active),
-            disabled: CollapseBasicProp::from_state(Theme::default(), CollapseState::Disabled),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct CollapseBasicProp {
@@ -111,10 +81,35 @@ pub struct CollapseBasicProp {
     pub body: ViewBasicProp,
 }
 
+component_colors!{
+    CollapseColors {
+        colors = (Color, Color, Color);
+        background_color, border_color, shadow_color
+    }
+}
+
+from_prop_to_toml!{
+    CollapseBasicProp {
+        container => CONTAINER,
+        header => HEADER,
+        body => BODY
+    }
+}
+
+impl From<ViewColors> for CollapseColors {
+    fn from(value: ViewColors) -> Self {
+        Self {
+            background_color: value.background_color,
+            border_color: value.border_color,
+            shadow_color: value.shadow_color,
+        }
+    }
+}
+
 impl BasicProp for CollapseBasicProp {
     type State = CollapseState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = CollapseColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
@@ -125,7 +120,7 @@ impl BasicProp for CollapseBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into())
+        ViewBasicProp::state_colors(theme, state.into()).into()
     }
 
     fn len() -> usize {

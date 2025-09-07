@@ -9,28 +9,27 @@ use crate::{
         svg::SvgState,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
+        ViewColors,
     },
     error::Error,
-    get_get_mut,
+    from_prop_to_toml, get_get_mut,
     prop::{
         manuel::{ACTIVE, BASIC, BODY, CONTAINER, DISABLED, HEADER},
         traits::NewFrom,
         ApplySlotMapImpl, Applys,
     },
-    themes::{Color, Theme},
     prop_interconvert,
+    themes::Theme,
     utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct SubMenuProp {
-    #[live(SubMenuBasicProp::default())]
-    pub basic: SubMenuBasicProp,
-    #[live(SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active))]
-    pub active: SubMenuBasicProp,
-    #[live(SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled))]
-    pub disabled: SubMenuBasicProp,
+prop_interconvert! {
+    SubMenuProp {
+        basic_prop = SubMenuBasicProp;
+        basic => BASIC, SubMenuBasicProp::default(), |v| (v, SubMenuState::Basic).try_into(),
+        active => ACTIVE, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
+        disabled => DISABLED, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled), |v| (v, SubMenuState::Disabled).try_into()
+    }, "[component.sub_menu] should be a table"
 }
 
 impl Prop for SubMenuProp {
@@ -76,24 +75,6 @@ impl SlotProp for SubMenuProp {
     }
 }
 
-prop_interconvert! {
-    SubMenuProp {
-        basic => BASIC, SubMenuBasicProp::default(), |v| (v, SubMenuState::Basic).try_into(),
-        active => ACTIVE, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
-        disabled => DISABLED, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled), |v| (v, SubMenuState::Disabled).try_into()
-    }, "[component.sub_menu] should be a table"
-}
-
-impl Default for SubMenuProp {
-    fn default() -> Self {
-        Self {
-            basic: SubMenuBasicProp::default(),
-            active: SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active),
-            disabled: SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct SubMenuBasicProp {
@@ -105,10 +86,18 @@ pub struct SubMenuBasicProp {
     pub body: ViewBasicProp,
 }
 
+from_prop_to_toml! {
+    SubMenuBasicProp {
+        container => CONTAINER,
+        header => HEADER,
+        body => BODY
+    }
+}
+
 impl BasicProp for SubMenuBasicProp {
     type State = SubMenuState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = ViewColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {

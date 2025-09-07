@@ -1,5 +1,5 @@
 use crate::{
-    prop::traits::{FromLiveColor, FromLiveValue, ToColor, ToU32},
+    prop::traits::{FromLiveColor, FromLiveValue, ToColor, ToTomlValue, ToU32},
     themes::{Color, Hex},
 };
 
@@ -124,6 +124,47 @@ impl FromLiveValue for DVec2 {
             Some((*vec2).into())
         } else {
             None
+        }
+    }
+}
+
+impl ToTomlValue for Vec2 {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert("x", self.x.to_toml_value());
+        inline_table.insert("y", self.y.to_toml_value());
+        toml_edit::Value::InlineTable(inline_table)
+    }
+}
+
+impl ToTomlValue for Vec3 {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert("x", self.x.to_toml_value());
+        inline_table.insert("y", self.y.to_toml_value());
+        inline_table.insert("z", self.z.to_toml_value());
+        toml_edit::Value::InlineTable(inline_table)
+    }
+}
+
+impl ToTomlValue for Vec4 {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert("x", self.x.to_toml_value());
+        inline_table.insert("y", self.y.to_toml_value());
+        inline_table.insert("z", self.z.to_toml_value());
+        inline_table.insert("w", self.w.to_toml_value());
+        toml_edit::Value::InlineTable(inline_table)
+    }
+}
+
+pub type AbsPos = Option<DVec2>;
+
+impl ToTomlValue for AbsPos {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        match self {
+            Some(dvec2) => format!("vec2({}, {})", dvec2.x, dvec2.y).to_toml_value(),
+            None => "None".to_string().to_toml_value(),
         }
     }
 }

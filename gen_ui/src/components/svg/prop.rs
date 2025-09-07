@@ -2,33 +2,38 @@ use makepad_widgets::*;
 use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_part, component_state, components::{
+    basic_prop_interconvert, component_color, component_part, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::ViewState, ViewBasicProp,
-    }, error::Error, from_inherit_to_view_basic_prop, get_get_mut, inherits_view_basic_prop, prop::{
+        view::ViewState,
+        ViewBasicProp,
+    },
+    error::Error,
+    from_inherit_to_view_basic_prop, from_prop_to_toml, get_get_mut, inherits_view_basic_prop,
+    prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, COLOR, CONTAINER, CURSOR, DISABLED, FLOW,
             HEIGHT, HOVER, MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET,
             SPACING, SPREAD_RADIUS, SVG, THEME, WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplySlotMapImpl, Radius,
-    }, state_color, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    },
+    prop_interconvert, state_color, state_colors,
+    themes::{Theme, TomlValueTo},
+    utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct SvgProp {
-    #[live(SvgBasicProp::default())]
-    pub basic: SvgBasicProp,
-    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Hover))]
-    pub hover: SvgBasicProp,
-    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Pressed))]
-    pub pressed: SvgBasicProp,
-    #[live(SvgBasicProp::from_state(Theme::default(), SvgState::Disabled))]
-    pub disabled: SvgBasicProp,
+prop_interconvert! {
+    SvgProp {
+        basic_prop = SvgBasicProp;
+        basic => BASIC, SvgBasicProp::default(), |v| (v, SvgState::Basic).try_into(),
+        hover => HOVER, SvgBasicProp::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),
+        pressed => PRESSED, SvgBasicProp::from_state(Theme::default(), SvgState::Pressed), |v| (v, SvgState::Pressed).try_into(),
+        disabled => DISABLED, SvgBasicProp::from_state(Theme::default(), SvgState::Disabled), |v| (v, SvgState::Disabled).try_into()
+    }, "[components.svg] should be a table"
 }
 
 impl Prop for SvgProp {
@@ -72,26 +77,6 @@ impl SlotProp for SvgProp {
     }
 }
 
-impl Default for SvgProp {
-    fn default() -> Self {
-        Self {
-            basic: SvgBasicProp::default(),
-            hover: SvgBasicProp::from_state(Theme::default(), SvgState::Hover),
-            pressed: SvgBasicProp::from_state(Theme::default(), SvgState::Pressed),
-            disabled: SvgBasicProp::from_state(Theme::default(), SvgState::Disabled),
-        }
-    }
-}
-
-prop_interconvert! {
-    SvgProp {
-        basic => BASIC, SvgBasicProp::default(), |v| (v, SvgState::Basic).try_into(),
-        hover => HOVER, SvgBasicProp::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),
-        pressed => PRESSED, SvgBasicProp::from_state(Theme::default(), SvgState::Pressed), |v| (v, SvgState::Pressed).try_into(),
-        disabled => DISABLED, SvgBasicProp::from_state(Theme::default(), SvgState::Disabled), |v| (v, SvgState::Disabled).try_into()
-    }, "[components.svg] should be a table"
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct SvgBasicProp {
@@ -107,6 +92,13 @@ impl Default for SvgBasicProp {
     }
 }
 
+from_prop_to_toml! {
+    SvgBasicProp {
+        svg => SVG,
+        container => CONTAINER
+    }
+}
+
 impl SlotBasicProp for SvgBasicProp {
     type Part = SvgPart;
 
@@ -119,8 +111,7 @@ impl SlotBasicProp for SvgBasicProp {
     ) -> () {
         match part {
             SvgPart::Container => {
-                self.container
-                    .set_from_str(key, &value.into(), state);
+                self.container.set_from_str(key, &value.into(), state);
             }
             SvgPart::Svg => self.svg.set_from_str(key, &value.into(), state),
         }
@@ -137,7 +128,7 @@ impl SlotBasicProp for SvgBasicProp {
 impl BasicProp for SvgBasicProp {
     type State = SvgState;
 
-    type Colors = Color;
+    type Colors = SvgColors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
         Self {
@@ -234,41 +225,39 @@ impl SvgBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
-#[live_ignore]
-pub struct SvgPartProp {
-    #[live]
-    pub theme: Theme,
-    #[live]
-    pub color: Vec4,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(MouseCursor::default())]
-    pub cursor: MouseCursor,
-    #[live(Size::Fit)]
-    pub height: Size,
-    #[live(Size::Fixed(16.0))]
-    pub width: Size,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
+basic_prop_interconvert! {
+    SvgPartProp {
+        state = SvgState;
+        {
+            color => COLOR, |v| v.try_into()
+        };
+        {
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            cursor: MouseCursor => CURSOR, MouseCursor::Default, |v| v.to_cursor(),
+            height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
+            width: Size => WIDTH, Size::Fixed(16.0), |v| v.to_size(),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some)
+        }
+    }, "[components.svg.svg] should be an inline table"
 }
 
-impl Default for SvgPartProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), SvgState::default())
+component_color! {
+    SvgColors {
+        colors = (Color);
+        color
     }
 }
 
 impl BasicProp for SvgPartProp {
     type State = SvgState;
     /// color
-    type Colors = Color;
+    type Colors = SvgColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
-        let color = Self::state_colors(theme, state).into();
+        let SvgColors { color } = Self::state_colors(theme, state);
         Self {
             theme,
-            color,
+            color: color.into(),
             margin: Margin::from_f64(0.0),
             cursor: MouseCursor::default(),
             height: Size::Fit,
@@ -296,7 +285,7 @@ impl BasicProp for SvgPartProp {
                 self.sync(state);
             }
             COLOR => {
-                let color = Self::state_colors(self.theme, state);
+                let SvgColors { color } = Self::state_colors(self.theme, state);
                 self.color = Vec4::from_live_color(value).unwrap_or(color.into());
             }
             MARGIN => {
@@ -316,7 +305,7 @@ impl BasicProp for SvgPartProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let color = Self::state_colors(self.theme, state);
+        let SvgColors { color } = Self::state_colors(self.theme, state);
         self.color = color.into();
     }
 
@@ -359,61 +348,56 @@ impl BasicProp for SvgPartProp {
     }
 }
 
-impl TryFrom<(&Value, SvgState)> for SvgPartProp {
-    type Error = Error;
+// impl TryFrom<(&Value, SvgState)> for SvgPartProp {
+//     type Error = Error;
 
-    fn try_from((value, state): (&Value, SvgState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[components.svg.svg] should be an inline table".to_string(),
-        ))?;
+//     fn try_from((value, state): (&Value, SvgState)) -> Result<Self, Self::Error> {
+//         let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
+//             "[components.svg.svg] should be an inline table".to_string(),
+//         ))?;
 
-        let theme = Theme::default();
-        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-        let color = Self::state_colors(theme, state);
-        let color = get_from_itable(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let cursor = get_from_itable(
-            inline_table,
-            CURSOR,
-            || Ok(MouseCursor::Default),
-            |v| v.to_cursor(),
-        )?;
-        let height = get_from_itable(
-            inline_table,
-            HEIGHT,
-            || Ok(Size::Fit),
-            |v| v.to_size(),
-        )?;
-        let width = get_from_itable(
-            inline_table,
-            WIDTH,
-            || Ok(Size::Fixed(16.0)),
-            |v| v.to_size(),
-        )?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-        Ok(Self {
-            theme,
-            color,
-            margin,
-            cursor,
-            height,
-            width,
-            abs_pos,
-        })
-    }
-}
+//         let theme = Theme::default();
+//         let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
+//         let color = Self::state_colors(theme, state);
+//         let color = get_from_itable(
+//             inline_table,
+//             BACKGROUND_COLOR,
+//             || Ok(color),
+//             |v| v.try_into(),
+//         )?
+//         .into();
+//         let margin = Margin::from_f64(0.0);
+//         let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
+//         let cursor = get_from_itable(
+//             inline_table,
+//             CURSOR,
+//             || Ok(MouseCursor::Default),
+//             |v| v.to_cursor(),
+//         )?;
+//         let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fit), |v| v.to_size())?;
+//         let width = get_from_itable(
+//             inline_table,
+//             WIDTH,
+//             || Ok(Size::Fixed(16.0)),
+//             |v| v.to_size(),
+//         )?;
+//         let abs_pos = get_from_itable(
+//             inline_table,
+//             ABS_POS,
+//             || Ok(None),
+//             |v| v.to_dvec2().map(Some),
+//         )?;
+//         Ok(Self {
+//             theme,
+//             color,
+//             margin,
+//             cursor,
+//             height,
+//             width,
+//             abs_pos,
+//         })
+//     }
+// }
 
 component_state! {
     SvgState {
@@ -448,7 +432,7 @@ component_part! {
     } , SvgState
 }
 
-inherits_view_basic_prop!{
+inherits_view_basic_prop! {
     SvgContainerProp {
         border_width: 0.0,
         border_radius: Radius::new(4.0),
@@ -469,7 +453,7 @@ inherits_view_basic_prop!{
         height: Size::Fit,
         width: Size::Fit,
         abs_pos: None,
-    }, SvgState, "svg.container", 
+    }, SvgState, "svg.container",
     {
         SvgState::Basic => (500, 500, 400),
         SvgState::Hover => (400, 400, 300),

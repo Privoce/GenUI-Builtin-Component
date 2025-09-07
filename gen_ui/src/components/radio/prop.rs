@@ -1,5 +1,5 @@
 use crate::{
-    component_part, component_state,
+    basic_prop_interconvert, component_colors, component_part, component_state,
     components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
@@ -7,46 +7,31 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
-    get_get_mut,
+    from_prop_to_toml, get_get_mut,
     prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_WIDTH, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, RADIO, SIZE,
             STROKE_COLOR, THEME,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ActiveMode, ApplySlotMapImpl,
     },
-    state_colors,
+    prop_interconvert, state_colors,
     themes::{Color, Theme, TomlValueTo},
-    prop_interconvert,
     utils::get_from_itable,
 };
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::Item;
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct RadioProp {
-    #[live(RadioBasicProp::default())]
-    pub basic: RadioBasicProp,
-    #[live(RadioBasicProp::from_state(Theme::default(), RadioState::Hover))]
-    pub hover: RadioBasicProp,
-    #[live(RadioBasicProp::from_state(Theme::default(), RadioState::Active))]
-    pub active: RadioBasicProp,
-    #[live(RadioBasicProp::from_state(Theme::default(), RadioState::Disabled))]
-    pub disabled: RadioBasicProp,
-}
-
-impl Default for RadioProp {
-    fn default() -> Self {
-        Self {
-            basic: RadioBasicProp::default(),
-            hover: RadioBasicProp::from_state(Theme::default(), RadioState::Hover),
-            active: RadioBasicProp::from_state(Theme::default(), RadioState::Active),
-            disabled: RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),
-        }
-    }
+prop_interconvert! {
+    RadioProp {
+        basic_prop = RadioBasicProp;
+        basic => BASIC, RadioBasicProp::default(),|v| (v, RadioState::Basic).try_into(),
+        hover => HOVER, RadioBasicProp::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),
+        active => ACTIVE, RadioBasicProp::from_state(Theme::default(), RadioState::Active),|v| (v, RadioState::Active).try_into(),
+        disabled => DISABLED, RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),|v| (v, RadioState::Disabled).try_into()
+    }, "[component.radio] should be a table"
 }
 
 impl SlotProp for RadioProp {
@@ -90,16 +75,7 @@ impl Prop for RadioProp {
     }
 }
 
-prop_interconvert! {
-    RadioProp {
-        basic => BASIC, RadioBasicProp::default(),|v| (v, RadioState::Basic).try_into(),
-        hover => HOVER, RadioBasicProp::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),
-        active => ACTIVE, RadioBasicProp::from_state(Theme::default(), RadioState::Active),|v| (v, RadioState::Active).try_into(),
-        disabled => DISABLED, RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),|v| (v, RadioState::Disabled).try_into()
-    }, "[component.radio] should be a table"
-}
-
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct RadioBasicProp {
     #[live(Self::default_container(Theme::default(), RadioState::Basic))]
@@ -113,6 +89,14 @@ pub struct RadioBasicProp {
 impl Default for RadioBasicProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), RadioState::Basic)
+    }
+}
+
+from_prop_to_toml! {
+    RadioBasicProp {
+        container => CONTAINER,
+        radio => RADIO,
+        extra => EXTRA
     }
 }
 
@@ -147,7 +131,7 @@ impl SlotBasicProp for RadioBasicProp {
 impl BasicProp for RadioBasicProp {
     type State = RadioState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = RadioColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
@@ -252,118 +236,44 @@ impl RadioBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct RadioPartProp {
-    #[live(Theme::default())]
-    pub theme: Theme,
-    #[live(20.0)]
-    pub size: f32,
-    #[live]
-    pub background_color: Vec4,
-    #[live]
-    pub border_color: Vec4,
-    #[live]
-    pub stroke_color: Vec4,
-    #[live(true)]
-    pub background_visible: bool,
-    #[live(1.0)]
-    pub border_width: f32,
-    #[live(ActiveMode::Round)]
-    pub mode: ActiveMode,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
-    #[live(MouseCursor::Hand)]
-    pub cursor: MouseCursor,
+basic_prop_interconvert! {
+    RadioPartProp {
+        state = RadioState;
+        {
+            background_color => BACKGROUND_COLOR, |v| v.try_into(),
+            stroke_color => STROKE_COLOR, |v| v.try_into(),
+            border_color => BORDER_COLOR, |v| v.try_into()
+        };
+        {
+            size: f32 => SIZE, 20.0, |v| v.to_f32(),
+            background_visible: bool => BACKGROUND_VISIBLE, true, |v| v.to_bool(),
+            border_width: f32 => BORDER_WIDTH, 1.0, |v| v.to_f32(),
+            mode: ActiveMode => MODE, ActiveMode::Round, |v| v.try_into(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor()
+        }
+    }, "[component.radio.radio] should be an inline table"
 }
 
-impl TryFrom<(&Value, RadioState)> for RadioPartProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Value, RadioState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.radio.radio] should be an inline table".to_string(),
-        ))?;
-
-        let theme = Theme::default();
-        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
-        let background_color = get_from_itable(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(background_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let stroke_color = get_from_itable(
-            inline_table,
-            STROKE_COLOR,
-            || Ok(stroke_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let border_color = get_from_itable(
-            inline_table,
-            BORDER_COLOR,
-            || Ok(border_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(20.0), |item| item.to_f32())?;
-        let background_visible = get_from_itable(
-            inline_table,
-            BACKGROUND_VISIBLE,
-            || Ok(true),
-            |item| item.to_bool(),
-        )?;
-        let border_width =
-            get_from_itable(inline_table, BORDER_WIDTH, || Ok(1.0), |item| item.to_f32())?;
-        let mode = get_from_itable(
-            inline_table,
-            MODE,
-            || Ok(ActiveMode::Round),
-            |item| item.try_into(),
-        )?;
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::Hand
-        };
-        let cursor = get_from_itable(inline_table, "cursor", || Ok(cursor), |v| v.to_cursor())?;
-
-        Ok(Self {
-            theme,
-            size,
-            background_color,
-            stroke_color,
-            border_color,
-            background_visible,
-            border_width,
-            mode,
-            margin,
-            abs_pos,
-            cursor,
-        })
+component_colors! {
+    RadioColors {
+        colors = (Color, Color, Color);
+        background_color, stroke_color, border_color
     }
 }
 
 impl BasicProp for RadioPartProp {
     type State = RadioState;
     /// (background_color, stroke_color, border_color)
-    type Colors = (Color, Color, Color);
+    type Colors = RadioColors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
+        let RadioColors {
+            background_color,
+            stroke_color,
+            border_color,
+        } = Self::state_colors(theme, state);
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
@@ -403,17 +313,19 @@ impl BasicProp for RadioPartProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
-                let (background_color, _, _) = Self::state_colors(self.theme, state);
+                let colors = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    Vec4::from_live_color(value).unwrap_or(colors.background_color.into());
             }
             STROKE_COLOR => {
-                let (_, stroke_color, _) = Self::state_colors(self.theme, state);
-                self.stroke_color = Vec4::from_live_color(value).unwrap_or(stroke_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.stroke_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.stroke_color.into());
             }
             BORDER_COLOR => {
-                let (_, _, border_color) = Self::state_colors(self.theme, state);
-                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.border_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.border_color.into());
             }
             SIZE => {
                 self.size = f32::from_live_value(value).unwrap_or(20.0);
@@ -446,7 +358,11 @@ impl BasicProp for RadioPartProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let (background_color, stroke_color, border_color) = Self::state_colors(self.theme, state);
+        let RadioColors {
+            background_color,
+            stroke_color,
+            border_color,
+        } = Self::state_colors(self.theme, state);
         self.background_color = background_color.into();
         self.stroke_color = stroke_color.into();
         self.border_color = border_color.into();
@@ -493,12 +409,6 @@ impl BasicProp for RadioPartProp {
             padding: Padding::from_f64(0.0),
             ..Default::default()
         }
-    }
-}
-
-impl Default for RadioPartProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), RadioState::Basic)
     }
 }
 

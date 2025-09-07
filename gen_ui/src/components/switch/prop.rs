@@ -1,45 +1,34 @@
 use crate::{
-    component_state, components::{
+    basic_prop_interconvert, component_colors, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    }, error::Error, get_get_mut, prop::{
+    },
+    error::Error,
+    get_get_mut,
+    prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CURSOR, DISABLED, HOVER_ACTIVE, HOVER_BASIC, MARGIN, SIZE,
             STROKE_COLOR, THEME,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    },
+    prop_interconvert, state_colors,
+    themes::{Color, Theme, TomlValueTo},
 };
 use makepad_widgets::*;
-use toml_edit::Item;
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct SwitchProp {
-    #[live(SwitchBasicProp::default())]
-    pub basic: SwitchBasicProp,
-    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic))]
-    pub hover_basic: SwitchBasicProp,
-    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive))]
-    pub hover_active: SwitchBasicProp,
-    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::Active))]
-    pub active: SwitchBasicProp,
-    #[live(SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled))]
-    pub disabled: SwitchBasicProp,
-}
-
-impl Default for SwitchProp {
-    fn default() -> Self {
-        Self {
-            basic: SwitchBasicProp::default(),
-            hover_basic: SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),
-            hover_active: SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),
-            active: SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),
-            disabled: SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),
-        }
-    }
+prop_interconvert! {
+    SwitchProp {
+        basic_prop = SwitchBasicProp;
+        basic => BASIC, SwitchBasicProp::default(),|v| (v, SwitchState::Basic).try_into(),
+        hover_basic => HOVER_BASIC, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),
+        hover_active => HOVER_ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),|v| (v, SwitchState::HoverActive).try_into(),
+        active => ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),|v| (v, SwitchState::Active).try_into(),
+        disabled => DISABLED, SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),|v| (v, SwitchState::Disabled).try_into()
+    }, "[component.checkbox] should be a table"
 }
 
 impl Prop for SwitchProp {
@@ -76,127 +65,44 @@ impl Prop for SwitchProp {
     }
 }
 
-prop_interconvert! {
-    SwitchProp {
-        basic => BASIC, SwitchBasicProp::default(),|v| (v, SwitchState::Basic).try_into(),
-        hover_basic => HOVER_BASIC, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),
-        hover_active => HOVER_ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),|v| (v, SwitchState::HoverActive).try_into(),
-        active => ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),|v| (v, SwitchState::Active).try_into(),
-        disabled => DISABLED, SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),|v| (v, SwitchState::Disabled).try_into()
-    }, "[component.checkbox] should be a table"
-}
-
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct SwitchBasicProp {
-    #[live(Theme::default())]
-    pub theme: Theme,
-    #[live(24.0)]
-    pub size: f32,
-    #[live]
-    pub background_color: Vec4,
-    #[live]
-    pub border_color: Vec4,
-    #[live]
-    pub stroke_color: Vec4,
-    #[live(true)]
-    pub background_visible: bool,
-    #[live(1.0)]
-    pub border_width: f32,
-    #[live(Radius::new(5.4))]
-    pub border_radius: Radius,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
-    #[live(MouseCursor::Hand)]
-    pub cursor: MouseCursor,
-}
-
-impl TryFrom<(&Item, SwitchState)> for SwitchBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, SwitchState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.checkbox.checkbox] should be an inline table".to_string(),
-        ))?;
-
-        let theme = Theme::default();
-        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
-        let background_color = get_from_itable(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(background_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let stroke_color = get_from_itable(
-            inline_table,
-            STROKE_COLOR,
-            || Ok(stroke_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let border_color = get_from_itable(
-            inline_table,
-            BORDER_COLOR,
-            || Ok(border_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(24.0), |item| item.to_f32())?;
-        let background_visible = get_from_itable(
-            inline_table,
-            BACKGROUND_VISIBLE,
-            || Ok(true),
-            |item| item.to_bool(),
-        )?;
-        let border_width =
-            get_from_itable(inline_table, BORDER_WIDTH, || Ok(1.0), |item| item.to_f32())?;
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::Hand
+basic_prop_interconvert! {
+    SwitchBasicProp {
+        state = SwitchState;
+        {
+            background_color => BACKGROUND_COLOR, |v| v.try_into(),
+            stroke_color => STROKE_COLOR, |v| v.try_into(),
+            border_color => BORDER_COLOR, |v| v.try_into()
         };
-        let cursor = get_from_itable(inline_table, "cursor", || Ok(cursor), |v| v.to_cursor())?;
-        let border_radius = get_from_itable(
-            inline_table,
-            BORDER_RADIUS,
-            || Ok(Radius::new(5.4)),
-            |v| v.try_into(),
-        )?;
-        Ok(Self {
-            theme,
-            size,
-            background_color,
-            stroke_color,
-            border_color,
-            background_visible,
-            border_width,
-            margin,
-            abs_pos,
-            cursor,
-            border_radius,
-        })
+        {
+            size: f32 => SIZE, 24.0, |v| v.to_f32(),
+            background_visible: bool => BACKGROUND_VISIBLE, true, |v| v.to_bool(),
+            border_width: f32 => BORDER_WIDTH, 1.0, |v| v.to_f32(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor(),
+            border_radius: Radius => BORDER_RADIUS, Radius::new(5.4), |v| v.try_into()
+        }
+    }, "[components.switch.$state] should be an inline table"
+}
+
+component_colors! {
+    SwitchColors {
+        colors = (Color, Color, Color);
+        background_color, stroke_color, border_color
     }
 }
 
 impl BasicProp for SwitchBasicProp {
     type State = SwitchState;
     /// (background_color, stroke_color, border_color)
-    type Colors = (Color, Color, Color);
+    type Colors = SwitchColors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
+        let SwitchColors {
+            background_color,
+            stroke_color,
+            border_color,
+        } = Self::state_colors(theme, state);
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
@@ -237,17 +143,19 @@ impl BasicProp for SwitchBasicProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
-                let (background_color, _, _) = Self::state_colors(self.theme, state);
+                let colors = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    Vec4::from_live_color(value).unwrap_or(colors.background_color.into());
             }
             STROKE_COLOR => {
-                let (_, stroke_color, _) = Self::state_colors(self.theme, state);
-                self.stroke_color = Vec4::from_live_color(value).unwrap_or(stroke_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.stroke_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.stroke_color.into());
             }
             BORDER_COLOR => {
-                let (_, _, border_color) = Self::state_colors(self.theme, state);
-                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.border_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.border_color.into());
             }
             SIZE => {
                 self.size = f32::from_live_value(value).unwrap_or(24.0);
@@ -277,7 +185,11 @@ impl BasicProp for SwitchBasicProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let (background_color, stroke_color, border_color) = Self::state_colors(self.theme, state);
+        let SwitchColors {
+            background_color,
+            stroke_color,
+            border_color,
+        } = Self::state_colors(self.theme, state);
         self.background_color = background_color.into();
         self.stroke_color = stroke_color.into();
         self.border_color = border_color.into();
@@ -323,12 +235,6 @@ impl BasicProp for SwitchBasicProp {
             padding: Padding::from_f64(0.0),
             ..Default::default()
         }
-    }
-}
-
-impl Default for SwitchBasicProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), SwitchState::Basic)
     }
 }
 

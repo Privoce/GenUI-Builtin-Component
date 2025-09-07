@@ -14,12 +14,13 @@ use toml_edit::{Formatted, Value};
 
 use crate::error::Error;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub enum Color {
     Hex(Hex),
     RGB(Rgb),
     RGBA(Rgba),
     WHITE,
+    #[default]
     BLACK,
 }
 

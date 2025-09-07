@@ -2,6 +2,16 @@
 /// This macro generates an implementation of `TryFrom<&toml_edit::Item>` for a
 /// specified type. It extracts fields from a TOML table item, providing default
 /// values if the fields are not present.
+/// ## usage
+/// ```rust
+/// prop_interconvert! {
+///     LabelProp {
+///         basic_prop = LabelBasicProp;
+///         basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
+///         disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
+///     }, "[component.label] should be a table"
+/// }
+/// ```
 #[macro_export]
 macro_rules! prop_interconvert {
     ($ty_name: ident {
@@ -10,7 +20,7 @@ macro_rules! prop_interconvert {
             $field: ident => $key: ident, $default: expr, $try_into: expr
         ),*
     }, $e: expr) => {
-        #[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+        #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
         #[live_ignore]
         pub struct $ty_name {
             $(
@@ -58,6 +68,54 @@ macro_rules! prop_interconvert {
     };
 }
 
+#[macro_export]
+macro_rules! try_from_toml_item {
+    ($ty_name: ty {
+        $(
+            $field: ident => $key: ident, $default: expr, $try_into: expr
+        ),*
+    }, $e: expr) => {
+        impl TryFrom<&toml_edit::Item> for $ty_name {
+            type Error = crate::error::Error;
+            fn try_from(value: &toml_edit::Item) -> Result<Self, Self::Error> {
+                let table = value.as_table().ok_or(Error::ThemeStyleParse(
+                    $e.to_string(),
+                ))?;
+                $(
+                    let $field = crate::utils::get_from_table(
+                        table,
+                        $key,
+                        || Ok($default),
+                        $try_into,
+                    )?;
+                )*
+                Ok(Self {
+                    $(
+                        $field,
+                    )*
+                })
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! from_prop_to_toml {
+    ($prop_struct: ident {
+        $(
+            $field: ident => $key: ident
+        ),*
+    }) => {
+        impl From<&$prop_struct> for toml_edit::Value {
+            fn from(value: &$prop_struct) -> Self {
+                let mut itable = toml_edit::InlineTable::new();
+                $(itable.insert($key, (&value.$field).into());)*
+                toml_edit::Value::InlineTable(itable)
+            }
+        }
+    };
+}
+
 /// # basic_prop_interconvert! macro
 /// This macro generates implementations of `TryFrom` and `From` traits for a
 /// specified property struct. It handles conversion from TOML items, values,
@@ -74,8 +132,7 @@ macro_rules! prop_interconvert {
 /// basic_prop_interconvert! {
 ///     LabelBasicProp {
 ///         state = LabelState;
-///         colors = color;
-///         color => COLOR, |v| v.try_into(),
+///         {color => COLOR, |v| v.try_into()};
 ///         {
 ///             font_size: f32 => FONT_SIZE, 12.0, |v| v.to_f32(),
 ///             line_spacing: f32 => LINE_SPACING, 1.0, |v| v.to_f32(),
@@ -91,7 +148,7 @@ macro_rules! prop_interconvert {
 #[macro_export]
 macro_rules! basic_prop_interconvert {
     ($prop_struct: ident {
-        state = $state_ty: ty;
+        state = $state_ty: ident;
         $({$($color: ident => $color_key: ident, $color_try_into: expr),*})?;
         {$($field: ident : $field_ty: ident => $key: ident, $field_val: expr, $try_into: expr),*}
     }, $e: expr) => {
@@ -114,7 +171,7 @@ macro_rules! basic_prop_interconvert {
 
         impl Default for $prop_struct {
             fn default() -> Self {
-                Self::from_state(Theme::default(), LabelState::Basic)
+                Self::from_state(Theme::default(), $state_ty::default())
             }
         }
 
@@ -141,7 +198,8 @@ macro_rules! basic_prop_interconvert {
                 (inline_table, state).try_into()
             }
         }
-
+        
+        #[allow(unused_variables)]
         impl TryFrom<(&toml_edit::InlineTable, $state_ty)> for $prop_struct {
             type Error = crate::error::Error;
 
@@ -174,7 +232,7 @@ macro_rules! basic_prop_interconvert {
             }
         }
 
-        impl From<&$prop_struct> for toml_edit::Item {
+        impl From<&$prop_struct> for toml_edit::Value {
             fn from(value: &$prop_struct) -> Self {
                 let mut inline_table = toml_edit::InlineTable::new();
                 inline_table.insert(THEME, value.theme.to_toml_value());
@@ -184,25 +242,37 @@ macro_rules! basic_prop_interconvert {
                 $(
                     $(inline_table.insert($color_key, value.$color.to_color().into());)*
                 )?
-                toml_edit::Item::Value(toml_edit::Value::InlineTable(inline_table))
+                toml_edit::Value::InlineTable(inline_table)
             }
         }
     };
 }
 
+/// # component_colors! macro
+/// This macro generates a struct with specified color fields and implements
+/// the `From` trait for converting from a tuple of colors to the struct.
+/// ## usage
+/// ```rust
+/// component_colors! {
+///     ButtonColors {
+///         colors = (Color, Color, Color);
+///         background_color, border_color, shadow_color
+///     }
+/// }
+/// ```
 #[macro_export]
 macro_rules! component_colors {
     ($color: ident {
-        colors = ($($color_from: ty)*);
-        $($field: ident)*
+        colors = ($($color_from: ty),*);
+        $($field: ident),*
     }) => {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Copy, Default)]
         pub struct $color {
-            $($field: crate::themes::Color),*
+            $(pub $field: crate::themes::Color),*
         }
 
-        impl From<($($color_from)*)> for $color {
-            fn from(( $($field),* ): ($($color_from)*) ) -> Self {
+        impl From<($($color_from),*)> for $color {
+            fn from(( $($field),* ): ($($color_from),*) ) -> Self {
                 Self {
                     $($field),*
                 }
@@ -219,7 +289,7 @@ macro_rules! component_color {
     }) => {
         #[derive(Debug, Clone, Copy)]
         pub struct $color {
-            $($field: crate::themes::Color),*
+            $(pub $field: crate::themes::Color),*
         }
 
         impl From<crate::themes::Color> for $color {

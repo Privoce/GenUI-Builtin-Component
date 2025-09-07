@@ -76,10 +76,10 @@ impl Widget for THomePage {
         let v1 = self.gview(id!(v1));
         let v2 = self.gview(id!(v2));
         if let Some(_) = btn1.clicked(&actions) {
-            v1.set_visible(cx, !v1.get_visible());
+            let _ = v1.set_visible(cx, !v1.get_visible());
         }
         if let Some(_) = btn2.clicked(&actions) {
-            v2.set_visible(cx, !v2.get_visible());
+            let _ = v2.set_visible(cx, !v2.get_visible());
         }
     }
 }

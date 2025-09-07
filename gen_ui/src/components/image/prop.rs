@@ -1,40 +1,28 @@
 use makepad_widgets::{image_cache::ImageFit, *};
-use toml_edit::Item;
 
 use crate::{
-    component_state, components::{
+    basic_prop_interconvert, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    }, error::Error, get_get_mut, prop::{
+    },
+    error::Error,
+    get_get_mut,
+    prop::{
         manuel::{
-            ABS_POS, BASIC, CURSOR, FIT, HEIGHT, LOADING, MARGIN, MIN_HEIGHT, MIN_WIDTH, WIDTH,
-            WIDTH_SCALE,
+            ABS_POS, BASIC, CURSOR, FIT, HEIGHT, LOADING, MARGIN, MIN_HEIGHT, MIN_WIDTH, THEME,
+            WIDTH, WIDTH_SCALE,
         },
-        traits::{FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveValue, NewFrom, ToTomlValue},
         ApplyStateMapImpl,
-    }, themes::{Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    },
+    prop_interconvert,
+    themes::{Theme, TomlValueTo},
 };
-
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct ImageProp {
-    #[live(ImageBasicProp::default())]
-    pub basic: ImageBasicProp,
-    #[live(ImageBasicProp::from_state(Theme::default(), ImageState::Loading))]
-    pub loading: ImageBasicProp,
-}
-
-impl Default for ImageProp {
-    fn default() -> Self {
-        Self {
-            basic: Default::default(),
-            loading: ImageBasicProp::from_state(Theme::default(), ImageState::Loading),
-        }
-    }
-}
 
 prop_interconvert! {
     ImageProp {
+        basic_prop = ImageBasicProp;
         basic => BASIC, ImageBasicProp::default(), |v| (v, ImageState::Basic).try_into(),
         loading => LOADING, ImageBasicProp::default(), |v| (v, ImageState::Loading).try_into()
     }, "[component.image] should be a table"
@@ -66,104 +54,23 @@ impl Prop for ImageProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct ImageBasicProp {
-    #[live(ImageFit::default())]
-    pub fit: ImageFit,
-    #[live(Size::Fixed(64.0))]
-    pub height: Size,
-    #[live(Size::Fixed(128.0))]
-    pub width: Size,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(MouseCursor::default())]
-    pub cursor: MouseCursor,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
-    #[live(128.0)]
-    pub min_width: f64,
-    #[live(64.0)]
-    pub min_height: f64,
-    #[live(1.0)]
-    pub width_scale: f64,
-}
 
-impl Default for ImageBasicProp {
-    fn default() -> Self {
-        Self {
-            fit: ImageFit::default(),
-            height: Size::Fixed(64.0),
-            width: Size::Fixed(128.0),
-            margin: Margin::from_f64(0.0),
-            cursor: MouseCursor::default(),
-            abs_pos: None,
-            min_width: 128.0,
-            min_height: 64.0,
-            width_scale: 1.0,
+basic_prop_interconvert! {
+    ImageBasicProp {
+        state = ImageState;
+        {};
+        {
+            fit: ImageFit => FIT, ImageFit::default(), |v| v.to_image_fit(),
+            height: Size => HEIGHT, Size::Fixed(64.0), |v| v.to_size(),
+            width: Size => WIDTH, Size::Fixed(128.0), |v| v.to_size(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            cursor: MouseCursor => CURSOR, MouseCursor::Default, |v| v.to_cursor(),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            min_width: f64 => MIN_WIDTH, 128.0, |v| v.to_f64(),
+            min_height: f64 => MIN_HEIGHT, 64.0, |v| v.to_f64(),
+            width_scale: f64 => WIDTH_SCALE, 1.0, |v| v.to_f64()
         }
-    }
-}
-
-impl TryFrom<(&Item, ImageState)> for ImageBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, ImageState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.image.$state] should be an inline table".to_string(),
-        ))?;
-
-        let fit = get_from_itable(
-            inline_table,
-            FIT,
-            || Ok(ImageFit::default()),
-            |v| v.to_image_fit(),
-        )?;
-
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::Hand
-        };
-
-        let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let height = get_from_itable(
-            inline_table,
-            HEIGHT,
-            || Ok(Size::Fixed(64.0)),
-            |v| v.to_size(),
-        )?;
-        let width = get_from_itable(
-            inline_table,
-            WIDTH,
-            || Ok(Size::Fixed(128.0)),
-            |v| v.to_size(),
-        )?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-
-        let min_width = get_from_itable(inline_table, MIN_WIDTH, || Ok(128.0), |v| v.to_f64())?;
-        let min_height = get_from_itable(inline_table, MIN_HEIGHT, || Ok(64.0), |v| v.to_f64())?;
-        let width_scale = get_from_itable(inline_table, WIDTH_SCALE, || Ok(1.0), |v| v.to_f64())?;
-
-        Ok(Self {
-            fit,
-            height,
-            width,
-            margin,
-            cursor,
-            abs_pos,
-            min_width,
-            min_height,
-            width_scale,
-        })
-    }
+    }, "[component.image.$state] should be an inline table"
 }
 
 impl BasicProp for ImageBasicProp {
@@ -171,13 +78,14 @@ impl BasicProp for ImageBasicProp {
 
     type Colors = ();
 
-    fn from_state(_theme: crate::themes::Theme, state: Self::State) -> Self {
+    fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
             MouseCursor::Hand
         };
         Self {
+            theme,
             fit: ImageFit::default(),
             height: Size::Fixed(64.0),
             width: Size::Fixed(128.0),
@@ -200,6 +108,9 @@ impl BasicProp for ImageBasicProp {
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
+            THEME => {
+                self.theme = Theme::from_live_value(value).unwrap_or(Theme::default());
+            }
             FIT => {
                 self.fit = ImageFit::from_live_value(value).unwrap_or(ImageFit::default());
             }

@@ -1,7 +1,7 @@
 use makepad_widgets::*;
 use toml_edit::Value;
 
-use crate::{error::Error, prop::traits::{FromLiveValue, NewFrom}, themes::TomlValueTo};
+use crate::{error::Error, prop::traits::{FromLiveValue, NewFrom, ToTomlValue}, themes::TomlValueTo};
 
 /// ## Radius
 /// Radius always use in:
@@ -23,6 +23,17 @@ pub struct Radius {
     pub bottom: f32,
     #[live]
     pub left: f32,
+}
+
+impl ToTomlValue for Radius {
+    fn to_toml_value(&self) -> Value {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert("top", self.top.to_toml_value());
+        inline_table.insert("right", self.right.to_toml_value());
+        inline_table.insert("bottom", self.bottom.to_toml_value());
+        inline_table.insert("left", self.left.to_toml_value());
+        Value::InlineTable(inline_table)
+    }
 }
 
 impl ToLiveValue for Radius {

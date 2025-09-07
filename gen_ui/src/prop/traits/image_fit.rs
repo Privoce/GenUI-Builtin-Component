@@ -2,7 +2,7 @@ use makepad_widgets::image_cache::ImageFit;
 
 use crate::prop::{
     manuel::{BIGGEST, HORIZONTAL, SIZE, SMALLEST, STRETCH, VERTICAL},
-    traits::FromLiveValue,
+    traits::{FromLiveValue, ToTomlValue},
 };
 
 impl FromLiveValue for ImageFit {
@@ -22,5 +22,20 @@ impl FromLiveValue for ImageFit {
             },
             _ => None,
         }
+    }
+}
+
+impl ToTomlValue for ImageFit {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        match self {
+            ImageFit::Biggest => BIGGEST,
+            ImageFit::Horizontal => HORIZONTAL,
+            ImageFit::Size => SIZE,
+            ImageFit::Smallest => SMALLEST,
+            ImageFit::Stretch => STRETCH,
+            ImageFit::Vertical => VERTICAL,
+        }
+        .to_string()
+        .to_toml_value()
     }
 }

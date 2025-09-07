@@ -1,4 +1,4 @@
-use crate::prop::traits::FromLiveValue;
+use crate::prop::traits::{FromLiveValue, ToTomlValue};
 use makepad_widgets::{Align, Vec2, Vec4};
 
 use super::NewFrom;
@@ -31,5 +31,14 @@ impl FromLiveValue for Align {
             }
             _ => None,
         }
+    }
+}
+
+impl ToTomlValue for Align {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        let mut inline_table = toml_edit::InlineTable::new();
+        inline_table.insert("x", self.x.to_toml_value());
+        inline_table.insert("y", self.y.to_toml_value());
+        toml_edit::Value::InlineTable(inline_table)
     }
 }

@@ -1,27 +1,37 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
+use toml_edit::Item;
 
 use crate::{
-    component_part, component_state, components::{
+    component_part, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    }, error::Error, from_inherit_to_view_basic_prop, get_get_mut, inherits_view_basic_prop, prop::{
+        ViewColors,
+    },
+    error::Error,
+    from_inherit_to_view_basic_prop, from_prop_to_toml, get_get_mut, inherits_view_basic_prop,
+    prop::{
         manuel::{
-            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BODY, BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CONTAINER, CURSOR, FLOW, FOOTER, HEADER, HEIGHT, HOVER, MARGIN, PADDING, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH
+            ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BODY,
+            BORDER_COLOR, BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CONTAINER, CURSOR, FLOW,
+            FOOTER, HEADER, HEIGHT, HOVER, MARGIN, PADDING, ROTATION, SCALE, SHADOW_COLOR,
+            SHADOW_OFFSET, SPACING, SPREAD_RADIUS, THEME, WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplySlotMapImpl, ApplyStateMapImpl, Applys, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    },
+    prop_interconvert, state_colors,
+    themes::{Theme, TomlValueTo},
+    utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct CardProp {
-    #[live(CardBasicProp::default())]
-    pub basic: CardBasicProp,
-    #[live(CardBasicProp::from_state(Theme::default(), CardState::Hover))]
-    pub hover: CardBasicProp,
+prop_interconvert! {
+    CardProp {
+        basic_prop = CardBasicProp;
+        basic => BASIC, CardBasicProp::default(), |v| (v, CardState::Basic).try_into(),
+        hover => HOVER, CardBasicProp::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()
+    }, "[component.card] should be a table"
 }
 
 impl Prop for CardProp {
@@ -68,22 +78,6 @@ impl SlotProp for CardProp {
     }
 }
 
-prop_interconvert! {
-    CardProp {
-        basic => BASIC, CardBasicProp::default(), |v| (v, CardState::Basic).try_into(),
-        hover => HOVER, CardBasicProp::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()
-    }, "[component.card] should be a table"
-}
-
-impl Default for CardProp {
-    fn default() -> Self {
-        Self {
-            basic: CardBasicProp::default(),
-            hover: CardBasicProp::from_state(Theme::default(), CardState::Hover),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct CardBasicProp {
@@ -100,7 +94,7 @@ pub struct CardBasicProp {
 impl BasicProp for CardBasicProp {
     type State = CardState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = ViewColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
@@ -179,6 +173,15 @@ impl SlotBasicProp for CardBasicProp {
 impl Default for CardBasicProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), CardState::Basic)
+    }
+}
+
+from_prop_to_toml! {
+    CardBasicProp {
+        container => CONTAINER,
+        header => HEADER,
+        body => BODY,
+        footer => FOOTER
     }
 }
 
@@ -305,7 +308,6 @@ inherits_view_basic_prop! {
     }
 }
 
-
 inherits_view_basic_prop! {
     CardBodyProp {
         border_width: 0.0,
@@ -354,7 +356,7 @@ inherits_view_basic_prop! {
         height: Size::Fit,
         width: Size::Fill,
         abs_pos: None,
-    }, CardState, "card.footer", 
+    }, CardState, "card.footer",
     {
         CardState::Basic => (500, 500, 400),
         CardState::Hover => (400, 400, 300)
@@ -364,7 +366,6 @@ inherits_view_basic_prop! {
 from_inherit_to_view_basic_prop!(CardHeaderProp);
 from_inherit_to_view_basic_prop!(CardBodyProp);
 from_inherit_to_view_basic_prop!(CardFooterProp);
-
 
 component_part! {
     CardPart {

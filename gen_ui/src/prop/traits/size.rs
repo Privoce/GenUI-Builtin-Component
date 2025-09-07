@@ -1,6 +1,5 @@
 use makepad_widgets::Size;
 use toml_edit::Value;
-
 use crate::prop::{
     manuel::{ALL, FILL, FIT_UP},
     traits::{FromLiveValue, ToTomlValue},
@@ -36,20 +35,3 @@ impl ToTomlValue for Size {
     }
 }
 
-impl ToTomlValue for f64 {
-    fn to_toml_value(&self) -> Value {
-        Value::Float(toml_edit::Formatted::new(*self))
-    }
-}
-
-impl ToTomlValue for f32 {
-    fn to_toml_value(&self) -> Value {
-        Value::Float(toml_edit::Formatted::new(*self as f64))
-    }
-}
-
-impl ToTomlValue for usize {
-    fn to_toml_value(&self) -> Value {
-        Value::Integer(toml_edit::Formatted::new(*self as i64))
-    }
-}

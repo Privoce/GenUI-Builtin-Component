@@ -4,6 +4,7 @@ use crate::{error::Error, themes::container::ContainerConf};
 
 use super::controller::ControllerConf;
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, Default)]
 pub struct GlobalConf {
     // pub theme: Theme,

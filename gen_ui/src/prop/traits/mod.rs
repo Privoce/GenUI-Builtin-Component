@@ -17,6 +17,7 @@ pub use path::*;
 use toml_edit::Value;
 use crate::{error::Error, themes::Color};
 pub use area::*;
+pub use vec::*;
 
 pub trait NewFrom {
     fn from_f64(uni: f64) -> Self;

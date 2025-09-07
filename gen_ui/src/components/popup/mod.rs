@@ -191,7 +191,7 @@ impl PopupComponent for GPopup {
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let prop = self.prop.get(self.current_state());
-        self.draw_popup.merge(&prop.into());
+        self.draw_popup.merge(&(*prop).into());
         Ok(())
     }
 

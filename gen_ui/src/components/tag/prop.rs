@@ -13,28 +13,25 @@ use crate::{
         view::{ViewBasicProp, ViewState},
     },
     error::Error,
-    get_get_mut,
+    from_prop_to_toml, get_get_mut,
     prop::{
         manuel::{BASIC, CLOSE, CONTAINER, DISABLED, HOVER, ICON, PRESSED, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Radius,
     },
-    themes::Theme,
     prop_interconvert,
+    themes::Theme,
     utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct TagProp {
-    #[live(TagBasicProp::default())]
-    pub basic: TagBasicProp,
-    #[live(TagBasicProp::from_state(Theme::default(), TagState::Hover))]
-    pub hover: TagBasicProp,
-    #[live(TagBasicProp::from_state(Theme::default(), TagState::Pressed))]
-    pub pressed: TagBasicProp,
-    #[live(TagBasicProp::from_state(Theme::default(), TagState::Disabled))]
-    pub disabled: TagBasicProp,
+prop_interconvert! {
+    TagProp {
+        basic_prop = TagBasicProp;
+        basic => BASIC, TagBasicProp::default(), |v| (v, TagState::Basic).try_into(),
+        hover => HOVER, TagBasicProp::from_state(Theme::default(), TagState::Hover), |v| (v, TagState::Hover).try_into(),
+        pressed => PRESSED, TagBasicProp::from_state(Theme::default(), TagState::Pressed), |v| (v, TagState::Pressed).try_into(),
+        disabled => DISABLED, TagBasicProp::from_state(Theme::default(), TagState::Disabled), |v| (v, TagState::Disabled).try_into()
+    }, "[component.tag] should be a table"
 }
 
 impl SlotProp for TagProp {
@@ -57,26 +54,6 @@ impl SlotProp for TagProp {
             ],
         );
     }
-}
-
-impl Default for TagProp {
-    fn default() -> Self {
-        Self {
-            basic: TagBasicProp::default(),
-            hover: TagBasicProp::from_state(Theme::default(), TagState::Hover),
-            pressed: TagBasicProp::from_state(Theme::default(), TagState::Pressed),
-            disabled: TagBasicProp::from_state(Theme::default(), TagState::Disabled),
-        }
-    }
-}
-
-prop_interconvert! {
-    TagProp {
-        basic => BASIC, TagBasicProp::default(), |v| (v, TagState::Basic).try_into(),
-        hover => HOVER, TagBasicProp::from_state(Theme::default(), TagState::Hover), |v| (v, TagState::Hover).try_into(),
-        pressed => PRESSED, TagBasicProp::from_state(Theme::default(), TagState::Pressed), |v| (v, TagState::Pressed).try_into(),
-        disabled => DISABLED, TagBasicProp::from_state(Theme::default(), TagState::Disabled), |v| (v, TagState::Disabled).try_into()
-    }, "[component.tag] should be a table"
 }
 
 impl Prop for TagProp {
@@ -227,6 +204,15 @@ impl BasicProp for TagBasicProp {
     }
 }
 
+from_prop_to_toml! {
+    TagBasicProp {
+        icon => ICON,
+        text => TEXT,
+        close => CLOSE,
+        container => CONTAINER
+    }
+}
+
 impl TryFrom<(&Item, TagState)> for TagBasicProp {
     type Error = Error;
 
@@ -301,6 +287,7 @@ impl TagBasicProp {
         SvgBasicProp::from_state(theme, state.into())
     }
 }
+
 component_state! {
     TagState {
         Basic => BASIC,

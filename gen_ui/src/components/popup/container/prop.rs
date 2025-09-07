@@ -1,7 +1,7 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
+    basic_prop_interconvert, component_color,
     components::{
         live_props::LiveProps,
         popup::PopupState,
@@ -14,27 +14,18 @@ use crate::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, CLIP_X, CLIP_Y, CURSOR,
             FLOW, HEIGHT, MARGIN, PADDING, SPACING, THEME, WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl,
     },
-    themes::{Color, Theme, TomlValueTo},
-    prop_interconvert,
-    utils::get_from_itable,
+    prop_interconvert, state_color,
+    themes::{Theme, TomlValueTo},
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct PopupContainerProp {
-    #[live(PopupContainerBasicProp::default())]
-    pub basic: PopupContainerBasicProp,
-}
-
-impl Default for PopupContainerProp {
-    fn default() -> Self {
-        Self {
-            basic: PopupContainerBasicProp::default(),
-        }
-    }
+prop_interconvert! {
+    PopupContainerProp {
+        basic_prop = PopupContainerBasicProp;
+        basic => BASIC, PopupContainerBasicProp::default(),|v| (v, PopupState::Basic).try_into()
+    }, "[component.popup] should be a table"
 }
 
 impl Prop for PopupContainerProp {
@@ -66,49 +57,38 @@ impl Prop for PopupContainerProp {
     }
 }
 
-prop_interconvert! {
-    PopupContainerProp {
-        basic => BASIC, PopupContainerBasicProp::default(),|v| (v, PopupState::Basic).try_into()
-    }, "[component.popup] should be a table"
+basic_prop_interconvert! {
+    PopupContainerBasicProp {
+        state = PopupState;
+        {background_color => BACKGROUND_COLOR, |v| v.try_into()};
+        {
+            background_visible: bool => BACKGROUND_VISIBLE, true, |v| v.to_bool(),
+            padding: Padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(padding),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            clip_x: bool => CLIP_X, false, |v| v.to_bool(),
+            clip_y: bool => CLIP_Y, false, |v| v.to_bool(),
+            align: Align => ALIGN, Align::default(), |v| v.to_align(align),
+            cursor: MouseCursor => CURSOR, MouseCursor::default(), |v| v.to_cursor(),
+            flow: Flow => FLOW, Flow::Down, |v| v.to_flow(),
+            spacing: f64 => SPACING, 6.0, |v| v.to_f64(),
+            height: Size => HEIGHT, Size::Fill, |v| v.to_size(),
+            width: Size => WIDTH, Size::Fill, |v| v.to_size(),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some)
+        }
+    }, "[component.popup_container] should be a table"
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
-#[live_ignore]
-pub struct PopupContainerBasicProp {
-    #[live]
-    pub theme: Theme,
-    #[live]
-    pub background_color: Vec4,
-    #[live(true)]
-    pub background_visible: bool,
-    #[live(Padding::from_f64(0.0))]
-    pub padding: Padding,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(false)]
-    pub clip_x: bool,
-    #[live(false)]
-    pub clip_y: bool,
-    #[live(Align::default())]
-    pub align: Align,
-    #[live(MouseCursor::default())]
-    pub cursor: MouseCursor,
-    #[live(Flow::Down)]
-    pub flow: Flow,
-    #[live(6.0)]
-    pub spacing: f64,
-    #[live(Size::Fill)]
-    pub height: Size,
-    #[live(Size::Fill)]
-    pub width: Size,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
+component_color! {
+    PopupContainerColors {
+        colors = (Color);
+        background_color
+    }
 }
 
 impl BasicProp for PopupContainerBasicProp {
     type State = PopupState;
 
-    type Colors = Color;
+    type Colors = PopupContainerColors;
 
     fn len() -> usize {
         14
@@ -121,7 +101,8 @@ impl BasicProp for PopupContainerBasicProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
-                let background_color = Self::state_colors(self.theme, state);
+                let PopupContainerColors { background_color } =
+                    Self::state_colors(self.theme, state);
                 self.background_color =
                     Vec4::from_live_color(value).unwrap_or(background_color.into());
             }
@@ -171,12 +152,12 @@ impl BasicProp for PopupContainerBasicProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let background_color = Self::state_colors(self.theme, state);
+        let PopupContainerColors { background_color } = Self::state_colors(self.theme, state);
         self.background_color = background_color.into();
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let background_color = Self::state_colors(theme, state);
+        let PopupContainerColors { background_color } = Self::state_colors(theme, state);
 
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
@@ -202,20 +183,11 @@ impl BasicProp for PopupContainerBasicProp {
         }
     }
 
-    fn state_colors(theme: Theme, state: Self::State) -> Self::Colors {
-        let bg_level = match state {
-            PopupState::Basic => 300,
-        };
-
-        match theme {
-            Theme::Dark => Theme::Dark.color(bg_level),
-            Theme::Primary => Theme::Primary.color(bg_level),
-            Theme::Error => Theme::Error.color(bg_level),
-            Theme::Warning => Theme::Warning.color(bg_level),
-            Theme::Success => Theme::Success.color(bg_level),
-            Theme::Info => Theme::Info.color(bg_level),
-        }
+    state_color! {
+        (bg_level),
+        PopupState::Basic => (300)
     }
+
     fn live_props() -> LiveProps {
         vec![
             (live_id!(theme), None.into()),
@@ -272,107 +244,6 @@ impl BasicProp for PopupContainerBasicProp {
             spacing: self.spacing,
             ..Default::default()
         }
-    }
-}
-
-impl Default for PopupContainerBasicProp {
-    fn default() -> Self {
-        PopupContainerBasicProp::from_state(Theme::default(), PopupState::Basic)
-    }
-}
-
-impl TryFrom<(&Value, PopupState)> for PopupContainerBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Value, PopupState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[components.view.$state] should be an inline table".to_string(),
-        ))?;
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&Item, PopupState)> for PopupContainerBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, PopupState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[components.view.$state] should be an inline table".to_string(),
-        ))?;
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&InlineTable, PopupState)> for PopupContainerBasicProp {
-    type Error = Error;
-
-    fn try_from((inline_table, state): (&InlineTable, PopupState)) -> Result<Self, Self::Error> {
-        let theme = Theme::default();
-        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-
-        let background_color = Self::state_colors(theme, state);
-
-        let background_color = get_from_itable(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(background_color),
-            |v| v.try_into(),
-        )?
-        .into();
-
-        let background_visible = get_from_itable(
-            inline_table,
-            BACKGROUND_VISIBLE,
-            || Ok(true),
-            |v| v.to_bool(),
-        )?;
-
-        let padding = Padding::from_f64(0.0);
-        let padding = get_from_itable(
-            inline_table,
-            PADDING,
-            || Ok(padding),
-            |v| v.to_padding(padding),
-        )?;
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let clip_x = get_from_itable(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
-        let clip_y = get_from_itable(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;
-        let align = Align::default();
-        let align = get_from_itable(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::default()
-        };
-        let cursor = get_from_itable(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-        let flow = get_from_itable(inline_table, FLOW, || Ok(Flow::Down), |v| v.to_flow())?;
-        let spacing = get_from_itable(inline_table, SPACING, || Ok(6.0), |v| v.to_f64())?;
-        let height = get_from_itable(inline_table, HEIGHT, || Ok(Size::Fill), |v| v.to_size())?;
-        let width = get_from_itable(inline_table, WIDTH, || Ok(Size::Fill), |v| v.to_size())?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-
-        Ok(Self {
-            theme,
-            background_color,
-            background_visible,
-            padding,
-            margin,
-            clip_x,
-            clip_y,
-            align,
-            cursor,
-            flow,
-            spacing,
-            height,
-            width,
-            abs_pos,
-        })
     }
 }
 

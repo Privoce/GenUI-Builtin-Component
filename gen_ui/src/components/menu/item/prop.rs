@@ -11,30 +11,28 @@ use crate::{
         svg::{SvgBasicProp, SvgPart, SvgState},
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
+        ViewColors,
     },
     error::Error,
-    get_get_mut,
+    from_prop_to_toml, get_get_mut,
     prop::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, EXTRA, HOVER, ICON, TEXT},
         traits::NewFrom,
         ApplySlotMapImpl, Applys,
     },
-    themes::{Color, Theme},
     prop_interconvert,
+    themes::Theme,
     utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct MenuItemProp {
-    #[live(MenuItemBasicProp::default())]
-    pub basic: MenuItemBasicProp,
-    #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover))]
-    pub hover: MenuItemBasicProp,
-    #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active))]
-    pub active: MenuItemBasicProp,
-    #[live(MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled))]
-    pub disabled: MenuItemBasicProp,
+prop_interconvert! {
+    MenuItemProp {
+        basic_prop = MenuItemBasicProp;
+        basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
+        hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
+        active => ACTIVE, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
+        disabled => DISABLED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
+    }, "[component.menu_item] should be a table"
 }
 
 impl Prop for MenuItemProp {
@@ -83,26 +81,6 @@ impl SlotProp for MenuItemProp {
     }
 }
 
-prop_interconvert! {
-    MenuItemProp {
-        basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
-        hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
-        active => ACTIVE, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
-        disabled => DISABLED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
-    }, "[component.menu_item] should be a table"
-}
-
-impl Default for MenuItemProp {
-    fn default() -> Self {
-        Self {
-            basic: MenuItemBasicProp::default(),
-            hover: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover),
-            active: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active),
-            disabled: MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct MenuItemBasicProp {
@@ -116,10 +94,19 @@ pub struct MenuItemBasicProp {
     pub extra: ViewBasicProp,
 }
 
+from_prop_to_toml! {
+    MenuItemBasicProp {
+        container => CONTAINER,
+        icon => ICON,
+        text => TEXT,
+        extra => EXTRA
+    }
+}
+
 impl BasicProp for MenuItemBasicProp {
     type State = MenuItemState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = ViewColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {

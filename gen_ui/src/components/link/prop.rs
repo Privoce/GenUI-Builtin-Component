@@ -1,8 +1,7 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state,
+    basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
@@ -18,41 +17,16 @@ use crate::{
             SHADOW_OFFSET, SPREAD_RADIUS, THEME, UNDERLINE_COLOR, UNDERLINE_VISIBLE,
             UNDERLINE_WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ApplyStateMapImpl, Radius,
     },
-    state_colors,
+    prop_interconvert, state_colors,
     themes::{Color, Theme, TomlValueTo},
-    prop_interconvert,
-    utils::get_from_itable as get,
 };
-
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct LinkProp {
-    #[live(LinkBasicProp::default())]
-    pub basic: LinkBasicProp,
-    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Hover))]
-    pub hover: LinkBasicProp,
-    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Pressed))]
-    pub pressed: LinkBasicProp,
-    #[live(LinkBasicProp::from_state(Theme::default(), LinkState::Disabled))]
-    pub disabled: LinkBasicProp,
-}
-
-impl Default for LinkProp {
-    fn default() -> Self {
-        Self {
-            basic: LinkBasicProp::default(),
-            hover: LinkBasicProp::from_state(Theme::default(), LinkState::Hover),
-            pressed: LinkBasicProp::from_state(Theme::default(), LinkState::Pressed),
-            disabled: LinkBasicProp::from_state(Theme::default(), LinkState::Disabled),
-        }
-    }
-}
 
 prop_interconvert! {
     LinkProp {
+        basic_prop = LinkBasicProp;
         basic => BASIC, LinkBasicProp::default(), |v| (v, LinkState::Basic).try_into(),
         hover => HOVER, LinkBasicProp::from_state(Theme::default(), LinkState::Hover), |v| (v, LinkState::Hover).try_into(),
         pressed => PRESSED, LinkBasicProp::from_state(Theme::default(), LinkState::Pressed), |v| (v, LinkState::Pressed).try_into(),
@@ -91,66 +65,45 @@ impl Prop for LinkProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
-#[live_ignore]
-pub struct LinkBasicProp {
-    #[live]
-    pub theme: Theme,
-    #[live]
-    pub color: Vec4,
-    #[live(12.0)]
-    pub font_size: f32,
-    #[live(1.2)]
-    pub line_spacing: f32,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(Padding::from_f64(0.0))]
-    pub padding: Padding,
-    #[live(true)]
-    pub underline_visible: bool,
-    #[live]
-    pub underline_color: Vec4,
-    #[live(1.0)]
-    pub underline_width: f32,
-    #[live(Flow::RightWrap)]
-    pub flow: Flow,
-    #[live]
-    pub background_color: Vec4,
-    #[live]
-    pub border_color: Vec4,
-    #[live(0.0)]
-    pub border_width: f32,
-    #[live(Radius::new(0.0))]
-    pub border_radius: Radius,
-    #[live]
-    pub shadow_color: Vec4,
-    #[live(0.0)]
-    pub spread_radius: f32,
-    #[live(0.0)]
-    pub blur_radius: f32,
-    #[live(vec2(0.0, 0.0))]
-    pub shadow_offset: Vec2,
-    #[live(false)]
-    pub background_visible: bool,
-    #[live(0.0)]
-    pub rotation: f32,
-    #[live(1.0)]
-    pub scale: f32,
-    #[live(false)]
-    pub clip_x: bool,
-    #[live(false)]
-    pub clip_y: bool,
-    #[live(Align::default())]
-    pub align: Align,
-    #[live(MouseCursor::default())]
-    pub cursor: MouseCursor,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
+basic_prop_interconvert! {
+    LinkBasicProp {
+        state = LinkState;
+        {
+            color => COLOR, |v| v.try_into(),
+            underline_color => UNDERLINE_COLOR, |v| v.try_into(),
+            background_color => BACKGROUND_COLOR, |v| v.try_into(),
+            border_color => BORDER_COLOR, |v| v.try_into(),
+            shadow_color => SHADOW_COLOR, |v| v.try_into()
+        };
+        {
+            font_size: f32 => FONT_SIZE, 10.0, |v| v.to_f32(),
+            line_spacing: f32 => LINE_SPACING, 1.2, |v| v.to_f32(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            padding: Padding => PADDING, Padding::from_f64(0.0), |v| v.to_padding(padding),
+            flow: Flow => FLOW, Flow::RightWrap, |v| v.to_flow(),
+            underline_visible: bool => UNDERLINE_VISIBLE, true, |v| v.to_bool(),
+            underline_width: f32 => UNDERLINE_WIDTH, 1.0, |v| v.to_f32(),
+            border_width: f32 => BORDER_WIDTH, 1.0, |v| v.to_f32(),
+            border_radius: Radius => BORDER_RADIUS, Radius::new(0.0), |v| v.try_into(),
+            spread_radius: f32 => SPREAD_RADIUS, 0.0, |v| v.to_f32(),
+            blur_radius: f32 => BLUR_RADIUS, 0.0, |v| v.to_f32(),
+            shadow_offset: Vec2 => SHADOW_OFFSET, vec2(0.0, 0.0), |v| v.to_vec2(shadow_offset),
+            background_visible: bool => BACKGROUND_VISIBLE, false, |v| v.to_bool(),
+            rotation: f32 => ROTATION, 0.0, |v| v.to_f32(),
+            scale: f32 => SCALE, 1.0, |v| v.to_f32(),
+            cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor(),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            clip_x: bool => CLIP_X, false, |v| v.to_bool(),
+            clip_y: bool => CLIP_Y, false, |v| v.to_bool(),
+            align: Align => ALIGN, Align::default(), |v| v.to_align(Align::default())
+        }
+    }, "[component.link.$state] should be a inline table"
 }
 
-impl Default for LinkBasicProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), LinkState::Basic)
+component_colors! {
+    LinkColors {
+        colors = (Color, Color, Color, Color, Color);
+        color, underline_color, background_color, border_color, shadow_color
     }
 }
 
@@ -168,7 +121,7 @@ impl LinkBasicProp {
 
 impl BasicProp for LinkBasicProp {
     type State = LinkState;
-    type Colors = (Color, Color, Color, Color, Color);
+    type Colors = LinkColors;
 
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> () {
         match key {
@@ -177,8 +130,8 @@ impl BasicProp for LinkBasicProp {
                 self.sync(state);
             }
             COLOR => {
-                let (color, _, _, _, _) = Self::state_colors(self.theme, state);
-                self.color = Vec4::from_live_color(value).unwrap_or(color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.color = Vec4::from_live_color(value).unwrap_or(colors.color.into());
             }
             FONT_SIZE => {
                 self.font_size = f32::from_live_value(value).unwrap_or(12.0);
@@ -196,9 +149,9 @@ impl BasicProp for LinkBasicProp {
                 self.flow = Flow::from_live_value(value).unwrap_or(Flow::RightWrap);
             }
             UNDERLINE_COLOR => {
-                let (_, underline_color, _, _, _) = Self::state_colors(self.theme, state);
+                let colors = Self::state_colors(self.theme, state);
                 self.underline_color =
-                    Vec4::from_live_color(value).unwrap_or(underline_color.into());
+                    Vec4::from_live_color(value).unwrap_or(colors.underline_color.into());
             }
             UNDERLINE_VISIBLE => {
                 self.underline_visible = bool::from_live_value(value).unwrap_or(true);
@@ -207,13 +160,14 @@ impl BasicProp for LinkBasicProp {
                 self.underline_width = f32::from_live_value(value).unwrap_or(1.0);
             }
             BACKGROUND_COLOR => {
-                let (_, _, background_color, _, _) = Self::state_colors(self.theme, state);
+                let colors = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    Vec4::from_live_color(value).unwrap_or(colors.background_color.into());
             }
             BORDER_COLOR => {
-                let (_, _, _, border_color, _) = Self::state_colors(self.theme, state);
-                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.border_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.border_color.into());
             }
             BORDER_WIDTH => {
                 self.border_width = f32::from_live_value(value).unwrap_or(0.0);
@@ -222,8 +176,9 @@ impl BasicProp for LinkBasicProp {
                 self.border_radius = Radius::from_live_value(value).unwrap_or(Radius::new(0.0));
             }
             SHADOW_COLOR => {
-                let (_, _, _, _, shadow_color) = Self::state_colors(self.theme, state);
-                self.shadow_color = Vec4::from_live_color(value).unwrap_or(shadow_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.shadow_color =
+                    Vec4::from_live_color(value).unwrap_or(colors.shadow_color.into());
             }
             SPREAD_RADIUS => {
                 self.spread_radius = f32::from_live_value(value).unwrap_or(0.0);
@@ -268,8 +223,13 @@ impl BasicProp for LinkBasicProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let (color, underline_color, background_color, border_color, shadow_color) =
-            Self::state_colors(self.theme, state);
+        let LinkColors {
+            color,
+            underline_color,
+            background_color,
+            border_color,
+            shadow_color,
+        } = Self::state_colors(self.theme, state);
         self.color = color.into();
         self.underline_color = underline_color.into();
         self.background_color = background_color.into();
@@ -282,8 +242,13 @@ impl BasicProp for LinkBasicProp {
     }
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (color, underline_color, background_color, border_color, shadow_color) =
-            Self::state_colors(theme, state);
+        let LinkColors {
+            color,
+            underline_color,
+            background_color,
+            border_color,
+            shadow_color,
+        } = Self::state_colors(theme, state);
 
         Self {
             theme,
@@ -399,189 +364,6 @@ impl BasicProp for LinkBasicProp {
             align: self.align,
             ..Default::default()
         }
-    }
-}
-
-impl TryFrom<(&Item, LinkState)> for LinkBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Item, LinkState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LinkProp should be a inline table".to_string(),
-        ))?;
-
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&Value, LinkState)> for LinkBasicProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Value, LinkState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "LinkProp should be a inline table".to_string(),
-        ))?;
-
-        (inline_table, state).try_into()
-    }
-}
-
-impl TryFrom<(&InlineTable, LinkState)> for LinkBasicProp {
-    type Error = Error;
-
-    fn try_from((inline_table, state): (&InlineTable, LinkState)) -> Result<Self, Self::Error> {
-        let theme = Theme::default();
-        let theme = get(inline_table, THEME, || Ok(theme), |value| value.try_into())?;
-        let (color, underline_color, background_color, border_color, shadow_color) =
-            Self::state_colors(theme, state);
-        let color = get(inline_table, COLOR, || Ok(color), |value| value.try_into())?.into();
-        let font_size = get(inline_table, FONT_SIZE, || Ok(10.0), |item| item.to_f32())?;
-        let line_spacing = get(inline_table, LINE_SPACING, || Ok(1.2), |item| item.to_f32())?;
-
-        let default_margin = Margin::from_f64(0.0);
-
-        let margin = get(
-            inline_table,
-            MARGIN,
-            || Ok(default_margin),
-            |item| item.to_margin(default_margin),
-        )?;
-
-        let default_padding = Padding::from_f64(0.0);
-
-        let padding = get(
-            inline_table,
-            PADDING,
-            || Ok(default_padding),
-            |item| item.to_padding(default_padding),
-        )?;
-
-        let flow = get(
-            inline_table,
-            FLOW,
-            || Ok(Flow::RightWrap),
-            |item| item.to_flow(),
-        )?;
-
-        let underline_visible = get(
-            inline_table,
-            UNDERLINE_VISIBLE,
-            || Ok(true),
-            |item| item.to_bool(),
-        )?;
-
-        let underline_width = get(
-            inline_table,
-            UNDERLINE_WIDTH,
-            || Ok(1.0),
-            |item| item.to_f32(),
-        )?;
-
-        let underline_color = get(
-            inline_table,
-            UNDERLINE_COLOR,
-            || Ok(underline_color),
-            |value| value.try_into(),
-        )?
-        .into();
-
-        let background_color = get(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(background_color),
-            |v| v.try_into(),
-        )?
-        .into();
-
-        let border_color = get(
-            inline_table,
-            BORDER_COLOR,
-            || Ok(border_color),
-            |v| v.try_into(),
-        )?
-        .into();
-
-        let border_width = get(inline_table, BORDER_WIDTH, || Ok(1.0), |v| v.to_f32())?;
-
-        let border_radius = get(
-            inline_table,
-            BORDER_RADIUS,
-            || Ok(Radius::new(0.0)),
-            |v| v.try_into(),
-        )?;
-
-        let shadow_color = get(
-            inline_table,
-            SHADOW_COLOR,
-            || Ok(shadow_color),
-            |v| v.try_into(),
-        )?
-        .into();
-
-        let spread_radius = get(inline_table, SPREAD_RADIUS, || Ok(0.0), |v| v.to_f32())?;
-
-        let blur_radius = get(inline_table, BLUR_RADIUS, || Ok(0.0), |v| v.to_f32())?;
-        let shadow_offset = vec2(0.0, 0.0);
-        let shadow_offset = get(
-            inline_table,
-            SHADOW_OFFSET,
-            || Ok(shadow_offset),
-            |v| v.to_vec2(shadow_offset),
-        )?;
-
-        let background_visible = get(
-            inline_table,
-            BACKGROUND_VISIBLE,
-            || Ok(false),
-            |v| v.to_bool(),
-        )?;
-
-        let rotation = get(inline_table, ROTATION, || Ok(0.0), |v| v.to_f32())?;
-        let scale = get(inline_table, SCALE, || Ok(1.0), |v| v.to_f32())?;
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::default()
-        };
-        let cursor = get(inline_table, CURSOR, || Ok(cursor), |v| v.to_cursor())?;
-        let abs_pos = get(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-        let clip_x = get(inline_table, CLIP_X, || Ok(false), |v| v.to_bool())?;
-        let clip_y = get(inline_table, CLIP_Y, || Ok(false), |v| v.to_bool())?;
-        let align = Align::default();
-        let align = get(inline_table, ALIGN, || Ok(align), |v| v.to_align(align))?;
-        Ok(Self {
-            theme,
-            color,
-            font_size,
-            line_spacing,
-            margin,
-            padding,
-            flow,
-            underline_visible,
-            underline_color,
-            underline_width,
-            background_color,
-            border_color,
-            border_width,
-            border_radius,
-            shadow_color,
-            spread_radius,
-            blur_radius,
-            shadow_offset,
-            background_visible,
-            rotation,
-            scale,
-            clip_x,
-            clip_y,
-            align,
-            cursor,
-            abs_pos,
-        })
     }
 }
 

@@ -7,24 +7,25 @@ use crate::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
+        ViewColors,
     },
     error::Error,
-    get_get_mut,
+    from_prop_to_toml, get_get_mut,
     prop::{
         manuel::{BASIC, BODY, CONTAINER, FOOTER, HEADER},
         traits::NewFrom,
         ApplySlotMapImpl, ApplyStateMapImpl, Applys,
     },
-    themes::{Color, Theme},
     prop_interconvert,
+    themes::Theme,
     utils::get_from_itable,
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct MenuProp {
-    #[live(MenuBasicProp::default())]
-    pub basic: MenuBasicProp,
+prop_interconvert! {
+    MenuProp {
+        basic_prop = MenuBasicProp;
+        basic => BASIC, MenuBasicProp::default(), |v| (v, MenuState::Basic).try_into()
+    }, "[component.menu] should be a table"
 }
 
 impl Prop for MenuProp {
@@ -66,20 +67,6 @@ impl SlotProp for MenuProp {
     }
 }
 
-prop_interconvert! {
-    MenuProp {
-        basic => BASIC, MenuBasicProp::default(), |v| (v, MenuState::Basic).try_into()
-    }, "[component.menu] should be a table"
-}
-
-impl Default for MenuProp {
-    fn default() -> Self {
-        Self {
-            basic: MenuBasicProp::default(),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct MenuBasicProp {
@@ -93,10 +80,19 @@ pub struct MenuBasicProp {
     pub footer: ViewBasicProp,
 }
 
+from_prop_to_toml! {
+    MenuBasicProp {
+        container => CONTAINER,
+        header => HEADER,
+        body => BODY,
+        footer => FOOTER
+    }
+}
+
 impl BasicProp for MenuBasicProp {
     type State = MenuState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = ViewColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {

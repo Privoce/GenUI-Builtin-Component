@@ -7,7 +7,7 @@ use crate::{
     error::Error,
     prop::{
         manuel::{CROSS, ROUND, TICK},
-        traits::FromLiveValue,
+        traits::{FromLiveValue, ToTomlValue},
     },
 };
 
@@ -50,6 +50,18 @@ impl FromLiveValue for ActiveMode {
     }
 }
 
+impl ToTomlValue for ActiveMode {
+    fn to_toml_value(&self) -> toml_edit::Value {
+        match self {
+            ActiveMode::Round => ROUND,
+            ActiveMode::Tick => TICK,
+            ActiveMode::Cross => CROSS,
+        }
+        .to_string()
+        .to_toml_value()
+    }
+}
+
 impl FromStr for ActiveMode {
     type Err = Error;
 
@@ -63,7 +75,6 @@ impl FromStr for ActiveMode {
     }
 }
 
-
 impl ToLiveValue for ActiveMode {
     fn to_live_value(&self) -> LiveValue {
         match self {
@@ -73,5 +84,3 @@ impl ToLiveValue for ActiveMode {
         }
     }
 }
-
-

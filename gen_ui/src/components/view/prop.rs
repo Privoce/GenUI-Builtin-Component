@@ -1,44 +1,36 @@
 use makepad_widgets::*;
-use toml_edit::{InlineTable, Item, Value};
 
 use crate::{
-    component_state, components::{
+    component_colors, component_state,
+    components::{
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Prop},
-    }, error::Error, get_get_mut, getter_setter_prop, inherits_view_basic_prop, prop::{
+    },
+    error::Error,
+    get_get_mut, getter_setter_prop, inherits_view_basic_prop,
+    prop::{
         manuel::{
             ABS_POS, ALIGN, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BLUR_RADIUS, BORDER_COLOR,
             BORDER_RADIUS, BORDER_WIDTH, CLIP_X, CLIP_Y, CURSOR, DISABLED, FLOW, HEIGHT, HOVER,
             MARGIN, PADDING, PRESSED, ROTATION, SCALE, SHADOW_COLOR, SHADOW_OFFSET, SPACING,
             SPREAD_RADIUS, THEME, WIDTH,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::AbsPos,
+        traits::{FromLiveColor, FromLiveValue, NewFrom, ToTomlValue, ToColor},
         ApplyStateMapImpl, Radius,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    },
+    prop_interconvert, state_colors,
+    themes::{Color, Theme, TomlValueTo},
 };
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct ViewProp {
-    #[live(ViewBasicProp::default())]
-    pub basic: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Hover))]
-    pub hover: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Pressed))]
-    pub pressed: ViewBasicProp,
-    #[live(ViewBasicProp::from_state(Theme::default(), ViewState::Disabled))]
-    pub disabled: ViewBasicProp,
-}
-
-impl Default for ViewProp {
-    fn default() -> Self {
-        Self {
-            basic: ViewBasicProp::default(),
-            hover: ViewBasicProp::from_state(Theme::default(), ViewState::Hover),
-            pressed: ViewBasicProp::from_state(Theme::default(), ViewState::Pressed),
-            disabled: ViewBasicProp::from_state(Theme::default(), ViewState::Disabled),
-        }
-    }
+prop_interconvert! {
+    ViewProp {
+        basic_prop = ViewBasicProp;
+        basic => BASIC, ViewBasicProp::default(),|v| (v, ViewState::Basic).try_into(),
+        hover => HOVER, ViewBasicProp::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),
+        pressed => PRESSED, ViewBasicProp::from_state(Theme::default(), ViewState::Pressed), |v| (v, ViewState::Pressed).try_into(),
+        disabled => DISABLED, ViewBasicProp::from_state(Theme::default(), ViewState::Disabled), |v| (v, ViewState::Disabled).try_into()
+    }, "[component.view] should be a table"
 }
 
 impl Prop for ViewProp {
@@ -72,16 +64,14 @@ impl Prop for ViewProp {
     }
 }
 
-prop_interconvert! {
-    ViewProp {
-        basic => BASIC, ViewBasicProp::default(),|v| (v, ViewState::Basic).try_into(),
-        hover => HOVER, ViewBasicProp::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),
-        pressed => PRESSED, ViewBasicProp::from_state(Theme::default(), ViewState::Pressed), |v| (v, ViewState::Pressed).try_into(),
-        disabled => DISABLED, ViewBasicProp::from_state(Theme::default(), ViewState::Disabled), |v| (v, ViewState::Disabled).try_into()
-    }, "[component.view] should be a table"
+component_colors! {
+    ViewColors {
+        colors = (Color, Color, Color);
+        background_color, border_color, shadow_color
+    }
 }
 
-inherits_view_basic_prop!{
+inherits_view_basic_prop! {
     ViewBasicProp {
         border_width: 0.0,
         border_radius: Radius::new(4.0),

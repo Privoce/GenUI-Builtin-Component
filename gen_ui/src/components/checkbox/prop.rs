@@ -1,45 +1,32 @@
 use crate::{
-    component_part, component_state, components::{
+    basic_prop_interconvert, component_colors, component_part, component_state, components::{
         label::{LabelBasicProp, LabelState},
         live_props::LiveProps,
         traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
         view::{ViewBasicProp, ViewState},
-    }, error::Error, get_get_mut, prop::{
+    }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
             BORDER_WIDTH, CHECKBOX, CONTAINER, CURSOR, DISABLED, EXTRA, HOVER, MARGIN, MODE, SIZE,
             STROKE_COLOR, THEME,
         },
-        traits::{FromLiveColor, FromLiveValue, NewFrom},
+        traits::{AbsPos, FromLiveColor, FromLiveValue, NewFrom, ToColor, ToTomlValue},
         ActiveMode, ApplySlotMapImpl,
-    }, state_colors, themes::{Color, Theme, TomlValueTo}, prop_interconvert, utils::get_from_itable
+    }, prop_interconvert, state_colors, themes::{Color, Theme, TomlValueTo}, utils::get_from_itable
 };
 use makepad_widgets::*;
-use toml_edit::{Item, Value};
+use toml_edit::{Item};
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct CheckboxProp {
-    #[live(CheckboxBasicProp::default())]
-    pub basic: CheckboxBasicProp,
-    #[live(CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover))]
-    pub hover: CheckboxBasicProp,
-    #[live(CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active))]
-    pub active: CheckboxBasicProp,
-    #[live(CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled))]
-    pub disabled: CheckboxBasicProp,
+prop_interconvert! {
+    CheckboxProp {
+        basic_prop = CheckboxBasicProp;
+        basic => BASIC, CheckboxBasicProp::default(),|v| (v, CheckboxState::Basic).try_into(),
+        hover => HOVER, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
+        active => ACTIVE, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active),|v| (v, CheckboxState::Active).try_into(),
+        disabled => DISABLED, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled),|v| (v, CheckboxState::Disabled).try_into()
+    }, "[component.checkbox] should be a table"
 }
 
-impl Default for CheckboxProp {
-    fn default() -> Self {
-        Self {
-            basic: CheckboxBasicProp::default(),
-            hover: CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),
-            active: CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active),
-            disabled: CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled),
-        }
-    }
-}
 
 impl SlotProp for CheckboxProp {
     type Part = CheckboxPart;
@@ -86,16 +73,8 @@ impl Prop for CheckboxProp {
     }
 }
 
-prop_interconvert! {
-    CheckboxProp {
-        basic => BASIC, CheckboxBasicProp::default(),|v| (v, CheckboxState::Basic).try_into(),
-        hover => HOVER, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
-        active => ACTIVE, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active),|v| (v, CheckboxState::Active).try_into(),
-        disabled => DISABLED, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled),|v| (v, CheckboxState::Disabled).try_into()
-    }, "[component.checkbox] should be a table"
-}
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
+#[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
 pub struct CheckboxBasicProp {
     #[live(Self::default_container(Theme::default(), CheckboxState::Basic))]
@@ -109,6 +88,14 @@ pub struct CheckboxBasicProp {
 impl Default for CheckboxBasicProp {
     fn default() -> Self {
         Self::from_state(Theme::default(), CheckboxState::Basic)
+    }
+}
+
+from_prop_to_toml!{
+    CheckboxBasicProp {
+        container => CONTAINER,
+        checkbox => CHECKBOX,
+        extra => EXTRA
     }
 }
 
@@ -144,7 +131,7 @@ impl SlotBasicProp for CheckboxBasicProp {
 impl BasicProp for CheckboxBasicProp {
     type State = CheckboxState;
 
-    type Colors = (Color, Color, Color);
+    type Colors = CheckboxColors;
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
@@ -249,118 +236,40 @@ impl CheckboxBasicProp {
     }
 }
 
-#[derive(Debug, Clone, Live, LiveHook, LiveRegister)]
-#[live_ignore]
-pub struct CheckboxPartProp {
-    #[live(Theme::default())]
-    pub theme: Theme,
-    #[live(20.0)]
-    pub size: f32,
-    #[live]
-    pub background_color: Vec4,
-    #[live]
-    pub border_color: Vec4,
-    #[live]
-    pub stroke_color: Vec4,
-    #[live(true)]
-    pub background_visible: bool,
-    #[live(1.0)]
-    pub border_width: f32,
-    #[live(ActiveMode::Round)]
-    pub mode: ActiveMode,
-    #[live(Margin::from_f64(0.0))]
-    pub margin: Margin,
-    #[live(None)]
-    pub abs_pos: Option<DVec2>,
-    #[live(MouseCursor::Hand)]
-    pub cursor: MouseCursor,
+basic_prop_interconvert! {
+    CheckboxPartProp {
+        state = CheckboxState;
+        {
+            background_color => BACKGROUND_COLOR, |v| v.try_into(),
+            stroke_color => STROKE_COLOR, |v| v.try_into(),
+            border_color => BORDER_COLOR, |v| v.try_into()
+        };
+        {
+            size: f32 => SIZE, 20.0, |v| v.to_f32(),
+            background_visible: bool => BACKGROUND_VISIBLE, true, |v| v.to_bool(),
+            border_width: f32 => BORDER_WIDTH, 1.0, |v| v.to_f32(),
+            mode: ActiveMode => MODE, ActiveMode::Round, |v| v.try_into(),
+            margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
+            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor()
+        }
+    }, "[component.checkbox.$part] should be a inline table"
 }
 
-impl TryFrom<(&Value, CheckboxState)> for CheckboxPartProp {
-    type Error = Error;
-
-    fn try_from((value, state): (&Value, CheckboxState)) -> Result<Self, Self::Error> {
-        let inline_table = value.as_inline_table().ok_or(Error::ThemeStyleParse(
-            "[component.checkbox.checkbox] should be an inline table".to_string(),
-        ))?;
-
-        let theme = Theme::default();
-        let theme = get_from_itable(inline_table, THEME, || Ok(theme), |v| v.try_into())?;
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
-        let background_color = get_from_itable(
-            inline_table,
-            BACKGROUND_COLOR,
-            || Ok(background_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let stroke_color = get_from_itable(
-            inline_table,
-            STROKE_COLOR,
-            || Ok(stroke_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let border_color = get_from_itable(
-            inline_table,
-            BORDER_COLOR,
-            || Ok(border_color),
-            |v| v.try_into(),
-        )?
-        .into();
-        let size = get_from_itable(inline_table, SIZE, || Ok(20.0), |item| item.to_f32())?;
-        let background_visible = get_from_itable(
-            inline_table,
-            BACKGROUND_VISIBLE,
-            || Ok(true),
-            |item| item.to_bool(),
-        )?;
-        let border_width =
-            get_from_itable(inline_table, BORDER_WIDTH, || Ok(1.0), |item| item.to_f32())?;
-        let mode = get_from_itable(
-            inline_table,
-            MODE,
-            || Ok(ActiveMode::Round),
-            |item| item.try_into(),
-        )?;
-        let margin = Margin::from_f64(0.0);
-        let margin = get_from_itable(inline_table, MARGIN, || Ok(margin), |v| v.to_margin(margin))?;
-        let abs_pos = get_from_itable(
-            inline_table,
-            ABS_POS,
-            || Ok(None),
-            |v| v.to_dvec2().map(Some),
-        )?;
-        let cursor = if state.is_disabled() {
-            MouseCursor::NotAllowed
-        } else {
-            MouseCursor::Hand
-        };
-        let cursor = get_from_itable(inline_table, "cursor", || Ok(cursor), |v| v.to_cursor())?;
-
-        Ok(Self {
-            theme,
-            size,
-            background_color,
-            stroke_color,
-            border_color,
-            background_visible,
-            border_width,
-            mode,
-            margin,
-            abs_pos,
-            cursor,
-        })
+component_colors!{
+    CheckboxColors {
+        colors = (Color, Color, Color);
+        background_color, stroke_color, border_color
     }
 }
 
 impl BasicProp for CheckboxPartProp {
     type State = CheckboxState;
     /// (background_color, stroke_color, border_color)
-    type Colors = (Color, Color, Color);
+    type Colors = CheckboxColors;
 
     fn from_state(theme: Theme, state: Self::State) -> Self {
-        let (background_color, stroke_color, border_color) = Self::state_colors(theme, state);
+        let CheckboxColors { background_color, stroke_color, border_color } = Self::state_colors(theme, state);
         let cursor = if state.is_disabled() {
             MouseCursor::NotAllowed
         } else {
@@ -400,17 +309,17 @@ impl BasicProp for CheckboxPartProp {
                 self.sync(state);
             }
             BACKGROUND_COLOR => {
-                let (background_color, _, _) = Self::state_colors(self.theme, state);
+                let colors = Self::state_colors(self.theme, state);
                 self.background_color =
-                    Vec4::from_live_color(value).unwrap_or(background_color.into());
+                    Vec4::from_live_color(value).unwrap_or(colors.background_color.into());
             }
             STROKE_COLOR => {
-                let (_, stroke_color, _) = Self::state_colors(self.theme, state);
-                self.stroke_color = Vec4::from_live_color(value).unwrap_or(stroke_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.stroke_color = Vec4::from_live_color(value).unwrap_or(colors.stroke_color.into());
             }
             BORDER_COLOR => {
-                let (_, _, border_color) = Self::state_colors(self.theme, state);
-                self.border_color = Vec4::from_live_color(value).unwrap_or(border_color.into());
+                let colors = Self::state_colors(self.theme, state);
+                self.border_color = Vec4::from_live_color(value).unwrap_or(colors.border_color.into());
             }
             SIZE => {
                 self.size = f32::from_live_value(value).unwrap_or(20.0);
@@ -443,7 +352,7 @@ impl BasicProp for CheckboxPartProp {
     }
 
     fn sync(&mut self, state: Self::State) -> () {
-        let (background_color, stroke_color, border_color) = Self::state_colors(self.theme, state);
+        let CheckboxColors { background_color, stroke_color, border_color } = Self::state_colors(self.theme, state);
         self.background_color = background_color.into();
         self.stroke_color = stroke_color.into();
         self.border_color = border_color.into();
@@ -493,11 +402,7 @@ impl BasicProp for CheckboxPartProp {
     }
 }
 
-impl Default for CheckboxPartProp {
-    fn default() -> Self {
-        Self::from_state(Theme::default(), CheckboxState::Basic)
-    }
-}
+
 
 component_state! {
     CheckboxState {
