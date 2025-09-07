@@ -1,3 +1,5 @@
+use std::env::current_dir;
+
 use gen_ui::{components::*, prop::traits::ToColor, themes::Theme};
 use makepad_widgets::*;
 
@@ -74,7 +76,7 @@ live_design! {
                     // }
                     //
 
-                   
+
 
                     // <GHLayout> {
                         // <GView> {
@@ -99,7 +101,7 @@ live_design! {
                         //         }
                         //     }
                         // }
-                       
+
                     // }
                     body = <HomePage> {}
                     // body = <THomePage> {}
@@ -128,7 +130,8 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
         crate::an::live_design(cx);
-        crate::gen_ui::live_design(cx, Option::<&str>::None);
+        // crate::gen_ui::live_design(cx, Option::<&str>::None);
+        crate::gen_ui::live_design(cx, Some(current_dir().unwrap()));
         crate::views::register(cx);
     }
 }
