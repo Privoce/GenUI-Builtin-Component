@@ -1,4 +1,4 @@
-use toml_edit::{Item, Table};
+use toml_edit::Table;
 
 use crate::components::{
     ButtonProp, CardProp, CheckboxProp, CollapseProp, DividerProp, ImageProp, LabelProp, LinkProp,
@@ -65,7 +65,25 @@ impl From<&ComponentsConf> for Table {
     fn from(value: &ComponentsConf) -> Self {
         let mut table = Table::new();
         table.insert(LABEL, (&value.label).into());
-        
+        table.insert(VIEW, (&value.view).into());
+        table.insert(BUTTON, (&value.button).into());
+        table.insert(CARD, (&value.card).into());
+        table.insert(RADIO, (&value.radio).into());
+        table.insert(CHECKBOX, (&value.checkbox).into());
+        table.insert(SWITCH, (&value.switch).into());
+        table.insert(DIVIDER, (&value.divider).into());
+        table.insert(SVG, (&value.svg).into());
+        table.insert(IMAGE, (&value.image).into());
+        table.insert(POPUP, (&value.popup).into());
+        table.insert(POPUP_CONTAINER, (&value.popup_container).into());
+        table.insert(TABBAR, (&value.tabbar).into());
+        table.insert(TABBAR_ITEM, (&value.tabbar_item).into());
+        table.insert(TAG, (&value.tag).into());
+        table.insert(LINK, (&value.link).into());
+        table.insert(MENU_ITEM, (&value.menu_item).into());
+        table.insert(SUB_MENU, (&value.sub_menu).into());
+        table.insert(MENU, (&value.menu).into());
+        table.insert(COLLAPSE, (&value.collapse).into());
         table
     }
 }

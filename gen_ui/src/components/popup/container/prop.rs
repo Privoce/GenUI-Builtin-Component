@@ -73,7 +73,7 @@ basic_prop_interconvert! {
             spacing: f64 => SPACING, 6.0, |v| v.to_f64(),
             height: Size => HEIGHT, Size::Fill, |v| v.to_size(),
             width: Size => WIDTH, Size::Fill, |v| v.to_size(),
-            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some)
+            abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v)))
         }
     }, "[component.popup_container] should be a table"
 }

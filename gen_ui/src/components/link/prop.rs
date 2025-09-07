@@ -92,7 +92,7 @@ basic_prop_interconvert! {
             rotation: f32 => ROTATION, 0.0, |v| v.to_f32(),
             scale: f32 => SCALE, 1.0, |v| v.to_f32(),
             cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor(),
-            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v))),
             clip_x: bool => CLIP_X, false, |v| v.to_bool(),
             clip_y: bool => CLIP_Y, false, |v| v.to_bool(),
             align: Align => ALIGN, Align::default(), |v| v.to_align(Align::default())

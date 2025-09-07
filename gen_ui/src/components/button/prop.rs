@@ -87,7 +87,7 @@ basic_prop_interconvert! {
             height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
             width: Size => WIDTH, Size::Fit, |v| v.to_size(),
             spacing: f64 => SPACING, 6.0, |v| v.to_f64(),
-            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some)
+            abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v)))
         }
     }, "ButtonBasicProp should be a inline table"
 }

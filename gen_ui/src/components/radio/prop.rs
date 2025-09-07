@@ -250,7 +250,7 @@ basic_prop_interconvert! {
             border_width: f32 => BORDER_WIDTH, 1.0, |v| v.to_f32(),
             mode: ActiveMode => MODE, ActiveMode::Round, |v| v.try_into(),
             margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
-            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v))),
             cursor: MouseCursor => CURSOR, MouseCursor::Hand, |v| v.to_cursor()
         }
     }, "[component.radio.radio] should be an inline table"

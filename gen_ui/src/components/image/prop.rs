@@ -65,7 +65,7 @@ basic_prop_interconvert! {
             width: Size => WIDTH, Size::Fixed(128.0), |v| v.to_size(),
             margin: Margin => MARGIN, Margin::from_f64(0.0), |v| v.to_margin(margin),
             cursor: MouseCursor => CURSOR, MouseCursor::Default, |v| v.to_cursor(),
-            abs_pos: AbsPos => ABS_POS, None, |v| v.to_dvec2().map(Some),
+            abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v))),
             min_width: f64 => MIN_WIDTH, 128.0, |v| v.to_f64(),
             min_height: f64 => MIN_HEIGHT, 64.0, |v| v.to_f64(),
             width_scale: f64 => WIDTH_SCALE, 1.0, |v| v.to_f64()
