@@ -9,16 +9,16 @@ live_design! {
     use crate::views::cbox::*;
 
     pub MenuPage = {{MenuPage}} {
-        prop: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
+        style: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
         <CBox> {
-            prop: {
+            style: {
                 basic: {
                     margin: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
                     padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
                 }
             }
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fill,
                         width: Fill,
@@ -28,7 +28,7 @@ live_design! {
                     }
                 }
                 <GVLayout> {
-                    prop: {basic: {height: 300.0, width: Fill, padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
+                    style: {basic: {height: 300.0, width: Fill, padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
                     <GMenuItem> {
                         text: <GLabel> {
                             text: "Menu item"
@@ -88,7 +88,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
+                    style: {basic: {padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}}}
                     <GMenu>{
                         body: {
                             <GSubMenu>{
@@ -127,7 +127,7 @@ live_design! {
                         }
                     }
                         <GMenu>{
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Error,
@@ -147,7 +147,7 @@ live_design! {
                             },
                             body: {
                                 <GSubMenu>{
-                                    prop: {
+                                    style: {
                                         basic: {
                                             container: {
                                                 theme: Error,
@@ -162,13 +162,13 @@ live_design! {
                                     },
                                     body: {
                                         <GMenuItem> {
-                                            prop: {basic: {container: {theme: Error}}}
+                                            style: {basic: {container: {theme: Error}}}
                                             text: <GLabel>{
                                                 text: "Sub Menu Item 0-0",
                                             }
                                         }
                                         <GSubMenu>{
-                                            prop: {
+                                            style: {
                                                 basic: {
                                                     container: {
                                                         theme: Error,
@@ -188,13 +188,13 @@ live_design! {
                                             }
                                             body: <GView> {
                                                 <GMenuItem> {
-                                                    prop: {basic: {container: {theme: Error}}}
+                                                    style: {basic: {container: {theme: Error}}}
                                                     text: <GLabel>{
                                                         text: "Sub Menu Item 0-1-0",
                                                     }
                                                 }
                                                 <GMenuItem> {
-                                                    prop: {basic: {container: {theme: Error}}}
+                                                    style: {basic: {container: {theme: Error}}}
                                                     value: "sub_active",
                                                     text: <GLabel>{
                                                         text: "Sub Menu Item 0-1-1",
@@ -205,7 +205,7 @@ live_design! {
                                     }
                                 }
                                 <GMenuItem> {
-                                    prop: {basic: {container: {theme: Error}}}
+                                    style: {basic: {container: {theme: Error}}}
                                     text: <GLabel>{
                                         text: "Sub Menu Item 1",
                                     }

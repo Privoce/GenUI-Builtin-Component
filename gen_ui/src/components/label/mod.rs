@@ -3,7 +3,7 @@ use makepad_widgets::{shader::draw_text::TextStyle, *};
 use crate::{
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Prop},
+        traits::{BasicStyle, Style},
     },
     error::Error,
     getter, getter_setter_ref, lifecycle,
@@ -37,7 +37,7 @@ live_design! {
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
 pub struct GLabel {
     #[live]
-    pub prop: LabelProp,
+    pub style: LabelProp,
     #[live(true)]
     pub visible: bool,
     #[live]
@@ -88,8 +88,8 @@ impl WidgetNode for GLabel {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -119,11 +119,11 @@ impl Widget for GLabel {
             return DrawStep::done();
         }
         let state = self.state;
-        let walk = walk.with_add_padding(self.prop.get(state).padding);
+        let walk = walk.with_add_padding(self.style.get(state).padding);
         cx.begin_turtle(
             walk,
             Layout {
-                flow: self.prop.get(state).flow,
+                flow: self.style.get(state).flow,
                 ..Default::default()
             },
         );
@@ -159,7 +159,7 @@ impl LiveHook for GLabel {
         self.set_apply_state_map(
             nodes,
             index,
-            &LabelBasicProp::live_props(),
+            &LabelBasicStyle::live_props(),
             [live_id!(basic), live_id!(disabled)],
             |component| {
                 component.lifecycle.next();
@@ -186,26 +186,26 @@ impl Component for GLabel {
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let label_prop = &cx.global::<Conf>().components.label;
         // [sync from conf prop] -----------------------------------------------------
-        self.prop = label_prop.clone();
+        self.style = label_prop.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         if self.disabled {
             self.switch_state(LabelState::Disabled);
         }
-        // dbg!(self.prop.basic.color);
+        // dbg!(self.style.basic.color);
         // [sync to draw_text] -------------------------------------------------------
         let is_set_disabled_color = self.is_set_disabled_color();
         if !self.is_set_disabled_color {
             self.is_set_disabled_color = is_set_disabled_color;
         }
-        let prop = self.prop.get_mut(self.state);
+        let style = self.style.get_mut(self.state);
         if !self.is_set_disabled_color && self.disabled {
-            prop.sync(LabelState::Disabled);
+            style.sync(LabelState::Disabled);
         }
-        self.draw_text.color = prop.color;
-        self.draw_text.text_style.font_size = prop.font_size;
-        self.draw_text.text_style.line_spacing = prop.line_spacing;
+        self.draw_text.color = style.color;
+        self.draw_text.text_style.font_size = style.font_size;
+        self.draw_text.text_style.line_spacing = style.line_spacing;
         self.draw_text.text_style.font_family = match self.mode {
             FontMode::Regular => self.font_regular.font_family.clone(),
             FontMode::Bold => self.font_bold.font_family.clone(),
@@ -241,7 +241,7 @@ impl Component for GLabel {
         ()
     }
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     sync!();
@@ -259,13 +259,13 @@ impl GLabel {
     }
     getter! {
         GLabel{
-            get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
-            get_color(String) {|c| {c.prop.basic.get_color().to_hex_string()}},
-            get_font_size(f32) {|c| {c.prop.basic.get_font_size()}},
-            get_line_spacing(f32) {|c| {c.prop.basic.get_line_spacing()}},
-            get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
-            get_padding(Padding) {|c| {c.prop.basic.get_padding()}},
-            get_flow(Flow) {|c| {c.prop.basic.get_flow()}},
+            get_theme(Theme) {|c| {c.style.basic.get_theme()}},
+            get_color(String) {|c| {c.style.basic.get_color().to_hex_string()}},
+            get_font_size(f32) {|c| {c.style.basic.get_font_size()}},
+            get_line_spacing(f32) {|c| {c.style.basic.get_line_spacing()}},
+            get_margin(Margin) {|c| {c.style.basic.get_margin()}},
+            get_padding(Padding) {|c| {c.style.basic.get_padding()}},
+            get_flow(Flow) {|c| {c.style.basic.get_flow()}},
             get_mode(FontMode) {|c| {c.mode}},
             get_text(String) {|c| {c.text.as_ref().to_string()}},
             get_visible(bool) {|c| {c.visible}},
@@ -274,13 +274,13 @@ impl GLabel {
     }
     setter! {
         GLabel{
-            set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); Ok(())}},
-            set_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_color(color); Ok(())}},
-            set_font_size(font_size: f32) {|c, _cx| {c.prop.basic.set_font_size(font_size); Ok(())}},
-            set_line_spacing(line_spacing: f32) {|c, _cx| {c.prop.basic.set_line_spacing(line_spacing); Ok(())}},
-            set_margin(margin: Margin) {|c, _cx| {c.prop.basic.set_margin(margin); Ok(())}},
-            set_padding(padding: Padding) {|c, _cx| {c.prop.basic.set_padding(padding); Ok(())}},
-            set_flow(flow: Flow) {|c, _cx| {c.prop.basic.set_flow(flow); Ok(())}},
+            set_theme(theme: Theme) {|c, _cx| {c.style.basic.set_theme(theme); Ok(())}},
+            set_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_color(color); Ok(())}},
+            set_font_size(font_size: f32) {|c, _cx| {c.style.basic.set_font_size(font_size); Ok(())}},
+            set_line_spacing(line_spacing: f32) {|c, _cx| {c.style.basic.set_line_spacing(line_spacing); Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.style.basic.set_margin(margin); Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.style.basic.set_padding(padding); Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.style.basic.set_flow(flow); Ok(())}},
             set_mode(mode: FontMode) {|c, _cx| {c.mode = mode; Ok(())}},
             set_text(text: String) {|c, _cx| {c.text.as_mut_empty().push_str(&text); Ok(())}},
             set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},

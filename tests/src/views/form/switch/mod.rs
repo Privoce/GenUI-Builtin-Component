@@ -11,7 +11,7 @@ live_design! {
     pub SwitchPage = {{SwitchPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -19,16 +19,16 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: { basic: { height: Fit, width: Fill,}},
+                    style: { basic: { height: Fit, width: Fill,}},
                     <GSwitch> {}
                     <GLabel> {
                         text: "basic"
                     }
                 }
                 <GHLayout> {
-                    prop: { basic: { height: Fit, width: Fill,}},
+                    style: { basic: { height: Fit, width: Fill,}},
                     <GSwitch>{
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Warning,
                             }
@@ -40,9 +40,9 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: { basic: { height: Fit, width: Fill,}},
+                    style: { basic: { height: Fit, width: Fill,}},
                     <GSwitch>{
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Info,
                             }
@@ -61,7 +61,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -69,15 +69,15 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
+                    style: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
                     <GView> {
-                        prop: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
+                        style: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
                         <GLabel> {
                             text: "Wi-Fi"
                         }
                     }
                     <GSwitch> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Primary,
                             }
@@ -86,15 +86,15 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
+                    style: { basic: { height: 48.0, width: 400.0, align: {x: 0.0, y: 0.5} } },
                     <GView> {
-                        prop: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
+                        style: {basic: {padding: {left: 0.0, top: 0.0, bottom: 0.0, right: 0.0}, align: {x: 0.0, y: 0.5} } },
                         <GLabel> {
                             text: "Bluetooth"
                         }
                     }
                     <GSwitch>{
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Primary,
                             }

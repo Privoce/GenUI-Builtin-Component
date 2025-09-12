@@ -3,12 +3,12 @@ mod prop;
 use crate::{
     active_event, animation_open_then_redraw,
     components::{
-        label::{GLabel, LabelBasicProp},
+        label::{GLabel, LabelBasicStyle},
         lifecycle::LifeCycle,
         menu::event::{MenuItemClicked, MenuItemEvent, MenuItemHoverIn, MenuItemHoverOut},
-        svg::{GSvg, SvgBasicProp},
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        svg::{GSvg, SvgBasicStyle},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::{GView, ViewBasicStyle},
     },
     error::Error,
     event_option, getter, hit_hover_in, hit_hover_out, lifecycle, play_animation,
@@ -77,7 +77,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GMenuItem {
     #[live]
-    pub prop: MenuItemProp,
+    pub style: MenuItemProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -143,8 +143,8 @@ impl WidgetNode for GMenuItem {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -183,9 +183,9 @@ impl Widget for GMenuItem {
         }
 
         let state = self.state;
-        let prop = self.prop.get(state);
+        let style = self.style.get(state);
 
-        let _ = self.draw_item.begin(cx, walk, prop.layout());
+        let _ = self.draw_item.begin(cx, walk, style.layout());
 
         let _ = SlotDrawer::new(
             [
@@ -237,15 +237,15 @@ impl LiveHook for GMenuItem {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        let live_props = ViewBasicProp::live_props();
+        let live_props = ViewBasicStyle::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
             [live_id!(basic), live_id!(hover), live_id!(active), live_id!(disabled)],
             [
                 (MenuItemPart::Container, &live_props),
-                (MenuItemPart::Icon, &SvgBasicProp::live_props()),
-                (MenuItemPart::Text, &LabelBasicProp::live_props()),
+                (MenuItemPart::Icon, &SvgBasicStyle::live_props()),
+                (MenuItemPart::Text, &LabelBasicStyle::live_props()),
                 (MenuItemPart::Extra, &live_props),
             ],
             |_| {},
@@ -282,18 +282,18 @@ impl Component for GMenuItem {
     type State = MenuItemState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.menu_item;
-        self.prop = prop.clone();
-        self.icon.prop.basic = self.prop.basic.icon;
-        self.icon.prop.hover = self.prop.hover.icon;
-        self.icon.prop.pressed = self.prop.active.icon;
-        self.icon.prop.disabled = self.prop.disabled.icon;
-        self.text.prop.basic = self.prop.basic.text;
-        self.text.prop.disabled = self.prop.disabled.text;
-        self.extra.prop.basic = self.prop.basic.extra;
-        self.extra.prop.hover = self.prop.hover.extra;
-        self.extra.prop.pressed = self.prop.active.extra;
-        self.extra.prop.disabled = self.prop.disabled.extra;
+        let style = &cx.global::<Conf>().components.menu_item;
+        self.style = style.clone();
+        self.icon.style.basic = self.style.basic.icon;
+        self.icon.style.hover = self.style.hover.icon;
+        self.icon.style.pressed = self.style.active.icon;
+        self.icon.style.disabled = self.style.disabled.icon;
+        self.text.style.basic = self.style.basic.text;
+        self.text.style.disabled = self.style.disabled.text;
+        self.extra.style.basic = self.style.basic.extra;
+        self.extra.style.hover = self.style.hover.extra;
+        self.extra.style.pressed = self.style.active.extra;
+        self.extra.style.disabled = self.style.disabled.extra;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
@@ -307,8 +307,8 @@ impl Component for GMenuItem {
             }
         };
         self.switch_state(state);
-        let prop = self.prop.get(self.state);
-        self.draw_item.merge(&prop.container);
+        let style = self.style.get(self.state);
+        self.draw_item.merge(&style.container);
         let _ = self.icon.render(cx)?;
         let _ = self.text.render(cx)?;
         let _ = self.extra.render(cx)?;
@@ -325,7 +325,7 @@ impl Component for GMenuItem {
                     }
                 }
                 Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.state).container.cursor);
+                    cx.set_cursor(self.style.get(self.state).container.cursor);
                     self.switch_state_with_animation(cx, MenuItemState::Hover);
                     hit_hover_in!(self, cx, e);
                 }
@@ -357,7 +357,7 @@ impl Component for GMenuItem {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, MenuItemState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -394,7 +394,7 @@ impl Component for GMenuItem {
         });
 
         // sync state if is not Basic
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -415,10 +415,10 @@ impl Component for GMenuItem {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(MenuItemState::Basic);
-            let hover_prop = self.prop.get(MenuItemState::Hover);
-            let active_prop = self.prop.get(MenuItemState::Active);
-            let disabled_prop = self.prop.get(MenuItemState::Disabled);
+            let basic_prop = self.style.get(MenuItemState::Basic);
+            let hover_prop = self.style.get(MenuItemState::Hover);
+            let active_prop = self.style.get(MenuItemState::Active);
+            let disabled_prop = self.style.get(MenuItemState::Disabled);
             let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -515,7 +515,7 @@ impl Component for GMenuItem {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 MenuItemState::Basic => nodes.child_by_path(
                     self.index,
@@ -553,15 +553,15 @@ impl Component for GMenuItem {
             set_animation! {
                 nodes: draw_item = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }

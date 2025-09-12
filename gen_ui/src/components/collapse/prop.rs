@@ -6,8 +6,8 @@ use crate::{
         label::LabelState,
         live_props::LiveProps,
         svg::SvgState,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState}, ViewColors,
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState}, ViewColors,
     }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{BASIC, BODY, CONTAINER, DISABLED, HEADER, HOVER, PRESSED},
         traits::NewFrom,
@@ -17,18 +17,18 @@ use crate::{
 
 prop_interconvert! {
     CollapseProp {
-        basic_prop = CollapseBasicProp;
-        basic => BASIC, CollapseBasicProp::default(), |v| (v, CollapseState::Basic).try_into(),
-        hover => HOVER, CollapseBasicProp::from_state(Theme::default(), CollapseState::Hover), |v| (v, CollapseState::Hover).try_into(),
-        active => PRESSED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Active), |v| (v, CollapseState::Active).try_into(),
-        disabled => DISABLED, CollapseBasicProp::from_state(Theme::default(), CollapseState::Disabled), |v| (v, CollapseState::Disabled).try_into()
+        basic_prop = CollapseBasicStyle;
+        basic => BASIC, CollapseBasicStyle::default(), |v| (v, CollapseState::Basic).try_into(),
+        hover => HOVER, CollapseBasicStyle::from_state(Theme::default(), CollapseState::Hover), |v| (v, CollapseState::Hover).try_into(),
+        active => PRESSED, CollapseBasicStyle::from_state(Theme::default(), CollapseState::Active), |v| (v, CollapseState::Active).try_into(),
+        disabled => DISABLED, CollapseBasicStyle::from_state(Theme::default(), CollapseState::Disabled), |v| (v, CollapseState::Disabled).try_into()
     }, "[component.menu_item] should be a table"
 }
 
-impl Prop for CollapseProp {
+impl Style for CollapseProp {
     type State = CollapseState;
 
-    type Basic = CollapseBasicProp;
+    type Basic = CollapseBasicStyle;
 
     get_get_mut! {
         CollapseState::Basic => basic,
@@ -38,7 +38,7 @@ impl Prop for CollapseProp {
     }
 
     fn len() -> usize {
-        4 * CollapseBasicProp::len()
+        4 * CollapseBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -49,7 +49,7 @@ impl Prop for CollapseProp {
     }
 }
 
-impl SlotProp for CollapseProp {
+impl SlotStyle for CollapseProp {
     type Part = CollapsePart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -72,13 +72,13 @@ impl SlotProp for CollapseProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct CollapseBasicProp {
-    #[live(CollapseBasicProp::default_container(Theme::default(), CollapseState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(CollapseBasicProp::default_header(Theme::default(), CollapseState::Basic))]
-    pub header: ViewBasicProp,
-    #[live(CollapseBasicProp::default_body(Theme::default(), CollapseState::Basic))]
-    pub body: ViewBasicProp,
+pub struct CollapseBasicStyle {
+    #[live(CollapseBasicStyle::default_container(Theme::default(), CollapseState::Basic))]
+    pub container: ViewBasicStyle,
+    #[live(CollapseBasicStyle::default_header(Theme::default(), CollapseState::Basic))]
+    pub header: ViewBasicStyle,
+    #[live(CollapseBasicStyle::default_body(Theme::default(), CollapseState::Basic))]
+    pub body: ViewBasicStyle,
 }
 
 component_colors!{
@@ -89,7 +89,7 @@ component_colors!{
 }
 
 from_prop_to_toml!{
-    CollapseBasicProp {
+    CollapseBasicStyle {
         container => CONTAINER,
         header => HEADER,
         body => BODY
@@ -106,7 +106,7 @@ impl From<ViewColors> for CollapseColors {
     }
 }
 
-impl BasicProp for CollapseBasicProp {
+impl BasicStyle for CollapseBasicStyle {
     type State = CollapseState;
 
     type Colors = CollapseColors;
@@ -120,11 +120,11 @@ impl BasicProp for CollapseBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into()).into()
+        ViewBasicStyle::state_colors(theme, state.into()).into()
     }
 
     fn len() -> usize {
-        3 * ViewBasicProp::len()
+        3 * ViewBasicStyle::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -138,9 +138,9 @@ impl BasicProp for CollapseBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
-            (live_id!(header), ViewBasicProp::live_props().into()),
-            (live_id!(body), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
+            (live_id!(header), ViewBasicStyle::live_props().into()),
+            (live_id!(body), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -152,7 +152,7 @@ impl BasicProp for CollapseBasicProp {
     }
 }
 
-impl SlotBasicProp for CollapseBasicProp {
+impl SlotBasicStyle for CollapseBasicStyle {
     type Part = CollapsePart;
 
     fn set_from_str_slot(
@@ -183,13 +183,13 @@ impl SlotBasicProp for CollapseBasicProp {
     }
 }
 
-impl Default for CollapseBasicProp {
+impl Default for CollapseBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), CollapseState::Basic)
     }
 }
 
-impl TryFrom<(&Item, CollapseState)> for CollapseBasicProp {
+impl TryFrom<(&Item, CollapseState)> for CollapseBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, CollapseState)) -> Result<Self, Self::Error> {
@@ -201,7 +201,7 @@ impl TryFrom<(&Item, CollapseState)> for CollapseBasicProp {
             inline_table,
             CONTAINER,
             || {
-                Ok(CollapseBasicProp::default_container(
+                Ok(CollapseBasicStyle::default_container(
                     Theme::default(),
                     state,
                 ))
@@ -212,14 +212,14 @@ impl TryFrom<(&Item, CollapseState)> for CollapseBasicProp {
         let header = get_from_itable(
             inline_table,
             HEADER,
-            || Ok(CollapseBasicProp::default_header(Theme::default(), state)),
+            || Ok(CollapseBasicStyle::default_header(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let body = get_from_itable(
             inline_table,
             BODY,
-            || Ok(CollapseBasicProp::default_body(Theme::default(), state)),
+            || Ok(CollapseBasicStyle::default_body(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -231,9 +231,9 @@ impl TryFrom<(&Item, CollapseState)> for CollapseBasicProp {
     }
 }
 
-impl CollapseBasicProp {
-    pub fn default_container(theme: Theme, state: CollapseState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl CollapseBasicStyle {
+    pub fn default_container(theme: Theme, state: CollapseState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fill);
         container.set_background_visible(true);
@@ -243,8 +243,8 @@ impl CollapseBasicProp {
         container.set_spacing(0.0);
         container
     }
-    pub fn default_header(theme: Theme, state: CollapseState) -> ViewBasicProp {
-        let mut header = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_header(theme: Theme, state: CollapseState) -> ViewBasicStyle {
+        let mut header = ViewBasicStyle::from_state(theme, state.into());
         header.set_height(Size::Fit);
         header.set_width(Size::Fill);
         header.set_background_visible(true);
@@ -252,8 +252,8 @@ impl CollapseBasicProp {
         header.set_flow(Flow::Right);
         header
     }
-    pub fn default_body(theme: Theme, state: CollapseState) -> ViewBasicProp {
-        let mut body = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_body(theme: Theme, state: CollapseState) -> ViewBasicStyle {
+        let mut body = ViewBasicStyle::from_state(theme, state.into());
         body.set_height(Size::Fit);
         body.set_width(Size::Fill);
         body.set_background_visible(true);

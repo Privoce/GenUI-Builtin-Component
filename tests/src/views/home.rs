@@ -28,14 +28,14 @@ live_design! {
     use crate::views::nav::router::*;
 
     pub HomePage = {{HomePage}} {
-        prop: {
+        style: {
             basic: {
                 flow: Right,
                 padding: {left: 0.0, right: 0.0, top: 0.0, bottom: 0.0}
             }
         }
         menu = <GMenu> {
-            prop: {
+            style: {
                 basic: {
                     container: {
                         theme: Primary,
@@ -48,7 +48,7 @@ live_design! {
             // active: "tab_view",
             body: {
                 <GSubMenu> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 theme: Primary,
@@ -68,7 +68,7 @@ live_design! {
                     },
                     body: {
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -81,7 +81,7 @@ live_design! {
                             value: "tab_view"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -94,7 +94,7 @@ live_design! {
                             value: "tab_label"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -107,7 +107,7 @@ live_design! {
                             value: "tab_button"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -120,7 +120,7 @@ live_design! {
                             value: "tab_svg"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -133,7 +133,7 @@ live_design! {
                             value: "tab_image"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -146,7 +146,7 @@ live_design! {
                             value: "tab_card"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -159,7 +159,7 @@ live_design! {
                             value: "tab_divider"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -174,7 +174,7 @@ live_design! {
                     }
                 }
                 <GSubMenu> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 theme: Primary,
@@ -194,7 +194,7 @@ live_design! {
                     },
                     body: {
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -207,7 +207,7 @@ live_design! {
                             value: "tab_radio"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -220,7 +220,7 @@ live_design! {
                             value: "tab_checkbox"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -236,7 +236,7 @@ live_design! {
                     }
                 }
                 <GSubMenu> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 theme: Primary,
@@ -256,7 +256,7 @@ live_design! {
                     },
                     body: {
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -269,7 +269,7 @@ live_design! {
                             value: "tab_tag"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -284,7 +284,7 @@ live_design! {
                     }
                 }
                 <GSubMenu> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 theme: Primary,
@@ -304,7 +304,7 @@ live_design! {
                     },
                     body: {
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -317,7 +317,7 @@ live_design! {
                             value: "tab_dialog"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -330,7 +330,7 @@ live_design! {
                             value: "tab_drawer"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -343,7 +343,7 @@ live_design! {
                             value: "tab_popover"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -356,7 +356,7 @@ live_design! {
                             value: "tab_tooltip"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -369,7 +369,7 @@ live_design! {
                             value: "tab_tabbar"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,
@@ -382,7 +382,7 @@ live_design! {
                             value: "tab_menu"
                         }
                         <GMenuItem> {
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         theme: Primary,

@@ -89,7 +89,7 @@ live_design! {
 /// These events allow interaction with the label and can be used to trigger actions or further animations in response to user input.
 ///
 /// ## Props
-/// | Macro   | Prop                 | Description                                      | Type                    | Default     |
+/// | Macro   | Style                 | Description                                      | Type                    | Default     |
 /// |---------|----------------------|--------------------------------------------------|-------------------------|-------------|
 /// | live    | stroke_hover_color   | The color of the text stroke when hovered        | `Option<Vec4>`          | `None`      |
 /// | live    | stroke_focus_color   | The color of the text stroke when focused        | `Option<Vec4>`          | `None`      |

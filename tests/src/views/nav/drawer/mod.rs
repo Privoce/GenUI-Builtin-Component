@@ -11,7 +11,7 @@ live_design! {
     pub DrawerPage = {{DrawerPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -23,24 +23,24 @@ live_design! {
                     popup: {
                         popup: {
                             <GHLayout> {
-                                prop: {basic: {height: 80.0}}
+                                style: {basic: {height: 80.0}}
                                 <GVLayout> {
-                                    prop: {basic: {align: {x: 0.5}}}
+                                    style: {basic: {align: {x: 0.5}}}
                                     <IconPlus> {}
                                     <GLabel> {text: "Add to"}
                                 }
                                 <GVLayout> {
-                                    prop: {basic: {align: {x: 0.5}}}
+                                    style: {basic: {align: {x: 0.5}}}
                                     <IconClose> {}
                                     <GLabel> {text: "Close"}
                                 }
                                 <GVLayout> {
-                                    prop: {basic: {align: {x: 0.5}}}
+                                    style: {basic: {align: {x: 0.5}}}
                                     <IconHome> {}
                                     <GLabel> {text: "Home"}
                                 }
                                 <GVLayout> {
-                                    prop: {basic: {align: {x: 0.5}}}
+                                    style: {basic: {align: {x: 0.5}}}
                                     <IconGift> {}
                                     <GLabel> {text: "Gift"}
                                 }
@@ -54,7 +54,7 @@ live_design! {
                     popup: {
                         popup: {
                             <GButton> {
-                                prop: {
+                                style: {
                                     basic: {theme: Success}
                                 }
                             }
@@ -67,7 +67,7 @@ live_design! {
                     popup: {
                         popup: {
                             <GButton> {
-                                prop: {
+                                style: {
                                     basic: {theme: Success}
                                 }
                             }
@@ -80,7 +80,7 @@ live_design! {
                     popup: {
                         popup: {
                             <GButton> {
-                                prop: {
+                                style: {
                                     basic: {theme: Success}
                                 }
                             }

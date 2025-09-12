@@ -4,8 +4,8 @@ use crate::{
     basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Style},
+        view::{ViewBasicStyle, ViewState},
     },
     error::Error,
     get_get_mut, getter_setter_prop,
@@ -26,17 +26,17 @@ use crate::{
 
 prop_interconvert! {
     LinkProp {
-        basic_prop = LinkBasicProp;
-        basic => BASIC, LinkBasicProp::default(), |v| (v, LinkState::Basic).try_into(),
-        hover => HOVER, LinkBasicProp::from_state(Theme::default(), LinkState::Hover), |v| (v, LinkState::Hover).try_into(),
-        pressed => PRESSED, LinkBasicProp::from_state(Theme::default(), LinkState::Pressed), |v| (v, LinkState::Pressed).try_into(),
-        disabled => DISABLED, LinkBasicProp::from_state(Theme::default(), LinkState::Disabled), |v| (v, LinkState::Disabled).try_into()
+        basic_prop = LinkBasicStyle;
+        basic => BASIC, LinkBasicStyle::default(), |v| (v, LinkState::Basic).try_into(),
+        hover => HOVER, LinkBasicStyle::from_state(Theme::default(), LinkState::Hover), |v| (v, LinkState::Hover).try_into(),
+        pressed => PRESSED, LinkBasicStyle::from_state(Theme::default(), LinkState::Pressed), |v| (v, LinkState::Pressed).try_into(),
+        disabled => DISABLED, LinkBasicStyle::from_state(Theme::default(), LinkState::Disabled), |v| (v, LinkState::Disabled).try_into()
     }, "[component.link] should be a table"
 }
 
-impl Prop for LinkProp {
+impl Style for LinkProp {
     type State = LinkState;
-    type Basic = LinkBasicProp;
+    type Basic = LinkBasicStyle;
 
     get_get_mut! {
         LinkState::Basic => basic,
@@ -46,7 +46,7 @@ impl Prop for LinkProp {
     }
 
     fn len() -> usize {
-        4 * LinkBasicProp::len()
+        4 * LinkBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -66,7 +66,7 @@ impl Prop for LinkProp {
 }
 
 basic_prop_interconvert! {
-    LinkBasicProp {
+    LinkBasicStyle {
         state = LinkState;
         {
             color => COLOR, |v| v.try_into(),
@@ -107,7 +107,7 @@ component_colors! {
     }
 }
 
-impl LinkBasicProp {
+impl LinkBasicStyle {
     getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_color, set_color: color -> Vec4,
@@ -119,7 +119,7 @@ impl LinkBasicProp {
     }
 }
 
-impl BasicProp for LinkBasicProp {
+impl BasicStyle for LinkBasicStyle {
     type State = LinkState;
     type Colors = LinkColors;
 
@@ -367,9 +367,9 @@ impl BasicProp for LinkBasicProp {
     }
 }
 
-impl From<&LinkBasicProp> for ViewBasicProp {
-    fn from(value: &LinkBasicProp) -> Self {
-        let LinkBasicProp {
+impl From<&LinkBasicStyle> for ViewBasicStyle {
+    fn from(value: &LinkBasicStyle) -> Self {
+        let LinkBasicStyle {
             theme,
             margin,
             padding,
@@ -392,7 +392,7 @@ impl From<&LinkBasicProp> for ViewBasicProp {
             abs_pos,
             ..
         } = *value;
-        ViewBasicProp {
+        ViewBasicStyle {
             theme,
             margin,
             padding,

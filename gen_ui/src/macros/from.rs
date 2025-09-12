@@ -6,9 +6,9 @@
 /// ```rust
 /// prop_interconvert! {
 ///     LabelProp {
-///         basic_prop = LabelBasicProp;
-///         basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
-///         disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
+///         basic_prop = LabelBasicStyle;
+///         basic => BASIC, LabelBasicStyle::default(), |v| (v, LabelState::Basic).try_into(),
+///         disabled => DISABLED, LabelBasicStyle::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
 ///     }, "[component.label] should be a table"
 /// }
 /// ```
@@ -130,7 +130,7 @@ macro_rules! from_prop_to_toml {
 /// ## usage
 /// ```rust
 /// basic_prop_interconvert! {
-///     LabelBasicProp {
+///     LabelBasicStyle {
 ///         state = LabelState;
 ///         {color => COLOR, |v| v.try_into()};
 ///         {
@@ -142,7 +142,7 @@ macro_rules! from_prop_to_toml {
 ///             height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
 ///             width: Size => WIDTH, Size::Fit, |v| v.to_size()
 ///         }
-///     }, "LabelBasicProp should be a inline table"
+///     }, "LabelBasicStyle should be a inline table"
 /// }
 /// ```
 #[macro_export]

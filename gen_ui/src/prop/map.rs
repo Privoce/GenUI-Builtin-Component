@@ -1,6 +1,6 @@
 use crate::{
     components::{
-        LivePropsValue, {BasicProp, Component, Part, SlotBasicProp},
+        LivePropsValue, {BasicStyle, Component, Part, SlotBasicStyle},
     },
     error::Error,
     prop::{manuel::THEME, prop_converter::PropVecConverter},
@@ -268,7 +268,7 @@ pub trait ApplyStateMapImpl<S>: ApplyMapImpl {
     /// - `prop`: the main properties to sync (basic properties)
     fn sync<'p, P, IS>(&'p self, prop: &mut P, basic_state: S, states: IS) -> ()
     where
-        P: BasicProp<State = S> + 'p,
+        P: BasicStyle<State = S> + 'p,
         IS: IntoIterator<Item = (S, &'p mut P)>;
 }
 
@@ -294,7 +294,7 @@ where
         IF: FnOnce(LiveId, &mut C, SlotMap<PT>) -> () + Copy;
     // fn sync<'p, P, SS, PS>(&'p self, basic_state: S, states: SS, parts: PS) -> ()
     // where
-    //     P: BasicProp<State = IS> + 'p,
+    //     P: BasicStyle<State = IS> + 'p,
     //     SS: IntoIterator<Item = S> + Copy,
     //     PS: IntoIterator<Item = (PT, &'p mut P)>;
     fn sync<'p, P, SS, PS>(
@@ -305,7 +305,7 @@ where
         parts: PS,
     ) -> ()
     where
-        P: SlotBasicProp<Part = PT, State = S> + 'p,
+        P: SlotBasicStyle<Part = PT, State = S> + 'p,
         SS: IntoIterator<Item = (S, &'p mut P)>,
         PS: IntoIterator<Item = PT>;
     /// ## cross
@@ -377,7 +377,7 @@ where
                 // let mut slot_props = HashMap::new();
                 for (key, fields) in live_props {
                     let mut paths = vec![
-                        live_id!(prop).as_field(),
+                        live_id!(style).as_field(),
                         state.as_field(),
                         live_part.as_field(),
                         key.as_field(),
@@ -400,7 +400,7 @@ where
         parts: PS,
     ) -> ()
     where
-        P: SlotBasicProp<Part = PT, State = S> + 'p,
+        P: SlotBasicStyle<Part = PT, State = S> + 'p,
         SS: IntoIterator<Item = (S, &'p mut P)>,
         PS: IntoIterator<Item = PT>,
     {
@@ -586,7 +586,7 @@ where
 {
     fn sync<'p, P, IS>(&'p self, prop: &mut P, basic_state: S, states: IS) -> ()
     where
-        P: BasicProp<State = S> + 'p,
+        P: BasicStyle<State = S> + 'p,
         IS: IntoIterator<Item = (S, &'p mut P)>,
     {
         if let Some(basic_props) = self.get(&basic_state) {
@@ -656,7 +656,7 @@ where
             let mut applys = PropMap::new();
             for (state, fields) in live_props {
                 let mut paths = vec![
-                    live_id!(prop).as_field(),
+                    live_id!(style).as_field(),
                     prefix.as_field(),
                     state.as_field(),
                 ];

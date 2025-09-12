@@ -10,7 +10,7 @@ use crate::{
     components::{
         label::FontMode,
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop},
+        traits::{BasicStyle, Component, Style},
     },
     error::Error,
     event_option, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out, lifecycle,
@@ -87,7 +87,7 @@ live_design! {
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
 pub struct GLink {
     #[live]
-    pub prop: LinkProp,
+    pub style: LinkProp,
     #[live(true)]
     pub visible: bool,
     #[live(false)]
@@ -149,8 +149,8 @@ impl WidgetNode for GLink {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -179,15 +179,15 @@ impl Widget for GLink {
             return DrawStep::done();
         }
 
-        let prop = self.prop.get(self.state);
-        self.draw_link.begin(cx, walk, prop.layout());
+        let style = self.style.get(self.state);
+        self.draw_link.begin(cx, walk, style.layout());
         // // here we need to check if the text is empty, if so we need to set it to a space
         // // or the text draw will not work(seems like lazy drawtext bug)
         // let _ = self.text.as_ref().is_empty().then(|| {
         //     let _ = self.set_text(cx, " ");
         // });
         self.draw_text
-            .draw_walk(cx, prop.walk(), Align::default(), self.text.as_ref());
+            .draw_walk(cx, style.walk(), Align::default(), self.text.as_ref());
         // cx.end_turtle_with_area(&mut self.area);
         self.draw_link.end(cx);
         self.set_scope_path(&scope.path);
@@ -247,7 +247,7 @@ impl LiveHook for GLink {
         self.set_apply_state_map(
             nodes,
             index,
-            &LinkBasicProp::live_props(),
+            &LinkBasicStyle::live_props(),
             [
                 live_id!(basic),
                 live_id!(hover),
@@ -283,25 +283,25 @@ impl Component for GLink {
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
         let link_prop = &cx.global::<Conf>().components.link;
         // [sync from conf prop] -----------------------------------------------------
-        self.prop = link_prop.clone();
+        self.style = link_prop.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         if self.disabled {
             self.switch_state(LinkState::Disabled);
         }
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         // [sync to draw_link] -------------------------------------------------------
-        self.draw_text.color = prop.color;
-        self.draw_text.text_style.font_size = prop.font_size;
-        self.draw_text.text_style.line_spacing = prop.line_spacing;
+        self.draw_text.color = style.color;
+        self.draw_text.text_style.font_size = style.font_size;
+        self.draw_text.text_style.line_spacing = style.line_spacing;
         self.draw_text.text_style.font_family = match self.mode {
             FontMode::Regular => self.font_regular.font_family.clone(),
             FontMode::Bold => self.font_bold.font_family.clone(),
             FontMode::Italic => self.font_italic.font_family.clone(),
             FontMode::BoldItalic => self.font_bold_italic.font_family.clone(),
         };
-        self.draw_link.merge(prop);
+        self.draw_link.merge(style);
         Ok(())
     }
 
@@ -309,7 +309,7 @@ impl Component for GLink {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, LinkState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
             }
             _ => {}
         }
@@ -323,7 +323,7 @@ impl Component for GLink {
                 hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
                 self.switch_state_with_animation(cx, LinkState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -379,10 +379,10 @@ impl Component for GLink {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(LinkState::Basic);
-            let hover_prop = self.prop.get(LinkState::Hover);
-            let pressed_prop = self.prop.get(LinkState::Pressed);
-            let disabled_prop = self.prop.get(LinkState::Disabled);
+            let basic_prop = self.style.get(LinkState::Basic);
+            let hover_prop = self.style.get(LinkState::Hover);
+            let pressed_prop = self.style.get(LinkState::Pressed);
+            let disabled_prop = self.style.get(LinkState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -534,7 +534,7 @@ impl Component for GLink {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 LinkState::Basic => nodes.child_by_path(
                     self.index,
@@ -573,18 +573,18 @@ impl Component for GLink {
             set_animation! {
                 nodes: draw_link = {
                     index => {
-                        background_color => prop.background_color,
-                        border_color => prop.border_color,
-                        border_radius => prop.border_radius,
-                        border_width => (prop.border_width as f64),
-                        shadow_color => prop.shadow_color,
-                        spread_radius => (prop.spread_radius as f64),
-                        blur_radius => (prop.blur_radius as f64),
-                        shadow_offset => prop.shadow_offset,
-                        background_visible => prop.background_visible.to_f64(),
-                        underline_color => prop.underline_color,
-                        underline_visible => prop.underline_visible.to_f64(),
-                        underline_width => (prop.underline_width as f64)
+                        background_color => style.background_color,
+                        border_color => style.border_color,
+                        border_radius => style.border_radius,
+                        border_width => (style.border_width as f64),
+                        shadow_color => style.shadow_color,
+                        spread_radius => (style.spread_radius as f64),
+                        blur_radius => (style.blur_radius as f64),
+                        shadow_offset => style.shadow_offset,
+                        background_visible => style.background_visible.to_f64(),
+                        underline_color => style.underline_color,
+                        underline_visible => style.underline_visible.to_f64(),
+                        underline_width => (style.underline_width as f64)
                     }
                 }
             }
@@ -592,16 +592,16 @@ impl Component for GLink {
             set_animation! {
                 nodes: draw_text = {
                     index => {
-                        color => prop.color
+                        color => style.color
                     }
                 }
             }
 
             for (field, target_prop) in [
-                (live_id!(font_size), (prop.font_size as f64).to_live_value()),
+                (live_id!(font_size), (style.font_size as f64).to_live_value()),
                 (
                     live_id!(line_spacing),
-                    (prop.line_spacing as f64).to_live_value(),
+                    (style.line_spacing as f64).to_live_value(),
                 ),
             ] {
                 if let Some(index) = index {
@@ -621,7 +621,7 @@ impl Component for GLink {
         }
     }
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     sync!();

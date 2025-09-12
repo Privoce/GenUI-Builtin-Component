@@ -11,7 +11,7 @@ live_design! {
     pub ImagePage = {{ImagePage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -19,7 +19,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {
+                    style: {
                     basic: {
                             height: Fit,
                             width: Fill,
@@ -28,7 +28,7 @@ live_design! {
                     }
                     <GImage> {
                         src: Live(dep("crate://self/resources/install.png")),
-                        prop: {
+                        style: {
                             basic: {
                                 height: 200.0,
                                 width: 400.0,
@@ -40,7 +40,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {
+                    style: {
                     basic: {
                             height: Fit,
                             width: Fill,
@@ -55,7 +55,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {
+                    style: {
                     basic: {
                             height: Fit,
                             width: Fill,
@@ -64,7 +64,7 @@ live_design! {
                     }
                     <GImage> {
                         src: Url("https://aisearch.bj.bcebos.com/homepage/input_panel/aisearch_online.png"),
-                        prop: {
+                        style: {
                             basic: {
                                 height: 80.0,
                                 width: 160.0,
@@ -76,7 +76,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {
+                    style: {
                     basic: {
                             height: Fit,
                             width: Fill,
@@ -85,7 +85,7 @@ live_design! {
                     }
                     <GImage> {
                         src: Url("https://miro.medium.com/v2/resize:fit:1200/0*fmpeXj1eUS-Nrkkv.png"),
-                        prop: {
+                        style: {
                             basic: {
                                 height: 80.0,
                                 width: 160.0,

@@ -11,7 +11,7 @@ live_design! {
     pub TooltipPage = {{TooltipPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -20,7 +20,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {basic: {height: 100.0, width: Fill, spacing: 60.0, align: {x:0.5}}},
+                    style: {basic: {height: 100.0, width: Fill, spacing: 60.0, align: {x:0.5}}},
                     <GToolTip> {
                         position: TopLeft
                         <GButton> {
@@ -41,9 +41,9 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {basic: {height: 200.0, width: Fill}},
+                    style: {basic: {height: 200.0, width: Fill}},
                     <GVLayout> {
-                        prop: {basic: {height: Fill, width: 180.0, spacing: 20.0, align: {y:0.5}}},
+                        style: {basic: {height: Fill, width: 180.0, spacing: 20.0, align: {y:0.5}}},
                         <GToolTip> {
                             position: LeftTop
                             <GButton> {
@@ -64,10 +64,10 @@ live_design! {
                         }
                     }
                     <GView>{
-                        prop: {basic: {height: Fill}},
+                        style: {basic: {height: Fill}},
                     }
                     <GVLayout> {
-                        prop: {basic: {height: Fill, width: 180.0, spacing: 20.0, align: {y:0.5}}},
+                        style: {basic: {height: Fill, width: 180.0, spacing: 20.0, align: {y:0.5}}},
                         <GToolTip> {
                             position: RightTop
                             <GButton> {
@@ -89,7 +89,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {basic: {height: 100.0, width: Fill, spacing: 60.0, align: {x:0.5}}},
+                    style: {basic: {height: 100.0, width: Fill, spacing: 60.0, align: {x:0.5}}},
                     <GToolTip> {
                         position: BottomLeft
                         <GButton> {

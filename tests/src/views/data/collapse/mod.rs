@@ -11,7 +11,7 @@ live_design! {
     pub CollapsePage = {{CollapsePage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -35,7 +35,7 @@ live_design! {
                     }
                 } 
                 <GCollapse> {
-                    prop: {
+                    style: {
                         basic: {
                             header: {
                                 theme: Primary,
@@ -59,7 +59,7 @@ live_design! {
                     }
                 }
                 <GCollapse> {
-                        prop: {
+                        style: {
                             basic: {
                                 header: {
                                     theme: Info,

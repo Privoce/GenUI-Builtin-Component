@@ -11,7 +11,7 @@ live_design! {
     pub RouterPage = {{RouterPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fill,
                         width: Fill,
@@ -20,15 +20,15 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {basic: {height: Fit}}
+                    style: {basic: {height: Fit}}
                     n1 = <GButton>{slot: {text: "Nav Page 1"}}
                     n2 = <GButton>{slot: {text: "Nav Page 2"}}
                 }
                 page_router = <GRouter> {
                     bar_pages = {
-                        prop:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
+                        style:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
                         bpage1 = <GBarPage> {
-                            prop:{basic: {height: Fill, width: Fill, background_visible: true}}
+                            style:{basic: {height: Fill, width: Fill, background_visible: true}}
                             <GLabel> {text: "Bar Page 1"}
                         }
                         bpage2 = <GBarPage> {
@@ -65,7 +65,7 @@ live_design! {
                         }
                     }
                     nav_pages = {
-                        prop:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
+                        style:{basic: {height: Fill, width: Fill, background_visible: true, background_color: #666}}
                         npage1 = <GNavPage> {
                             <GLabel> {
                                 text: "Nav Page 1"

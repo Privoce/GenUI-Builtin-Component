@@ -4,8 +4,8 @@ use crate::{
     basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
-        view::ViewBasicProp,
+        traits::{BasicStyle, ComponentState, Style},
+        view::ViewBasicStyle,
     },
     error::Error,
     get_get_mut,
@@ -23,22 +23,22 @@ use crate::{
 
 prop_interconvert! {
     DividerProp {
-        basic_prop = DividerBasicProp;
-        basic => BASIC, DividerBasicProp::default(), |v| (v, DividerState::Basic).try_into()
+        basic_prop = DividerBasicStyle;
+        basic => BASIC, DividerBasicStyle::default(), |v| (v, DividerState::Basic).try_into()
     }, "[component.divider] should be a table"
 }
 
-impl Prop for DividerProp {
+impl Style for DividerProp {
     type State = DividerState;
 
-    type Basic = DividerBasicProp;
+    type Basic = DividerBasicStyle;
 
     get_get_mut! {
         DividerState::Basic => basic
     }
 
     fn len() -> usize {
-        1 * DividerBasicProp::len()
+        1 * DividerBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -50,7 +50,7 @@ impl Prop for DividerProp {
 }
 
 basic_prop_interconvert! {
-    DividerBasicProp {
+    DividerBasicStyle {
         state = DividerState;
         {
             background_color => BACKGROUND_COLOR, |v| v.try_into(),
@@ -78,7 +78,7 @@ component_colors! {
     }
 }
 
-impl BasicProp for DividerBasicProp {
+impl BasicStyle for DividerBasicStyle {
     type State = DividerState;
     /// (background_color, shadow_color)
     type Colors = DividerColors;
@@ -215,9 +215,9 @@ impl BasicProp for DividerBasicProp {
     }
 }
 
-impl From<&DividerBasicProp> for ViewBasicProp {
-    fn from(value: &DividerBasicProp) -> Self {
-        let DividerBasicProp {
+impl From<&DividerBasicStyle> for ViewBasicStyle {
+    fn from(value: &DividerBasicStyle) -> Self {
+        let DividerBasicStyle {
             theme,
             background_color,
             border_radius,
@@ -233,7 +233,7 @@ impl From<&DividerBasicProp> for ViewBasicProp {
             abs_pos,
         } = value;
 
-        ViewBasicProp {
+        ViewBasicStyle {
             theme: *theme,
             background_color: *background_color,
             border_radius: *border_radius,

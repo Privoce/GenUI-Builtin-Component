@@ -9,7 +9,7 @@ use makepad_widgets::*;
 use crate::{
     active_event, animation_open_then_redraw, components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop},
+        traits::{BasicStyle, Component, Style},
     }, error::Error, event_option, lifecycle, play_animation, prop::{
         manuel::{ACTIVE, BASIC, DISABLED, HOVER_ACTIVE, HOVER_BASIC},
         traits::ToFloat,
@@ -74,7 +74,7 @@ live_design! {
 pub struct GSwitch {
     // --- prop -------------------
     #[live]
-    pub prop: SwitchProp,
+    pub style: SwitchProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -124,8 +124,8 @@ impl WidgetNode for GSwitch {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -154,9 +154,9 @@ impl Widget for GSwitch {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
         if self.visible {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
 
-            self.draw_switch.begin(cx, walk, prop.layout());
+            self.draw_switch.begin(cx, walk, style.layout());
             self.draw_switch.end(cx);
         }
 
@@ -190,7 +190,7 @@ impl LiveHook for GSwitch {
         self.set_apply_state_map(
             nodes,
             index,
-            &SwitchBasicProp::live_props(),
+            &SwitchBasicStyle::live_props(),
             [
                 live_id!(basic),
                 live_id!(hover_basic),
@@ -235,8 +235,8 @@ impl Component for GSwitch {
     type State = SwitchState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.switch;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.switch;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
@@ -251,8 +251,8 @@ impl Component for GSwitch {
         };
         self.switch_state(state);
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_switch.merge(&prop);
+        let style = self.style.get(state);
+        self.draw_switch.merge(&style);
         self.draw_switch.active = self.value.to_f32();
         Ok(())
     }
@@ -261,7 +261,7 @@ impl Component for GSwitch {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, SwitchState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
             }
             _ => {}
         }
@@ -276,7 +276,7 @@ impl Component for GSwitch {
                 }
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
                 let (state, state_an) = if self.value {
                     (SwitchState::HoverActive, id!(active.on_hover))
                 } else {
@@ -334,7 +334,7 @@ impl Component for GSwitch {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -353,11 +353,11 @@ impl Component for GSwitch {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(SwitchState::Basic);
-            let hover_basic_prop = self.prop.get(SwitchState::HoverBasic);
-            let hover_active_prop = self.prop.get(SwitchState::HoverActive);
-            let active_prop = self.prop.get(SwitchState::Active);
-            let disabled_prop = self.prop.get(SwitchState::Disabled);
+            let basic_prop = self.style.get(SwitchState::Basic);
+            let hover_basic_prop = self.style.get(SwitchState::HoverBasic);
+            let hover_active_prop = self.style.get(SwitchState::HoverActive);
+            let active_prop = self.style.get(SwitchState::Active);
+            let disabled_prop = self.style.get(SwitchState::Disabled);
             let (
                 mut basic_index,
                 mut hover_basic_index,
@@ -471,7 +471,7 @@ impl Component for GSwitch {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 SwitchState::Basic => nodes.child_by_path(
                     self.index,
@@ -517,12 +517,12 @@ impl Component for GSwitch {
             set_animation! {
                 nodes: draw_switch = {
                     index => {
-                        background_color => prop.background_color,
-                        border_color => prop.border_color,
-                        border_radius => prop.border_radius,
-                        border_width => (prop.border_width as f64),
-                        stroke_color => prop.stroke_color,
-                        background_visible => prop.background_visible.to_f64(),
+                        background_color => style.background_color,
+                        border_color => style.border_color,
+                        border_radius => style.border_radius,
+                        border_width => (style.border_width as f64),
+                        stroke_color => style.stroke_color,
+                        background_visible => style.background_visible.to_f64(),
                         active => self.value.to_f64()
                     }
                 }

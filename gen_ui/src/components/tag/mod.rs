@@ -8,11 +8,11 @@ pub use prop::*;
 use crate::{
     active_event, animation_open_then_redraw,
     components::{
-        label::{GLabel, LabelBasicProp},
+        label::{GLabel, LabelBasicStyle},
         lifecycle::LifeCycle,
-        svg::{GSvg, SvgBasicProp},
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::ViewBasicProp,
+        svg::{GSvg, SvgBasicStyle},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::ViewBasicStyle,
     },
     error::Error,
     event_option, event_option_ref, hit_finger_down, hit_hover_in, hit_hover_out, lifecycle,
@@ -79,7 +79,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GTag {
     #[live]
-    pub prop: TagProp,
+    pub style: TagProp,
     // --- draw ----------------------
     #[live]
     pub draw_tag: DrawView,
@@ -145,8 +145,8 @@ impl WidgetNode for GTag {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.container.walk()
+        let style = self.style.get(self.state);
+        style.container.walk()
     }
 
     fn area(&self) -> Area {
@@ -190,10 +190,10 @@ impl LiveHook for GTag {
                 live_id!(disabled),
             ],
             [
-                (TagPart::Icon, &SvgBasicProp::live_props()),
-                (TagPart::Text, &LabelBasicProp::live_props()),
-                (TagPart::Close, &SvgBasicProp::live_props()),
-                (TagPart::Container, &ViewBasicProp::live_props()),
+                (TagPart::Icon, &SvgBasicStyle::live_props()),
+                (TagPart::Text, &LabelBasicStyle::live_props()),
+                (TagPart::Close, &SvgBasicStyle::live_props()),
+                (TagPart::Container, &ViewBasicStyle::live_props()),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -225,18 +225,18 @@ impl Component for GTag {
     type State = TagState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.tag;
-        self.prop = prop.clone();
-        self.icon.prop.basic = self.prop.basic.icon;
-        self.icon.prop.hover = self.prop.hover.icon;
-        self.icon.prop.pressed = self.prop.pressed.icon;
-        self.icon.prop.disabled = self.prop.disabled.icon;
-        self.text.prop.basic = self.prop.basic.text;
-        self.text.prop.disabled = self.prop.disabled.text;
-        self.close.prop.basic = self.prop.basic.close;
-        self.close.prop.hover = self.prop.hover.close;
-        self.close.prop.pressed = self.prop.pressed.close;
-        self.close.prop.disabled = self.prop.disabled.close;
+        let style = &cx.global::<Conf>().components.tag;
+        self.style = style.clone();
+        self.icon.style.basic = self.style.basic.icon;
+        self.icon.style.hover = self.style.hover.icon;
+        self.icon.style.pressed = self.style.pressed.icon;
+        self.icon.style.disabled = self.style.disabled.icon;
+        self.text.style.basic = self.style.basic.text;
+        self.text.style.disabled = self.style.disabled.text;
+        self.close.style.basic = self.style.basic.close;
+        self.close.style.hover = self.style.hover.close;
+        self.close.style.pressed = self.style.pressed.close;
+        self.close.style.disabled = self.style.disabled.close;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
@@ -246,8 +246,8 @@ impl Component for GTag {
             TagState::Basic
         };
         self.switch_state(state);
-        let prop = self.prop.get(self.state);
-        self.draw_tag.merge(&prop.container);
+        let style = self.style.get(self.state);
+        self.draw_tag.merge(&style.container);
         let _ = self.icon.render(cx)?;
         let _ = self.text.render(cx)?;
         let _ = self.close.render(cx)?;
@@ -259,7 +259,7 @@ impl Component for GTag {
         match hit {
             Hit::FingerHoverIn(e) => {
                 self.switch_state_with_animation(cx, TagState::Hover);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
                 hit_hover_in!(self, cx, e);
             }
             Hit::FingerHoverOut(e) => {
@@ -297,7 +297,7 @@ impl Component for GTag {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, TagState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -336,7 +336,7 @@ impl Component for GTag {
             self.close.focus_sync();
         });
 
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -354,10 +354,10 @@ impl Component for GTag {
         let nodes = &mut live_file.expanded.nodes;
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(TagState::Basic);
-            let hover_prop = self.prop.get(TagState::Hover);
-            let pressed_prop = self.prop.get(TagState::Pressed);
-            let disabled_prop = self.prop.get(TagState::Disabled);
+            let basic_prop = self.style.get(TagState::Basic);
+            let hover_prop = self.style.get(TagState::Hover);
+            let pressed_prop = self.style.get(TagState::Pressed);
+            let disabled_prop = self.style.get(TagState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
 
@@ -455,7 +455,7 @@ impl Component for GTag {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 TagState::Basic => nodes.child_by_path(
                     self.index,
@@ -493,15 +493,15 @@ impl Component for GTag {
             set_animation! {
                 nodes: draw_tag = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }
@@ -520,8 +520,8 @@ impl Widget for GTag {
         if !self.visible() {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.state);
-        let _ = self.draw_tag.begin(cx, walk, prop.container.layout());
+        let style = self.style.get(self.state);
+        let _ = self.draw_tag.begin(cx, walk, style.container.layout());
         let _ = SlotDrawer::new(
             [
                 (live_id!(icon), (&mut self.icon).into()),

@@ -11,7 +11,7 @@ live_design! {
     pub DialogPage = {{DialogPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -27,7 +27,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,

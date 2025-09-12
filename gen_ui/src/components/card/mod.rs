@@ -9,8 +9,8 @@ use makepad_widgets::*;
 use crate::{
     active_event, animation_open_then_redraw, area, area_ref, components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp, ViewState},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::{GView, ViewBasicStyle, ViewState},
     }, error::Error, event_option, event_option_ref, getter_setter_ref, hit_hover_in, hit_hover_out, lifecycle, play_animation, prop::{
         manuel::{BASIC, HOVER},
         traits::ToFloat,
@@ -50,7 +50,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GCard {
     #[live]
-    pub prop: CardProp,
+    pub style: CardProp,
     // --- others -------------------
     #[live(true)]
     pub visible: bool,
@@ -117,8 +117,8 @@ impl WidgetNode for GCard {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -157,9 +157,9 @@ impl Widget for GCard {
         }
 
         let state = self.state;
-        let prop = self.prop.get(state);
+        let style = self.style.get(state);
 
-        let _ = self.draw_card.begin(cx, walk, prop.layout());
+        let _ = self.draw_card.begin(cx, walk, style.layout());
         let _ = SlotDrawer::new(
             [
                 (live_id!(header), (&mut self.header).into()),
@@ -219,7 +219,7 @@ impl LiveHook for GCard {
     }
 
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        let live_props = ViewBasicProp::live_props();
+        let live_props = ViewBasicStyle::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
@@ -250,20 +250,20 @@ impl Component for GCard {
     type State = CardState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.card;
-        self.prop = prop.clone();
-        self.header.prop.basic = self.prop.basic.header.into();
-        self.header.prop.hover = self.prop.hover.header.into();
-        self.body.prop.basic = self.prop.basic.body.into();
-        self.body.prop.hover = self.prop.hover.body.into();
-        self.footer.prop.basic = self.prop.basic.footer.into();
-        self.footer.prop.hover = self.prop.hover.footer.into();
+        let style = &cx.global::<Conf>().components.card;
+        self.style = style.clone();
+        self.header.style.basic = self.style.basic.header.into();
+        self.header.style.hover = self.style.hover.header.into();
+        self.body.style.basic = self.style.basic.body.into();
+        self.body.style.hover = self.style.hover.body.into();
+        self.footer.style.basic = self.style.basic.footer.into();
+        self.footer.style.hover = self.style.hover.footer.into();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_card.merge(&prop.container);
+        let style = self.style.get(state);
+        self.draw_card.merge(&style.container);
         Ok(())
     }
 
@@ -272,7 +272,7 @@ impl Component for GCard {
 
         match hit {
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
                 self.switch_state_with_animation(cx, CardState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -314,7 +314,7 @@ impl Component for GCard {
         }
 
         // sync state if is not Basic
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -335,8 +335,8 @@ impl Component for GCard {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(CardState::Basic);
-            let hover_prop = self.prop.get(CardState::Hover);
+            let basic_prop = self.style.get(CardState::Basic);
+            let hover_prop = self.style.get(CardState::Hover);
             let (mut basic_index, mut hover_index) = (None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
@@ -388,7 +388,7 @@ impl Component for GCard {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 CardState::Basic => nodes.child_by_path(
                     self.index,
@@ -410,15 +410,15 @@ impl Component for GCard {
             set_animation! {
                 nodes: draw_card = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }

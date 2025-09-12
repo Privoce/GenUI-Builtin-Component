@@ -9,7 +9,7 @@ use crate::{
     active_event, animation_open_then_redraw, area, area_ref,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop},
+        traits::{BasicStyle, Component, Style},
     },
     error::Error,
     event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
@@ -77,7 +77,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GButton {
     #[live]
-    pub prop: ButtonProp,
+    pub style: ButtonStyle,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -128,8 +128,8 @@ impl WidgetNode for GButton {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -162,8 +162,8 @@ impl Widget for GButton {
         }
 
         let state = self.state;
-        let prop = self.prop.get(state);
-        let _ = self.draw_button.begin(cx, walk, prop.layout());
+        let style = self.style.get(state);
+        let _ = self.draw_button.begin(cx, walk, style.layout());
 
         if self.slot.visible() {
             let slot_walk = self.slot.walk(cx);
@@ -228,7 +228,7 @@ impl LiveHook for GButton {
         self.set_apply_state_map(
             nodes,
             index,
-            &ButtonBasicProp::live_props(),
+            &ButtonBasicStyle::live_props(),
             [
                 live_id!(basic),
                 live_id!(hover),
@@ -265,16 +265,16 @@ impl Component for GButton {
     type State = ButtonState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.button;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.button;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         if self.disabled {
             self.switch_state(ButtonState::Disabled);
         }
-        let prop = self.prop.get(self.state);
-        self.draw_button.merge(&prop.into());
+        let style = self.style.get(self.state);
+        self.draw_button.merge(&style.into());
         Ok(())
     }
 
@@ -282,7 +282,7 @@ impl Component for GButton {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, ButtonState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
             }
             _ => {}
         }
@@ -297,7 +297,7 @@ impl Component for GButton {
                 hit_finger_down!(self, cx, area, e);
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
                 self.switch_state_with_animation(cx, ButtonState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -339,7 +339,7 @@ impl Component for GButton {
 
     // sync props if not set in DSL, depend on `self.sync` is true
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -360,10 +360,10 @@ impl Component for GButton {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(ButtonState::Basic);
-            let hover_prop = self.prop.get(ButtonState::Hover);
-            let pressed_prop = self.prop.get(ButtonState::Pressed);
-            let disabled_prop = self.prop.get(ButtonState::Disabled);
+            let basic_prop = self.style.get(ButtonState::Basic);
+            let hover_prop = self.style.get(ButtonState::Hover);
+            let pressed_prop = self.style.get(ButtonState::Pressed);
+            let disabled_prop = self.style.get(ButtonState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -460,7 +460,7 @@ impl Component for GButton {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 ButtonState::Basic => nodes.child_by_path(
                     self.index,
@@ -498,15 +498,15 @@ impl Component for GButton {
             set_animation! {
                 nodes: draw_button = {
                     index => {
-                        background_color => prop.background_color,
-                        border_color => prop.border_color,
-                        border_radius => prop.border_radius,
-                        border_width => (prop.border_width as f64),
-                        shadow_color => prop.shadow_color,
-                        spread_radius => (prop.spread_radius as f64),
-                        blur_radius => (prop.blur_radius as f64),
-                        shadow_offset => prop.shadow_offset,
-                        background_visible => prop.background_visible.to_f64()
+                        background_color => style.background_color,
+                        border_color => style.border_color,
+                        border_radius => style.border_radius,
+                        border_width => (style.border_width as f64),
+                        shadow_color => style.shadow_color,
+                        spread_radius => (style.spread_radius as f64),
+                        blur_radius => (style.blur_radius as f64),
+                        shadow_offset => style.shadow_offset,
+                        background_visible => style.background_visible.to_f64()
                     }
                 }
             }
@@ -540,58 +540,58 @@ impl GButton {
     }
     getter! {
         GButton {
-            get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
-            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
-            get_background_visible(bool) {|c| {c.prop.basic.get_background_visible()}},
-            get_shadow_color(String) {|c| {c.prop.basic.get_shadow_color().to_hex_string()}},
-            get_border_color(String) {|c| {c.prop.basic.get_border_color().to_hex_string()}},
-            get_border_radius(Radius) {|c| {c.prop.basic.get_border_radius()}},
-            get_border_width(f32) {|c| {c.prop.basic.get_border_width()}},
-            get_spread_radius(f32) {|c| {c.prop.basic.get_spread_radius()}},
-            get_blur_radius(f32) {|c| {c.prop.basic.get_blur_radius()}},
-            get_shadow_offset(Vec2) {|c| {c.prop.basic.get_shadow_offset()}},
-            get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
-            get_padding(Padding) {|c| {c.prop.basic.get_padding()}},
-            get_width(Size) {|c| {c.prop.basic.get_width()}},
-            get_height(Size) {|c| {c.prop.basic.get_height()}},
-            get_cursor(MouseCursor) {|c| {c.prop.basic.get_cursor()}},
-            get_flow(Flow) {|c| {c.prop.basic.get_flow()}},
-            get_align(Align) {|c| {c.prop.basic.get_align()}},
-            get_spacing(f64) {|c| {c.prop.basic.get_spacing()}},
+            get_theme(Theme) {|c| {c.style.basic.get_theme()}},
+            get_background_color(String) {|c| {c.style.basic.get_background_color().to_hex_string()}},
+            get_background_visible(bool) {|c| {c.style.basic.get_background_visible()}},
+            get_shadow_color(String) {|c| {c.style.basic.get_shadow_color().to_hex_string()}},
+            get_border_color(String) {|c| {c.style.basic.get_border_color().to_hex_string()}},
+            get_border_radius(Radius) {|c| {c.style.basic.get_border_radius()}},
+            get_border_width(f32) {|c| {c.style.basic.get_border_width()}},
+            get_spread_radius(f32) {|c| {c.style.basic.get_spread_radius()}},
+            get_blur_radius(f32) {|c| {c.style.basic.get_blur_radius()}},
+            get_shadow_offset(Vec2) {|c| {c.style.basic.get_shadow_offset()}},
+            get_margin(Margin) {|c| {c.style.basic.get_margin()}},
+            get_padding(Padding) {|c| {c.style.basic.get_padding()}},
+            get_width(Size) {|c| {c.style.basic.get_width()}},
+            get_height(Size) {|c| {c.style.basic.get_height()}},
+            get_cursor(MouseCursor) {|c| {c.style.basic.get_cursor()}},
+            get_flow(Flow) {|c| {c.style.basic.get_flow()}},
+            get_align(Align) {|c| {c.style.basic.get_align()}},
+            get_spacing(f64) {|c| {c.style.basic.get_spacing()}},
             get_disabled(bool) {|c| {c.disabled}},
             get_visible(bool) {|c| {c.visible}},
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
             get_sync(bool) {|c| {c.sync}},
             get_event_open(bool) {|c| {c.event_open}},
-            get_abs_pos(Option<DVec2>) {|c| {c.prop.basic.get_abs_pos()}}
+            get_abs_pos(Option<DVec2>) {|c| {c.style.basic.get_abs_pos()}}
         }
     }
     setter! {
         GButton {
-            set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ButtonState::Basic); Ok(())}},
-            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
-            set_background_visible(visible: bool) {|c, _cx| {c.prop.basic.set_background_visible(visible); Ok(())}},
-            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_shadow_color(color); Ok(())}},
-            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_border_color(color); Ok(())}},
-            set_border_radius(radius: Radius) {|c, _cx| {c.prop.basic.set_border_radius(radius); Ok(())}},
-            set_border_width(width: f32) {|c, _cx| {c.prop.basic.set_border_width(width); Ok(())}},
-            set_spread_radius(radius: f32) {|c, _cx| {c.prop.basic.set_spread_radius(radius); Ok(())}},
-            set_blur_radius(radius: f32) {|c, _cx| {c.prop.basic.set_blur_radius(radius); Ok(())}},
-            set_shadow_offset(offset: Vec2) {|c, _cx| {c.prop.basic.set_shadow_offset(offset); Ok(())}},
-            set_margin(margin: Margin) {|c, _cx| {c.prop.basic.set_margin(margin); Ok(())}},
-            set_padding(padding: Padding) {|c, _cx| {c.prop.basic.set_padding(padding); Ok(())}},
-            set_width(width: Size) {|c, _cx| {c.prop.basic.set_width(width); Ok(())}},
-            set_height(height: Size) {|c, _cx| {c.prop.basic.set_height(height); Ok(())}},
-            set_cursor(cursor: MouseCursor) {|c, _cx| {c.prop.basic.set_cursor(cursor); Ok(())}},
-            set_flow(flow: Flow) {|c, _cx| {c.prop.basic.set_flow(flow); Ok(())}},
-            set_align(align: Align) {|c, _cx| {c.prop.basic.set_align(align); Ok(())}},
-            set_spacing(spacing: f64) {|c, _cx| {c.prop.basic.set_spacing(spacing); Ok(())}},
+            set_theme(theme: Theme) {|c, _cx| {c.style.basic.set_theme(theme); c.style.basic.sync(ButtonState::Basic); Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_background_color(color); Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.style.basic.set_background_visible(visible); Ok(())}},
+            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_shadow_color(color); Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_border_color(color); Ok(())}},
+            set_border_radius(radius: Radius) {|c, _cx| {c.style.basic.set_border_radius(radius); Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.style.basic.set_border_width(width); Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.style.basic.set_spread_radius(radius); Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.style.basic.set_blur_radius(radius); Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.style.basic.set_shadow_offset(offset); Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.style.basic.set_margin(margin); Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.style.basic.set_padding(padding); Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.style.basic.set_width(width); Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.style.basic.set_height(height); Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.style.basic.set_cursor(cursor); Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.style.basic.set_flow(flow); Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.style.basic.set_align(align); Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.style.basic.set_spacing(spacing); Ok(())}},
             set_disabled(disabled: bool) {|c, _cx| {c.disabled = disabled; Ok(())}},
             set_visible(visible: bool) {|c, _cx| {c.visible = visible; c.redraw(_cx); Ok(())}},
             set_grab_key_focus(grab: bool) {|c, _cx| {c.grab_key_focus = grab; Ok(())}},
-            set_sync(sync: bool) {|c, _cx| {c.sync = sync; c.prop.basic.sync(ButtonState::Basic); Ok(())}},
+            set_sync(sync: bool) {|c, _cx| {c.sync = sync; c.style.basic.sync(ButtonState::Basic); Ok(())}},
             set_event_open(open: bool) {|c, _cx| {c.event_open = open; Ok(())}},
-            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.prop.basic.set_abs_pos(abs_pos); Ok(())}}
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.style.basic.set_abs_pos(abs_pos); Ok(())}}
         }
     }
 }

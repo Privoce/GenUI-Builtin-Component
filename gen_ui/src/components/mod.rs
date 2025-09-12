@@ -70,7 +70,7 @@ live_design! {
     }
 
     pub GHLayout = <GView> {
-        prop: {
+        style: {
             basic: {
                 height: Fill,
                 width: Fill,
@@ -82,7 +82,7 @@ live_design! {
     }
 
     pub GVLayout = <GView> {
-        prop: {
+        style: {
             basic: {
                 height: Fill,
                 width: Fill,
@@ -100,7 +100,7 @@ live_design! {
     }
 
     pub GCard = <GCardBase>{
-        prop: {
+        style: {
             basic: {
                 container: {
                     height: 300.0,
@@ -160,15 +160,15 @@ live_design! {
         src: dep("crate://self/resources/icons/svg/up.svg")
     }
     pub IconLeft = <GSvg> {
-        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        style: {basic: {svg: {height: 16.0, width: Fit}}}
         src: dep("crate://self/resources/icons/svg/left.svg")
     }
     pub IconRight = <GSvg> {
-        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        style: {basic: {svg: {height: 16.0, width: Fit}}}
         src: dep("crate://self/resources/icons/svg/right.svg")
     }
     pub IconMore = <GSvg> {
-        prop: {basic: {svg: {height: 16.0, width: Fit}}}
+        style: {basic: {svg: {height: 16.0, width: Fit}}}
         src: dep("crate://self/resources/icons/svg/more.svg")
     }
     pub IconAll = <GSvg> {
@@ -227,7 +227,7 @@ live_design! {
     pub GPopup = <GPopupBase>{}
 
     pub GDialogPopup = <GPopup> {
-        prop: {
+        style: {
             basic: {
                 height: 300.0,
                 width: 400.0,
@@ -238,7 +238,7 @@ live_design! {
     pub GDrawerPopup = <GPopup> {}
 
     pub GPopoverPopup = <GPopup> {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,
@@ -248,7 +248,7 @@ live_design! {
     }
 
     pub GToolTipPopup = <GPopup> {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,
@@ -266,7 +266,7 @@ live_design! {
     }
 
     pub GDialogContainer = <GPopupContainer>{
-        prop: {
+        style: {
             basic: {
                 height: All,
                 width: All,
@@ -309,7 +309,7 @@ live_design! {
     }
 
     pub GPopoverContainer = <GPopupContainer> {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,
@@ -324,7 +324,7 @@ live_design! {
     }
 
     pub GTooltipContainer = <GPopupContainer> {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,
@@ -342,31 +342,31 @@ live_design! {
         mode: Dialog,
         popup: <GDialogContainer>{
             popup: {
-                prop: {basic: {height: 260.0, width: 360.0}}
+                style: {basic: {height: 260.0, width: 360.0}}
                 <GHLayout> {
-                    prop: {basic: {height: 48.0}}
+                    style: {basic: {height: 48.0}}
                     <GLabel> {
-                        prop: {basic: {font_size: 22.0}}
+                        style: {basic: {font_size: 22.0}}
                         text: "Basic dialog title",
                         mode: Bold
                     }
                 }
                 <GHLayout>{
-                    prop: {basic: {height: Fill}}
+                    style: {basic: {height: Fill}}
                     <GLabel> {
-                        prop: {basic: {width: Fill,}}
+                        style: {basic: {width: Fill,}}
                         text: "A dialog is a modal window that appears in front of app content to provide critical information or ask for a decision."
                     }
                 }
                 <GHLayout>{
-                    prop: {basic: {height: Fit, align: {x: 1.0}}}
+                    style: {basic: {height: Fit, align: {x: 1.0}}}
                     <GButton> {
-                        prop:{basic: {theme: Dark}}
+                        style:{basic: {theme: Dark}}
                         slot: {text: "Cancel"}
                     }
                     <GButton> {
                         slot: {
-                            prop:{basic: {color: #4CAF50}}
+                            style:{basic: {color: #4CAF50}}
                             text: "OK"
                         }
                     }
@@ -400,7 +400,7 @@ live_design! {
 
     pub GTag = <GTagBase> {
         icon: <GSvg>{
-            prop: {basic: {svg: {width: 12.0}}}
+            style: {basic: {svg: {width: 12.0}}}
             visible: false
         },
         text: <GLabel>{
@@ -408,7 +408,7 @@ live_design! {
         },
         close: <IconClose>{
             visible: false,
-            prop: {basic: {svg: {width: 12.0}}}
+            style: {basic: {svg: {width: 12.0}}}
         }
     }
 
@@ -418,7 +418,7 @@ live_design! {
 
     pub GNavPage = <GPage> {
         header = <GView> {
-            prop: {
+            style: {
                 basic: {
                     height: Fit,
                     width: Fill,
@@ -430,7 +430,7 @@ live_design! {
                 }
             }
             back_icon = <GSvg> {
-                prop: {
+                style: {
                     basic: {
                         svg: {
                             height: 18.0,
@@ -446,7 +446,7 @@ live_design! {
                 src: dep("crate://self/resources/icons/svg/left.svg")
             }
             title_wrap = <GView> {
-                prop: {
+                style: {
                     basic: {
                         height: 24.0,
                         width: Fill,
@@ -461,7 +461,7 @@ live_design! {
                 }
             }
             extra_icon = <GSvg> {
-                prop: {
+                style: {
                     basic: {
                         svg: {
                             height: 18.0,
@@ -479,7 +479,7 @@ live_design! {
         }
     }
     pub GBarPage = <GView> {
-        prop: {
+        style: {
             basic: {
                 height: Fill,
                 width: Fill,
@@ -491,7 +491,7 @@ live_design! {
 
     pub GRouter = <GRouterBase> {
         bar_pages = <GView>{
-            prop: {
+            style: {
                 basic: {
                     height: Fill,
                     width: Fill,
@@ -502,7 +502,7 @@ live_design! {
             }
         }
         nav_pages = <GView>{
-            prop: {
+            style: {
                 basic: {
                     height: Fill,
                     width: Fill,

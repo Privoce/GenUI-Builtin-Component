@@ -2,7 +2,7 @@ use crate::{
     basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
+        traits::{BasicStyle, ComponentState, Style},
     },
     error::Error,
     get_get_mut,
@@ -22,19 +22,19 @@ use makepad_widgets::*;
 
 prop_interconvert! {
     SwitchProp {
-        basic_prop = SwitchBasicProp;
-        basic => BASIC, SwitchBasicProp::default(),|v| (v, SwitchState::Basic).try_into(),
-        hover_basic => HOVER_BASIC, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),
-        hover_active => HOVER_ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::HoverActive),|v| (v, SwitchState::HoverActive).try_into(),
-        active => ACTIVE, SwitchBasicProp::from_state(Theme::default(), SwitchState::Active),|v| (v, SwitchState::Active).try_into(),
-        disabled => DISABLED, SwitchBasicProp::from_state(Theme::default(), SwitchState::Disabled),|v| (v, SwitchState::Disabled).try_into()
+        basic_prop = SwitchBasicStyle;
+        basic => BASIC, SwitchBasicStyle::default(),|v| (v, SwitchState::Basic).try_into(),
+        hover_basic => HOVER_BASIC, SwitchBasicStyle::from_state(Theme::default(), SwitchState::HoverBasic),|v| (v, SwitchState::HoverBasic).try_into(),
+        hover_active => HOVER_ACTIVE, SwitchBasicStyle::from_state(Theme::default(), SwitchState::HoverActive),|v| (v, SwitchState::HoverActive).try_into(),
+        active => ACTIVE, SwitchBasicStyle::from_state(Theme::default(), SwitchState::Active),|v| (v, SwitchState::Active).try_into(),
+        disabled => DISABLED, SwitchBasicStyle::from_state(Theme::default(), SwitchState::Disabled),|v| (v, SwitchState::Disabled).try_into()
     }, "[component.checkbox] should be a table"
 }
 
-impl Prop for SwitchProp {
+impl Style for SwitchProp {
     type State = SwitchState;
 
-    type Basic = SwitchBasicProp;
+    type Basic = SwitchBasicStyle;
 
     get_get_mut! {
         SwitchState::Basic => basic,
@@ -45,7 +45,7 @@ impl Prop for SwitchProp {
     }
 
     fn len() -> usize {
-        4 * SwitchBasicProp::len()
+        4 * SwitchBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -66,7 +66,7 @@ impl Prop for SwitchProp {
 }
 
 basic_prop_interconvert! {
-    SwitchBasicProp {
+    SwitchBasicStyle {
         state = SwitchState;
         {
             background_color => BACKGROUND_COLOR, |v| v.try_into(),
@@ -92,7 +92,7 @@ component_colors! {
     }
 }
 
-impl BasicProp for SwitchBasicProp {
+impl BasicStyle for SwitchBasicStyle {
     type State = SwitchState;
     /// (background_color, stroke_color, border_color)
     type Colors = SwitchColors;

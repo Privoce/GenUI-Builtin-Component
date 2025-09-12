@@ -14,14 +14,14 @@ live_design! {
     pub ViewPage = {{ViewPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -33,7 +33,7 @@ live_design! {
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -46,7 +46,7 @@ live_design! {
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -61,7 +61,7 @@ live_design! {
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -76,7 +76,7 @@ live_design! {
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -90,7 +90,7 @@ live_design! {
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -103,7 +103,7 @@ live_design! {
                         text: "Scroll"
                     }
                     <GView> {
-                        prop: {
+                        style: {
                             basic: {
                                 height: 200.0,
                                 width: 20.0,
@@ -122,14 +122,14 @@ live_design! {
         // --------------------- animation ---------------------------------------------------------
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
                     }
                 }
                 <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -146,7 +146,7 @@ live_design! {
                     animation_open: true,
                 }
                 focus_v = <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,
@@ -186,14 +186,14 @@ live_design! {
         // --------------------- event handling ---------------------------------------------------------
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
                     }
                 }
                 eview = <GView> {
-                    prop: {
+                    style: {
                         basic: {
                             height: 100.0,
                             width: 100.0,

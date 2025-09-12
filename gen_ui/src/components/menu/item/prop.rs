@@ -6,11 +6,11 @@ use toml_edit::Item;
 use crate::{
     component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
+        label::{LabelBasicStyle, LabelState},
         live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        svg::{SvgBasicStyle, SvgPart, SvgState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
         ViewColors,
     },
     error::Error,
@@ -27,18 +27,18 @@ use crate::{
 
 prop_interconvert! {
     MenuItemProp {
-        basic_prop = MenuItemBasicProp;
-        basic => BASIC, MenuItemBasicProp::default(), |v| (v, MenuItemState::Basic).try_into(),
-        hover => HOVER, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
-        active => ACTIVE, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
-        disabled => DISABLED, MenuItemBasicProp::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
+        basic_prop = MenuItemBasicStyle;
+        basic => BASIC, MenuItemBasicStyle::default(), |v| (v, MenuItemState::Basic).try_into(),
+        hover => HOVER, MenuItemBasicStyle::from_state(Theme::default(), MenuItemState::Hover), |v| (v, MenuItemState::Hover).try_into(),
+        active => ACTIVE, MenuItemBasicStyle::from_state(Theme::default(), MenuItemState::Active), |v| (v, MenuItemState::Active).try_into(),
+        disabled => DISABLED, MenuItemBasicStyle::from_state(Theme::default(), MenuItemState::Disabled), |v| (v, MenuItemState::Disabled).try_into()
     }, "[component.menu_item] should be a table"
 }
 
-impl Prop for MenuItemProp {
+impl Style for MenuItemProp {
     type State = MenuItemState;
 
-    type Basic = MenuItemBasicProp;
+    type Basic = MenuItemBasicStyle;
 
     get_get_mut! {
         MenuItemState::Basic => basic,
@@ -48,7 +48,7 @@ impl Prop for MenuItemProp {
     }
 
     fn len() -> usize {
-        4 * MenuItemBasicProp::len()
+        4 * MenuItemBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -59,7 +59,7 @@ impl Prop for MenuItemProp {
     }
 }
 
-impl SlotProp for MenuItemProp {
+impl SlotStyle for MenuItemProp {
     type Part = MenuItemPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -83,19 +83,19 @@ impl SlotProp for MenuItemProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct MenuItemBasicProp {
-    #[live(MenuItemBasicProp::default_container(Theme::default(), MenuItemState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(MenuItemBasicProp::default_icon(Theme::default(), MenuItemState::Basic))]
-    pub icon: SvgBasicProp,
-    #[live(MenuItemBasicProp::default_text(Theme::default(), MenuItemState::Basic))]
-    pub text: LabelBasicProp,
-    #[live(MenuItemBasicProp::default_extra(Theme::default(), MenuItemState::Basic))]
-    pub extra: ViewBasicProp,
+pub struct MenuItemBasicStyle {
+    #[live(MenuItemBasicStyle::default_container(Theme::default(), MenuItemState::Basic))]
+    pub container: ViewBasicStyle,
+    #[live(MenuItemBasicStyle::default_icon(Theme::default(), MenuItemState::Basic))]
+    pub icon: SvgBasicStyle,
+    #[live(MenuItemBasicStyle::default_text(Theme::default(), MenuItemState::Basic))]
+    pub text: LabelBasicStyle,
+    #[live(MenuItemBasicStyle::default_extra(Theme::default(), MenuItemState::Basic))]
+    pub extra: ViewBasicStyle,
 }
 
 from_prop_to_toml! {
-    MenuItemBasicProp {
+    MenuItemBasicStyle {
         container => CONTAINER,
         icon => ICON,
         text => TEXT,
@@ -103,7 +103,7 @@ from_prop_to_toml! {
     }
 }
 
-impl BasicProp for MenuItemBasicProp {
+impl BasicStyle for MenuItemBasicStyle {
     type State = MenuItemState;
 
     type Colors = ViewColors;
@@ -118,11 +118,11 @@ impl BasicProp for MenuItemBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into())
+        ViewBasicStyle::state_colors(theme, state.into())
     }
 
     fn len() -> usize {
-        3 * ViewBasicProp::len()
+        3 * ViewBasicStyle::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -137,10 +137,10 @@ impl BasicProp for MenuItemBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
-            (live_id!(header), ViewBasicProp::live_props().into()),
-            (live_id!(body), ViewBasicProp::live_props().into()),
-            (live_id!(footer), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
+            (live_id!(header), ViewBasicStyle::live_props().into()),
+            (live_id!(body), ViewBasicStyle::live_props().into()),
+            (live_id!(footer), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -152,7 +152,7 @@ impl BasicProp for MenuItemBasicProp {
     }
 }
 
-impl SlotBasicProp for MenuItemBasicProp {
+impl SlotBasicStyle for MenuItemBasicStyle {
     type Part = MenuItemPart;
 
     fn set_from_str_slot(
@@ -196,13 +196,13 @@ impl SlotBasicProp for MenuItemBasicProp {
     }
 }
 
-impl Default for MenuItemBasicProp {
+impl Default for MenuItemBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), MenuItemState::Basic)
     }
 }
 
-impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicProp {
+impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, MenuItemState)) -> Result<Self, Self::Error> {
@@ -214,7 +214,7 @@ impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicProp {
             inline_table,
             CONTAINER,
             || {
-                Ok(MenuItemBasicProp::default_container(
+                Ok(MenuItemBasicStyle::default_container(
                     Theme::default(),
                     state,
                 ))
@@ -225,21 +225,21 @@ impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicProp {
         let icon = get_from_itable(
             inline_table,
             ICON,
-            || Ok(MenuItemBasicProp::default_icon(Theme::default(), state)),
+            || Ok(MenuItemBasicStyle::default_icon(Theme::default(), state)),
             |v| (v, SvgState::from(state)).try_into(),
         )?;
 
         let text = get_from_itable(
             inline_table,
             TEXT,
-            || Ok(MenuItemBasicProp::default_text(Theme::default(), state)),
+            || Ok(MenuItemBasicStyle::default_text(Theme::default(), state)),
             |v| (v, LabelState::from(state)).try_into(),
         )?;
 
         let extra = get_from_itable(
             inline_table,
             EXTRA,
-            || Ok(MenuItemBasicProp::default_extra(Theme::default(), state)),
+            || Ok(MenuItemBasicStyle::default_extra(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -252,9 +252,9 @@ impl TryFrom<(&Item, MenuItemState)> for MenuItemBasicProp {
     }
 }
 
-impl MenuItemBasicProp {
-    pub fn default_container(theme: Theme, state: MenuItemState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl MenuItemBasicStyle {
+    pub fn default_container(theme: Theme, state: MenuItemState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fill);
         container.set_background_visible(true);
@@ -263,15 +263,15 @@ impl MenuItemBasicProp {
         container.set_margin(Margin::from_f64(0.0));
         container
     }
-    pub fn default_icon(theme: Theme, state: MenuItemState) -> SvgBasicProp {
-        let icon = SvgBasicProp::from_state(theme, state.into());
+    pub fn default_icon(theme: Theme, state: MenuItemState) -> SvgBasicStyle {
+        let icon = SvgBasicStyle::from_state(theme, state.into());
         icon
     }
-    pub fn default_text(theme: Theme, state: MenuItemState) -> LabelBasicProp {
-        LabelBasicProp::from_state(theme, state.into())
+    pub fn default_text(theme: Theme, state: MenuItemState) -> LabelBasicStyle {
+        LabelBasicStyle::from_state(theme, state.into())
     }
-    pub fn default_extra(theme: Theme, state: MenuItemState) -> ViewBasicProp {
-        let mut extra = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_extra(theme: Theme, state: MenuItemState) -> ViewBasicStyle {
+        let mut extra = ViewBasicStyle::from_state(theme, state.into());
         extra.set_height(Size::Fill);
         extra.set_width(Size::Fit);
         extra

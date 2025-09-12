@@ -11,7 +11,7 @@ live_design! {
     pub RadioPage = {{RadioPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -26,7 +26,7 @@ live_design! {
                     }
                 }
                 <GRadio> {
-                    prop: {
+                    style: {
                         basic: {
                             radio: {
                                 theme: Warning,
@@ -42,7 +42,7 @@ live_design! {
                 }
                     
                 <GRadio> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 background_visible: true,
@@ -66,7 +66,7 @@ live_design! {
                     }
                 }
                 <GRadio> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 background_visible: true,
@@ -88,7 +88,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -96,7 +96,7 @@ live_design! {
                     }
                 }
                 <GRadioGroup> {
-                    prop: {
+                    style: {
                         basic: {
                             flow: Down,
                             align: {
@@ -106,7 +106,7 @@ live_design! {
                     }
                     active: "callisto",
                     <GRadio> {
-                        prop: {
+                        style: {
                             basic: {
                                 radio: {theme: Primary, mode: Round},
                                 container: {spacing: 20.0}
@@ -120,7 +120,7 @@ live_design! {
                         }
                     }
                     <GRadio> {
-                        prop: {
+                        style: {
                             basic: {
                                 radio: {theme: Primary, mode: Round},
                                 container: {spacing: 20.0}
@@ -134,7 +134,7 @@ live_design! {
                         }
                     }
                     <GRadio> {
-                        prop: {
+                        style: {
                             basic: {
                                 radio: {theme: Primary, mode: Round},
                                 container: {spacing: 20.0}
@@ -148,7 +148,7 @@ live_design! {
                         }
                     }
                     <GRadio> {
-                        prop: {
+                        style: {
                             basic: {
                                 radio: {theme: Primary, mode: Round},
                                 container: {spacing: 20.0}

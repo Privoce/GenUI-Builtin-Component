@@ -40,76 +40,7 @@ live_design! {
                     draw_bg: {
                         color: #140D2A,
                     }
-
-
-
-                    // <GVTabbar>{
-                    //     items: [
-                    //         {
-                    //             value: "wind",
-                    //             text: "Wind",
-                    //             icon: {
-                    //                 src: dep("crate://self/resources/wind.svg"),
-                    //             },
-                    //             prop: {
-                    //                 basic: {
-                    //                     icon: {
-                    //                         svg: {
-                    //                             theme: Primary
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     ]
-                    // }
-                    // <GNavPage> {
-                    //     prop: {
-                    //         basic: {
-                    //             height: 300.0,
-                    //             width: 300.0,
-                    //             background_visible: true,
-                    //             theme: Info,
-                    //         }
-                    //     }
-                    //     <GButton>{}
-                    // }
-                    //
-
-
-
-                    // <GHLayout> {
-                        // <GView> {
-                        //     prop: {
-                        //         basic: {
-                        //             background_visible: true,
-                        //             height: 200.0,
-                        //             clip_y: true
-                        //         }
-                        //     }
-                        //     scroll_bars: <GScrollBars> {
-                        //         show_scroll_y: true
-                        //     }
-                        //     <GView> {
-                        //         prop: {
-                        //             basic: {
-                        //                 background_visible: true,
-                        //                 height: 300.0,
-                        //                 width: 60.0,
-                        //                 theme: Primary,
-                        //             }
-                        //         }
-                        //     }
-                        // }
-
-                    // }
                     body = <HomePage> {}
-                    // body = <THomePage> {}
-                    // body = <ViewPage>{}
-                    // <GLabel> {
-                    //     text: "hello"
-                    // }
-                    // <GButton> {}
                 }
             }
         }
@@ -130,8 +61,8 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         crate::makepad_widgets::live_design(cx);
         crate::an::live_design(cx);
-        // crate::gen_ui::live_design(cx, Option::<&str>::None);
-        crate::gen_ui::live_design(cx, Some(current_dir().unwrap()));
+        crate::gen_ui::live_design(cx, Option::<&str>::None);
+        // crate::gen_ui::live_design(cx, Some(current_dir().unwrap()));
         crate::views::register(cx);
     }
 }

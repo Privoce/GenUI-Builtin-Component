@@ -5,11 +5,11 @@ use toml_edit::Item;
 
 use crate::{
     component_part, component_state, components::{
-        label::{LabelBasicProp, LabelState},
+        label::{LabelBasicStyle, LabelState},
         live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        svg::{SvgBasicStyle, SvgPart, SvgState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
     }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{ACTIVE, BASIC, CONTAINER, DISABLED, HOVER, ICON, TEXT},
         traits::NewFrom,
@@ -19,15 +19,15 @@ use crate::{
 
 prop_interconvert! {
     TabbarItemProp {
-        basic_prop = TabbarItemBasicProp;
-        basic => BASIC, TabbarItemBasicProp::default(), |v| (v, TabbarItemState::Basic).try_into(),
-        hover => HOVER, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Hover), |v| (v, TabbarItemState::Hover).try_into(),
-        active => ACTIVE, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Active), |v| (v, TabbarItemState::Active).try_into(),
-        disabled => DISABLED, TabbarItemBasicProp::from_state(Theme::default(), TabbarItemState::Disabled), |v| (v, TabbarItemState::Disabled).try_into()
+        basic_prop = TabbarItemBasicStyle;
+        basic => BASIC, TabbarItemBasicStyle::default(), |v| (v, TabbarItemState::Basic).try_into(),
+        hover => HOVER, TabbarItemBasicStyle::from_state(Theme::default(), TabbarItemState::Hover), |v| (v, TabbarItemState::Hover).try_into(),
+        active => ACTIVE, TabbarItemBasicStyle::from_state(Theme::default(), TabbarItemState::Active), |v| (v, TabbarItemState::Active).try_into(),
+        disabled => DISABLED, TabbarItemBasicStyle::from_state(Theme::default(), TabbarItemState::Disabled), |v| (v, TabbarItemState::Disabled).try_into()
     }, "[component.tabbar_item] should be a table"
 }
 
-impl SlotProp for TabbarItemProp {
+impl SlotStyle for TabbarItemProp {
     type Part = TabbarItemPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -48,10 +48,10 @@ impl SlotProp for TabbarItemProp {
     }
 }
 
-impl Prop for TabbarItemProp {
+impl Style for TabbarItemProp {
     type State = TabbarItemState;
 
-    type Basic = TabbarItemBasicProp;
+    type Basic = TabbarItemBasicStyle;
 
     get_get_mut! {
         TabbarItemState::Basic => basic,
@@ -61,7 +61,7 @@ impl Prop for TabbarItemProp {
     }
 
     fn len() -> usize {
-        4 * TabbarItemBasicProp::len()
+        4 * TabbarItemBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -74,30 +74,30 @@ impl Prop for TabbarItemProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct TabbarItemBasicProp {
+pub struct TabbarItemBasicStyle {
     #[live(Self::default_icon(Theme::default(), TabbarItemState::Basic))]
-    pub icon: SvgBasicProp,
+    pub icon: SvgBasicStyle,
     #[live(Self::default_text(Theme::default(), TabbarItemState::Basic))]
-    pub text: LabelBasicProp,
+    pub text: LabelBasicStyle,
     #[live(Self::default_container(Theme::default(), TabbarItemState::Basic))]
-    pub container: ViewBasicProp,
+    pub container: ViewBasicStyle,
 }
 
-impl Default for TabbarItemBasicProp {
+impl Default for TabbarItemBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), TabbarItemState::default())
     }
 }
 
 from_prop_to_toml!{
-    TabbarItemBasicProp {
+    TabbarItemBasicStyle {
         icon => ICON,
         text => TEXT,
         container => CONTAINER
     }
 }
 
-impl SlotBasicProp for TabbarItemBasicProp {
+impl SlotBasicStyle for TabbarItemBasicStyle {
     type Part = TabbarItemPart;
 
     fn set_from_str_slot(
@@ -136,7 +136,7 @@ impl SlotBasicProp for TabbarItemBasicProp {
     }
 }
 
-impl BasicProp for TabbarItemBasicProp {
+impl BasicStyle for TabbarItemBasicStyle {
     type State = TabbarItemState;
 
     type Colors = ();
@@ -154,7 +154,7 @@ impl BasicProp for TabbarItemBasicProp {
     }
 
     fn len() -> usize {
-        ViewBasicProp::len() + SvgBasicProp::len() + LabelBasicProp::len()
+        ViewBasicStyle::len() + SvgBasicStyle::len() + LabelBasicStyle::len()
     }
 
     fn set_from_str(
@@ -174,9 +174,9 @@ impl BasicProp for TabbarItemBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(icon), SvgBasicProp::live_props().into()),
-            (live_id!(text), LabelBasicProp::live_props().into()),
-            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(icon), SvgBasicStyle::live_props().into()),
+            (live_id!(text), LabelBasicStyle::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -189,7 +189,7 @@ impl BasicProp for TabbarItemBasicProp {
     }
 }
 
-impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicProp {
+impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, TabbarItemState)) -> Result<Self, Self::Error> {
@@ -201,7 +201,7 @@ impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicProp {
             inline_table,
             CONTAINER,
             || {
-                Ok(TabbarItemBasicProp::default_container(
+                Ok(TabbarItemBasicStyle::default_container(
                     Theme::default(),
                     state,
                 ))
@@ -231,9 +231,9 @@ impl TryFrom<(&Item, TabbarItemState)> for TabbarItemBasicProp {
     }
 }
 
-impl TabbarItemBasicProp {
-    pub fn default_container(theme: Theme, state: TabbarItemState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl TabbarItemBasicStyle {
+    pub fn default_container(theme: Theme, state: TabbarItemState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.height = Size::Fill;
         container.width = Size::Fill;
         container.align = Align::from_f64(0.5);
@@ -243,13 +243,13 @@ impl TabbarItemBasicProp {
         container.spacing = 0.0;
         container
     }
-    pub fn default_text(theme: Theme, state: TabbarItemState) -> LabelBasicProp {
-        let mut text = LabelBasicProp::from_state(theme, state.into());
+    pub fn default_text(theme: Theme, state: TabbarItemState) -> LabelBasicStyle {
+        let mut text = LabelBasicStyle::from_state(theme, state.into());
         text.flow = Flow::Right;
         text
     }
-    pub fn default_icon(theme: Theme, state: TabbarItemState) -> SvgBasicProp {
-        let mut icon = SvgBasicProp::from_state(theme, state.into());
+    pub fn default_icon(theme: Theme, state: TabbarItemState) -> SvgBasicStyle {
+        let mut icon = SvgBasicStyle::from_state(theme, state.into());
         icon.container.height = Size::Fixed(32.0);
         icon.container.width = Size::Fixed(64.0);
         icon.container.border_radius = Radius::from_f64(8.0);

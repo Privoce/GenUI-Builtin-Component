@@ -11,7 +11,7 @@ live_design! {
     pub LabelPage = {{LabelPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -34,7 +34,7 @@ live_design! {
                     mode: BoldItalic,
                 }
                 <GLabel>{
-                    prop: {
+                    style: {
                         basic: {
                             font_size: 20.0,
                             color: #f00
@@ -49,7 +49,7 @@ live_design! {
                     disabled: true
                 }
                 <GLabel>{
-                    prop: {
+                    style: {
                         basic: {
                             color: #ff0
                         }
@@ -59,7 +59,7 @@ live_design! {
                     disabled: true
                 }
                 <GLabel>{
-                    prop: {
+                    style: {
                         disabled: {
                             color: #ff0
                         }

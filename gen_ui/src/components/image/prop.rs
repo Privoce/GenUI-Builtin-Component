@@ -4,7 +4,7 @@ use crate::{
     basic_prop_interconvert, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
+        traits::{BasicStyle, ComponentState, Style},
     },
     error::Error,
     get_get_mut,
@@ -22,16 +22,16 @@ use crate::{
 
 prop_interconvert! {
     ImageProp {
-        basic_prop = ImageBasicProp;
-        basic => BASIC, ImageBasicProp::default(), |v| (v, ImageState::Basic).try_into(),
-        loading => LOADING, ImageBasicProp::default(), |v| (v, ImageState::Loading).try_into()
+        basic_prop = ImageBasicStyle;
+        basic => BASIC, ImageBasicStyle::default(), |v| (v, ImageState::Basic).try_into(),
+        loading => LOADING, ImageBasicStyle::default(), |v| (v, ImageState::Loading).try_into()
     }, "[component.image] should be a table"
 }
 
-impl Prop for ImageProp {
+impl Style for ImageProp {
     type State = ImageState;
 
-    type Basic = ImageBasicProp;
+    type Basic = ImageBasicStyle;
 
     get_get_mut! {
         ImageState::Basic => basic,
@@ -39,7 +39,7 @@ impl Prop for ImageProp {
     }
 
     fn len() -> usize {
-        1 * ImageBasicProp::len()
+        1 * ImageBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -56,7 +56,7 @@ impl Prop for ImageProp {
 
 
 basic_prop_interconvert! {
-    ImageBasicProp {
+    ImageBasicStyle {
         state = ImageState;
         {};
         {
@@ -73,7 +73,7 @@ basic_prop_interconvert! {
     }, "[component.image.$state] should be an inline table"
 }
 
-impl BasicProp for ImageBasicProp {
+impl BasicStyle for ImageBasicStyle {
     type State = ImageState;
 
     type Colors = ();

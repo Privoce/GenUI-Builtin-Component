@@ -7,7 +7,7 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         popup::{GPopup, PopupState},
-        traits::{BasicProp, PopupComponent, Prop},
+        traits::{BasicStyle, PopupComponent, Style},
     }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap, Position}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, themes::conf::Conf
 };
 
@@ -21,7 +21,7 @@ live_design! {
 #[derive(Live, LiveRegister)]
 pub struct GPopupContainer {
     #[live]
-    pub prop: PopupContainerProp,
+    pub style: PopupContainerProp,
     #[live]
     pub popup: GPopup,
     #[live]
@@ -56,7 +56,7 @@ impl LiveHook for GPopupContainer {
         self.set_apply_state_map(
             nodes,
             index,
-            &PopupContainerBasicProp::live_props(),
+            &PopupContainerBasicStyle::live_props(),
             [live_id!(basic)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -75,13 +75,13 @@ impl PopupComponent for GPopupContainer {
     type State = PopupState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.popup_container;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.popup_container;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.current_state());
-        self.draw_popup_container.merge(&prop.into());
+        let style = self.style.get(self.current_state());
+        self.draw_popup_container.merge(&style.into());
         Ok(())
     }
 
@@ -93,7 +93,7 @@ impl PopupComponent for GPopupContainer {
         if !self.sync {
             return;
         }
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn current_state(&self) -> Self::State {
@@ -103,9 +103,9 @@ impl PopupComponent for GPopupContainer {
     fn begin(&mut self, cx: &mut Cx2d) -> () {
         self.draw_list.begin_overlay_reuse(cx);
         cx.begin_pass_sized_turtle(Layout::flow_down());
-        let prop = self.prop.get(self.current_state());
+        let style = self.style.get(self.current_state());
         self.draw_popup_container
-            .begin(cx, prop.walk(), prop.layout());
+            .begin(cx, style.walk(), style.layout());
     }
 
     fn end(&mut self, cx: &mut Cx2d, _scope: &mut Scope, shift_area: Area, shift: DVec2) -> () {

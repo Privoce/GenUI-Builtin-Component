@@ -20,7 +20,7 @@ GenUI 将组件分为三大类，每类都有特定的用途和实现模式：
 ```rust
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GLabel {
-    #[live] pub prop: LabelProp,
+    #[live] pub style: LabelProp,
     #[live] pub draw_text: DrawText,
     #[rust] pub state: LabelState,
 }
@@ -38,7 +38,7 @@ pub struct GLabel {
 ```rust
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GButton {
-    #[live] pub prop: ButtonProp,
+    #[live] pub style: ButtonProp,
     #[live] pub draw_button: DrawButton,
     #[live] pub slot: WidgetRef,
     #[rust] pub state: ButtonState,
@@ -57,7 +57,7 @@ pub struct GButton {
 ```rust
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GCard {
-    #[live] pub prop: CardProp,
+    #[live] pub style: CardProp,
     #[live] pub header: GView,
     #[live] pub body: GView,
     #[live] pub footer: GView,
@@ -71,7 +71,7 @@ pub struct GCard {
 
 ```mermaid
 graph TD
-    A[组件结构体] --> B[属性系统 Prop]
+    A[组件结构体] --> B[属性系统 Style]
     A --> C[动画系统 Animator] 
     A --> D[事件系统 Event]
     A --> E[绘制系统 Draw]
@@ -83,7 +83,7 @@ graph TD
     D --> I[状态切换]
     
     F --> J[TOML配置文件]
-    G --> K[BasicProp/Hover/Pressed/Disabled]
+    G --> K[BasicStyle/Hover/Pressed/Disabled]
     
     L[插槽系统] --> M[普通插槽 WidgetRef]
     L --> N[具名插槽 GView]
@@ -100,16 +100,16 @@ graph TB
     end
     
     subgraph "组件层" 
-        Component[组件结构体] --> Prop[属性Prop]
+        Component[组件结构体] --> Style[属性Prop]
         Component --> Animator[动画器]
         Component --> Event[事件处理]
         Component --> Draw[绘制系统]
     end
     
     subgraph "属性层"
-        Prop --> BasicProp[基础属性]
-        Prop --> StateProp[状态属性]
-        BasicProp --> Theme[主题系统]
+        Style --> BasicStyle[基础属性]
+        Style --> StateProp[状态属性]
+        BasicStyle --> Theme[主题系统]
         StateProp --> State[组件状态]
     end
     
@@ -128,21 +128,21 @@ graph TB
     subgraph "插槽层"
         Slot[插槽系统] --> WidgetSlot[普通插槽]
         Slot --> NamedSlot[具名插槽]
-        NamedSlot --> SlotProp[插槽属性]
+        NamedSlot --> SlotStyle[插槽属性]
     end
     
-    Conf --> Prop
-    ApplyMap --> Prop
-    StateChange --> Prop
+    Conf --> Style
+    ApplyMap --> Style
+    StateChange --> Style
     Slot --> Component
 ```
 
 ## 核心关系说明
 
 ### 1. 组件 ↔ 属性系统
-- 组件通过 `prop: ComponentProp` 持有所有属性
+- 组件通过 `style: ComponentStyle` 持有所有样式属性
 - 属性分为四种状态：`basic`、`hover`、`pressed`、`disabled`
-- 每个状态包含完整的 `BasicProp`（基础属性）
+- 每个状态包含完整的 `BasicStyle`（基础属性）
 
 ### 2. 属性 ↔ 配置系统
 - `merge_conf_prop()` 方法从全局配置合并属性
@@ -162,14 +162,14 @@ graph TB
 ### 5. 组件 ↔ 插槽系统
 - **普通插槽**：`slot: WidgetRef`，可放置任意内容
 - **具名插槽**：`header: GView`、`body: GView` 等，特定用途
-- 插槽属性通过 `SlotProp` 和 `SlotBasicProp` 管理
+- 插槽属性通过 `SlotStyle` 和 `SlotBasicStyle` 管理
 
 ## 设计原则
 
 ### 1. 状态驱动设计
 ```rust
 // 状态决定当前使用的属性
-let prop = self.prop.get(self.state);
+let style = self.style.get(self.state);
 
 // 事件改变状态
 self.switch_state(ButtonState::Pressed);
@@ -183,7 +183,7 @@ self.redraw(cx);
 // 配置覆盖默认值，确保一致性
 fn merge_conf_prop(&mut self, cx: &mut Cx) {
     let conf_prop = &cx.global::<Conf>().components.button;
-    self.prop = conf_prop.clone();
+    self.style = conf_prop.clone();
 }
 ```
 
@@ -217,8 +217,8 @@ set_animation! {
 impl Component for GLabel {
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         // 同步属性到绘制对象
-        self.draw_text.color = self.prop.get(self.state).color;
-        self.draw_text.text_style.font_size = self.prop.get(self.state).font_size;
+        self.draw_text.color = self.style.get(self.state).color;
+        self.draw_text.text_style.font_size = self.style.get(self.state).font_size;
         Ok(())
     }
 }
@@ -237,7 +237,7 @@ impl Widget for GLabel {
 impl Component for GButton {
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         // 同步属性
-        self.draw_button.merge(&self.prop.get(self.state));
+        self.draw_button.merge(&self.style.get(self.state));
         Ok(())
     }
 }
@@ -259,9 +259,9 @@ impl Widget for GButton {
 impl SlotComponent for GCard {
     fn render_slots(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         // 同步插槽属性
-        self.header.apply_slot_prop(cx, &self.prop.get(self.state).header);
-        self.body.apply_slot_prop(cx, &self.prop.get(self.state).body);
-        self.footer.apply_slot_prop(cx, &self.prop.get(self.state).footer);
+        self.header.apply_slot_prop(cx, &self.style.get(self.state).header);
+        self.body.apply_slot_prop(cx, &self.style.get(self.state).body);
+        self.footer.apply_slot_prop(cx, &self.style.get(self.state).footer);
         Ok(())
     }
 }
@@ -281,13 +281,13 @@ impl Widget for GCard {
 ### 属性结构层次
 ```
 ComponentProp {
-    basic: ComponentBasicProp {
+    basic: ComponentBasicStyle {
         component_part: ComponentPartProp,  // 组件特定属性
-        container: ViewBasicProp,          // 容器属性
+        container: ViewBasicStyle,          // 容器属性
     },
-    hover: ComponentBasicProp { ... },
-    pressed: ComponentBasicProp { ... },
-    disabled: ComponentBasicProp { ... },
+    hover: ComponentBasicStyle { ... },
+    pressed: ComponentBasicStyle { ... },
+    disabled: ComponentBasicStyle { ... },
 }
 ```
 
@@ -355,7 +355,7 @@ fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) -> Eve
 ## 最佳实践
 
 ### 1. 属性设计
-- 使用宏继承 `ViewBasicProp` 避免 live reload 问题
+- 使用宏继承 `ViewBasicStyle` 避免 live reload 问题
 - 为每个状态定义完整的属性集合
 - 使用 `from_live_value()` 进行类型转换
 
@@ -378,10 +378,10 @@ fn handle_event(&mut self, cx: &mut Cx, event: &Event, scope: &mut Scope) -> Eve
 
 ### prop.rs
 接下来让我来指导你更改tag的prop.rs, 让我们以tabbar_item的prop作为蓝本，说明和分析一下你写的代码的不足和错误的地方
-1. tag和tabbar_item一样都是带有插槽的，tag有左侧的icon插槽，中间的text文字插槽和右侧的关闭图标的插槽，这里的插槽都是具名插槽(具体插槽)，对于有插槽的组件都会使用SlotProp trait处理顶层Prop，也就是impl SlotProp for TagProp，然后会使用component_part!宏来创建组件结构，这里就会含有Container，Icon, Text, Close四个。
-2. 插槽组件使用TagBasicProp来声明具体插槽属性，由于这些插槽已经是基本组件了，并且可以直接获取插槽的BasicProp，所以需要让TagBasicProp来实现BasicProp和SlotBasicProp trait
+1. tag和tabbar_item一样都是带有插槽的，tag有左侧的icon插槽，中间的text文字插槽和右侧的关闭图标的插槽，这里的插槽都是具名插槽(具体插槽)，对于有插槽的组件都会使用SlotStyle trait处理顶层Prop，也就是impl SlotStyle for TagProp，然后会使用component_part!宏来创建组件结构，这里就会含有Container，Icon, Text, Close四个。
+2. 插槽组件使用TagBasicStyle来声明具体插槽属性，由于这些插槽已经是基本组件了，并且可以直接获取插槽的BasicStyle，所以需要让TagBasicStyle来实现BasicStyle和SlotBasicStyle trait
 3. set_from_str方法中都可以使用属性类型的from_live_value().unwrap_or来设置，这里我已经改了
-4. 你的 TagBasicProp声明是完全错误的，应该像TabbarItemBasicProp那样进行声明
+4. 你的 TagBasicStyle声明是完全错误的，应该像TabbarItemBasicStyle那样进行声明
 
 ### mod.rs
 让我指导你写组件的具体实现mod.rs，我们参考tabbar_item的mod.rs

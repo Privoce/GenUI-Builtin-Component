@@ -1,9 +1,9 @@
 use crate::{
     basic_prop_interconvert, component_colors, component_part, component_state, components::{
-        label::{LabelBasicProp, LabelState},
+        label::{LabelBasicStyle, LabelState},
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
     }, error::Error, from_prop_to_toml, get_get_mut, prop::{
         manuel::{
             ABS_POS, ACTIVE, BACKGROUND_COLOR, BACKGROUND_VISIBLE, BASIC, BORDER_COLOR,
@@ -19,16 +19,16 @@ use toml_edit::{Item};
 
 prop_interconvert! {
     CheckboxProp {
-        basic_prop = CheckboxBasicProp;
-        basic => BASIC, CheckboxBasicProp::default(),|v| (v, CheckboxState::Basic).try_into(),
-        hover => HOVER, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
-        active => ACTIVE, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Active),|v| (v, CheckboxState::Active).try_into(),
-        disabled => DISABLED, CheckboxBasicProp::from_state(Theme::default(), CheckboxState::Disabled),|v| (v, CheckboxState::Disabled).try_into()
+        basic_prop = CheckboxBasicStyle;
+        basic => BASIC, CheckboxBasicStyle::default(),|v| (v, CheckboxState::Basic).try_into(),
+        hover => HOVER, CheckboxBasicStyle::from_state(Theme::default(), CheckboxState::Hover),|v| (v, CheckboxState::Hover).try_into(),
+        active => ACTIVE, CheckboxBasicStyle::from_state(Theme::default(), CheckboxState::Active),|v| (v, CheckboxState::Active).try_into(),
+        disabled => DISABLED, CheckboxBasicStyle::from_state(Theme::default(), CheckboxState::Disabled),|v| (v, CheckboxState::Disabled).try_into()
     }, "[component.checkbox] should be a table"
 }
 
 
-impl SlotProp for CheckboxProp {
+impl SlotStyle for CheckboxProp {
     type Part = CheckboxPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -49,10 +49,10 @@ impl SlotProp for CheckboxProp {
     }
 }
 
-impl Prop for CheckboxProp {
+impl Style for CheckboxProp {
     type State = CheckboxState;
 
-    type Basic = CheckboxBasicProp;
+    type Basic = CheckboxBasicStyle;
 
     get_get_mut! {
         CheckboxState::Basic => basic,
@@ -62,7 +62,7 @@ impl Prop for CheckboxProp {
     }
 
     fn len() -> usize {
-        4 * CheckboxBasicProp::len()
+        4 * CheckboxBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -76,30 +76,30 @@ impl Prop for CheckboxProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct CheckboxBasicProp {
+pub struct CheckboxBasicStyle {
     #[live(Self::default_container(Theme::default(), CheckboxState::Basic))]
-    pub container: ViewBasicProp,
+    pub container: ViewBasicStyle,
     #[live(Self::default_checkbox(Theme::default(), CheckboxState::Basic))]
     pub checkbox: CheckboxPartProp,
     #[live(Self::default_extra(Theme::default(), CheckboxState::Basic))]
-    pub extra: ViewBasicProp,
+    pub extra: ViewBasicStyle,
 }
 
-impl Default for CheckboxBasicProp {
+impl Default for CheckboxBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), CheckboxState::Basic)
     }
 }
 
 from_prop_to_toml!{
-    CheckboxBasicProp {
+    CheckboxBasicStyle {
         container => CONTAINER,
         checkbox => CHECKBOX,
         extra => EXTRA
     }
 }
 
-impl SlotBasicProp for CheckboxBasicProp {
+impl SlotBasicStyle for CheckboxBasicStyle {
     type Part = CheckboxPart;
 
     fn set_from_str_slot(
@@ -128,7 +128,7 @@ impl SlotBasicProp for CheckboxBasicProp {
     }
 }
 
-impl BasicProp for CheckboxBasicProp {
+impl BasicStyle for CheckboxBasicStyle {
     type State = CheckboxState;
 
     type Colors = CheckboxColors;
@@ -146,7 +146,7 @@ impl BasicProp for CheckboxBasicProp {
     }
 
     fn len() -> usize {
-        CheckboxPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len()
+        CheckboxPartProp::len() + ViewBasicStyle::len() + LabelBasicStyle::len()
     }
 
     fn set_from_str(
@@ -166,9 +166,9 @@ impl BasicProp for CheckboxBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
             (live_id!(checkbox), CheckboxPartProp::live_props().into()),
-            (live_id!(extra), ViewBasicProp::live_props().into()),
+            (live_id!(extra), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -180,7 +180,7 @@ impl BasicProp for CheckboxBasicProp {
     }
 }
 
-impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicProp {
+impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, CheckboxState)) -> Result<Self, Self::Error> {
@@ -214,9 +214,9 @@ impl TryFrom<(&Item, CheckboxState)> for CheckboxBasicProp {
     }
 }
 
-impl CheckboxBasicProp {
-    pub fn default_container(theme: Theme, state: CheckboxState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl CheckboxBasicStyle {
+    pub fn default_container(theme: Theme, state: CheckboxState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fit);
         container.set_flow(Flow::Right);
@@ -225,7 +225,7 @@ impl CheckboxBasicProp {
         container.set_cursor(MouseCursor::Hand);
         container
     }
-    pub fn default_extra(theme: Theme, state: CheckboxState) -> ViewBasicProp {
+    pub fn default_extra(theme: Theme, state: CheckboxState) -> ViewBasicStyle {
         let mut extra = Self::default_container(theme, state);
         extra.set_padding(Padding::from_f64(0.0));
         extra
@@ -263,7 +263,7 @@ component_colors!{
     }
 }
 
-impl BasicProp for CheckboxPartProp {
+impl BasicStyle for CheckboxPartProp {
     type State = CheckboxState;
     /// (background_color, stroke_color, border_color)
     type Colors = CheckboxColors;

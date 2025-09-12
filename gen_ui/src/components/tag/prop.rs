@@ -6,11 +6,11 @@ use toml_edit::Item;
 use crate::{
     component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
+        label::{LabelBasicStyle, LabelState},
         live_props::LiveProps,
-        svg::{SvgBasicProp, SvgPart, SvgState},
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        svg::{SvgBasicStyle, SvgPart, SvgState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
     },
     error::Error,
     from_prop_to_toml, get_get_mut,
@@ -26,15 +26,15 @@ use crate::{
 
 prop_interconvert! {
     TagProp {
-        basic_prop = TagBasicProp;
-        basic => BASIC, TagBasicProp::default(), |v| (v, TagState::Basic).try_into(),
-        hover => HOVER, TagBasicProp::from_state(Theme::default(), TagState::Hover), |v| (v, TagState::Hover).try_into(),
-        pressed => PRESSED, TagBasicProp::from_state(Theme::default(), TagState::Pressed), |v| (v, TagState::Pressed).try_into(),
-        disabled => DISABLED, TagBasicProp::from_state(Theme::default(), TagState::Disabled), |v| (v, TagState::Disabled).try_into()
+        basic_prop = TagBasicStyle;
+        basic => BASIC, TagBasicStyle::default(), |v| (v, TagState::Basic).try_into(),
+        hover => HOVER, TagBasicStyle::from_state(Theme::default(), TagState::Hover), |v| (v, TagState::Hover).try_into(),
+        pressed => PRESSED, TagBasicStyle::from_state(Theme::default(), TagState::Pressed), |v| (v, TagState::Pressed).try_into(),
+        disabled => DISABLED, TagBasicStyle::from_state(Theme::default(), TagState::Disabled), |v| (v, TagState::Disabled).try_into()
     }, "[component.tag] should be a table"
 }
 
-impl SlotProp for TagProp {
+impl SlotStyle for TagProp {
     type Part = TagPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -56,10 +56,10 @@ impl SlotProp for TagProp {
     }
 }
 
-impl Prop for TagProp {
+impl Style for TagProp {
     type State = TagState;
 
-    type Basic = TagBasicProp;
+    type Basic = TagBasicStyle;
 
     get_get_mut! {
         TagState::Basic => basic,
@@ -69,7 +69,7 @@ impl Prop for TagProp {
     }
 
     fn len() -> usize {
-        4 * TagBasicProp::len()
+        4 * TagBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -82,24 +82,24 @@ impl Prop for TagProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct TagBasicProp {
-    #[live(TagBasicProp::default_icon(Theme::default(), TagState::default()))]
-    pub icon: SvgBasicProp,
-    #[live(TagBasicProp::default_text(Theme::default(), TagState::default()))]
-    pub text: LabelBasicProp,
-    #[live(TagBasicProp::default_close(Theme::default(), TagState::default()))]
-    pub close: SvgBasicProp,
-    #[live(TagBasicProp::default_container(Theme::default(), TagState::default()))]
-    pub container: ViewBasicProp,
+pub struct TagBasicStyle {
+    #[live(TagBasicStyle::default_icon(Theme::default(), TagState::default()))]
+    pub icon: SvgBasicStyle,
+    #[live(TagBasicStyle::default_text(Theme::default(), TagState::default()))]
+    pub text: LabelBasicStyle,
+    #[live(TagBasicStyle::default_close(Theme::default(), TagState::default()))]
+    pub close: SvgBasicStyle,
+    #[live(TagBasicStyle::default_container(Theme::default(), TagState::default()))]
+    pub container: ViewBasicStyle,
 }
 
-impl Default for TagBasicProp {
+impl Default for TagBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), TagState::default())
     }
 }
 
-impl SlotBasicProp for TagBasicProp {
+impl SlotBasicStyle for TagBasicStyle {
     type Part = TagPart;
 
     fn set_from_str_slot(
@@ -148,14 +148,14 @@ impl SlotBasicProp for TagBasicProp {
     }
 }
 
-impl BasicProp for TagBasicProp {
+impl BasicStyle for TagBasicStyle {
     type State = TagState;
 
     type Colors = ();
 
     fn from_state(theme: crate::themes::Theme, state: Self::State) -> Self {
         Self {
-            icon: SvgBasicProp::from_state(theme, state.into()),
+            icon: SvgBasicStyle::from_state(theme, state.into()),
             text: Self::default_text(theme, state),
             close: Self::default_close(theme, state),
             container: Self::default_container(theme, state),
@@ -167,7 +167,7 @@ impl BasicProp for TagBasicProp {
     }
 
     fn len() -> usize {
-        ViewBasicProp::len() + SvgBasicProp::len() + LabelBasicProp::len() + SvgBasicProp::len()
+        ViewBasicStyle::len() + SvgBasicStyle::len() + LabelBasicStyle::len() + SvgBasicStyle::len()
     }
 
     fn set_from_str(
@@ -188,10 +188,10 @@ impl BasicProp for TagBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(icon), SvgBasicProp::live_props().into()),
-            (live_id!(text), LabelBasicProp::live_props().into()),
-            (live_id!(close), SvgBasicProp::live_props().into()),
-            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(icon), SvgBasicStyle::live_props().into()),
+            (live_id!(text), LabelBasicStyle::live_props().into()),
+            (live_id!(close), SvgBasicStyle::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -205,7 +205,7 @@ impl BasicProp for TagBasicProp {
 }
 
 from_prop_to_toml! {
-    TagBasicProp {
+    TagBasicStyle {
         icon => ICON,
         text => TEXT,
         close => CLOSE,
@@ -213,7 +213,7 @@ from_prop_to_toml! {
     }
 }
 
-impl TryFrom<(&Item, TagState)> for TagBasicProp {
+impl TryFrom<(&Item, TagState)> for TagBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, TagState)) -> Result<Self, Self::Error> {
@@ -224,14 +224,14 @@ impl TryFrom<(&Item, TagState)> for TagBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || Ok(TagBasicProp::default_container(Theme::default(), state)),
+            || Ok(TagBasicStyle::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let icon = get_from_itable(
             inline_table,
             ICON,
-            || Ok(SvgBasicProp::default()),
+            || Ok(SvgBasicStyle::default()),
             |v| (v, state.into()).try_into(),
         )?;
 
@@ -258,9 +258,9 @@ impl TryFrom<(&Item, TagState)> for TagBasicProp {
     }
 }
 
-impl TagBasicProp {
-    pub fn default_container(theme: Theme, state: TagState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl TagBasicStyle {
+    pub fn default_container(theme: Theme, state: TagState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.height = Size::Fit;
         container.width = Size::Fit;
         container.align = Align::from_f64(0.5);
@@ -272,19 +272,19 @@ impl TagBasicProp {
         container
     }
 
-    pub fn default_text(theme: Theme, state: TagState) -> LabelBasicProp {
-        let mut text = LabelBasicProp::from_state(theme, state.into());
+    pub fn default_text(theme: Theme, state: TagState) -> LabelBasicStyle {
+        let mut text = LabelBasicStyle::from_state(theme, state.into());
         text.flow = Flow::Right;
         text.set_font_size(10.0);
         text
     }
 
-    pub fn default_close(theme: Theme, state: TagState) -> SvgBasicProp {
-        SvgBasicProp::from_state(theme, state.into())
+    pub fn default_close(theme: Theme, state: TagState) -> SvgBasicStyle {
+        SvgBasicStyle::from_state(theme, state.into())
     }
 
-    pub fn default_icon(theme: Theme, state: TagState) -> SvgBasicProp {
-        SvgBasicProp::from_state(theme, state.into())
+    pub fn default_icon(theme: Theme, state: TagState) -> SvgBasicStyle {
+        SvgBasicStyle::from_state(theme, state.into())
     }
 }
 

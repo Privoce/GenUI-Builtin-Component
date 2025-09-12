@@ -7,8 +7,8 @@ use crate::{
         label::LabelState,
         live_props::LiveProps,
         svg::SvgState,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
         ViewColors,
     },
     error::Error,
@@ -25,17 +25,17 @@ use crate::{
 
 prop_interconvert! {
     SubMenuProp {
-        basic_prop = SubMenuBasicProp;
-        basic => BASIC, SubMenuBasicProp::default(), |v| (v, SubMenuState::Basic).try_into(),
-        active => ACTIVE, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
-        disabled => DISABLED, SubMenuBasicProp::from_state(Theme::default(), SubMenuState::Disabled), |v| (v, SubMenuState::Disabled).try_into()
+        basic_prop = SubMenuBasicStyle;
+        basic => BASIC, SubMenuBasicStyle::default(), |v| (v, SubMenuState::Basic).try_into(),
+        active => ACTIVE, SubMenuBasicStyle::from_state(Theme::default(), SubMenuState::Active), |v| (v, SubMenuState::Active).try_into(),
+        disabled => DISABLED, SubMenuBasicStyle::from_state(Theme::default(), SubMenuState::Disabled), |v| (v, SubMenuState::Disabled).try_into()
     }, "[component.sub_menu] should be a table"
 }
 
-impl Prop for SubMenuProp {
+impl Style for SubMenuProp {
     type State = SubMenuState;
 
-    type Basic = SubMenuBasicProp;
+    type Basic = SubMenuBasicStyle;
 
     get_get_mut! {
         SubMenuState::Basic => basic,
@@ -44,7 +44,7 @@ impl Prop for SubMenuProp {
     }
 
     fn len() -> usize {
-        4 * SubMenuBasicProp::len()
+        4 * SubMenuBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -55,7 +55,7 @@ impl Prop for SubMenuProp {
     }
 }
 
-impl SlotProp for SubMenuProp {
+impl SlotStyle for SubMenuProp {
     type Part = SubMenuPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -77,24 +77,24 @@ impl SlotProp for SubMenuProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct SubMenuBasicProp {
-    #[live(SubMenuBasicProp::default_container(Theme::default(), SubMenuState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(SubMenuBasicProp::default_header(Theme::default(), SubMenuState::Basic))]
-    pub header: ViewBasicProp,
-    #[live(SubMenuBasicProp::default_body(Theme::default(), SubMenuState::Basic))]
-    pub body: ViewBasicProp,
+pub struct SubMenuBasicStyle {
+    #[live(SubMenuBasicStyle::default_container(Theme::default(), SubMenuState::Basic))]
+    pub container: ViewBasicStyle,
+    #[live(SubMenuBasicStyle::default_header(Theme::default(), SubMenuState::Basic))]
+    pub header: ViewBasicStyle,
+    #[live(SubMenuBasicStyle::default_body(Theme::default(), SubMenuState::Basic))]
+    pub body: ViewBasicStyle,
 }
 
 from_prop_to_toml! {
-    SubMenuBasicProp {
+    SubMenuBasicStyle {
         container => CONTAINER,
         header => HEADER,
         body => BODY
     }
 }
 
-impl BasicProp for SubMenuBasicProp {
+impl BasicStyle for SubMenuBasicStyle {
     type State = SubMenuState;
 
     type Colors = ViewColors;
@@ -108,11 +108,11 @@ impl BasicProp for SubMenuBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into())
+        ViewBasicStyle::state_colors(theme, state.into())
     }
 
     fn len() -> usize {
-        3 * ViewBasicProp::len()
+        3 * ViewBasicStyle::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -126,9 +126,9 @@ impl BasicProp for SubMenuBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
-            (live_id!(header), ViewBasicProp::live_props().into()),
-            (live_id!(body), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
+            (live_id!(header), ViewBasicStyle::live_props().into()),
+            (live_id!(body), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -140,7 +140,7 @@ impl BasicProp for SubMenuBasicProp {
     }
 }
 
-impl SlotBasicProp for SubMenuBasicProp {
+impl SlotBasicStyle for SubMenuBasicStyle {
     type Part = SubMenuPart;
 
     fn set_from_str_slot(
@@ -170,13 +170,13 @@ impl SlotBasicProp for SubMenuBasicProp {
     }
 }
 
-impl Default for SubMenuBasicProp {
+impl Default for SubMenuBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), SubMenuState::Basic)
     }
 }
 
-impl TryFrom<(&Item, SubMenuState)> for SubMenuBasicProp {
+impl TryFrom<(&Item, SubMenuState)> for SubMenuBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, SubMenuState)) -> Result<Self, Self::Error> {
@@ -187,21 +187,21 @@ impl TryFrom<(&Item, SubMenuState)> for SubMenuBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || Ok(SubMenuBasicProp::default_container(Theme::default(), state)),
+            || Ok(SubMenuBasicStyle::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let header = get_from_itable(
             inline_table,
             HEADER,
-            || Ok(SubMenuBasicProp::default_header(Theme::default(), state)),
+            || Ok(SubMenuBasicStyle::default_header(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let body = get_from_itable(
             inline_table,
             BODY,
-            || Ok(SubMenuBasicProp::default_body(Theme::default(), state)),
+            || Ok(SubMenuBasicStyle::default_body(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -213,9 +213,9 @@ impl TryFrom<(&Item, SubMenuState)> for SubMenuBasicProp {
     }
 }
 
-impl SubMenuBasicProp {
-    pub fn default_container(theme: Theme, state: SubMenuState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl SubMenuBasicStyle {
+    pub fn default_container(theme: Theme, state: SubMenuState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fill);
         container.set_background_visible(true);
@@ -225,8 +225,8 @@ impl SubMenuBasicProp {
         container.set_spacing(0.0);
         container
     }
-    pub fn default_header(theme: Theme, state: SubMenuState) -> ViewBasicProp {
-        let mut header = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_header(theme: Theme, state: SubMenuState) -> ViewBasicStyle {
+        let mut header = ViewBasicStyle::from_state(theme, state.into());
         header.set_height(Size::Fixed(42.0));
         header.set_width(Size::Fill);
         header.set_background_visible(true);
@@ -235,8 +235,8 @@ impl SubMenuBasicProp {
         header.set_margin(Margin::from_f64(0.0));
         header
     }
-    pub fn default_body(theme: Theme, state: SubMenuState) -> ViewBasicProp {
-        let mut body = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_body(theme: Theme, state: SubMenuState) -> ViewBasicStyle {
+        let mut body = ViewBasicStyle::from_state(theme, state.into());
         body.set_height(Size::Fit);
         body.set_width(Size::Fill);
         body.set_background_visible(true);

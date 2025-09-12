@@ -9,7 +9,7 @@ use std::cell::RefCell;
 
 use crate::{
     animation_open_then_redraw,
-    components::{BasicProp, Component, DrawState, LifeCycle, Prop},
+    components::{BasicStyle, Component, DrawState, LifeCycle, Style},
     error::Error,
     event_option, event_option_ref, impl_view_trait_live_hook, impl_view_trait_widget_node,
     lifecycle, play_animation,
@@ -64,7 +64,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GTabbar {
     #[live]
-    pub prop: TabbarProp,
+    pub style: TabbarProp,
     #[live(true)]
     pub visible: bool,
     #[live]
@@ -113,7 +113,7 @@ impl_view_trait_widget_node!(GTabbar, draw_tabbar);
 
 impl Widget for GTabbar {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         // the beginning state
         if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
             if !self.visible {
@@ -123,9 +123,9 @@ impl Widget for GTabbar {
             }
             self.defer_walks.clear();
 
-            let layout = prop.layout();
+            let layout = style.layout();
 
-            if prop.background_visible {
+            if style.background_visible {
                 self.draw_tabbar.begin(cx, walk, layout);
             } else {
                 cx.begin_turtle(walk, layout);
@@ -165,7 +165,7 @@ impl Widget for GTabbar {
                 }
                 self.draw_state.set(DrawState::DeferWalk(step + 1));
             } else {
-                if prop.background_visible {
+                if style.background_visible {
                     self.draw_tabbar.end(cx);
                     self.area = self.draw_tabbar.area();
                 } else {
@@ -249,7 +249,7 @@ impl LiveHook for GTabbar {
         self.set_apply_state_map(
             nodes,
             index,
-            &TabbarBasicProp::live_props(),
+            &TabbarBasicStyle::live_props(),
             [live_id!(basic), live_id!(disabled)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -278,13 +278,13 @@ impl Component for GTabbar {
     type State = TabbarState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.tabbar;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.tabbar;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.state);
-        self.draw_tabbar.merge(&(*prop).into());
+        let style = self.style.get(self.state);
+        self.draw_tabbar.merge(&(*style).into());
         if self.disabled {
             self.switch_state(TabbarState::Disabled);
         }
@@ -308,7 +308,7 @@ impl Component for GTabbar {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -329,8 +329,8 @@ impl Component for GTabbar {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(TabbarState::Basic);
-            let disabled_prop = self.prop.get(TabbarState::Disabled);
+            let basic_prop = self.style.get(TabbarState::Basic);
+            let disabled_prop = self.style.get(TabbarState::Disabled);
             let (mut basic_index, mut disabled_index) = (None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
@@ -382,7 +382,7 @@ impl Component for GTabbar {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 TabbarState::Basic => nodes.child_by_path(
                     self.index,
@@ -404,15 +404,15 @@ impl Component for GTabbar {
             set_animation! {
                 nodes: draw_tabbar = {
                     index => {
-                        background_color => prop.background_color,
-                        border_color => prop.border_color,
-                        border_radius => prop.border_radius,
-                        border_width => (prop.border_width as f64),
-                        shadow_color => prop.shadow_color,
-                        spread_radius => (prop.spread_radius as f64),
-                        blur_radius => (prop.blur_radius as f64),
-                        shadow_offset => prop.shadow_offset,
-                        background_visible => prop.background_visible.to_f64()
+                        background_color => style.background_color,
+                        border_color => style.border_color,
+                        border_radius => style.border_radius,
+                        border_width => (style.border_width as f64),
+                        shadow_color => style.shadow_color,
+                        spread_radius => (style.spread_radius as f64),
+                        blur_radius => (style.blur_radius as f64),
+                        shadow_offset => style.shadow_offset,
+                        background_visible => style.background_visible.to_f64()
                     }
                 }
             }

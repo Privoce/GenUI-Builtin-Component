@@ -8,7 +8,7 @@ pub use prop::*;
 
 use crate::components::image::async_impl::{parse_image_buffer, ImageAsync};
 use crate::components::lifecycle::LifeCycle;
-use crate::components::traits::{BasicProp, Component, Prop};
+use crate::components::traits::{BasicStyle, Component, Style};
 use crate::error::Error;
 use crate::prop::manuel::{BASIC, LOADING};
 use crate::prop::{ApplyStateMap, Src, SrcType};
@@ -51,7 +51,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GImage {
     #[live]
-    pub prop: ImageProp,
+    pub style: ImageProp,
     #[animator]
     animator: Animator,
     #[live]
@@ -106,8 +106,8 @@ impl WidgetNode for GImage {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -143,7 +143,7 @@ impl LiveHook for GImage {
         self.set_apply_state_map(
             nodes,
             index,
-            &ImageBasicProp::live_props(),
+            &ImageBasicStyle::live_props(),
             [live_id!(basic), live_id!(hover), live_id!(pressed)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -180,7 +180,7 @@ impl Widget for GImage {
         // we change either nothing, or width or height
         let rect = cx.peek_walk_turtle(walk);
         let dpi = cx.current_dpi_factor();
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         let (width, height) = if let Some((w, h)) = &self.async_image_size {
             // still loading
 
@@ -190,7 +190,7 @@ impl Widget for GImage {
             let (width, height) = image_texture
                 .get_format(cx)
                 .vec_width_height()
-                .unwrap_or((prop.min_width as usize, prop.min_height as usize));
+                .unwrap_or((style.min_width as usize, style.min_height as usize));
             if let Some(animation) = image_texture.animation(cx) {
                 let (w, h) = (animation.width as f64, animation.height as f64);
                 self.next_frame = cx.new_next_frame();
@@ -202,15 +202,15 @@ impl Widget for GImage {
             } else {
                 self.draw_img.image_scale = vec2(1.0, 1.0);
                 self.draw_img.image_pan = vec2(0.0, 0.0);
-                (width as f64 * prop.width_scale, height as f64)
+                (width as f64 * style.width_scale, height as f64)
             }
         } else {
             self.draw_img.draw_vars.empty_texture(0);
-            (prop.min_width as f64 / dpi, prop.min_height as f64 / dpi)
+            (style.min_width as f64 / dpi, style.min_height as f64 / dpi)
         };
 
         let aspect = width / height;
-        match prop.fit {
+        match style.fit {
             ImageFit::Size => {
                 walk.width = Size::Fixed(width);
                 walk.height = Size::Fixed(height);
@@ -359,14 +359,14 @@ impl Component for GImage {
     type State = ImageState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.image;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.image;
+        self.style = style.clone();
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         // only image do not need merge ------------------------------
-        // let prop = self.prop.get(self.state);
-        // self.draw_img.merge(&prop.into());
+        // let style = self.style.get(self.state);
+        // self.draw_img.merge(&style.into());
         // -----------------------------------------------------------
         self.lazy_create_image_cache(cx);
         match self.src.clone() {
@@ -441,14 +441,14 @@ impl Component for GImage {
             }
         }
 
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         if let Some(nf) = self.next_frame.is_event(event) {
             // compute the next frame and patch things up
             if let Some(image_texture) = &self.texture {
                 let (texture_width, texture_height) = image_texture
                     .get_format(cx)
                     .vec_width_height()
-                    .unwrap_or((prop.min_width as usize, prop.min_height as usize));
+                    .unwrap_or((style.min_width as usize, style.min_height as usize));
                 if let Some(animation) = image_texture.animation(cx).clone() {
                     let delta = if let Some(last_time) = &self.last_time {
                         nf.time - last_time
@@ -547,7 +547,7 @@ impl Component for GImage {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, _cx: &mut Cx) -> () {
@@ -625,14 +625,14 @@ impl GImage {
     }
 
     pub fn get_size_when_load(&self) -> (usize, usize) {
-        let prop = self.prop.get(self.state);
-        let height = match prop.height {
+        let style = self.style.get(self.state);
+        let height = match style.height {
             Size::Fixed(h) => h,
-            _ => prop.min_height,
+            _ => style.min_height,
         };
-        let width = match prop.width {
+        let width = match style.width {
             Size::Fixed(w) => w,
-            _ => prop.min_width,
+            _ => style.min_width,
         };
         (height as usize, width as usize)
     }

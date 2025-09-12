@@ -9,7 +9,7 @@ live_design! {
     link genui_basic;
 
     pub GCheckboxGroupBase = {{GCheckboxGroup}} {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,

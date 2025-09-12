@@ -5,9 +5,9 @@ use crate::{
         lifecycle::LifeCycle,
         tabbar::{
             item::{GTabbarItem, GTabbarItemRef, GTabbarItemWidgetRefExt, TabbarItemProp},
-            TabbarBasicProp, TabbarItemData, TabbarProp, TabbarState,
+            TabbarBasicStyle, TabbarItemData, TabbarProp, TabbarState,
         },
-        traits::{BasicProp, Component, Prop},
+        traits::{BasicStyle, Component, Style},
     },
     error::Error,
     lifecycle, play_animation,
@@ -55,7 +55,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GVTabbar {
     #[live]
-    pub prop: TabbarProp,
+    pub style: TabbarProp,
     #[live]
     pub active: Option<String>,
     #[rust]
@@ -101,7 +101,7 @@ impl WidgetNode for GVTabbar {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         prop.walk()
     }
 
@@ -119,7 +119,7 @@ impl Widget for GVTabbar {
         if !self.visible {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         self.draw_tabbar.begin(cx, prop.walk(), prop.layout());
         self.children.clear();
         for item in self.items.iter() {
@@ -148,7 +148,7 @@ impl LiveHook for GVTabbar {
         self.set_apply_state_map(
             nodes,
             index,
-            &TabbarBasicProp::live_props(),
+            &TabbarBasicStyle::live_props(),
             [live_id!(basic), live_id!(disabled)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -172,15 +172,15 @@ impl Component for GVTabbar {
     type State = TabbarState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.tabbar;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.tabbar;
+        self.style = prop.clone();
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
         if self.disabled {
             self.switch_state(TabbarState::Disabled);
         }
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         self.draw_tabbar.merge(&(*prop).into());
         Ok(())
     }
@@ -203,7 +203,7 @@ impl Component for GVTabbar {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -224,8 +224,8 @@ impl Component for GVTabbar {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(TabbarState::Basic);
-            let disabled_prop = self.prop.get(TabbarState::Disabled);
+            let basic_prop = self.style.get(TabbarState::Basic);
+            let disabled_prop = self.style.get(TabbarState::Disabled);
             let (mut basic_index, mut disabled_index) = (None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
@@ -278,7 +278,7 @@ impl Component for GVTabbar {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 TabbarState::Basic => nodes.child_by_path(
                     self.index,

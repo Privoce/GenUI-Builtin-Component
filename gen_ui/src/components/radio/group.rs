@@ -9,7 +9,7 @@ live_design! {
     link genui_basic;
 
     pub GRadioGroupBase = {{GRadioGroup}} {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,

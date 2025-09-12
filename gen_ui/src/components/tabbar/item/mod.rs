@@ -6,12 +6,12 @@ pub use prop::*;
 use crate::{
     active_event, animation_open_then_redraw,
     components::{
-        label::{GLabel, LabelBasicProp},
+        label::{GLabel, LabelBasicStyle},
         lifecycle::LifeCycle,
-        svg::{GSvg, SvgBasicProp},
+        svg::{GSvg, SvgBasicStyle},
         tabbar::{TabbarItemClicked, TabbarItemEvent, TabbarItemHoverIn, TabbarItemHoverOut},
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::ViewBasicProp,
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::ViewBasicStyle,
     },
     error::Error,
     event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
@@ -77,7 +77,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GTabbarItem {
     #[live]
-    pub prop: TabbarItemProp,
+    pub style: TabbarItemProp,
     // --- draw ----------------------
     #[live]
     pub draw_item: DrawView,
@@ -139,8 +139,8 @@ impl WidgetNode for GTabbarItem {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -170,8 +170,8 @@ impl Widget for GTabbarItem {
         if !self.visible() {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.state);
-        let _ = self.draw_item.begin(cx, walk, prop.layout());
+        let style = self.style.get(self.state);
+        let _ = self.draw_item.begin(cx, walk, style.layout());
         let _ = SlotDrawer::new(
             [
                 (live_id!(icon), (&mut self.icon).into()),
@@ -211,9 +211,9 @@ impl LiveHook for GTabbarItem {
                 live_id!(disabled),
             ],
             [
-                (TabbarItemPart::Icon, &SvgBasicProp::live_props()),
-                (TabbarItemPart::Text, &LabelBasicProp::live_props()),
-                (TabbarItemPart::Container, &ViewBasicProp::live_props()),
+                (TabbarItemPart::Icon, &SvgBasicStyle::live_props()),
+                (TabbarItemPart::Text, &LabelBasicStyle::live_props()),
+                (TabbarItemPart::Container, &ViewBasicStyle::live_props()),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -253,14 +253,14 @@ impl Component for GTabbarItem {
     type State = TabbarItemState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.tabbar_item;
-        self.prop = prop.clone();
-        self.icon.prop.basic = self.prop.basic.icon;
-        self.icon.prop.hover = self.prop.hover.icon;
-        self.icon.prop.pressed = self.prop.active.icon;
-        self.icon.prop.disabled = self.prop.disabled.icon;
-        self.text.prop.basic = self.prop.basic.text;
-        self.text.prop.disabled = self.prop.disabled.text;
+        let style = &cx.global::<Conf>().components.tabbar_item;
+        self.style = style.clone();
+        self.icon.style.basic = self.style.basic.icon;
+        self.icon.style.hover = self.style.hover.icon;
+        self.icon.style.pressed = self.style.active.icon;
+        self.icon.style.disabled = self.style.disabled.icon;
+        self.text.style.basic = self.style.basic.text;
+        self.text.style.disabled = self.style.disabled.text;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
@@ -274,8 +274,8 @@ impl Component for GTabbarItem {
             }
         };
         self.switch_state(state);
-        let prop = self.prop.get(self.state);
-        self.draw_item.merge(&prop.container);
+        let style = self.style.get(self.state);
+        self.draw_item.merge(&style.container);
         let _ = self.icon.render(cx)?;
         let _ = self.text.render(cx)?;
         Ok(())
@@ -295,7 +295,7 @@ impl Component for GTabbarItem {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, TabbarItemState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -328,7 +328,7 @@ impl Component for GTabbarItem {
             self.text.focus_sync();
         });
 
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -346,10 +346,10 @@ impl Component for GTabbarItem {
         let nodes = &mut live_file.expanded.nodes;
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(TabbarItemState::Basic);
-            let hover_prop = self.prop.get(TabbarItemState::Hover);
-            let active_prop = self.prop.get(TabbarItemState::Active);
-            let disabled_prop = self.prop.get(TabbarItemState::Disabled);
+            let basic_prop = self.style.get(TabbarItemState::Basic);
+            let hover_prop = self.style.get(TabbarItemState::Hover);
+            let active_prop = self.style.get(TabbarItemState::Active);
+            let disabled_prop = self.style.get(TabbarItemState::Disabled);
             let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -446,7 +446,7 @@ impl Component for GTabbarItem {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 TabbarItemState::Basic => nodes.child_by_path(
                     self.index,
@@ -484,15 +484,15 @@ impl Component for GTabbarItem {
             set_animation! {
                 nodes: draw_item = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }
@@ -595,7 +595,7 @@ impl GTabbarItem {
                     }
                 }
                 Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.state).container.cursor);
+                    cx.set_cursor(self.style.get(self.state).container.cursor);
                     self.switch_state_with_animation(cx, TabbarItemState::Hover);
                     hit_hover_in!(self, cx, e);
                 }

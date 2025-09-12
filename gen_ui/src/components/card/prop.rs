@@ -5,8 +5,8 @@ use crate::{
     component_part, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
         ViewColors,
     },
     error::Error,
@@ -28,16 +28,16 @@ use crate::{
 
 prop_interconvert! {
     CardProp {
-        basic_prop = CardBasicProp;
-        basic => BASIC, CardBasicProp::default(), |v| (v, CardState::Basic).try_into(),
-        hover => HOVER, CardBasicProp::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()
+        basic_prop = CardBasicStyle;
+        basic => BASIC, CardBasicStyle::default(), |v| (v, CardState::Basic).try_into(),
+        hover => HOVER, CardBasicStyle::from_state(Theme::default(), CardState::Hover), |v| (v, CardState::Hover).try_into()
     }, "[component.card] should be a table"
 }
 
-impl Prop for CardProp {
+impl Style for CardProp {
     type State = CardState;
 
-    type Basic = CardBasicProp;
+    type Basic = CardBasicStyle;
 
     get_get_mut! {
         CardState::Basic => basic,
@@ -45,7 +45,7 @@ impl Prop for CardProp {
     }
 
     fn len() -> usize {
-        2 * CardBasicProp::len()
+        2 * CardBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -60,7 +60,7 @@ impl Prop for CardProp {
     }
 }
 
-impl SlotProp for CardProp {
+impl SlotStyle for CardProp {
     type Part = CardPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -80,18 +80,18 @@ impl SlotProp for CardProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct CardBasicProp {
-    #[live(CardBasicProp::default_container(Theme::default(), CardState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(CardBasicProp::default_header(Theme::default(), CardState::Basic))]
+pub struct CardBasicStyle {
+    #[live(CardBasicStyle::default_container(Theme::default(), CardState::Basic))]
+    pub container: ViewBasicStyle,
+    #[live(CardBasicStyle::default_header(Theme::default(), CardState::Basic))]
     pub header: CardHeaderProp,
-    #[live(CardBasicProp::default_body(Theme::default(), CardState::Basic))]
+    #[live(CardBasicStyle::default_body(Theme::default(), CardState::Basic))]
     pub body: CardBodyProp,
-    #[live(CardBasicProp::default_footer(Theme::default(), CardState::Basic))]
+    #[live(CardBasicStyle::default_footer(Theme::default(), CardState::Basic))]
     pub footer: CardFooterProp,
 }
 
-impl BasicProp for CardBasicProp {
+impl BasicStyle for CardBasicStyle {
     type State = CardState;
 
     type Colors = ViewColors;
@@ -106,11 +106,11 @@ impl BasicProp for CardBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into())
+        ViewBasicStyle::state_colors(theme, state.into())
     }
 
     fn len() -> usize {
-        3 * ViewBasicProp::len()
+        3 * ViewBasicStyle::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -125,10 +125,10 @@ impl BasicProp for CardBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
-            (live_id!(header), ViewBasicProp::live_props().into()),
-            (live_id!(body), ViewBasicProp::live_props().into()),
-            (live_id!(footer), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
+            (live_id!(header), ViewBasicStyle::live_props().into()),
+            (live_id!(body), ViewBasicStyle::live_props().into()),
+            (live_id!(footer), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -140,7 +140,7 @@ impl BasicProp for CardBasicProp {
     }
 }
 
-impl SlotBasicProp for CardBasicProp {
+impl SlotBasicStyle for CardBasicStyle {
     type Part = CardPart;
 
     fn set_from_str_slot(
@@ -170,14 +170,14 @@ impl SlotBasicProp for CardBasicProp {
     }
 }
 
-impl Default for CardBasicProp {
+impl Default for CardBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), CardState::Basic)
     }
 }
 
 from_prop_to_toml! {
-    CardBasicProp {
+    CardBasicStyle {
         container => CONTAINER,
         header => HEADER,
         body => BODY,
@@ -185,7 +185,7 @@ from_prop_to_toml! {
     }
 }
 
-impl TryFrom<(&Item, CardState)> for CardBasicProp {
+impl TryFrom<(&Item, CardState)> for CardBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, CardState)) -> Result<Self, Self::Error> {
@@ -196,28 +196,28 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || Ok(CardBasicProp::default_container(Theme::default(), state)),
+            || Ok(CardBasicStyle::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let header = get_from_itable(
             inline_table,
             HEADER,
-            || Ok(CardBasicProp::default_header(Theme::default(), state)),
+            || Ok(CardBasicStyle::default_header(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
 
         let body = get_from_itable(
             inline_table,
             BODY,
-            || Ok(CardBasicProp::default_body(Theme::default(), state)),
+            || Ok(CardBasicStyle::default_body(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
 
         let footer = get_from_itable(
             inline_table,
             FOOTER,
-            || Ok(CardBasicProp::default_footer(Theme::default(), state)),
+            || Ok(CardBasicStyle::default_footer(Theme::default(), state)),
             |v| (v, state).try_into(),
         )?;
 
@@ -230,15 +230,15 @@ impl TryFrom<(&Item, CardState)> for CardBasicProp {
     }
 }
 
-impl CardBasicProp {
+impl CardBasicStyle {
     pub fn default_header(theme: Theme, state: CardState) -> CardHeaderProp {
         CardHeaderProp::from_state(theme, state.into())
     }
     pub fn default_footer(theme: Theme, state: CardState) -> CardFooterProp {
         CardFooterProp::from_state(theme, state.into())
     }
-    pub fn default_container(theme: Theme, state: CardState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_container(theme: Theme, state: CardState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_cursor(Default::default());
         container.set_background_visible(true);
         container

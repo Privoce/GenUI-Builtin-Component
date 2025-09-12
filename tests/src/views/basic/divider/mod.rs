@@ -11,7 +11,7 @@ live_design! {
     pub DividerPage = {{DividerPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -21,19 +21,19 @@ live_design! {
                 }
                 <GDivider>{}
                 <GDivider>{
-                    prop: {basic: {theme: Primary}}
+                    style: {basic: {theme: Primary}}
                 }
                 <GDivider>{
-                    prop: {basic: {theme: Info}}
+                    style: {basic: {theme: Info}}
                 }
                 <GDivider>{
-                    prop: {basic: {theme: Success}}
+                    style: {basic: {theme: Success}}
                 }
                 <GDivider>{
-                    prop: {basic: {theme: Warning}}
+                    style: {basic: {theme: Warning}}
                 }
                 <GDivider>{
-                    prop: {basic: {theme: Error}}
+                    style: {basic: {theme: Error}}
                 }
             }
             desc = {

@@ -198,7 +198,7 @@ macro_rules! state_color {
     };
 }
 
-/// ## generate `get` and `get_mut` fn in `Prop` trait
+/// ## generate `get` and `get_mut` fn in `Style` trait
 /// ### usage
 /// ```
 /// get_get_mut!{
@@ -267,7 +267,7 @@ macro_rules! sync {
 /// ## Inherit View Basic Properties
 /// This macro generates a struct that inherits the basic properties of a view.
 /// ### When to use
-/// You may find, sometimes the component prop which use `ViewBasicProp` will change to `ViewBasicProp::default()`
+/// You may find, sometimes the component prop which use `ViewBasicStyle` will change to `ViewBasicStyle::default()`
 /// instead of the right prop value apply from doc after Live reloading application
 /// ### Example
 /// ```
@@ -357,7 +357,7 @@ macro_rules! inherits_view_basic_prop {
             }, format!("[components.{}.$state] should be an inline table", $name)
         }
 
-        impl BasicProp for $struct_name {
+        impl BasicStyle for $struct_name {
             type State = $state;
 
             type Colors = crate::components::ViewColors;
@@ -590,7 +590,7 @@ macro_rules! inherits_view_basic_prop {
 #[macro_export]
 macro_rules! from_inherit_to_view_basic_prop {
     ($struct_name: ident) => {
-        impl From<$struct_name> for ViewBasicProp {
+        impl From<$struct_name> for ViewBasicStyle {
             fn from(value: $struct_name) -> Self {
                 Self {
                     theme: value.theme,
@@ -627,8 +627,8 @@ macro_rules! impl_view_trait_widget_node {
     ($struct_name: ident, $draw: ident) => {
         impl WidgetNode for $struct_name {
             fn walk(&mut self, _cx: &mut Cx) -> Walk {
-                let prop = self.prop.get(self.state);
-                prop.walk()
+                let style = self.style.get(self.state);
+                style.walk()
             }
 
             fn area(&self) -> Area {

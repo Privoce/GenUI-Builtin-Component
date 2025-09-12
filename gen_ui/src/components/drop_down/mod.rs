@@ -16,7 +16,7 @@ live_design! {
     link genui_basic;
 
     pub GDropDownBase = {{GDropDown}} {
-        prop: {
+        style: {
             basic: {
                 height: Fit,
                 width: Fit,

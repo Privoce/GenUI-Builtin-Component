@@ -11,7 +11,7 @@ live_design! {
     pub TagPage = {{TagPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -25,7 +25,7 @@ live_design! {
                     }
                 }
                 <GTag>{
-                    prop: {basic: {
+                    style: {basic: {
                         container: {theme: Primary},
                         icon: { svg: {width: 12.0}},
                         close: { svg: {width: 12.0}},
@@ -36,7 +36,7 @@ live_design! {
                     }
                 }
                 <GTag>{
-                    prop: {basic: {
+                    style: {basic: {
                         container: {theme: Error},
                         icon: { svg: {width: 12.0}},
                         close: { svg: {width: 12.0}},
@@ -47,7 +47,7 @@ live_design! {
                     close: <IconClose> {}
                 }
                 <GTag>{
-                    prop: {basic: {
+                    style: {basic: {
                         container: {theme: Success},
                         icon: { svg: {width: 12.0}},
                         close: { svg: {width: 12.0}},
@@ -59,7 +59,7 @@ live_design! {
                     close: <IconClose> {}
                 }
                 <GTag>{
-                    prop: {basic: {
+                    style: {basic: {
                         container: {theme: Info, border_radius: {left: 6.0, right: 6.0, top: 6.0, bottom: 6.0}},
                         icon: { svg: {width: 12.0}},
                         close: { svg: {width: 12.0}},
@@ -75,7 +75,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -84,7 +84,7 @@ live_design! {
                     }
                 }
                 etag = <GTag>{
-                    prop: {basic: {
+                    style: {basic: {
                         container: {theme: Success},
                         icon: { svg: {width: 12.0}},
                         close: { svg: {width: 12.0}},

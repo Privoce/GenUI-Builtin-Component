@@ -4,8 +4,8 @@ use crate::{
     basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Style},
+        view::{ViewBasicStyle, ViewState},
     },
     error::Error,
     get_get_mut, getter_setter_prop,
@@ -23,22 +23,22 @@ use crate::{
 };
 
 prop_interconvert! {
-    ButtonProp {
-        basic_prop = ButtonBasicProp;
-        basic => BASIC, ButtonBasicProp::default(),|v| (v, ButtonState::Basic).try_into(),
-        hover => HOVER, ButtonBasicProp::from_state(Theme::default(), ButtonState::Hover),|v| (v, ButtonState::Hover).try_into(),
-        pressed => PRESSED, ButtonBasicProp::from_state(Theme::default(), ButtonState::Pressed),|v| (v, ButtonState::Pressed).try_into(),
-        disabled => DISABLED, ButtonBasicProp::from_state(Theme::default(), ButtonState::Disabled),|v| (v, ButtonState::Disabled).try_into()
+    ButtonStyle {
+        basic_prop = ButtonBasicStyle;
+        basic => BASIC, ButtonBasicStyle::default(),|v| (v, ButtonState::Basic).try_into(),
+        hover => HOVER, ButtonBasicStyle::from_state(Theme::default(), ButtonState::Hover),|v| (v, ButtonState::Hover).try_into(),
+        pressed => PRESSED, ButtonBasicStyle::from_state(Theme::default(), ButtonState::Pressed),|v| (v, ButtonState::Pressed).try_into(),
+        disabled => DISABLED, ButtonBasicStyle::from_state(Theme::default(), ButtonState::Disabled),|v| (v, ButtonState::Disabled).try_into()
     }, "[component.button] should be a table"
 }
 
-impl Prop for ButtonProp {
+impl Style for ButtonStyle {
     type State = ButtonState;
 
-    type Basic = ButtonBasicProp;
+    type Basic = ButtonBasicStyle;
 
     fn len() -> usize {
-        ButtonBasicProp::len() * 4 // basic, hover, pressed, disabled
+        ButtonBasicStyle::len() * 4 // basic, hover, pressed, disabled
     }
 
     get_get_mut! {
@@ -65,7 +65,7 @@ impl Prop for ButtonProp {
 }
 
 basic_prop_interconvert! {
-    ButtonBasicProp {
+    ButtonBasicStyle {
         state = ButtonState;
         {
             background_color => BACKGROUND_COLOR, |v| v.try_into(),
@@ -89,12 +89,12 @@ basic_prop_interconvert! {
             spacing: f64 => SPACING, 6.0, |v| v.to_f64(),
             abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v)))
         }
-    }, "ButtonBasicProp should be a inline table"
+    }, "ButtonBasicStyle should be a inline table"
 }
 
-impl From<&ButtonBasicProp> for ViewBasicProp {
-    fn from(value: &ButtonBasicProp) -> Self {
-        let ButtonBasicProp {
+impl From<&ButtonBasicStyle> for ViewBasicStyle {
+    fn from(value: &ButtonBasicStyle) -> Self {
+        let ButtonBasicStyle {
             theme,
             background_color,
             background_visible,
@@ -116,7 +116,7 @@ impl From<&ButtonBasicProp> for ViewBasicProp {
             abs_pos,
         } = *value;
 
-        ViewBasicProp {
+        ViewBasicStyle {
             theme,
             background_color,
             border_color,
@@ -151,7 +151,7 @@ component_colors! {
     }
 }
 
-impl BasicProp for ButtonBasicProp {
+impl BasicStyle for ButtonBasicStyle {
     type State = ButtonState;
 
     type Colors = ButtonColors;
@@ -364,7 +364,7 @@ impl BasicProp for ButtonBasicProp {
     }
 }
 
-impl ButtonBasicProp {
+impl ButtonBasicStyle {
     getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_background_color, set_background_color: background_color -> Vec4,

@@ -9,8 +9,8 @@ use crate::{
     components::{
         lifecycle::LifeCycle,
         menu::event::{SubMenuChanged, SubMenuEvent},
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::{GView, ViewBasicStyle},
     },
     error::Error,
     event_option, getter, lifecycle, play_animation,
@@ -66,7 +66,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GSubMenu {
     #[live]
-    pub prop: SubMenuProp,
+    pub style: SubMenuProp,
     #[live]
     pub header: GView,
     #[live]
@@ -119,12 +119,12 @@ impl Widget for GSubMenu {
         if !self.visible {
             return DrawStep::done();
         }
-        let prop = self.prop.get_mut(self.state);
+        let style = self.style.get_mut(self.state);
         self.fold = self.active.to_f64();
         let body_walk = self.body.walk(cx);
         let header_walk = self.header.walk(cx);
 
-        self.draw_sub_menu.begin(cx, walk, prop.layout());
+        self.draw_sub_menu.begin(cx, walk, style.layout());
 
         if self.draw_state.begin(cx, DrawSubMenuState::DrawHeader) {
             if self.header.visible {
@@ -207,8 +207,8 @@ impl WidgetNode for GSubMenu {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.container.walk()
+        let style = self.style.get(self.state);
+        style.container.walk()
     }
 
     fn area(&self) -> Area {
@@ -249,7 +249,7 @@ impl LiveHook for GSubMenu {
         self.merge_conf_prop(cx);
     }
     fn after_apply(&mut self, _cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        let live_props = ViewBasicProp::live_props();
+        let live_props = ViewBasicStyle::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
@@ -290,14 +290,14 @@ impl Component for GSubMenu {
     type State = SubMenuState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.sub_menu;
-        self.prop = prop.clone();
-        self.header.prop.basic = self.prop.basic.header;
-        self.header.prop.pressed = self.prop.active.header;
-        self.header.prop.disabled = self.prop.disabled.header;
-        self.body.prop.basic = self.prop.basic.body;
-        self.body.prop.pressed = self.prop.active.body;
-        self.body.prop.disabled = self.prop.disabled.body;
+        let style = &cx.global::<Conf>().components.sub_menu;
+        self.style = style.clone();
+        self.header.style.basic = self.style.basic.header;
+        self.header.style.pressed = self.style.active.header;
+        self.header.style.disabled = self.style.disabled.header;
+        self.body.style.basic = self.style.basic.body;
+        self.body.style.pressed = self.style.active.body;
+        self.body.style.disabled = self.style.disabled.body;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
@@ -311,8 +311,8 @@ impl Component for GSubMenu {
             }
         }
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_sub_menu.merge(&prop.container);
+        let style = self.style.get(state);
+        self.draw_sub_menu.merge(&style.container);
         let _ = self.header.render(cx)?;
         let _ = self.body.render(cx)?;
         Ok(())
@@ -322,7 +322,7 @@ impl Component for GSubMenu {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, SubMenuState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -344,7 +344,7 @@ impl Component for GSubMenu {
                 }
             }
             Hit::FingerHoverIn(_meta) => {
-                cx.set_cursor(self.prop.get(self.state).header.cursor);
+                cx.set_cursor(self.style.get(self.state).header.cursor);
                 // self.switch_state_with_animation(cx, SubMenuState::Hover);
                 // self.active_hover_in(cx, meta);
             }
@@ -396,7 +396,7 @@ impl Component for GSubMenu {
         }
 
         // sync state if is not Basic
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -415,9 +415,9 @@ impl Component for GSubMenu {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(SubMenuState::Basic);
-            let active_prop = self.prop.get(SubMenuState::Active);
-            let disabled_prop = self.prop.get(SubMenuState::Disabled);
+            let basic_prop = self.style.get(SubMenuState::Basic);
+            let active_prop = self.style.get(SubMenuState::Active);
+            let disabled_prop = self.style.get(SubMenuState::Disabled);
             let (mut basic_index, mut active_index, mut disabled_index) = (None, None, None);
             if let Some(index) = nodes.child_by_path(
                 self.index,
@@ -491,7 +491,7 @@ impl Component for GSubMenu {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 SubMenuState::Basic => nodes.child_by_path(
                     self.index,
@@ -521,15 +521,15 @@ impl Component for GSubMenu {
             set_animation! {
                 nodes: draw_sub_menu = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }

@@ -4,7 +4,7 @@ use crate::{
     basic_prop_interconvert, component_color, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
+        traits::{BasicStyle, ComponentState, Style},
     },
     error::Error,
     get_get_mut, getter_setter_prop,
@@ -22,18 +22,18 @@ use crate::{
 
 prop_interconvert! {
     LabelProp {
-        basic_prop = LabelBasicProp;
-        basic => BASIC, LabelBasicProp::default(), |v| (v, LabelState::Basic).try_into(),
-        disabled => DISABLED, LabelBasicProp::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
+        basic_prop = LabelBasicStyle;
+        basic => BASIC, LabelBasicStyle::default(), |v| (v, LabelState::Basic).try_into(),
+        disabled => DISABLED, LabelBasicStyle::from_state(Theme::default(), LabelState::Disabled), |v| (v, LabelState::Disabled).try_into()
     }, "[component.label] should be a table"
 }
 
-impl Prop for LabelProp {
+impl Style for LabelProp {
     type State = LabelState;
-    type Basic = LabelBasicProp;
+    type Basic = LabelBasicStyle;
 
     fn len() -> usize {
-        2 * LabelBasicProp::len()
+        2 * LabelBasicStyle::len()
     }
 
     get_get_mut! {
@@ -54,7 +54,7 @@ impl Prop for LabelProp {
 }
 
 basic_prop_interconvert! {
-    LabelBasicProp {
+    LabelBasicStyle {
         state = LabelState;
         {color => COLOR, |v| v.try_into()};
         {
@@ -66,10 +66,10 @@ basic_prop_interconvert! {
             height: Size => HEIGHT, Size::Fit, |v| v.to_size(),
             width: Size => WIDTH, Size::Fit, |v| v.to_size()
         }
-    }, "LabelBasicProp should be a inline table"
+    }, "LabelBasicStyle should be a inline table"
 }
 
-impl LabelBasicProp {
+impl LabelBasicStyle {
     getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_color, set_color: color -> Vec4,
@@ -88,7 +88,7 @@ component_color! {
     }
 }
 
-impl BasicProp for LabelBasicProp {
+impl BasicStyle for LabelBasicStyle {
     type State = LabelState;
     type Colors = LabelColors;
 

@@ -5,8 +5,8 @@ use crate::{
     component_part, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
         ViewColors,
     },
     error::Error,
@@ -23,22 +23,22 @@ use crate::{
 
 prop_interconvert! {
     MenuProp {
-        basic_prop = MenuBasicProp;
-        basic => BASIC, MenuBasicProp::default(), |v| (v, MenuState::Basic).try_into()
+        basic_prop = MenuBasicStyle;
+        basic => BASIC, MenuBasicStyle::default(), |v| (v, MenuState::Basic).try_into()
     }, "[component.menu] should be a table"
 }
 
-impl Prop for MenuProp {
+impl Style for MenuProp {
     type State = MenuState;
 
-    type Basic = MenuBasicProp;
+    type Basic = MenuBasicStyle;
 
     get_get_mut! {
         MenuState::Basic => basic
     }
 
     fn len() -> usize {
-        2 * MenuBasicProp::len()
+        2 * MenuBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -49,7 +49,7 @@ impl Prop for MenuProp {
     }
 }
 
-impl SlotProp for MenuProp {
+impl SlotStyle for MenuProp {
     type Part = MenuPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -69,19 +69,19 @@ impl SlotProp for MenuProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct MenuBasicProp {
-    #[live(MenuBasicProp::default_container(Theme::default(), MenuState::Basic))]
-    pub container: ViewBasicProp,
-    #[live(MenuBasicProp::default_header(Theme::default(), MenuState::Basic))]
-    pub header: ViewBasicProp,
-    #[live(MenuBasicProp::default_body(Theme::default(), MenuState::Basic))]
-    pub body: ViewBasicProp,
-    #[live(MenuBasicProp::default_footer(Theme::default(), MenuState::Basic))]
-    pub footer: ViewBasicProp,
+pub struct MenuBasicStyle {
+    #[live(MenuBasicStyle::default_container(Theme::default(), MenuState::Basic))]
+    pub container: ViewBasicStyle,
+    #[live(MenuBasicStyle::default_header(Theme::default(), MenuState::Basic))]
+    pub header: ViewBasicStyle,
+    #[live(MenuBasicStyle::default_body(Theme::default(), MenuState::Basic))]
+    pub body: ViewBasicStyle,
+    #[live(MenuBasicStyle::default_footer(Theme::default(), MenuState::Basic))]
+    pub footer: ViewBasicStyle,
 }
 
 from_prop_to_toml! {
-    MenuBasicProp {
+    MenuBasicStyle {
         container => CONTAINER,
         header => HEADER,
         body => BODY,
@@ -89,7 +89,7 @@ from_prop_to_toml! {
     }
 }
 
-impl BasicProp for MenuBasicProp {
+impl BasicStyle for MenuBasicStyle {
     type State = MenuState;
 
     type Colors = ViewColors;
@@ -104,11 +104,11 @@ impl BasicProp for MenuBasicProp {
     }
 
     fn state_colors(theme: crate::themes::Theme, state: Self::State) -> Self::Colors {
-        ViewBasicProp::state_colors(theme, state.into())
+        ViewBasicStyle::state_colors(theme, state.into())
     }
 
     fn len() -> usize {
-        3 * ViewBasicProp::len()
+        3 * ViewBasicStyle::len()
     }
 
     fn set_from_str(&mut self, _key: &str, _value: &LiveValue, _state: Self::State) -> () {
@@ -123,10 +123,10 @@ impl BasicProp for MenuBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
-            (live_id!(header), ViewBasicProp::live_props().into()),
-            (live_id!(body), ViewBasicProp::live_props().into()),
-            (live_id!(footer), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
+            (live_id!(header), ViewBasicStyle::live_props().into()),
+            (live_id!(body), ViewBasicStyle::live_props().into()),
+            (live_id!(footer), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -138,7 +138,7 @@ impl BasicProp for MenuBasicProp {
     }
 }
 
-impl SlotBasicProp for MenuBasicProp {
+impl SlotBasicStyle for MenuBasicStyle {
     type Part = MenuPart;
 
     fn set_from_str_slot(
@@ -168,13 +168,13 @@ impl SlotBasicProp for MenuBasicProp {
     }
 }
 
-impl Default for MenuBasicProp {
+impl Default for MenuBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), MenuState::Basic)
     }
 }
 
-impl TryFrom<(&Item, MenuState)> for MenuBasicProp {
+impl TryFrom<(&Item, MenuState)> for MenuBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, MenuState)) -> Result<Self, Self::Error> {
@@ -185,28 +185,28 @@ impl TryFrom<(&Item, MenuState)> for MenuBasicProp {
         let container = get_from_itable(
             inline_table,
             CONTAINER,
-            || Ok(MenuBasicProp::default_container(Theme::default(), state)),
+            || Ok(MenuBasicStyle::default_container(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let header = get_from_itable(
             inline_table,
             HEADER,
-            || Ok(MenuBasicProp::default_header(Theme::default(), state)),
+            || Ok(MenuBasicStyle::default_header(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let body = get_from_itable(
             inline_table,
             BODY,
-            || Ok(MenuBasicProp::default_body(Theme::default(), state)),
+            || Ok(MenuBasicStyle::default_body(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
         let footer = get_from_itable(
             inline_table,
             FOOTER,
-            || Ok(MenuBasicProp::default_footer(Theme::default(), state)),
+            || Ok(MenuBasicStyle::default_footer(Theme::default(), state)),
             |v| (v, ViewState::from(state)).try_into(),
         )?;
 
@@ -219,18 +219,18 @@ impl TryFrom<(&Item, MenuState)> for MenuBasicProp {
     }
 }
 
-impl MenuBasicProp {
-    pub fn default_header(theme: Theme, state: MenuState) -> ViewBasicProp {
+impl MenuBasicStyle {
+    pub fn default_header(theme: Theme, state: MenuState) -> ViewBasicStyle {
         let mut header = Self::default_container(theme, state);
         header.set_height(Size::Fit);
         header.set_width(Size::Fill);
         header
     }
-    pub fn default_footer(theme: Theme, state: MenuState) -> ViewBasicProp {
+    pub fn default_footer(theme: Theme, state: MenuState) -> ViewBasicStyle {
         Self::default_header(theme, state)
     }
-    pub fn default_container(theme: Theme, state: MenuState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+    pub fn default_container(theme: Theme, state: MenuState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_cursor(Default::default());
         container.set_width(Size::Fixed(300.0));
         container.set_height(Size::Fill);
@@ -239,7 +239,7 @@ impl MenuBasicProp {
         container.set_clip_x(true);
         container
     }
-    pub fn default_body(theme: Theme, state: MenuState) -> ViewBasicProp {
+    pub fn default_body(theme: Theme, state: MenuState) -> ViewBasicStyle {
         let mut body = Self::default_container(theme, state);
         body.set_height(Size::Fill);
         body.set_width(Size::Fill);

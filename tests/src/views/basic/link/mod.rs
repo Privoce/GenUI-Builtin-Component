@@ -11,7 +11,7 @@ live_design! {
     pub LinkPage = {{LinkPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -23,7 +23,7 @@ live_design! {
                     text: "Basic Link"
                 }
                 <GLink>{
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Primary,
                                 background_visible: true,
@@ -35,7 +35,7 @@ live_design! {
                         text: "Link with background",
                     }
                 <GLink>{
-                    prop: {
+                    style: {
                         basic: {
                             theme: Warning,
                             background_visible: true,
@@ -47,7 +47,7 @@ live_design! {
                     mode: Bold
                 }
                 <GLink>{
-                    prop: {
+                    style: {
                         basic: {
                             theme: Info,
                             underline_width: 2.0
@@ -57,7 +57,7 @@ live_design! {
                     mode: Bold
                 }
                 <GLink> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Error,
                             underline_visible: false,

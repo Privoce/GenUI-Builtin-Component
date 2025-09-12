@@ -1,4 +1,4 @@
-use crate::{components::ViewBasicProp, prop::traits::ToFloat};
+use crate::{components::ViewBasicStyle, prop::traits::ToFloat};
 use makepad_widgets::*;
 
 live_design! {
@@ -139,7 +139,7 @@ pub struct DrawView {
 }
 
 impl DrawView {
-    pub fn merge(&mut self, prop: &ViewBasicProp) {
+    pub fn merge(&mut self, prop: &ViewBasicStyle) {
         self.background_color = prop.background_color;
         self.border_color = prop.border_color;
         self.border_width = prop.border_width;

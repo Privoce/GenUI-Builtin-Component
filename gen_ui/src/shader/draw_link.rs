@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::{components::LinkBasicProp, prop::traits::ToFloat, shader::draw_view::DrawView};
+use crate::{components::LinkBasicStyle, prop::traits::ToFloat, shader::draw_view::DrawView};
 
 live_design! {
     use link::shaders::*;
@@ -104,7 +104,7 @@ pub struct DrawLink {
 }
 
 impl DrawLink {
-    pub fn merge(&mut self, other: &LinkBasicProp) {
+    pub fn merge(&mut self, other: &LinkBasicStyle) {
         self.underline_color = other.underline_color;
         self.underline_visible = other.underline_visible.to_f32();
         self.underline_width = other.underline_width;

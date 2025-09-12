@@ -11,7 +11,7 @@ live_design! {
     pub CheckboxPage = {{CheckboxPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -26,7 +26,7 @@ live_design! {
                     }
                 }
                 <GCheckbox> {
-                    prop: {
+                    style: {
                         basic: {
                             checkbox: {
                                 theme: Warning,
@@ -42,7 +42,7 @@ live_design! {
                 }
                     
                 <GCheckbox> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 background_visible: true,
@@ -66,7 +66,7 @@ live_design! {
                     }
                 }
                 <GCheckbox> {
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 background_visible: true,
@@ -88,7 +88,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -97,7 +97,7 @@ live_design! {
                 }
                 <GCheckboxGroup>{
                         active: ["1", "2"],
-                        prop: {
+                        style: {
                             basic: {
                                 width: 400.0,
                                 flow: Down,
@@ -105,7 +105,7 @@ live_design! {
                             }
                         }
                         <GCheckbox>{
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         width: Fill,
@@ -129,7 +129,7 @@ live_design! {
                             }
                         }
                         <GCheckbox>{
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         width: Fill,
@@ -153,7 +153,7 @@ live_design! {
                             }
                         }
                         <GCheckbox>{
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         width: Fill,
@@ -177,7 +177,7 @@ live_design! {
                             }
                         }
                         <GCheckbox>{
-                            prop: {
+                            style: {
                                 basic: {
                                     container: {
                                         width: Fill,

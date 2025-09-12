@@ -4,7 +4,7 @@ use crate::{
     component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
+        traits::{BasicStyle, ComponentState, Style},
     },
     error::Error,
     get_get_mut, getter_setter_prop, inherits_view_basic_prop,
@@ -24,18 +24,18 @@ use crate::{
 };
 
 prop_interconvert! {
-    ViewProp {
-        basic_prop = ViewBasicProp;
-        basic => BASIC, ViewBasicProp::default(),|v| (v, ViewState::Basic).try_into(),
-        hover => HOVER, ViewBasicProp::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),
-        pressed => PRESSED, ViewBasicProp::from_state(Theme::default(), ViewState::Pressed), |v| (v, ViewState::Pressed).try_into(),
-        disabled => DISABLED, ViewBasicProp::from_state(Theme::default(), ViewState::Disabled), |v| (v, ViewState::Disabled).try_into()
+    ViewStyle {
+        basic_prop = ViewBasicStyle;
+        basic => BASIC, ViewBasicStyle::default(),|v| (v, ViewState::Basic).try_into(),
+        hover => HOVER, ViewBasicStyle::from_state(Theme::default(), ViewState::Hover), |v| (v, ViewState::Hover).try_into(),
+        pressed => PRESSED, ViewBasicStyle::from_state(Theme::default(), ViewState::Pressed), |v| (v, ViewState::Pressed).try_into(),
+        disabled => DISABLED, ViewBasicStyle::from_state(Theme::default(), ViewState::Disabled), |v| (v, ViewState::Disabled).try_into()
     }, "[component.view] should be a table"
 }
 
-impl Prop for ViewProp {
+impl Style for ViewStyle {
     type State = ViewState;
-    type Basic = ViewBasicProp;
+    type Basic = ViewBasicStyle;
 
     get_get_mut! {
         ViewState::Basic => basic,
@@ -45,7 +45,7 @@ impl Prop for ViewProp {
     }
 
     fn len() -> usize {
-        ViewBasicProp::len() * 3
+        ViewBasicStyle::len() * 3
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -72,7 +72,7 @@ component_colors! {
 }
 
 inherits_view_basic_prop! {
-    ViewBasicProp {
+    ViewBasicStyle {
         border_width: 0.0,
         border_radius: Radius::new(4.0),
         spread_radius: 0.0,
@@ -101,7 +101,7 @@ inherits_view_basic_prop! {
     }
 }
 
-impl ViewBasicProp {
+impl ViewBasicStyle {
     getter_setter_prop! {
         get_theme, set_theme: theme -> Theme,
         get_background_color, set_background_color: background_color -> Vec4,

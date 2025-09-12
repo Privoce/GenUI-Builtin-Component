@@ -16,8 +16,8 @@ use crate::{
     active_event, area, area_ref,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::{GView, ViewBasicStyle},
     },
     error::Error,
     event_option, event_option_ref, getter_setter_ref, lifecycle,
@@ -42,7 +42,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GMenu {
     #[live]
-    pub prop: MenuProp,
+    pub style: MenuProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -111,8 +111,8 @@ impl WidgetNode for GMenu {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -151,7 +151,7 @@ impl Widget for GMenu {
         }
 
         let state = self.state;
-        let prop = self.prop.get(state);
+        let style = self.style.get(state);
 
         let _ = self.draw_menu.begin(
             cx,
@@ -159,10 +159,10 @@ impl Widget for GMenu {
             Layout {
                 clip_x: false,
                 clip_y: false,
-                padding: prop.container.padding,
-                align: prop.container.align,
-                flow: prop.container.flow,
-                spacing: prop.container.spacing,
+                padding: style.container.padding,
+                align: style.container.align,
+                flow: style.container.flow,
+                spacing: style.container.spacing,
                 ..Default::default()
             },
         );
@@ -245,7 +245,7 @@ impl LiveHook for GMenu {
     }
 
     fn after_apply(&mut self, cx: &mut Cx, _apply: &mut Apply, index: usize, nodes: &[LiveNode]) {
-        let live_props = ViewBasicProp::live_props();
+        let live_props = ViewBasicStyle::live_props();
         self.set_apply_slot_map(
             nodes,
             index,
@@ -279,17 +279,17 @@ impl Component for GMenu {
     type State = MenuState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.menu;
-        self.prop = prop.clone();
-        self.header.prop.basic = self.prop.basic.header;
-        self.body.prop.basic = self.prop.basic.body;
-        self.footer.prop.basic = self.prop.basic.footer;
+        let style = &cx.global::<Conf>().components.menu;
+        self.style = style.clone();
+        self.header.style.basic = self.style.basic.header;
+        self.body.style.basic = self.style.basic.body;
+        self.footer.style.basic = self.style.basic.footer;
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_menu.merge(&prop.container);
+        let style = self.style.get(state);
+        self.draw_menu.merge(&style.container);
         Ok(())
     }
 
@@ -323,7 +323,7 @@ impl Component for GMenu {
         }
 
         // sync state if is not Basic
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, _cx: &mut Cx) -> () {

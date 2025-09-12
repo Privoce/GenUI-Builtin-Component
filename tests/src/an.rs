@@ -15,7 +15,7 @@ live_design! {
             Post = <CachedView>{
                 flow: Down,
                 <GButton>{
-                    prop: {
+                    style: {
                         basic: {
                             border_width: 2.0,
                             border_color: #ff0,

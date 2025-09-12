@@ -11,7 +11,7 @@ live_design! {
     pub TabbarPage = {{TabbarPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -20,7 +20,7 @@ live_design! {
                     }
                 }
                     <GTabbarItem> {
-                        prop: {basic: {container: {height: Fit, width: Fit}}}
+                        style: {basic: {container: {height: Fit, width: Fit}}}
                         icon: <GSvg> {
                             src: dep("crate://self/resources/wind.svg"),
                         }
@@ -73,7 +73,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,

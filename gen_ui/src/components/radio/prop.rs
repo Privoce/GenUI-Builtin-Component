@@ -1,10 +1,10 @@
 use crate::{
     basic_prop_interconvert, component_colors, component_part, component_state,
     components::{
-        label::{LabelBasicProp, LabelState},
+        label::{LabelBasicStyle, LabelState},
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
-        view::{ViewBasicProp, ViewState},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
+        view::{ViewBasicStyle, ViewState},
     },
     error::Error,
     from_prop_to_toml, get_get_mut,
@@ -26,15 +26,15 @@ use toml_edit::Item;
 
 prop_interconvert! {
     RadioProp {
-        basic_prop = RadioBasicProp;
-        basic => BASIC, RadioBasicProp::default(),|v| (v, RadioState::Basic).try_into(),
-        hover => HOVER, RadioBasicProp::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),
-        active => ACTIVE, RadioBasicProp::from_state(Theme::default(), RadioState::Active),|v| (v, RadioState::Active).try_into(),
-        disabled => DISABLED, RadioBasicProp::from_state(Theme::default(), RadioState::Disabled),|v| (v, RadioState::Disabled).try_into()
+        basic_prop = RadioBasicStyle;
+        basic => BASIC, RadioBasicStyle::default(),|v| (v, RadioState::Basic).try_into(),
+        hover => HOVER, RadioBasicStyle::from_state(Theme::default(), RadioState::Hover),|v| (v, RadioState::Hover).try_into(),
+        active => ACTIVE, RadioBasicStyle::from_state(Theme::default(), RadioState::Active),|v| (v, RadioState::Active).try_into(),
+        disabled => DISABLED, RadioBasicStyle::from_state(Theme::default(), RadioState::Disabled),|v| (v, RadioState::Disabled).try_into()
     }, "[component.radio] should be a table"
 }
 
-impl SlotProp for RadioProp {
+impl SlotStyle for RadioProp {
     type Part = RadioPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -51,10 +51,10 @@ impl SlotProp for RadioProp {
     }
 }
 
-impl Prop for RadioProp {
+impl Style for RadioProp {
     type State = RadioState;
 
-    type Basic = RadioBasicProp;
+    type Basic = RadioBasicStyle;
 
     get_get_mut! {
         RadioState::Basic => basic,
@@ -64,7 +64,7 @@ impl Prop for RadioProp {
     }
 
     fn len() -> usize {
-        4 * RadioBasicProp::len()
+        4 * RadioBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -77,30 +77,30 @@ impl Prop for RadioProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct RadioBasicProp {
+pub struct RadioBasicStyle {
     #[live(Self::default_container(Theme::default(), RadioState::Basic))]
-    pub container: ViewBasicProp,
+    pub container: ViewBasicStyle,
     #[live(Self::default_radio(Theme::default(), RadioState::Basic))]
     pub radio: RadioPartProp,
     #[live(Self::default_extra(Theme::default(), RadioState::Basic))]
-    pub extra: ViewBasicProp,
+    pub extra: ViewBasicStyle,
 }
 
-impl Default for RadioBasicProp {
+impl Default for RadioBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), RadioState::Basic)
     }
 }
 
 from_prop_to_toml! {
-    RadioBasicProp {
+    RadioBasicStyle {
         container => CONTAINER,
         radio => RADIO,
         extra => EXTRA
     }
 }
 
-impl SlotBasicProp for RadioBasicProp {
+impl SlotBasicStyle for RadioBasicStyle {
     type Part = RadioPart;
 
     fn set_from_str_slot(
@@ -128,7 +128,7 @@ impl SlotBasicProp for RadioBasicProp {
     }
 }
 
-impl BasicProp for RadioBasicProp {
+impl BasicStyle for RadioBasicStyle {
     type State = RadioState;
 
     type Colors = RadioColors;
@@ -146,7 +146,7 @@ impl BasicProp for RadioBasicProp {
     }
 
     fn len() -> usize {
-        RadioPartProp::len() + ViewBasicProp::len() + LabelBasicProp::len()
+        RadioPartProp::len() + ViewBasicStyle::len() + LabelBasicStyle::len()
     }
 
     fn set_from_str(
@@ -166,9 +166,9 @@ impl BasicProp for RadioBasicProp {
 
     fn live_props() -> LiveProps {
         vec![
-            (live_id!(container), ViewBasicProp::live_props().into()),
+            (live_id!(container), ViewBasicStyle::live_props().into()),
             (live_id!(radio), RadioPartProp::live_props().into()),
-            (live_id!(extra), ViewBasicProp::live_props().into()),
+            (live_id!(extra), ViewBasicStyle::live_props().into()),
         ]
     }
 
@@ -180,7 +180,7 @@ impl BasicProp for RadioBasicProp {
     }
 }
 
-impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
+impl TryFrom<(&Item, RadioState)> for RadioBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, RadioState)) -> Result<Self, Self::Error> {
@@ -214,9 +214,9 @@ impl TryFrom<(&Item, RadioState)> for RadioBasicProp {
     }
 }
 
-impl RadioBasicProp {
-    pub fn default_container(theme: Theme, state: RadioState) -> ViewBasicProp {
-        let mut container = ViewBasicProp::from_state(theme, state.into());
+impl RadioBasicStyle {
+    pub fn default_container(theme: Theme, state: RadioState) -> ViewBasicStyle {
+        let mut container = ViewBasicStyle::from_state(theme, state.into());
         container.set_height(Size::Fit);
         container.set_width(Size::Fit);
         container.set_flow(Flow::Right);
@@ -225,7 +225,7 @@ impl RadioBasicProp {
         container.set_cursor(MouseCursor::Hand);
         container
     }
-    pub fn default_extra(theme: Theme, state: RadioState) -> ViewBasicProp {
+    pub fn default_extra(theme: Theme, state: RadioState) -> ViewBasicStyle {
         let mut extra = Self::default_container(theme, state);
         extra.set_padding(Padding::from_f64(0.0));
         extra
@@ -263,7 +263,7 @@ component_colors! {
     }
 }
 
-impl BasicProp for RadioPartProp {
+impl BasicStyle for RadioPartProp {
     type State = RadioState;
     /// (background_color, stroke_color, border_color)
     type Colors = RadioColors;

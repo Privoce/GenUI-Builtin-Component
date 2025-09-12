@@ -12,7 +12,7 @@ use std::cell::RefCell;
 use crate::{
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, PopupComponent, Prop},
+        traits::{BasicStyle, PopupComponent, Style},
         view::DrawState,
     },
     error::Error,
@@ -32,7 +32,7 @@ live_design! {
 #[derive(Live, LiveRegister)]
 pub struct GPopup {
     #[live]
-    pub prop: PopupProp,
+    pub style: PopupProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -123,7 +123,7 @@ impl LiveHook for GPopup {
         self.set_apply_state_map(
             nodes,
             index,
-            &PopupBasicProp::live_props(),
+            &PopupBasicStyle::live_props(),
             [live_id!(basic)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -185,13 +185,13 @@ impl PopupComponent for GPopup {
     type Error = Error;
     type State = PopupState;
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.popup;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.popup;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.current_state());
-        self.draw_popup.merge(&(*prop).into());
+        let style = self.style.get(self.current_state());
+        self.draw_popup.merge(&(*style).into());
         Ok(())
     }
 
@@ -203,7 +203,7 @@ impl PopupComponent for GPopup {
         if !self.sync {
             return;
         }
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn current_state(&self) -> Self::State {
@@ -331,7 +331,7 @@ impl GPopup {
         }
     }
     pub fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Option<Walk>) {
-        let prop = self.prop.get(self.current_state());
+        let style = self.style.get(self.current_state());
 
         // the beginning state
         if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
@@ -348,9 +348,9 @@ impl GPopup {
                 self.scroll
             };
 
-            let layout = prop.layout().with_scroll(scroll);
-            let walk = walk.unwrap_or(prop.walk());
-            if prop.background_visible {
+            let layout = style.layout().with_scroll(scroll);
+            let walk = walk.unwrap_or(style.walk());
+            if style.background_visible {
                 self.draw_popup.begin(cx, walk, layout);
             } else {
                 cx.begin_turtle(walk, layout);
@@ -393,7 +393,7 @@ impl GPopup {
                     scroll_bars.draw_scroll_bars(cx);
                 };
 
-                if prop.background_visible {
+                if style.background_visible {
                     self.draw_popup.end(cx);
                     self.area = self.draw_popup.area();
                 } else {

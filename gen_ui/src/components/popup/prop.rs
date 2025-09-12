@@ -4,8 +4,8 @@ use crate::{
     basic_prop_interconvert, component_colors, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
-        view::ViewBasicProp,
+        traits::{BasicStyle, ComponentState, Style},
+        view::ViewBasicStyle,
     },
     error::Error,
     from_inherit_to_view_basic_prop,
@@ -24,15 +24,15 @@ use crate::{
 
 prop_interconvert! {
     PopupProp {
-        basic_prop = PopupBasicProp;
-        basic => BASIC, PopupBasicProp::default(),|v| (v, PopupState::Basic).try_into()
+        basic_prop = PopupBasicStyle;
+        basic => BASIC, PopupBasicStyle::default(),|v| (v, PopupState::Basic).try_into()
     }, "[component.popup] should be a table"
 }
 
-impl Prop for PopupProp {
+impl Style for PopupProp {
     type State = PopupState;
 
-    type Basic = PopupBasicProp;
+    type Basic = PopupBasicStyle;
 
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
@@ -47,7 +47,7 @@ impl Prop for PopupProp {
     }
 
     fn len() -> usize {
-        PopupBasicProp::len()
+        PopupBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -58,59 +58,8 @@ impl Prop for PopupProp {
     }
 }
 
-// #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
-// #[live_ignore]
-// pub struct PopupBasicProp {
-//     #[live]
-//     pub theme: Theme,
-//     #[live]
-//     pub background_color: Vec4,
-//     #[live]
-//     pub border_color: Vec4,
-//     #[live(0.0)]
-//     pub border_width: f32,
-//     #[live(Radius::new(8.0))]
-//     pub border_radius: Radius,
-//     #[live]
-//     pub shadow_color: Vec4,
-//     #[live(0.0)]
-//     pub spread_radius: f32,
-//     #[live(0.0)]
-//     pub blur_radius: f32,
-//     #[live(vec2(0.0, 0.0))]
-//     pub shadow_offset: Vec2,
-//     #[live(true)]
-//     pub background_visible: bool,
-//     #[live(0.0)]
-//     pub rotation: f32,
-//     #[live(1.0)]
-//     pub scale: f32,
-//     #[live(Padding::from_f64(12.0))]
-//     pub padding: Padding,
-//     #[live(Margin::from_f64(0.0))]
-//     pub margin: Margin,
-//     #[live(false)]
-//     pub clip_x: bool,
-//     #[live(false)]
-//     pub clip_y: bool,
-//     #[live(Align::default())]
-//     pub align: Align,
-//     #[live(MouseCursor::default())]
-//     pub cursor: MouseCursor,
-//     #[live(Flow::Down)]
-//     pub flow: Flow,
-//     #[live(6.0)]
-//     pub spacing: f64,
-//     #[live(Size::Fill)]
-//     pub height: Size,
-//     #[live(Size::Fill)]
-//     pub width: Size,
-//     #[live(None)]
-//     pub abs_pos: Option<DVec2>,
-// }
-
 basic_prop_interconvert! {
-    PopupBasicProp {
+    PopupBasicStyle {
         state = PopupState;
         {
             background_color => BACKGROUND_COLOR, |v| v.try_into(),
@@ -138,7 +87,7 @@ basic_prop_interconvert! {
             width: Size => WIDTH, Size::Fill, |v| v.to_size(),
             abs_pos: AbsPos => ABS_POS, None, |v| Ok(v.to_dvec2().map_or(None, |v| Some(v)))
         }
-    }, "PopupBasicProp should be a inline table"
+    }, "PopupBasicStyle should be a inline table"
 }
 
 component_colors! {
@@ -148,7 +97,7 @@ component_colors! {
     }
 }
 
-impl BasicProp for PopupBasicProp {
+impl BasicStyle for PopupBasicStyle {
     type State = PopupState;
 
     type Colors = PopupColors;
@@ -377,7 +326,7 @@ impl BasicProp for PopupBasicProp {
     }
 }
 
-from_inherit_to_view_basic_prop!(PopupBasicProp);
+from_inherit_to_view_basic_prop!(PopupBasicStyle);
 
 component_state! {
     PopupState {

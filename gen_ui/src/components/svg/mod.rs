@@ -10,8 +10,8 @@ use crate::{
     active_event, animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::ViewBasicProp,
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::ViewBasicStyle,
     },
     error::Error,
     event_option, event_option_ref, hit_finger_down, hit_finger_up, hit_hover_in, hit_hover_out,
@@ -88,7 +88,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GSvg {
     #[live]
-    pub prop: SvgProp,
+    pub style: SvgStyle,
     #[live]
     pub src: LiveDependency,
     // --- visible -------------------
@@ -148,11 +148,11 @@ impl Widget for GSvg {
         if !self.visible {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.state);
-        // dbg!(prop.svg,walk);
+        let style = self.style.get(self.state);
+        // dbg!(style.svg,walk);
         self.draw_svg_container
-            .begin(cx, walk, prop.container.layout());
-        self.draw_svg.draw_walk(cx, prop.svg.walk());
+            .begin(cx, walk, style.container.layout());
+        self.draw_svg.draw_walk(cx, style.svg.walk());
         self.draw_svg_container.end(cx);
         self.set_scope_path(&scope.path);
         DrawStep::done()
@@ -169,8 +169,8 @@ impl WidgetNode for GSvg {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -212,7 +212,7 @@ impl LiveHook for GSvg {
                 live_id!(disabled),
             ],
             [
-                (SvgPart::Container, &ViewBasicProp::live_props()),
+                (SvgPart::Container, &ViewBasicStyle::live_props()),
                 (SvgPart::Svg, &SvgPartProp::live_props()),
             ],
             |_| {},
@@ -245,17 +245,17 @@ impl Component for GSvg {
     type State = SvgState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.svg;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.svg;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         if self.disabled {
             self.switch_state(SvgState::Disabled);
         }
-        let prop = self.prop.get(self.state);
-        self.draw_svg_container.merge(&prop.container.into());
-        self.draw_svg.merge(&prop.svg);
+        let style = self.style.get(self.state);
+        self.draw_svg_container.merge(&style.container.into());
+        self.draw_svg.merge(&style.svg);
         if self.draw_svg.svg_file.as_str() != self.src.as_str() {
             self.draw_svg.svg_file = self.src.clone();
         }
@@ -272,7 +272,7 @@ impl Component for GSvg {
             }
             Hit::FingerHoverIn(e) => {
                 self.switch_state_with_animation(cx, SvgState::Hover);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
                 hit_hover_in!(self, cx, e);
             }
             Hit::FingerHoverOut(e) => {
@@ -302,7 +302,7 @@ impl Component for GSvg {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, SvgState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -322,7 +322,7 @@ impl Component for GSvg {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -343,10 +343,10 @@ impl Component for GSvg {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(SvgState::Basic);
-            let hover_prop = self.prop.get(SvgState::Hover);
-            let pressed_prop = self.prop.get(SvgState::Pressed);
-            let disabled_prop = self.prop.get(SvgState::Disabled);
+            let basic_prop = self.style.get(SvgState::Basic);
+            let hover_prop = self.style.get(SvgState::Hover);
+            let pressed_prop = self.style.get(SvgState::Pressed);
+            let disabled_prop = self.style.get(SvgState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -459,7 +459,7 @@ impl Component for GSvg {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 SvgState::Basic => nodes.child_by_path(
                     self.index,
@@ -497,22 +497,22 @@ impl Component for GSvg {
             set_animation! {
                 nodes: draw_svg = {
                     index => {
-                        color => prop.svg.color
+                        color => style.svg.color
                     }
                 }
             }
             set_animation! {
                 nodes: draw_svg_container = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }

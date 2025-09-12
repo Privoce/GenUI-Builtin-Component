@@ -11,7 +11,7 @@ live_design! {
     pub CardPage = {{CardPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -19,7 +19,7 @@ live_design! {
                     }
                 }
                 <GCard>{
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 width: 360.0,
@@ -30,7 +30,7 @@ live_design! {
                     }
                     header: <GView>{
                         <GLabel> {
-                            prop: {
+                            style: {
                                 basic: {
                                     font_size: 22.0,
                                     color: #000
@@ -41,7 +41,7 @@ live_design! {
                     },
                     body: <GView>{
                         <GLabel> {
-                            prop: {
+                            style: {
                                 basic: {
                                     color: #4D4256
                                 }
@@ -50,7 +50,7 @@ live_design! {
                         }
                     },
                     footer: <GView>{
-                        prop: {
+                        style: {
                             basic: {
                                 align: {
                                     y: 0.5, x: 1.0
@@ -58,7 +58,7 @@ live_design! {
                             }
                         }
                         <GButton> {
-                                prop: {
+                                style: {
                                     basic: {
                                         theme: Primary,
                                         border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0}
@@ -71,7 +71,7 @@ live_design! {
                     }
                 }
                 <GCard>{
-                    prop: {
+                    style: {
                         basic: {
                             container: {
                                 width: 360.0,
@@ -81,7 +81,7 @@ live_design! {
                     }
                     header: <GView>{
                         <GLabel> {
-                            prop: {
+                            style: {
                                 basic: {
                                     font_size: 16.0
                                 }
@@ -93,7 +93,7 @@ live_design! {
                     body: <GView>{
                         <GImage> {
                             src: Live(dep("crate://self/resources/cat.jpg")),
-                            prop: {
+                            style: {
                                 basic: {
                                     height: Fill,
                                     width: Fill,
@@ -102,7 +102,7 @@ live_design! {
                         }
                     }
                     footer: <GView>{
-                        prop: {
+                        style: {
                             basic: {
                                 align: {
                                     y: 0.5
@@ -113,7 +113,7 @@ live_design! {
                             text: "Star: 12k"
                         }
                         <GView> {
-                            prop: {
+                            style: {
                                 basic: {
                                     height: Fit,
                                     align: {
@@ -123,7 +123,7 @@ live_design! {
                                 }
                             }
                             <GButton> {
-                                prop: {
+                                style: {
                                     basic: {
                                         theme: Primary,
                                     }
@@ -143,7 +143,7 @@ live_design! {
         // --------------------- others -------------------------------------------------------------
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,

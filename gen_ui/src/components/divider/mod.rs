@@ -6,7 +6,7 @@ pub use prop::*;
 use crate::{
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop},
+        traits::{BasicStyle, Component, Style},
     }, error::Error, lifecycle, prop::{manuel::BASIC, ApplyStateMap}, pure_after_apply, set_index, set_scope_path, shader::draw_view::DrawView, sync, themes::conf::Conf, visible
 };
 
@@ -18,7 +18,7 @@ live_design! {
 #[derive(Live, WidgetRef, WidgetSet, LiveRegisterWidget)]
 pub struct GDivider {
     #[live]
-    pub prop: DividerProp,
+    pub style: DividerProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -45,8 +45,8 @@ impl Widget for GDivider {
         if !self.visible {
             return DrawStep::done();
         }
-        let prop = self.prop.get(self.state);
-        self.draw_divider.begin(cx, walk, prop.layout());
+        let style = self.style.get(self.state);
+        self.draw_divider.begin(cx, walk, style.layout());
         self.draw_divider.end(cx);
         self.set_scope_path(&scope.path);
         DrawStep::done()
@@ -63,8 +63,8 @@ impl WidgetNode for GDivider {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -95,7 +95,7 @@ impl LiveHook for GDivider {
         self.set_apply_state_map(
             nodes,
             index,
-            &DividerBasicProp::live_props(),
+            &DividerBasicStyle::live_props(),
             [live_id!(basic)],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -116,13 +116,13 @@ impl Component for GDivider {
     type State = DividerState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.divider;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.divider;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
-        let prop = self.prop.get(self.state);
-        self.draw_divider.merge(&prop.into());
+        let style = self.style.get(self.state);
+        self.draw_divider.merge(&style.into());
         Ok(())
     }
 
@@ -140,7 +140,7 @@ impl Component for GDivider {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, _cx: &mut Cx) -> () {

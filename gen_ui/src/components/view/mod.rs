@@ -11,7 +11,7 @@ use crate::{
     active_event, animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Prop},
+        traits::{BasicStyle, Style},
     },
     error::Error,
     event_option, event_option_ref, getter, getter_setter_ref, hit_finger_down, hit_finger_up,
@@ -83,7 +83,7 @@ live_design! {
 pub struct GView {
     // --- prop -------------------
     #[live]
-    pub prop: ViewProp,
+    pub style: ViewStyle,
     // --- other props ------------
     #[live(true)]
     pub visible: bool,
@@ -205,7 +205,7 @@ impl LiveHook for GView {
         self.set_apply_state_map(
             nodes,
             index,
-            &ViewBasicProp::live_props(),
+            &ViewBasicStyle::live_props(),
             [
                 live_id!(basic),
                 live_id!(hover),
@@ -281,8 +281,8 @@ impl LiveHook for GView {
 
 impl WidgetNode for GView {
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.walk()
+        let style = self.style.get(self.state);
+        style.walk()
     }
 
     fn area(&self) -> Area {
@@ -371,7 +371,7 @@ impl WidgetNode for GView {
 
 impl Widget for GView {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
-        let prop = self.prop.get(self.state);
+        let style = self.style.get(self.state);
         // the beginning state
         if self.draw_state.begin(cx, DrawState::Drawing(0, false)) {
             if !self.visible {
@@ -454,9 +454,9 @@ impl Widget for GView {
                 self.scroll
             };
 
-            let layout = prop.layout().with_scroll(scroll);
+            let layout = style.layout().with_scroll(scroll);
 
-            if prop.background_visible {
+            if style.background_visible {
                 self.draw_view.begin(cx, walk, layout);
             } else {
                 cx.begin_turtle(walk, layout);
@@ -500,7 +500,7 @@ impl Widget for GView {
                     scroll_bars.draw_scroll_bars(cx);
                 };
 
-                if prop.background_visible {
+                if style.background_visible {
                     if is_texture(self.optimize) {
                         panic!("dont use show_bg and texture caching at the same time");
                     }
@@ -702,14 +702,14 @@ impl Component for GView {
     type State = ViewState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.view;
-        self.prop = prop.clone();
+        let style = &cx.global::<Conf>().components.view;
+        self.style = style.clone();
     }
 
     fn render(&mut self, _cx: &mut Cx) -> Result<(), Self::Error> {
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_view.merge(prop);
+        let style = self.style.get(state);
+        self.draw_view.merge(style);
         if self.disabled {
             self.switch_state(ViewState::Disabled);
         }
@@ -746,7 +746,7 @@ impl Component for GView {
                 }
             }
             Hit::FingerHoverIn(e) => {
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
                 self.switch_state_with_animation(cx, ViewState::Hover);
                 hit_hover_in!(self, cx, e);
             }
@@ -755,7 +755,7 @@ impl Component for GView {
                 hit_hover_out!(self, cx, e);
             }
             Hit::FingerHoverOver(e) => {
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
                 self.switch_state_with_animation(cx, ViewState::Hover);
                 self.play_animation(cx, id!(hover.on));
                 self.active_hover_over(cx, e);
@@ -776,7 +776,7 @@ impl Component for GView {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, ViewState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).cursor);
+                cx.set_cursor(self.style.get(self.state).cursor);
             }
             _ => {}
         }
@@ -795,7 +795,7 @@ impl Component for GView {
     }
 
     fn focus_sync(&mut self) -> () {
-        self.prop.sync(&self.apply_state_map);
+        self.style.sync(&self.apply_state_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -816,10 +816,10 @@ impl Component for GView {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(ViewState::Basic);
-            let hover_prop = self.prop.get(ViewState::Hover);
-            let pressed_prop = self.prop.get(ViewState::Pressed);
-            let disabled_prop = self.prop.get(ViewState::Disabled);
+            let basic_prop = self.style.get(ViewState::Basic);
+            let hover_prop = self.style.get(ViewState::Hover);
+            let pressed_prop = self.style.get(ViewState::Pressed);
+            let disabled_prop = self.style.get(ViewState::Disabled);
             let (mut basic_index, mut hover_index, mut pressed_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -916,7 +916,7 @@ impl Component for GView {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 ViewState::Basic => nodes.child_by_path(
                     self.index,
@@ -954,15 +954,15 @@ impl Component for GView {
             set_animation! {
                 nodes: draw_view = {
                     index => {
-                        background_color => prop.background_color,
-                        border_color => prop.border_color,
-                        border_radius => prop.border_radius,
-                        border_width => (prop.border_width as f64),
-                        shadow_color => prop.shadow_color,
-                        spread_radius => (prop.spread_radius as f64),
-                        blur_radius => (prop.blur_radius as f64),
-                        shadow_offset => prop.shadow_offset,
-                        background_visible => prop.background_visible.to_f64()
+                        background_color => style.background_color,
+                        border_color => style.border_color,
+                        border_radius => style.border_radius,
+                        border_width => (style.border_width as f64),
+                        shadow_color => style.shadow_color,
+                        spread_radius => (style.spread_radius as f64),
+                        blur_radius => (style.blur_radius as f64),
+                        shadow_offset => style.shadow_offset,
+                        background_visible => style.background_visible.to_f64()
                     }
                 }
             }
@@ -1022,28 +1022,28 @@ impl GView {
 
     getter! {
         GView {
-            get_theme(Theme) {|c| {c.prop.basic.get_theme()}},
-            get_background_color(String) {|c| {c.prop.basic.get_background_color().to_hex_string()}},
-            get_border_color(String) {|c| {c.prop.basic.get_border_color().to_hex_string()}},
-            get_border_radius(Radius) {|c| {c.prop.basic.get_border_radius()}},
-            get_border_width(f32) {|c| {c.prop.basic.get_border_width()}},
-            get_shadow_color(String) {|c| {c.prop.basic.get_shadow_color().to_hex_string()}},
-            get_spread_radius(f32) {|c| {c.prop.basic.get_spread_radius()}},
-            get_blur_radius(f32) {|c| {c.prop.basic.get_blur_radius()}},
-            get_shadow_offset(Vec2) {|c| {c.prop.basic.get_shadow_offset()}},
-            get_background_visible(bool) {|c| {c.prop.basic.get_background_visible()}},
-            get_rotation(f32) {|c| {c.prop.basic.get_rotation()}},
-            get_scale(f32) {|c| {c.prop.basic.get_scale()}},
-            get_align(Align) {|c| {c.prop.basic.get_align()}},
-            get_flow(Flow) {|c| {c.prop.basic.get_flow()}},
-            get_spacing(f64) {|c| {c.prop.basic.get_spacing()}},
-            get_padding(Padding) {|c| {c.prop.basic.get_padding()}},
-            get_margin(Margin) {|c| {c.prop.basic.get_margin()}},
-            get_clip_x(bool) {|c| {c.prop.basic.get_clip_x()}},
-            get_clip_y(bool) {|c| {c.prop.basic.get_clip_y()}},
-            get_cursor(MouseCursor) {|c| {c.prop.basic.get_cursor()}},
-            get_height(Size) {|c| {c.prop.basic.get_height()}},
-            get_width(Size) {|c| {c.prop.basic.get_width()}},
+            get_theme(Theme) {|c| {c.style.basic.get_theme()}},
+            get_background_color(String) {|c| {c.style.basic.get_background_color().to_hex_string()}},
+            get_border_color(String) {|c| {c.style.basic.get_border_color().to_hex_string()}},
+            get_border_radius(Radius) {|c| {c.style.basic.get_border_radius()}},
+            get_border_width(f32) {|c| {c.style.basic.get_border_width()}},
+            get_shadow_color(String) {|c| {c.style.basic.get_shadow_color().to_hex_string()}},
+            get_spread_radius(f32) {|c| {c.style.basic.get_spread_radius()}},
+            get_blur_radius(f32) {|c| {c.style.basic.get_blur_radius()}},
+            get_shadow_offset(Vec2) {|c| {c.style.basic.get_shadow_offset()}},
+            get_background_visible(bool) {|c| {c.style.basic.get_background_visible()}},
+            get_rotation(f32) {|c| {c.style.basic.get_rotation()}},
+            get_scale(f32) {|c| {c.style.basic.get_scale()}},
+            get_align(Align) {|c| {c.style.basic.get_align()}},
+            get_flow(Flow) {|c| {c.style.basic.get_flow()}},
+            get_spacing(f64) {|c| {c.style.basic.get_spacing()}},
+            get_padding(Padding) {|c| {c.style.basic.get_padding()}},
+            get_margin(Margin) {|c| {c.style.basic.get_margin()}},
+            get_clip_x(bool) {|c| {c.style.basic.get_clip_x()}},
+            get_clip_y(bool) {|c| {c.style.basic.get_clip_y()}},
+            get_cursor(MouseCursor) {|c| {c.style.basic.get_cursor()}},
+            get_height(Size) {|c| {c.style.basic.get_height()}},
+            get_width(Size) {|c| {c.style.basic.get_width()}},
             get_visible(bool) {|c| {c.visible}},
             get_disabled(bool) {|c| {c.disabled}},
             get_dpi_factor(Option<f64>) {|c| {c.dpi_factor}},
@@ -1051,33 +1051,33 @@ impl GView {
             get_grab_key_focus(bool) {|c| {c.grab_key_focus}},
             get_optimize(ViewOptimize) {|c| {c.optimize}},
             get_scroll(DVec2) {|c| {c.scroll}},
-            get_abs_pos(Option<DVec2>) {|c| {c.prop.basic.get_abs_pos()}}
+            get_abs_pos(Option<DVec2>) {|c| {c.style.basic.get_abs_pos()}}
         }
     }
     setter! {
         GView {
-            set_theme(theme: Theme) {|c, _cx| {c.prop.basic.set_theme(theme); c.prop.basic.sync(ViewState::Basic); Ok(())}},
-            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_background_color(color); Ok(())}},
-            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_border_color(color); Ok(())}},
-            set_border_radius(radius: Radius) {|c, _cx| {c.prop.basic.set_border_radius(radius); Ok(())}},
-            set_border_width(width: f32) {|c, _cx| {c.prop.basic.set_border_width(width); Ok(())}},
-            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.prop.basic.set_shadow_color(color); Ok(())}},
-            set_spread_radius(radius: f32) {|c, _cx| {c.prop.basic.set_spread_radius(radius); Ok(())}},
-            set_blur_radius(radius: f32) {|c, _cx| {c.prop.basic.set_blur_radius(radius); Ok(())}},
-            set_shadow_offset(offset: Vec2) {|c, _cx| {c.prop.basic.set_shadow_offset(offset); Ok(())}},
-            set_background_visible(visible: bool) {|c, _cx| {c.prop.basic.set_background_visible(visible); Ok(())}},
-            set_rotation(rotation: f32) {|c, _cx| {c.prop.basic.set_rotation(rotation); Ok(())}},
-            set_scale(scale: f32) {|c, _cx| {c.prop.basic.set_scale(scale); Ok(())}},
-            set_align(align: Align) {|c, _cx| {c.prop.basic.set_align(align); Ok(())}},
-            set_flow(flow: Flow) {|c, _cx| {c.prop.basic.set_flow(flow); Ok(())}},
-            set_spacing(spacing: f64) {|c, _cx| {c.prop.basic.set_spacing(spacing); Ok(())}},
-            set_padding(padding: Padding) {|c, _cx| {c.prop.basic.set_padding(padding); Ok(())}},
-            set_margin(margin: Margin) {|c, _cx| {c.prop.basic.set_margin(margin); Ok(())}},
-            set_clip_x(clip_x: bool) {|c, _cx| {c.prop.basic.set_clip_x(clip_x); Ok(())}},
-            set_clip_y(clip_y: bool) {|c, _cx| {c.prop.basic.set_clip_y(clip_y); Ok(())}},
-            set_cursor(cursor: MouseCursor) {|c, _cx| {c.prop.basic.set_cursor(cursor); Ok(())}},
-            set_height(height: Size) {|c, _cx| {c.prop.basic.set_height(height); Ok(())}},
-            set_width(width: Size) {|c, _cx| {c.prop.basic.set_width(width); Ok(())}},
+            set_theme(theme: Theme) {|c, _cx| {c.style.basic.set_theme(theme); c.style.basic.sync(ViewState::Basic); Ok(())}},
+            set_background_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_background_color(color); Ok(())}},
+            set_border_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_border_color(color); Ok(())}},
+            set_border_radius(radius: Radius) {|c, _cx| {c.style.basic.set_border_radius(radius); Ok(())}},
+            set_border_width(width: f32) {|c, _cx| {c.style.basic.set_border_width(width); Ok(())}},
+            set_shadow_color(color: String) {|c, _cx| {let color = Vec4::from_hex(&color)?; c.style.basic.set_shadow_color(color); Ok(())}},
+            set_spread_radius(radius: f32) {|c, _cx| {c.style.basic.set_spread_radius(radius); Ok(())}},
+            set_blur_radius(radius: f32) {|c, _cx| {c.style.basic.set_blur_radius(radius); Ok(())}},
+            set_shadow_offset(offset: Vec2) {|c, _cx| {c.style.basic.set_shadow_offset(offset); Ok(())}},
+            set_background_visible(visible: bool) {|c, _cx| {c.style.basic.set_background_visible(visible); Ok(())}},
+            set_rotation(rotation: f32) {|c, _cx| {c.style.basic.set_rotation(rotation); Ok(())}},
+            set_scale(scale: f32) {|c, _cx| {c.style.basic.set_scale(scale); Ok(())}},
+            set_align(align: Align) {|c, _cx| {c.style.basic.set_align(align); Ok(())}},
+            set_flow(flow: Flow) {|c, _cx| {c.style.basic.set_flow(flow); Ok(())}},
+            set_spacing(spacing: f64) {|c, _cx| {c.style.basic.set_spacing(spacing); Ok(())}},
+            set_padding(padding: Padding) {|c, _cx| {c.style.basic.set_padding(padding); Ok(())}},
+            set_margin(margin: Margin) {|c, _cx| {c.style.basic.set_margin(margin); Ok(())}},
+            set_clip_x(clip_x: bool) {|c, _cx| {c.style.basic.set_clip_x(clip_x); Ok(())}},
+            set_clip_y(clip_y: bool) {|c, _cx| {c.style.basic.set_clip_y(clip_y); Ok(())}},
+            set_cursor(cursor: MouseCursor) {|c, _cx| {c.style.basic.set_cursor(cursor); Ok(())}},
+            set_height(height: Size) {|c, _cx| {c.style.basic.set_height(height); Ok(())}},
+            set_width(width: Size) {|c, _cx| {c.style.basic.set_width(width); Ok(())}},
             set_visible(visible: bool) {|c, _cx| {c.visible = visible; Ok(())}},
             set_disabled(disabled: bool) {|c, _cx| {c.disabled = disabled; c.clear_animation(_cx); Ok(())}},
             set_dpi_factor(dpi_factor: Option<f64>) {|c, _cx| {c.dpi_factor = dpi_factor;  Ok(())}},
@@ -1085,7 +1085,7 @@ impl GView {
             set_grab_key_focus(grab_key_focus: bool) {|c, _cx| {c.grab_key_focus = grab_key_focus; Ok(())}},
             set_optimize(optimize: ViewOptimize) {|c, _cx| {c.optimize = optimize; Ok(())}},
             set_scroll(scroll: DVec2) {|c, _cx| {c.scroll = scroll; Ok(())}},
-            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.prop.basic.set_abs_pos(abs_pos); Ok(())}}
+            set_abs_pos(abs_pos: Option<DVec2>) {|c, _cx| {c.style.basic.set_abs_pos(abs_pos); Ok(())}}
         }
     }
 }

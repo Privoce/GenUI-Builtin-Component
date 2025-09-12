@@ -248,9 +248,9 @@ where
     }
 }
 
-/// # Prop
+/// # Style
 /// trait for component properties
-pub trait Prop: Default {
+pub trait Style: Default {
     type State;
     type Basic;
     fn get(&self, state: Self::State) -> &Self::Basic;
@@ -258,14 +258,14 @@ pub trait Prop: Default {
     /// ## get length of the properties
     /// ### example:
     /// ```rust
-    /// ABasicProp{
+    /// ABasicStyle{
     ///     background_color: Color,
     ///     border_color: Color,
     ///     border_width: f32,
     /// }
     /// AProp {
-    ///     basic: ABasicProp,
-    ///     hover: ABasicProp,
+    ///     basic: ABasicStyle,
+    ///     hover: ABasicStyle,
     /// }
     /// ```
     /// **`len()` will return 2 * 3**
@@ -279,14 +279,14 @@ pub trait Prop: Default {
         Self::State: Eq + Hash + Copy;
 }
 
-pub trait SlotProp: Prop {
+pub trait SlotStyle: Style {
     type Part: Part;
     fn sync_slot(&mut self, map: &ApplySlotMap<Self::State, Self::Part>) -> ();
 }
 
-/// # BasicProp
+/// # BasicStyle
 /// trait for basic properties of a component
-pub trait BasicProp: Default + Debug {
+pub trait BasicStyle: Default + Debug {
     type State;
     type Colors;
 
@@ -297,15 +297,15 @@ pub trait BasicProp: Default + Debug {
     /// ## get length of the basic properties
     fn len() -> usize;
     fn set_from_str(&mut self, key: &str, value: &LiveValue, state: Self::State) -> ();
-    /// ## sync from Basic State what apply from map if not set in DSL from (super Prop trait)
-    /// unlike Prop trait, this function only sync theme colors, and use in `set_from_str()`
+    /// ## sync from Basic State what apply from map if not set in DSL from (super Style trait)
+    /// unlike Style trait, this function only sync theme colors, and use in `set_from_str()`
     fn sync(&mut self, state: Self::State) -> ();
     fn live_props() -> LiveProps;
     fn walk(&self) -> Walk;
     fn layout(&self) -> Layout;
 }
 
-pub trait SlotBasicProp: BasicProp {
+pub trait SlotBasicStyle: BasicStyle {
     type Part: Part;
 
     /// value: 当涉及到更深的层级时就会含有一个Some(Applys)，这个Applys只会是Applys::Deep且层级至少为2

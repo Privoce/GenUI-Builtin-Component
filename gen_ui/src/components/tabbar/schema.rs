@@ -11,5 +11,5 @@ pub struct TabbarItemData {
     #[live]
     pub icon: IconData,
     #[live]
-    pub prop: TabbarItemProp,
+    pub style: TabbarItemProp,
 }

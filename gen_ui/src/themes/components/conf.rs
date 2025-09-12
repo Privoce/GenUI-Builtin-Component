@@ -1,9 +1,9 @@
 use toml_edit::Table;
 
 use crate::components::{
-    ButtonProp, CardProp, CheckboxProp, CollapseProp, DividerProp, ImageProp, LabelProp, LinkProp,
-    MenuItemProp, MenuProp, PopupContainerProp, PopupProp, RadioProp, SubMenuProp, SvgProp,
-    SwitchProp, TabbarItemProp, TabbarProp, TagProp, ViewProp,
+    ButtonStyle, CardProp, CheckboxProp, CollapseProp, DividerProp, ImageProp, LabelProp, LinkProp,
+    MenuItemProp, MenuProp, PopupContainerProp, PopupProp, RadioProp, SubMenuProp, SvgStyle,
+    SwitchProp, TabbarItemProp, TabbarProp, TagProp, ViewStyle,
 };
 use crate::error::Error;
 use crate::prop::manuel::{
@@ -15,14 +15,14 @@ use crate::try_from_toml_item;
 #[derive(Debug, Clone, Default)]
 pub struct ComponentsConf {
     pub label: LabelProp,
-    pub view: ViewProp,
-    pub button: ButtonProp,
+    pub view: ViewStyle,
+    pub button: ButtonStyle,
     pub card: CardProp,
     pub radio: RadioProp,
     pub checkbox: CheckboxProp,
     pub switch: SwitchProp,
     pub divider: DividerProp,
-    pub svg: SvgProp,
+    pub svg: SvgStyle,
     pub image: ImageProp,
     pub popup: PopupProp,
     pub popup_container: PopupContainerProp,
@@ -39,14 +39,14 @@ pub struct ComponentsConf {
 try_from_toml_item! {
     ComponentsConf {
         label => LABEL, LabelProp::default(), |item| item.try_into(),
-        view => VIEW, ViewProp::default(), |item| item.try_into(),
-        button => BUTTON, ButtonProp::default(), |item| item.try_into(),
+        view => VIEW, ViewStyle::default(), |item| item.try_into(),
+        button => BUTTON, ButtonStyle::default(), |item| item.try_into(),
         card => CARD, CardProp::default(), |item| item.try_into(),
         radio => RADIO, RadioProp::default(), |item| item.try_into(),
         checkbox => CHECKBOX, CheckboxProp::default(), |item| item.try_into(),
         switch => SWITCH, SwitchProp::default(), |item| item.try_into(),
         divider => DIVIDER, DividerProp::default(), |item| item.try_into(),
-        svg => SVG, SvgProp::default(), |item| item.try_into(),
+        svg => SVG, SvgStyle::default(), |item| item.try_into(),
         image => IMAGE, ImageProp::default(), |item| item.try_into(),
         popup => POPUP, PopupProp::default(), |item| item.try_into(),
         popup_container => POPUP_CONTAINER, PopupContainerProp::default(), |item| item.try_into(),

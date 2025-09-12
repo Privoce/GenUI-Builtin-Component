@@ -1,6 +1,6 @@
 use makepad_widgets::*;
 
-use crate::{components::SwitchBasicProp, prop::traits::ToFloat};
+use crate::{components::SwitchBasicStyle, prop::traits::ToFloat};
 
 live_design! {
     use link::shaders::*;
@@ -73,7 +73,7 @@ pub struct DrawSwitch {
 }
 
 impl DrawSwitch {
-    pub fn merge(&mut self, other: &SwitchBasicProp) {
+    pub fn merge(&mut self, other: &SwitchBasicStyle) {
         self.background_color = other.background_color;
         self.background_visible = other.background_visible.to_f32();
         self.stroke_color = other.stroke_color;

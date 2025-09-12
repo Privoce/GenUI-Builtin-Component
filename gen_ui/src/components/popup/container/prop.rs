@@ -5,8 +5,8 @@ use crate::{
     components::{
         live_props::LiveProps,
         popup::PopupState,
-        traits::{BasicProp, ComponentState, Prop},
-        view::ViewBasicProp,
+        traits::{BasicStyle, ComponentState, Style},
+        view::ViewBasicStyle,
     },
     error::Error,
     prop::{
@@ -23,15 +23,15 @@ use crate::{
 
 prop_interconvert! {
     PopupContainerProp {
-        basic_prop = PopupContainerBasicProp;
-        basic => BASIC, PopupContainerBasicProp::default(),|v| (v, PopupState::Basic).try_into()
+        basic_prop = PopupContainerBasicStyle;
+        basic => BASIC, PopupContainerBasicStyle::default(),|v| (v, PopupState::Basic).try_into()
     }, "[component.popup] should be a table"
 }
 
-impl Prop for PopupContainerProp {
+impl Style for PopupContainerProp {
     type State = PopupState;
 
-    type Basic = PopupContainerBasicProp;
+    type Basic = PopupContainerBasicStyle;
 
     fn get(&self, state: Self::State) -> &Self::Basic {
         match state {
@@ -46,7 +46,7 @@ impl Prop for PopupContainerProp {
     }
 
     fn len() -> usize {
-        PopupContainerBasicProp::len()
+        PopupContainerBasicStyle::len()
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -58,7 +58,7 @@ impl Prop for PopupContainerProp {
 }
 
 basic_prop_interconvert! {
-    PopupContainerBasicProp {
+    PopupContainerBasicStyle {
         state = PopupState;
         {background_color => BACKGROUND_COLOR, |v| v.try_into()};
         {
@@ -85,7 +85,7 @@ component_color! {
     }
 }
 
-impl BasicProp for PopupContainerBasicProp {
+impl BasicStyle for PopupContainerBasicStyle {
     type State = PopupState;
 
     type Colors = PopupContainerColors;
@@ -247,9 +247,9 @@ impl BasicProp for PopupContainerBasicProp {
     }
 }
 
-impl From<&PopupContainerBasicProp> for ViewBasicProp {
-    fn from(value: &PopupContainerBasicProp) -> Self {
-        let PopupContainerBasicProp {
+impl From<&PopupContainerBasicStyle> for ViewBasicStyle {
+    fn from(value: &PopupContainerBasicStyle) -> Self {
+        let PopupContainerBasicStyle {
             theme,
             background_color,
             background_visible,
@@ -266,7 +266,7 @@ impl From<&PopupContainerBasicProp> for ViewBasicProp {
             abs_pos,
         } = *value;
 
-        ViewBasicProp {
+        ViewBasicStyle {
             theme,
             background_color,
             background_visible,

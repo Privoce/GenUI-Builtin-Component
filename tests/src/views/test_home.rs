@@ -15,7 +15,7 @@ live_design! {
     pub THomePage = {{THomePage}} {
         <GVLayout> {
             v1 = <GView> {
-                prop: {
+                style: {
                     basic: {
                         background_visible: true,
                         height: 200.0,
@@ -25,7 +25,7 @@ live_design! {
                 visible: true
             }
             v2 = <GBarPage> {
-                prop: {
+                style: {
                     basic: {
                         background_visible: true,
                         height: 200.0,

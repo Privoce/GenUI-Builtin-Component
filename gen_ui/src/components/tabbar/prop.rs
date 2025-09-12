@@ -4,8 +4,8 @@ use crate::{
     component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Prop},
-        ViewBasicProp, ViewState,
+        traits::{BasicStyle, ComponentState, Style},
+        ViewBasicStyle, ViewState,
     },
     error::Error,
     from_inherit_to_view_basic_prop, get_get_mut, inherits_view_basic_prop,
@@ -25,15 +25,15 @@ use crate::{
 
 prop_interconvert! {
     TabbarProp {
-        basic_prop = TabbarBasicProp;
-        basic => BASIC, TabbarBasicProp::default(),|v| (v, TabbarState::Basic).try_into(),
-        disabled => DISABLED, TabbarBasicProp::from_state(Theme::default(), TabbarState::Disabled), |v| (v, TabbarState::Disabled).try_into()
+        basic_prop = TabbarBasicStyle;
+        basic => BASIC, TabbarBasicStyle::default(),|v| (v, TabbarState::Basic).try_into(),
+        disabled => DISABLED, TabbarBasicStyle::from_state(Theme::default(), TabbarState::Disabled), |v| (v, TabbarState::Disabled).try_into()
     }, "[component.tabbar] should be a table"
 }
 
-impl Prop for TabbarProp {
+impl Style for TabbarProp {
     type State = TabbarState;
-    type Basic = TabbarBasicProp;
+    type Basic = TabbarBasicStyle;
 
     get_get_mut! {
         TabbarState::Basic => basic,
@@ -41,7 +41,7 @@ impl Prop for TabbarProp {
     }
 
     fn len() -> usize {
-        TabbarBasicProp::len() * 3
+        TabbarBasicStyle::len() * 3
     }
 
     fn sync(&mut self, map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -57,7 +57,7 @@ impl Prop for TabbarProp {
 }
 
 inherits_view_basic_prop! {
-    TabbarBasicProp {
+    TabbarBasicStyle {
         border_width: 0.0,
         border_radius: Radius::new(0.0),
         spread_radius: 0.0,
@@ -86,7 +86,7 @@ inherits_view_basic_prop! {
     }
 }
 
-from_inherit_to_view_basic_prop!(TabbarBasicProp);
+from_inherit_to_view_basic_prop!(TabbarBasicStyle);
 
 component_state! {
     TabbarState {

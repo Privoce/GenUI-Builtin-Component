@@ -11,7 +11,7 @@ live_design! {
     pub SvgPage = {{SvgPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -19,7 +19,7 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -27,7 +27,7 @@ live_design! {
                         }
                     },
                     <GSvg> {
-                        prop: {
+                        style: {
                             basic: {
                                 svg: {height: 36.0, width: 36.0},
                             }
@@ -39,7 +39,7 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -47,7 +47,7 @@ live_design! {
                         }
                     },
                     <GSvg> {
-                        prop: {
+                        style: {
                             basic: {
                                 container: {background_visible: true, theme: Primary, cursor: Hand}
                                 svg: {height: 36.0, width: 36.0},
@@ -61,7 +61,7 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -69,7 +69,7 @@ live_design! {
                         }
                     },
                     <GSvg> {
-                        prop: {
+                        style: {
                             basic: {
                                 container: {
                                     background_visible: true, theme: Primary, cursor: Hand,
@@ -90,7 +90,7 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -126,7 +126,7 @@ live_design! {
         }
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -134,7 +134,7 @@ live_design! {
                     }
                 }
                 esvg = <GSvg> {
-                        prop: {
+                        style: {
                             basic: {
                                 container: {background_visible: true, theme: Primary, cursor: Hand, padding: {
                                     left: 12.0, right: 12.0, top: 12.0, bottom: 12.0

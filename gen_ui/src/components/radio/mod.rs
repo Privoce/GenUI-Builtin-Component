@@ -14,8 +14,8 @@ use crate::{
     active_event, animation_open_then_redraw,
     components::{
         lifecycle::LifeCycle,
-        traits::{BasicProp, Component, Prop, SlotComponent, SlotProp},
-        view::{GView, ViewBasicProp},
+        traits::{BasicStyle, Component, Style, SlotComponent, SlotStyle},
+        view::{GView, ViewBasicStyle},
     },
     error::Error,
     event_option, hit_hover_in, hit_hover_out, lifecycle, play_animation,
@@ -87,7 +87,7 @@ live_design! {
 pub struct GRadio {
     // --- prop -------------------
     #[live]
-    pub prop: RadioProp,
+    pub style: RadioProp,
     // --- visible -------------------
     #[live(true)]
     pub visible: bool,
@@ -150,8 +150,8 @@ impl WidgetNode for GRadio {
     }
 
     fn walk(&mut self, _cx: &mut Cx) -> Walk {
-        let prop = self.prop.get(self.state);
-        prop.container.walk()
+        let style = self.style.get(self.state);
+        style.container.walk()
     }
 
     fn area(&self) -> Area {
@@ -183,25 +183,25 @@ impl WidgetNode for GRadio {
 impl Widget for GRadio {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, _walk: Walk) -> DrawStep {
         if self.visible {
-            let prop = self.prop.get(self.state);
+            let style = self.style.get(self.state);
 
             self.draw_container
-                .begin(cx, prop.container.walk(), prop.container.layout());
+                .begin(cx, style.container.walk(), style.container.layout());
             if !self.reverse {
                 if self.radio_visible {
                     self.draw_radio
-                        .begin(cx, prop.radio.walk(), prop.radio.layout());
+                        .begin(cx, style.radio.walk(), style.radio.layout());
                     self.draw_radio.end(cx);
                 }
             }
             if self.extra.visible {
                 self.extra.disabled = self.disabled;
-                let _ = self.extra.draw_walk(cx, scope, prop.extra.walk());
+                let _ = self.extra.draw_walk(cx, scope, style.extra.walk());
             }
             if self.reverse {
                 if self.radio_visible {
                     self.draw_radio
-                        .begin(cx, prop.radio.walk(), prop.radio.layout());
+                        .begin(cx, style.radio.walk(), style.radio.layout());
                     self.draw_radio.end(cx);
                 }
             }
@@ -245,9 +245,9 @@ impl LiveHook for GRadio {
                 live_id!(disabled),
             ],
             [
-                (RadioPart::Container, &ViewBasicProp::live_props()),
+                (RadioPart::Container, &ViewBasicStyle::live_props()),
                 (RadioPart::Radio, &RadioPartProp::live_props()),
-                (RadioPart::Extra, &ViewBasicProp::live_props()),
+                (RadioPart::Extra, &ViewBasicStyle::live_props()),
             ],
             |_| {},
             |prefix, component, applys| match prefix.to_string().as_str() {
@@ -281,11 +281,11 @@ impl Component for GRadio {
     type State = RadioState;
 
     fn merge_conf_prop(&mut self, cx: &mut Cx) -> () {
-        let prop = &cx.global::<Conf>().components.radio;
-        self.prop = prop.clone();
-        self.extra.prop.basic = self.prop.basic.extra;
-        self.extra.prop.hover = self.prop.hover.extra;
-        self.extra.prop.pressed = self.prop.active.extra;
+        let style = &cx.global::<Conf>().components.radio;
+        self.style = style.clone();
+        self.extra.style.basic = self.style.basic.extra;
+        self.extra.style.hover = self.style.hover.extra;
+        self.extra.style.pressed = self.style.active.extra;
     }
 
     fn render(&mut self, cx: &mut Cx) -> Result<(), Self::Error> {
@@ -299,9 +299,9 @@ impl Component for GRadio {
             }
         }
         let state = self.state;
-        let prop = self.prop.get(state);
-        self.draw_container.merge(&prop.container);
-        self.draw_radio.merge(&prop.radio);
+        let style = self.style.get(state);
+        self.draw_container.merge(&style.container);
+        self.draw_radio.merge(&style.radio);
         let _ = self.extra.render(cx)?;
         Ok(())
     }
@@ -310,7 +310,7 @@ impl Component for GRadio {
         match hit {
             Hit::FingerHoverIn(_) => {
                 self.switch_state_and_redraw(cx, RadioState::Disabled);
-                cx.set_cursor(self.prop.get(self.state).container.cursor);
+                cx.set_cursor(self.style.get(self.state).container.cursor);
             }
             _ => {}
         }
@@ -326,7 +326,7 @@ impl Component for GRadio {
                     }
                 }
                 Hit::FingerHoverIn(e) => {
-                    cx.set_cursor(self.prop.get(self.state).container.cursor);
+                    cx.set_cursor(self.style.get(self.state).container.cursor);
                     self.switch_state_with_animation(cx, RadioState::Hover);
                     hit_hover_in!(self, cx, e);
                 }
@@ -364,7 +364,7 @@ impl Component for GRadio {
             return;
         }
         self.switch_state(state);
-        self.draw_radio.apply_type(self.prop.get(state).radio.mode);
+        self.draw_radio.apply_type(self.style.get(state).radio.mode);
         self.set_animation(cx);
     }
 
@@ -378,7 +378,7 @@ impl Component for GRadio {
         }
 
         // sync state if is not Basic
-        self.prop.sync_slot(&self.apply_slot_map);
+        self.style.sync_slot(&self.apply_slot_map);
     }
 
     fn set_animation(&mut self, cx: &mut Cx) -> () {
@@ -397,10 +397,10 @@ impl Component for GRadio {
 
         if self.lifecycle.is_created() || !init_global || self.scope_path.is_none() {
             self.lifecycle.next();
-            let basic_prop = self.prop.get(RadioState::Basic);
-            let hover_prop = self.prop.get(RadioState::Hover);
-            let active_prop = self.prop.get(RadioState::Active);
-            let disabled_prop = self.prop.get(RadioState::Disabled);
+            let basic_prop = self.style.get(RadioState::Basic);
+            let hover_prop = self.style.get(RadioState::Hover);
+            let active_prop = self.style.get(RadioState::Active);
+            let disabled_prop = self.style.get(RadioState::Disabled);
             let (mut basic_index, mut hover_index, mut active_index, mut disabled_index) =
                 (None, None, None, None);
             if let Some(index) = nodes.child_by_path(
@@ -538,7 +538,7 @@ impl Component for GRadio {
             }
         } else {
             let state = self.state;
-            let prop = self.prop.get(state);
+            let style = self.style.get(state);
             let index = match state {
                 RadioState::Basic => nodes.child_by_path(
                     self.index,
@@ -576,28 +576,28 @@ impl Component for GRadio {
             set_animation! {
                 nodes: draw_container = {
                     index => {
-                        background_color => prop.container.background_color,
-                        border_color => prop.container.border_color,
-                        border_radius => prop.container.border_radius,
-                        border_width => (prop.container.border_width as f64),
-                        shadow_color => prop.container.shadow_color,
-                        spread_radius => (prop.container.spread_radius as f64),
-                        blur_radius => (prop.container.blur_radius as f64),
-                        shadow_offset => prop.container.shadow_offset,
-                        background_visible => prop.container.background_visible.to_f64()
+                        background_color => style.container.background_color,
+                        border_color => style.container.border_color,
+                        border_radius => style.container.border_radius,
+                        border_width => (style.container.border_width as f64),
+                        shadow_color => style.container.shadow_color,
+                        spread_radius => (style.container.spread_radius as f64),
+                        blur_radius => (style.container.blur_radius as f64),
+                        shadow_offset => style.container.shadow_offset,
+                        background_visible => style.container.background_visible.to_f64()
                     }
                 }
             }
             set_animation! {
                 nodes: draw_radio = {
                     index => {
-                        background_color => prop.radio.background_color,
-                        background_visible => prop.radio.background_visible.to_f64(),
-                        border_color => prop.radio.border_color,
-                        border_width => (prop.radio.border_width as f64),
-                        size => (prop.radio.size as f64),
-                        mode => prop.radio.mode,
-                        stroke_color => prop.radio.stroke_color
+                        background_color => style.radio.background_color,
+                        background_visible => style.radio.background_visible.to_f64(),
+                        border_color => style.radio.border_color,
+                        border_width => (style.radio.border_width as f64),
+                        size => (style.radio.size as f64),
+                        mode => style.radio.mode,
+                        stroke_color => style.radio.stroke_color
                     }
                 }
             }

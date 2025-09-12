@@ -5,9 +5,9 @@ use crate::{
     basic_prop_interconvert, component_color, component_part, component_state,
     components::{
         live_props::LiveProps,
-        traits::{BasicProp, ComponentState, Part, Prop, SlotBasicProp, SlotProp},
+        traits::{BasicStyle, ComponentState, Part, Style, SlotBasicStyle, SlotStyle},
         view::ViewState,
-        ViewBasicProp,
+        ViewBasicStyle,
     },
     error::Error,
     from_inherit_to_view_basic_prop, from_prop_to_toml, get_get_mut, inherits_view_basic_prop,
@@ -27,19 +27,19 @@ use crate::{
 };
 
 prop_interconvert! {
-    SvgProp {
-        basic_prop = SvgBasicProp;
-        basic => BASIC, SvgBasicProp::default(), |v| (v, SvgState::Basic).try_into(),
-        hover => HOVER, SvgBasicProp::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),
-        pressed => PRESSED, SvgBasicProp::from_state(Theme::default(), SvgState::Pressed), |v| (v, SvgState::Pressed).try_into(),
-        disabled => DISABLED, SvgBasicProp::from_state(Theme::default(), SvgState::Disabled), |v| (v, SvgState::Disabled).try_into()
+    SvgStyle {
+        basic_prop = SvgBasicStyle;
+        basic => BASIC, SvgBasicStyle::default(), |v| (v, SvgState::Basic).try_into(),
+        hover => HOVER, SvgBasicStyle::from_state(Theme::default(), SvgState::Hover), |v| (v, SvgState::Hover).try_into(),
+        pressed => PRESSED, SvgBasicStyle::from_state(Theme::default(), SvgState::Pressed), |v| (v, SvgState::Pressed).try_into(),
+        disabled => DISABLED, SvgBasicStyle::from_state(Theme::default(), SvgState::Disabled), |v| (v, SvgState::Disabled).try_into()
     }, "[components.svg] should be a table"
 }
 
-impl Prop for SvgProp {
+impl Style for SvgStyle {
     type State = SvgState;
 
-    type Basic = SvgBasicProp;
+    type Basic = SvgBasicStyle;
 
     get_get_mut! {
         SvgState::Basic => basic,
@@ -49,7 +49,7 @@ impl Prop for SvgProp {
     }
 
     fn len() -> usize {
-        4 * SvgBasicProp::len()
+        4 * SvgBasicStyle::len()
     }
 
     fn sync(&mut self, _map: &crate::prop::ApplyStateMap<Self::State>) -> ()
@@ -60,7 +60,7 @@ impl Prop for SvgProp {
     }
 }
 
-impl SlotProp for SvgProp {
+impl SlotStyle for SvgStyle {
     type Part = SvgPart;
 
     fn sync_slot(&mut self, map: &crate::prop::ApplySlotMap<Self::State, Self::Part>) -> () {
@@ -79,27 +79,27 @@ impl SlotProp for SvgProp {
 
 #[derive(Debug, Clone, Live, LiveHook, LiveRegister, Copy)]
 #[live_ignore]
-pub struct SvgBasicProp {
+pub struct SvgBasicStyle {
     #[live(SvgPartProp::default())]
     pub svg: SvgPartProp,
-    #[live(SvgBasicProp::default_container(Theme::default(), SvgState::Basic))]
+    #[live(SvgBasicStyle::default_container(Theme::default(), SvgState::Basic))]
     pub container: SvgContainerProp,
 }
 
-impl Default for SvgBasicProp {
+impl Default for SvgBasicStyle {
     fn default() -> Self {
         Self::from_state(Theme::default(), SvgState::Basic)
     }
 }
 
 from_prop_to_toml! {
-    SvgBasicProp {
+    SvgBasicStyle {
         svg => SVG,
         container => CONTAINER
     }
 }
 
-impl SlotBasicProp for SvgBasicProp {
+impl SlotBasicStyle for SvgBasicStyle {
     type Part = SvgPart;
 
     fn set_from_str_slot(
@@ -125,7 +125,7 @@ impl SlotBasicProp for SvgBasicProp {
     }
 }
 
-impl BasicProp for SvgBasicProp {
+impl BasicStyle for SvgBasicStyle {
     type State = SvgState;
 
     type Colors = SvgColors;
@@ -170,7 +170,7 @@ impl BasicProp for SvgBasicProp {
     }
 }
 
-impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
+impl TryFrom<(&Item, SvgState)> for SvgBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Item, SvgState)) -> Result<Self, Self::Error> {
@@ -182,7 +182,7 @@ impl TryFrom<(&Item, SvgState)> for SvgBasicProp {
     }
 }
 
-impl TryFrom<(&Value, SvgState)> for SvgBasicProp {
+impl TryFrom<(&Value, SvgState)> for SvgBasicStyle {
     type Error = Error;
 
     fn try_from((value, state): (&Value, SvgState)) -> Result<Self, Self::Error> {
@@ -194,7 +194,7 @@ impl TryFrom<(&Value, SvgState)> for SvgBasicProp {
     }
 }
 
-impl TryFrom<(&InlineTable, SvgState)> for SvgBasicProp {
+impl TryFrom<(&InlineTable, SvgState)> for SvgBasicStyle {
     type Error = Error;
 
     fn try_from((inline_table, state): (&InlineTable, SvgState)) -> Result<Self, Self::Error> {
@@ -216,7 +216,7 @@ impl TryFrom<(&InlineTable, SvgState)> for SvgBasicProp {
     }
 }
 
-impl SvgBasicProp {
+impl SvgBasicStyle {
     pub fn default_container(theme: Theme, state: SvgState) -> SvgContainerProp {
         SvgContainerProp::from_state(theme, state.into())
     }
@@ -248,7 +248,7 @@ component_color! {
     }
 }
 
-impl BasicProp for SvgPartProp {
+impl BasicStyle for SvgPartProp {
     type State = SvgState;
     /// color
     type Colors = SvgColors;

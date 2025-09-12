@@ -92,7 +92,7 @@ live_design! {
 ///
 /// ## Props
 ///
-/// | Macro  | Prop               | Description                                      | Type               | Default  |
+/// | Macro  | Style               | Description                                      | Type               | Default  |
 /// |--------|--------------------|--------------------------------------------------|--------------------|----------|
 /// | live   | `theme`             | The visual theme (Dark or Light)                 | `Themes`           | `Themes::Dark` |
 /// | live   | `background_color`  | The background color of the view                 | `Option<Vec4>`     | `None`   |

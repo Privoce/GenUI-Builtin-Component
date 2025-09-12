@@ -14,7 +14,7 @@ live_design! {
     pub ButtonPage = {{ButtonPage}} {
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -22,35 +22,35 @@ live_design! {
                 }
                 <GButton> {}
                 <GButton> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Primary,
                         }
                     }
                 }
                 <GButton> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Success,
                         }
                     }
                 }
                 <GButton> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Info,
                         }
                     }
                 }
                 <GButton> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Warning,
                         }
                     }
                 }
                 <GButton> {
-                    prop: {
+                    style: {
                         basic: {
                             theme: Error,
                         }
@@ -64,7 +64,7 @@ live_design! {
         // --------------------- others -------------------------------------------------------------
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
@@ -72,7 +72,7 @@ live_design! {
                     }
                 }
                 <GHLayout>{
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -86,13 +86,13 @@ live_design! {
                         }
                     }
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Primary,
                             }
                         },
                         slot: <GHLayout>{
-                            prop: {
+                            style: {
                                 basic: {
                                     width: Fit,
                                     height: Fit,
@@ -105,7 +105,7 @@ live_design! {
                                 },
                             }
                             <GSvg> {
-                                prop: {
+                                style: {
                                     basic: {
                                         svg: {height: 18.0, width: 18.0, theme: Primary},
                                     }
@@ -119,13 +119,13 @@ live_design! {
                         }
                     }
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Success,
                             }
                         }
                         slot: <GSvg> {
-                            prop: {
+                            style: {
                                 basic: {
                                     svg: {height: 20.0, width: 20.0},
                                 }
@@ -134,7 +134,7 @@ live_design! {
                         }
                     }
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Info,
                                 border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0},
@@ -142,7 +142,7 @@ live_design! {
                             }
                         }
                         slot: <GSvg> {
-                                prop: {
+                                style: {
                                     basic: {
                                         svg: {height: 20.0, width: 20.0, theme: Primary},
                                     }
@@ -152,7 +152,7 @@ live_design! {
                     }
                 }
                 <GHLayout> {
-                    prop: {
+                    style: {
                         basic: {
                             height: Fit,
                             width: Fill,
@@ -161,7 +161,7 @@ live_design! {
                         }
                     },
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Info,
                                 spread_radius: 4.0,
@@ -173,7 +173,7 @@ live_design! {
                         }
                     }
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Warning,
                                 border_radius: {left: 10.0, right: 10.0, top: 10.0, bottom: 10.0}
@@ -184,7 +184,7 @@ live_design! {
                         }
                     }
                     <GButton> {
-                        prop: {
+                        style: {
                             basic: {
                                 theme: Error,
                                 border_radius: {left: 4.0, right: 10.0, top: 6.0, bottom: 2.0}
@@ -203,7 +203,7 @@ live_design! {
         // --------------------- event handling ---------------------------------------------------------
         <CBox> {
             show = {
-                prop: {
+                style: {
                     basic: {
                         height: Fit,
                         width: Fill,
